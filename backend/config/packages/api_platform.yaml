@@ -1,0 +1,17 @@
+api_platform:
+    title: Tabooki API
+    version: 0.1.0
+    formats:
+        jsonld: ['application/ld+json']
+        json: ['application/json']
+    docs_formats:
+        jsonld: ['application/ld+json']
+        jsonopenapi: ['application/vnd.openapi+json']
+        html: ['text/html']
+    defaults:
+        # Session-cookie auth from the same-origin SPA, so the API is NOT stateless.
+        stateless: false
+        cache_headers:
+            vary: ['Content-Type', 'Cookie', 'Origin']
+    mercure:
+        enabled: true

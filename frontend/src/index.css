@@ -1,0 +1,77 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Design tokens (shadcn/ui-compatible names so components can be added with `npx shadcn add`). */
+:root {
+  --background: #fbf8f2;
+  --foreground: #1d2420;
+  --card: #ffffff;
+  --card-foreground: #1d2420;
+  --muted: #efe9dd;
+  --muted-foreground: #66706a;
+  --primary: #1f6f4a;
+  --primary-foreground: #ffffff;
+  --accent: #e7f3dc;
+  --accent-foreground: #1f4d35;
+  --destructive: #c2410c;
+  --border: #e3dccd;
+  --input: #d9d1c0;
+  --ring: #1f6f4a;
+  --radius: 0.75rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #121614;
+    --foreground: #e9ede9;
+    --card: #1a201d;
+    --card-foreground: #e9ede9;
+    --muted: #232a26;
+    --muted-foreground: #9aa59f;
+    --primary: #5cbf8a;
+    --primary-foreground: #0d1a13;
+    --accent: #23362b;
+    --accent-foreground: #cdeccf;
+    --destructive: #f97316;
+    --border: #2c3530;
+    --input: #36413b;
+    --ring: #5cbf8a;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body,
+  #root {
+    @apply min-h-dvh;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+}

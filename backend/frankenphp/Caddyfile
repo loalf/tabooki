@@ -1,0 +1,86 @@
+{
+	skip_install_trust
+
+	{$CADDY_GLOBAL_OPTIONS}
+
+	frankenphp {
+		{$FRANKENPHP_CONFIG}
+	}
+}
+
+{$CADDY_EXTRA_CONFIG}
+
+# The React SPA in production: static files built into /app/spa, with
+# client-side routing (unknown paths fall back to index.html).
+(spa_static) {
+	root * /app/spa
+	try_files {path} /index.html
+	file_server
+}
+
+# The React SPA in development: proxy to the Vite dev server running on the host
+# (HMR websockets included), so dev and prod share the same origin.
+(spa_dev) {
+	reverse_proxy {$VITE_UPSTREAM:host.docker.internal:5174}
+}
+
+{$SERVER_NAME:localhost} {
+	log {
+		{$CADDY_SERVER_LOG_OPTIONS}
+		# Redact the authorization query parameter that can be set by Mercure
+		format filter {
+			request>uri query {
+				replace authorization REDACTED
+			}
+		}
+	}
+
+	encode zstd br gzip
+
+	{$CADDY_SERVER_EXTRA_DIRECTIVES}
+
+	# Everything Symfony handles: the API, the profiler/toolbar, and bundle assets (API docs UI).
+	@symfony path /api /api/* /_profiler* /_wdt* /bundles/*
+	handle @symfony {
+		root /app/public
+
+		@phpRoute not file {path}
+		rewrite @phpRoute index.php
+
+		@frontController path index.php
+		php @frontController {
+			{$FRANKENPHP_SITE_CONFIG}
+
+			worker {
+				file ./public/index.php
+				{$FRANKENPHP_WORKER_CONFIG}
+			}
+		}
+
+		file_server {
+			hide *.php
+		}
+	}
+
+	handle /.well-known/mercure* {
+		mercure {
+			# Share the hub between the addresses listed in SERVER_NAME (e.g. "localhost, php:80")
+			name default
+			issuer {$MERCURE_TRUSTED_ISSUERS:https://localhost} {
+				publisher {
+					jwt {env.MERCURE_PUBLISHER_JWT_KEY} {env.MERCURE_PUBLISHER_JWT_ALG}
+				}
+				subscriber {
+					jwt {env.MERCURE_SUBSCRIBER_JWT_KEY} {env.MERCURE_SUBSCRIBER_JWT_ALG}
+				}
+			}
+			# Subscribers must present a JWT (issued by Symfony via a cookie); no anonymous access.
+			subscriptions
+			{$MERCURE_EXTRA_DIRECTIVES}
+		}
+	}
+
+	handle {
+		import spa_{$SPA_MODE:static}
+	}
+}

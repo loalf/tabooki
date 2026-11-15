@@ -1,0 +1,244 @@
+# Tabooki — Product & Architecture Plan
+
+_Draft v0.4 — 2026-11-15 (all open questions answered; ready for M0)_
+
+## 1. What we're building
+
+A personal/household meal planner. The household keeps a **library** of recipe links from anywhere (blogs, YouTube, Instagram, TikTok…). Tabooki turns each link into a structured recipe, suggests a **weekly meal plan** from the library, and produces a merged, aisle-grouped **shopping list**.
+
+**Decisions so far**
+
+| Topic | Decision |
+|---|---|
+| Audience | Just my household (multi-user within one household, no public sign-up) |
+| Platform | Mobile-first web app, installable as a PWA |
+| Hosting | **Fully self-hosted** (Docker Compose) |
+| Backend | **PHP + Symfony** (API) |
+| Frontend | **React** SPA (Vite + TypeScript) |
+| Extraction | LLM-based, provider-agnostic. **Google AI Studio (Gemini) as the primary provider** (text, images, video). **Amazon Bedrock as the secondary provider** (text/images). The app is self-hosted, the models stay cloud APIs |
+| Phones | **iPhone and Android**: Web Share Target on Android, Apple Shortcut on iOS |
+| Languages | **Spanish and English**: bilingual UI, recipes in either language, one shared ingredient catalog |
+| Meals | **Lunch and dinner**, default **4 servings** (adjustable per meal) |
+| Units | **Metric everywhere** (g, ml, °C), with spoons, pinches and countable items kept as they are, original text preserved (see 4.3) |
+| Environments | **Local development** on macOS (Apple Silicon) with Docker Compose; **production on a Contabo VPS**, reached only through **Tailscale** |
+
+**Non-goals for v1:** public accounts, social features, nutrition tracking, grocery delivery integrations, native apps.
+
+## 2. Core user flows
+
+1. **Save a recipe.** Share a link from the phone (or paste it) → it appears in the library at once with a thumbnail and status "extracting…" → a few seconds to a minute later it becomes a full recipe. If extraction is unsure, it lands in a **Needs review** queue.
+2. **Review / edit.** Side-by-side: source (embed/caption/transcript) and extracted recipe. Fix ingredients, servings, tags. Manual recipes are also allowed.
+3. **Plan the week.** Choose which lunch and dinner slots to fill (e.g. skip Saturday dinner when eating out) and servings → Tabooki proposes a plan → lock the ones you like, swap or regenerate the rest.
+4. **Shop.** One tap builds the shopping list from the plan: scaled, merged, pantry staples left out, grouped by aisle. Both household members can check items off live in the store.
+5. **Cook.** Open the recipe from the plan, with a link back to the original video or post.
+
+## 3. Architecture overview
+
+```
+ Phone / desktop (PWA: React SPA, served as static files)
+   │  share-target / paste / iOS Shortcut           ▲ live updates (SSE)
+   ▼                                                 │
+ FrankenPHP (Caddy: HTTPS, static SPA, PHP app, built-in Mercure hub)
+   │
+   ▼
+ Symfony API (API Platform, Security, Doctrine)
+   │                          │
+   │ dispatch message         │ read/write
+   ▼                          ▼
+ Messenger worker ───────► PostgreSQL          local volume (uploads, thumbnails, videos)
+ (same image, `messenger:consume`)
+   │
+   ├─ fetchers: HttpClient + DomCrawler (JSON-LD), Readability, yt-dlp/ffmpeg via Process
+   └─ LLM gateway (own interface → Symfony AI Platform bridges / raw HttpClient)
+        ├─ Google AI Studio (Gemini) → primary: text, images, video (YouTube URL or uploaded file)
+        └─ Amazon Bedrock            → secondary: text/images fallback or A/B (Claude, Nova, …)
+```
+
+Everything runs in one `compose.yaml`: **`app`** (FrankenPHP + Symfony + built SPA), **`worker`** (same image, different command), **`db`** (Postgres) and an optional **`adminer`**. No Redis is needed: Messenger and cache both use Postgres at household scale.
+
+### Backend: Symfony
+
+| Concern | Choice | Notes |
+|---|---|---|
+| Framework | **Symfony 7.4 LTS** (or the current 8.x), PHP 8.4+ | LTS if you'd rather not chase upgrades |
+| Web server | **FrankenPHP** (official Docker image) | Caddy gives automatic HTTPS, serves the SPA's static files, has a built-in **Mercure** hub, and offers a worker mode for speed. One container replaces nginx + php-fpm |
+| API | **API Platform** for CRUD resources (recipes, plans, lists, ingredients). Plain controllers for workflow endpoints (`POST /api/ingest`, `POST /api/plans/{id}/generate`) | Produces an **OpenAPI spec automatically**, which the frontend turns into TypeScript types (see below) |
+| ORM / DB | **Doctrine ORM + Migrations**, **PostgreSQL 17** | JSONB columns for evidence, steps and tags |
+| Background jobs | **Symfony Messenger** with the **Doctrine transport** (`ExtractSourceMessage`, `FetchThumbnailMessage`…), retry strategy + failure transport | Run `messenger:consume async` in the worker container |
+| Scheduled jobs | **Symfony Scheduler** | e.g. retry `failed` sources nightly, clean old video files |
+| Auth | **Symfony Security**, session cookie (the SPA is same-origin, so no JWT/CORS hassle). **Login link** (built-in passwordless email links) or plain passwords. **Personal access tokens** (`access_token` authenticator) for the iOS Shortcut | Household-sized: create users by console command, no sign-up page |
+| Realtime | **Mercure** (built into FrankenPHP) + `symfony/mercure-bundle`. API Platform can publish updates automatically (`mercure: true` on a resource) | Live shopping-list check-off, and extraction status changing from "extracting…" to "ready" without polling |
+| Files | **Flysystem bundle** → local volume | Screenshots, downloaded reels, cached thumbnails |
+| Validation / DTOs | Symfony Validator + Serializer, PHP readonly DTO classes | The LLM output schema is a PHP DTO (see 4.2) |
+| HTML parsing | `symfony/dom-crawler`, `fivefilters/readability.php` | JSON-LD + readable article text |
+| External tools | `yt-dlp` + `ffmpeg` installed in the image, called via `symfony/process` | Pin the version and update it often (yt-dlp breaks when platforms change) |
+| Units | `php-units-of-measure/php-units-of-measure` + our own normalizer | Needed to merge the shopping list |
+| i18n | Symfony Translation (emails, error messages), user `locale` field (`es` / `en`) | |
+| Quality | PHPStan (max level), PHPUnit, PHP-CS-Fixer | |
+
+### Frontend: React (recommended), with alternatives considered
+
+**Recommendation: React + Vite SPA.** You already lean React, it has the largest ecosystem for what this app needs (PWA, offline data, drag-and-drop planner), and with Symfony doing the backend there's no reason for a meta-framework like Next.js. A plain SPA served as static files by FrankenPHP is the simplest setup to self-host.
+
+| Concern | Choice |
+|---|---|
+| Build | **Vite + React + TypeScript** |
+| Routing | **TanStack Router** (type-safe) or React Router |
+| Server state | **TanStack Query**: caching, optimistic updates (checking items off), and offline mutation queueing via its persister |
+| API types | **`openapi-typescript` + `openapi-fetch`**, generated from API Platform's OpenAPI spec, so a backend change shows up as a TS compile error |
+| UI | **Tailwind CSS + shadcn/ui** (Radix primitives), mobile-first |
+| PWA | **`vite-plugin-pwa`** (Workbox): installable, offline shell, cached recipes and shopping list, Web Share Target manifest |
+| Realtime | Native `EventSource` subscribed to Mercure topics, which invalidates TanStack Query caches |
+| Drag & drop (planner) | `dnd-kit` |
+| i18n | **`react-i18next`** with `es` and `en` catalogs. Language follows the user's setting, defaulting to the browser language |
+
+Alternatives considered:
+- **Symfony UX (Twig + Turbo + Stimulus/Live Components):** a single PHP codebase with no separate frontend build. A great fit for CRUD, but weaker for an **offline-capable shopping list** and a PWA that feels like an app on the phone. Not recommended here.
+- **Vue 3 / Svelte 5:** both fine and a bit lighter, and Vue is popular with Symfony developers. Pick one only if you prefer it; there's no technical win over React for this app.
+
+## 4. The extraction pipeline (the hard part)
+
+Each saved URL becomes a **source**, and a job takes it through these steps:
+
+```
+normalize URL → detect platform → fetch metadata → gather evidence → LLM extract → validate → store (ready | needs_review | failed)
+```
+
+### 4.1 Evidence gathering per platform
+
+Rule: **collect the cheapest good evidence first and only escalate when needed.** Always store the raw evidence (HTML snippet, caption, transcript) so we can re-extract later with better prompts or models, without fetching again.
+
+| Platform | Step 1 (cheap) | Step 2 | Step 3 (expensive) |
+|---|---|---|---|
+| **Recipe blogs** | Parse schema.org `Recipe` JSON-LD (most recipe sites have it). Map it directly | No JSON-LD → Readability-cleaned text → LLM | Page blocked → headless fetch, or ask the user to paste |
+| **YouTube** (incl. Shorts) | Title + description via YouTube Data API or `yt-dlp --dump-json`. Descriptions often contain the full recipe **or a link to a blog: follow it** | Captions/transcript → LLM | **Gemini with the YouTube URL** (native video understanding, public videos only) |
+| **Instagram** (posts/reels) | Caption via `yt-dlp` metadata or OpenGraph tags | Carousel images → vision LLM (recipe cards are often in the images) | Download the reel video → Gemini (File API or inline) |
+| **TikTok** | Same as Instagram (`yt-dlp` usually works better there) | — | Video → Gemini |
+| **Fallbacks (any)** | User pastes caption/text | User uploads screenshot(s) → vision LLM | User uploads a screen recording → Gemini |
+
+**Instagram warning:** Meta actively blocks scraping. `yt-dlp` works for many public reels but breaks from time to time and may need a logged-in cookie. That's acceptable at household volume, but it's brittle, and logged-in scraping goes against Instagram's ToS. Design so that **failure is a normal state**: the item stays in the library with its thumbnail and link, and one tap opens "paste caption / add screenshot". Also common: "recipe in comments" or "comment RECIPE and I'll DM you". The LLM should detect these and set the status to `needs_input` with a helpful message instead of guessing.
+
+### 4.2 LLM extraction
+
+- **LLM gateway in PHP:** define our own small interface (`RecipeExtractor::extract(Evidence): ExtractionResult`) and put the provider code behind it. **Symfony AI Platform** (`symfony/ai-platform`) has bridges for Gemini and Bedrock and supports structured output mapped to PHP classes. However, it is still **experimental (pre-1.0, no BC promise)**, so it stays behind our interface. If a bridge can't do something we need (e.g. Gemini YouTube-URL video input), we call the provider's API directly: Gemini's REST API is plain JSON over `HttpClient`, and Bedrock goes through `aws/aws-sdk-php` (Converse API).
+- **One extraction schema** (a PHP DTO turned into JSON Schema), used for every source: title, servings, times, cuisine, meal types, tags, diet flags, ingredient groups, steps, plus `confidence` and `missing_fields`.
+- Each ingredient comes out **already normalized**: `{ raw, quantity, unit, name, canonical_key, name_es, name_en, prep, optional }`, with units normalized as described in 4.3. `raw` and `name` keep the recipe's original language. `canonical_key` is a stable English slug (`onion`, `chickpeas_canned`) used for matching, so *cebolla* and *onion* merge on the shopping list.
+- The recipe's **`language`** (`es` / `en`) is detected and stored. Recipes are **kept in their original language**. A "translate" button (Gemini, cached per recipe) can come later (M6).
+- **Model routing (config, not code):**
+  - Text/JSON-LD normalization → **Gemini Flash-class** model (cheap, fast, good at JSON).
+  - Images (screenshots, Instagram carousels) → Gemini (natively multimodal).
+  - Video → **Gemini via AI Studio**: YouTube URLs are passed directly (public videos only). Instagram/TikTok reels are downloaded with yt-dlp and uploaded through the File API.
+  - **Bedrock** (e.g. Claude or Nova) is configured as the **fallback for text/image steps** when Gemini errors or is rate-limited, and is handy for comparing quality on the extraction spike. Bedrock doesn't host Gemini and has no YouTube-URL equivalent, so **video stays Gemini-only**.
+- **Never invent:** the prompt tells the model to leave fields empty instead of guessing. If the evidence doesn't include quantities (common in reels), mark the recipe `needs_review` instead of making up amounts.
+- **One source can yield several recipes** (e.g. a "3 weeknight dinners" video).
+- Log model, tokens and cost per job so you can see what extraction actually costs. Text extraction costs a fraction of a cent. Video is billed roughly per second of footage, which for short reels is still cheap on Flash-class models. Check current pricing.
+
+### 4.3 Units
+
+English recipes, especially American ones, use **cups, ounces, pounds and °F**. Spanish recipes use **grams, millilitres and °C**. Mixing them breaks shopping-list merging ("1 cup flour" + "200 g harina" can't be summed).
+
+Decision: **store and display everything in metric**. Weights in g/kg, volumes in ml/l, temperatures in °C (also rewritten inside the steps). Some units are practical and stay as they are: spoons (tbsp/tsp ↔ *cucharada/cucharadita*), pinches, and countable items ("2 eggs", "1 can"). The original text (`raw`) is always kept and shown on tap, so nothing is lost. Cups of dry ingredients are converted to grams only when the ingredient's density is known (flour, sugar, rice). Otherwise they become ml.
+
+## 5. Data model (first cut)
+
+```
+households        id, name, default_servings, planned_slots (e.g. Mon–Sun × lunch/dinner)
+users             id, household_id, email, display_name, locale (es|en)
+
+sources           id, household_id, url, normalized_url (unique per household), platform,
+                  title, author, thumbnail_url, status (pending|extracting|ready|needs_review|needs_input|failed),
+                  evidence jsonb (caption, transcript, json_ld, …), error, added_by, created_at
+
+recipes           id, household_id, source_id (nullable for manual), language (es|en), title, servings,
+                  prep_min, cook_min, total_min, cuisine, meal_types[], tags[], diet_flags[],
+                  steps jsonb, notes, rating, is_favorite, confidence, extracted_by_model, reviewed_at
+
+recipe_ingredients id, recipe_id, position, group_name, raw_text, quantity, unit,
+                  ingredient_id, prep, optional
+
+ingredients       id, household_id, canonical_key, name_es, name_en, aisle, is_staple,
+                  density_g_per_ml (nullable)   -- grows as recipes arrive
+
+extraction_runs   id, source_id, step, provider, model, input_tokens, output_tokens, cost_usd, ok, error, created_at
+
+meal_plans        id, household_id, week_start, created_at
+meal_plan_entries id, plan_id, date, slot (lunch|dinner), recipe_id, servings,
+                  is_leftover_of (entry id), locked
+
+shopping_lists    id, plan_id (nullable), household_id, created_at
+shopping_items    id, list_id, ingredient_id (nullable), display_text, quantity, unit, aisle,
+                  checked, is_manual, from_recipe_ids[]
+```
+
+Every table carries `household_id` so it's easy to open up to multiple households later. A **Doctrine SQL filter** plus an API Platform extension scope every query to the current user's household automatically.
+
+## 6. Meal planning
+
+Start **deterministic, not LLM**: it's faster, free, predictable and easy to tweak.
+
+- **Inputs:** which of the 14 lunch/dinner slots to fill this week, servings per slot (household default, overridable), max cook time on weeknights, last N weeks of plans.
+- **Lunch vs dinner fit:** recipes carry `meal_types`. The extractor suggests them and you can edit them. Some dishes are lunch-only (e.g. a heavy *cocido* or a big pasta), some dinner-only (a light soup or salad), most fit both. The planner respects this.
+- **Scoring each candidate recipe:** favorites and rating ↑, recently cooked ↓ (no repeats within ~3 weeks), variety across the week (protein, cuisine) ↑, **overlap in fresh ingredients with already chosen recipes ↑** (less waste: half a bunch of cilantro gets used twice), fits the slot's time limit.
+- Weighted random pick, slot by slot, so "regenerate" gives a different plan each time.
+- **Leftovers / cook once, eat twice:** with both lunch and dinner planned, this matters a lot. Tonight's dinner cooked in double quantity can fill tomorrow's lunch (a takeaway container for work). The planner can propose these pairs, and the shopping list counts the ingredients once at the doubled amount.
+- **Later (optional):** a natural-language tweak box ("more vegetarian this week, nothing spicy on Thursday") where an LLM turns the request into constraints and weights. The LLM sets the parameters and the planner still does the picking.
+
+## 7. Shopping list
+
+1. Take all ingredients of planned (non-leftover) entries, scaled by `entry.servings / recipe.servings`.
+2. Group by `ingredient_id`. Convert compatible units and sum (200 g + 0.5 kg → 700 g). Keep incompatible units as separate lines under the same item ("2 cans + 400 g chickpeas").
+3. Leave out **staples** (salt, oil, common spices) by default, shown in a collapsible "check you have" section.
+4. Shown in **each viewer's language** (`name_es` / `name_en`), whatever language the recipes are in.
+5. Group by aisle (produce, dairy, meat/fish, pantry, frozen, …). The aisle is stored on `ingredients`, so fixing it once fixes it for good.
+6. Manual items can be added. Check-off syncs live between household members (Mercure) and works offline (PWA cache plus TanStack Query's queued mutations, replayed on reconnect).
+
+## 8. Getting links in from the phone
+
+This matters, because most saves happen inside the Instagram and YouTube apps. The household has **both iPhone and Android**, so we build both paths. They share the same backend endpoint, `POST /api/ingest`.
+
+- **Android:** the installed PWA registers as a **Web Share Target** (in the manifest), so "Share → Tabooki" appears in the system share sheet. It uses the normal session cookie.
+- **iOS:** Safari does **not** support Web Share Target, so we ship an **Apple Shortcut** ("Save to Tabooki") that shows up in the share sheet and POSTs the shared URL to `/api/ingest` with a **personal access token**. The app gets a settings page that generates the token and links to the Shortcut, so setup takes about two minutes. Fallback: paste the link in the app.
+- Desktop: paste box, and optionally a bookmarklet.
+
+### Environments & access
+
+PWAs (service worker, install, share target) **require HTTPS**, and phones need to reach the server from anywhere (the supermarket, saving a reel on the bus).
+
+**Local development (Mac, Apple Silicon)**
+- `docker compose up` runs the same `app` / `worker` / `db` services as production, with source code mounted and Vite's dev server for hot reload.
+- FrankenPHP/Caddy serves `https://localhost` with its own local CA (trusted once), so service worker and PWA features work locally.
+- To try it on a real phone during development, use the staging copy on the VPS, or join the Mac to the tailnet too.
+
+**Production: Contabo VPS + Tailscale**
+- The VPS and every household phone join one **tailnet** (the Tailscale app on iPhone and Android, free for personal use).
+- The app is served at `https://tabooki.<tailnet>.ts.net`. Caddy (inside FrankenPHP) gets a **real certificate for `*.ts.net` automatically** from the local `tailscaled`, so no domain or Let's Encrypt setup is needed.
+- **Firewall:** nothing public except SSH, and even SSH can move to Tailscale SSH and close port 22. Postgres is never exposed.
+- The iOS Shortcut and Android share target post to the `ts.net` URL. This works whenever Tailscale is connected on the phone (enable "VPN On Demand" on iOS so it connects automatically).
+- **Architecture:** the Mac is ARM (arm64), while Contabo VPSs are usually x86_64. Images are built multi-arch with `docker buildx`, or built directly on the VPS.
+- **Deploy:** start simple. `git pull && docker compose up -d --build` on the VPS (a `make deploy` over SSH). Move to CI-built images later if needed.
+
+**Backups:** a nightly `pg_dump` + uploads volume → **off the VPS** with restic (e.g. to Contabo Object Storage, Backblaze B2 or a home NAS over Tailscale). Don't rely on VPS snapshots alone. The library is personal data you'd hate to lose.
+
+## 9. Milestones
+
+| # | Milestone | Done when… |
+|---|---|---|
+| M0 | **Scaffold** | Monorepo (`backend/` Symfony + API Platform, `frontend/` Vite React, `compose.yaml`). FrankenPHP serving API + SPA, Postgres, Messenger worker, login, generated TS API client. Reachable over HTTPS from the phone, installable |
+| M1 | **Library** | Paste a URL → card with title/thumbnail (OpenGraph/oEmbed). Manual recipe create/edit. Search and filter by tags |
+| M2 | **Extraction v1** | Job queue + statuses. Blogs (JSON-LD + LLM fallback). YouTube (description → transcript → Gemini video). Review screen |
+| M3 | **Social + inputs** | Instagram/TikTok via yt-dlp + Gemini. Paste-caption / screenshot / video-upload fallbacks. Share target + iOS Shortcut endpoint |
+| M4 | **Planner** | Weekly plan generation, lock/swap/regenerate, leftovers, history |
+| M5 | **Shopping list** | Merge/scale/units, staples, aisles, live check-off, offline |
+| M6 | **Polish** | Ratings after cooking, cook mode (screen stays on, step by step), re-extract with a newer model, cost dashboard |
+
+M2 is where the real risk is. It's worth a quick **extraction spike** (option 2 from earlier) before or during M0 with ~20 real links from your library, to measure success rate per platform.
+
+## 10. Risks & open questions
+
+**Risks**
+- Instagram extraction reliability and ToS (see 4.1). Mitigation: fallbacks are first-class.
+- LLM-hallucinated quantities. Mitigation: the "never invent" prompt, confidence plus review queue, raw evidence shown side by side.
+- Ingredient normalization quality ("spring onion" vs "scallion" vs "green onion") decides whether merging works. Mitigation: LLM canonical names + an editable `ingredients` table that learns.
+
+**Open questions**
+None blocking. Minor ones can be settled when we reach them: Symfony 7.4 LTS vs 8.x (default: 7.4 LTS), login links vs passwords (default: passwords for M0, login links later, since they need outgoing email from the VPS).

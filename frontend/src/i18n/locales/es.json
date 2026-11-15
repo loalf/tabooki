@@ -1,0 +1,25 @@
+{
+  "app": { "name": "Tabooki", "loading": "Cargando…" },
+  "nav": { "library": "Recetas", "plan": "Menú", "shopping": "Compra", "settings": "Ajustes" },
+  "login": {
+    "title": "Inicia sesión",
+    "subtitle": "Tu recetario, tu menú semanal y tu lista de la compra.",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "submit": "Entrar",
+    "submitting": "Entrando…",
+    "invalid": "Correo o contraseña incorrectos.",
+    "error": "No se ha podido iniciar sesión. Inténtalo de nuevo."
+  },
+  "library": { "title": "Recetas", "empty": "Aún no hay recetas. Pronto podrás guardar enlaces de blogs, YouTube e Instagram." },
+  "plan": { "title": "Menú semanal", "empty": "Aquí aparecerá el menú de comidas y cenas de la semana." },
+  "shopping": { "title": "Lista de la compra", "empty": "La lista de la compra se generará a partir del menú." },
+  "settings": {
+    "title": "Ajustes",
+    "signedInAs": "Has iniciado sesión como {{email}}",
+    "household": "Hogar",
+    "language": "Idioma",
+    "logout": "Cerrar sesión"
+  },
+  "languages": { "es": "Español", "en": "English" }
+}

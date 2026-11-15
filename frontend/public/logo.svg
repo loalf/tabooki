@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#1f6f4a"/>
+  <!-- bowl -->
+  <path d="M96 248h320c0 92-72 164-160 164S96 340 96 248z" fill="#f6efe2"/>
+  <!-- leaf -->
+  <path d="M268 220c-6-70 40-118 112-124 4 72-42 122-112 124z" fill="#9fd36b"/>
+  <path d="M276 212c22-34 50-62 84-86" stroke="#1f6f4a" stroke-width="10" stroke-linecap="round" fill="none"/>
+  <!-- steam -->
+  <path d="M176 196c-18-22 18-38 0-62M224 196c-18-22 18-38 0-62" stroke="#f6efe2" stroke-width="14" stroke-linecap="round" fill="none"/>
+</svg>

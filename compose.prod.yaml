@@ -1,0 +1,25 @@
+# Production overrides:
+#   docker compose -f compose.yaml -f compose.prod.yaml up -d --build --wait
+# Secrets come from a .env file next to this one (never committed). See docs/DEPLOY.md.
+services:
+  php:
+    image: tabooki-php-prod
+    build:
+      target: frankenphp_prod
+    environment:
+      APP_SECRET: ${APP_SECRET:?set APP_SECRET}
+      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:?set CADDY_MERCURE_JWT_SECRET}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:?set CADDY_MERCURE_JWT_SECRET}
+      SPA_MODE: static
+    volumes:
+      # Lets Caddy fetch the HTTPS certificate for *.ts.net from the host's tailscaled.
+      - /var/run/tailscale/tailscaled.sock:/var/run/tailscale/tailscaled.sock
+    ports: !override
+      # Only reachable on the VPS's Tailscale IP, never on the public interface.
+      - "${TAILSCALE_IP:?set TAILSCALE_IP}:443:443/tcp"
+      - "${TAILSCALE_IP:?set TAILSCALE_IP}:443:443/udp"
+
+  worker:
+    image: tabooki-php-prod
+    environment:
+      APP_SECRET: ${APP_SECRET:?set APP_SECRET}

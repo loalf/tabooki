@@ -1,0 +1,25 @@
+{
+  "app": { "name": "Tabooki", "loading": "Loading…" },
+  "nav": { "library": "Recipes", "plan": "Plan", "shopping": "Shopping", "settings": "Settings" },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Your recipe library, weekly meal plan and shopping list.",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "invalid": "Wrong email or password.",
+    "error": "Couldn't sign in. Please try again."
+  },
+  "library": { "title": "Recipes", "empty": "No recipes yet. Soon you'll be able to save links from blogs, YouTube and Instagram." },
+  "plan": { "title": "Weekly plan", "empty": "This week's lunches and dinners will show up here." },
+  "shopping": { "title": "Shopping list", "empty": "The shopping list will be generated from the meal plan." },
+  "settings": {
+    "title": "Settings",
+    "signedInAs": "Signed in as {{email}}",
+    "household": "Household",
+    "language": "Language",
+    "logout": "Sign out"
+  },
+  "languages": { "es": "Español", "en": "English" }
+}
