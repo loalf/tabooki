@@ -16,10 +16,12 @@ const tabs = [
 export function AppShell() {
   const { t } = useTranslation()
   const { data: me, isPending } = useMe()
-  const { pathname } = useLocation()
+  const location = useLocation()
+  const { pathname } = location
 
   if (isPending) return <Splash />
-  if (!me) return <Navigate to="/login" replace />
+  // Come back here after signing in (e.g. a link shared from another app).
+  if (!me) return <Navigate to="/login" replace state={{ from: location }} />
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-2xl flex-col">

@@ -100,6 +100,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/share-tokens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of ShareToken resources.
+         * @description Retrieves the collection of ShareToken resources.
+         */
+        get: operations["api_share-tokens_get_collection"];
+        put?: never;
+        /**
+         * Creates a ShareToken resource.
+         * @description Creates a ShareToken resource.
+         */
+        post: operations["api_share-tokens_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/share-tokens/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Removes the ShareToken resource.
+         * @description Removes the ShareToken resource.
+         */
+        delete: operations["api_share-tokens_id_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/sources": {
         parameters: {
             query?: never;
@@ -623,6 +667,79 @@ export interface components {
         "RecipeTag.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
             tag?: string;
             count?: number;
+        };
+        /**
+         * @description A personal token that lets one device save links without a session: the iPhone Shortcut
+         *     sends it to POST /api/share (ShareController). Only its SHA-256 hash is stored; the token
+         *     itself is shown once, when created. It can do nothing else.
+         */
+        "ShareToken-share_token.read": {
+            /** Format: uuid */
+            readonly id?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            /** Format: date-time */
+            readonly lastUsedAt?: string | null;
+            /** @description Which device it's for, e.g. "iPhone de Belén". */
+            name: string;
+        };
+        /**
+         * @description A personal token that lets one device save links without a session: the iPhone Shortcut
+         *     sends it to POST /api/share (ShareController). Only its SHA-256 hash is stored; the token
+         *     itself is shown once, when created. It can do nothing else.
+         */
+        "ShareToken-share_token.read_share_token.created": {
+            /** Format: uuid */
+            readonly id?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            /** Format: date-time */
+            readonly lastUsedAt?: string | null;
+            /** @description Which device it's for, e.g. "iPhone de Belén". */
+            name: string;
+            /** @description The secret, only in the response that creates the token. */
+            readonly token?: string | null;
+        };
+        /**
+         * @description A personal token that lets one device save links without a session: the iPhone Shortcut
+         *     sends it to POST /api/share (ShareController). Only its SHA-256 hash is stored; the token
+         *     itself is shown once, when created. It can do nothing else.
+         */
+        "ShareToken-share_token.write": {
+            /** @description Which device it's for, e.g. "iPhone de Belén". */
+            name: string;
+        };
+        /**
+         * @description A personal token that lets one device save links without a session: the iPhone Shortcut
+         *     sends it to POST /api/share (ShareController). Only its SHA-256 hash is stored; the token
+         *     itself is shown once, when created. It can do nothing else.
+         */
+        "ShareToken.jsonld-share_token.read": components["schemas"]["HydraItemBaseSchema"] & {
+            /** Format: uuid */
+            readonly id?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            /** Format: date-time */
+            readonly lastUsedAt?: string | null;
+            /** @description Which device it's for, e.g. "iPhone de Belén". */
+            name: string;
+        };
+        /**
+         * @description A personal token that lets one device save links without a session: the iPhone Shortcut
+         *     sends it to POST /api/share (ShareController). Only its SHA-256 hash is stored; the token
+         *     itself is shown once, when created. It can do nothing else.
+         */
+        "ShareToken.jsonld-share_token.read_share_token.created": components["schemas"]["HydraItemBaseSchema"] & {
+            /** Format: uuid */
+            readonly id?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            /** Format: date-time */
+            readonly lastUsedAt?: string | null;
+            /** @description Which device it's for, e.g. "iPhone de Belén". */
+            name: string;
+            /** @description The secret, only in the response that creates the token. */
+            readonly token?: string | null;
         };
         /**
          * @description A link saved to the library (blog post, YouTube video, Instagram reel, ...).
@@ -1182,6 +1299,110 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    "api_share-tokens_get_collection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ShareToken collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchemaNoPagination"] & {
+                        member: components["schemas"]["ShareToken.jsonld-share_token.read"][];
+                    };
+                    "application/json": components["schemas"]["ShareToken-share_token.read"][];
+                };
+            };
+        };
+    };
+    "api_share-tokens_post": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new ShareToken resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["ShareToken-share_token.write"];
+                "application/json": components["schemas"]["ShareToken-share_token.write"];
+            };
+        };
+        responses: {
+            /** @description ShareToken resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ShareToken.jsonld-share_token.read_share_token.created"];
+                    "application/json": components["schemas"]["ShareToken-share_token.read_share_token.created"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    "api_share-tokens_id_delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description ShareToken identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ShareToken resource deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -24,6 +24,13 @@ export default defineConfig({
         display: 'standalone',
         background_color: '#f6efe2',
         theme_color: '#1f6f4a',
+        // Android lists the installed app in the share sheet; shared links open /share (SharePage).
+        // iOS doesn't support this: an Apple Shortcut posts to /api/share instead (Settings).
+        share_target: {
+          action: '/share',
+          method: 'GET',
+          params: { title: 'title', text: 'text', url: 'url' },
+        },
         icons: [
           { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },

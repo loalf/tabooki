@@ -139,10 +139,42 @@
     "signedInAs": "Signed in as {{email}}",
     "household": "Household",
     "language": "Language",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "share": {
+      "title": "Save from your phone",
+      "android": "On Android, install Tabooki (browser menu → Add to Home screen). It then shows up in the Share menu of Instagram, TikTok, YouTube or the browser.",
+      "iphone": "iPhone",
+      "iphoneIntro": "iPhones don't let web apps appear in the Share menu, so this uses a shortcut in the Shortcuts app. Create a key for your iPhone and follow the steps.",
+      "deviceName": "Device name",
+      "create": "Create key",
+      "lastUsed": "Last used on {{date}}",
+      "neverUsed": "Not used yet",
+      "revoke": "Revoke the key for {{name}}",
+      "copyNow": "Copy the key now: it won't be shown again. It can only save links, and you can revoke it here.",
+      "token": "Authorization header value",
+      "address": "Address",
+      "copy": "Copy {{what}}",
+      "done": "Done",
+      "steps": {
+        "open": "On the iPhone, open <b>Shortcuts</b> and create a new shortcut with <b>+</b>.",
+        "shareSheet": "Tap <b>ⓘ</b> and turn on <b>Show in Share Sheet</b>. Under <b>Receive</b>, keep only <b>URLs</b> and <b>Text</b>.",
+        "getContents": "Add the <b>Get Contents of URL</b> action with the address above and, under <b>Show More</b>, the method <b>POST</b>.",
+        "headers": "Under <b>Headers</b>, add <code>Authorization</code> with the value above (it starts with <code>Bearer</code>).",
+        "body": "Under <b>Request Body</b>, choose <b>JSON</b> and add the field <code>url</code> with the <b>Shortcut Input</b> variable.",
+        "notify": "Add <b>Get Dictionary Value</b> for the key <code>message</code>, then <b>Show Notification</b> with that value.",
+        "name": "Name it <b>Save to Tabooki</b>. To use it: Share → Save to Tabooki."
+      }
+    }
   },
   "languages": {
     "es": "Español",
     "en": "English"
+  },
+  "share": {
+    "saving": "Saving the link…",
+    "duplicate": "Already in your library",
+    "noLink": "We didn't find a link in what you shared",
+    "failed": "Couldn't save the link",
+    "toLibrary": "Go to the library"
   }
 }

@@ -12,6 +12,7 @@ import { PlanPage } from '@/pages/PlanPage'
 import { RecipeEditPage } from '@/pages/RecipeEditPage'
 import { RecipePage } from '@/pages/RecipePage'
 import { SettingsPage } from '@/pages/SettingsPage'
+import { SharePage } from '@/pages/SharePage'
 import { ShoppingPage } from '@/pages/ShoppingPage'
 
 const queryClient = new QueryClient()
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
       { path: 'plan', element: <PlanPage /> },
       { path: 'shopping', element: <ShoppingPage /> },
       { path: 'settings', element: <SettingsPage /> },
+      { path: 'share', element: <SharePage /> },
     ],
   },
 ])

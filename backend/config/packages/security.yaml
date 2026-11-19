@@ -12,6 +12,13 @@ security:
         dev:
             pattern: ^/(_profiler(/|$)|(_wdt|assets|build)/)
             security: false
+        # The iPhone Shortcut saves links with a personal token (App\Entity\ShareToken), no session.
+        share:
+            pattern: ^/api/share$
+            stateless: true
+            provider: app_user_provider
+            access_token:
+                token_handler: App\Security\ShareTokenHandler
         main:
             lazy: true
             provider: app_user_provider

@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Navigate } from 'react-router'
+import { type Location, Navigate, useLocation } from 'react-router'
 import { ApiError } from '@/api/client'
 import { useLogin, useMe } from '@/auth/useAuth'
 import { Splash } from '@/components/Splash'
@@ -9,11 +9,12 @@ export function LoginPage() {
   const { t } = useTranslation()
   const { data: me, isPending } = useMe()
   const login = useLogin()
+  const from = (useLocation().state as { from?: Location } | null)?.from
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
   if (isPending) return <Splash />
-  if (me) return <Navigate to="/" replace />
+  if (me) return <Navigate to={from ? `${from.pathname}${from.search}` : '/'} replace />
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault()

@@ -9,17 +9,13 @@ use ApiPlatform\State\ProcessorInterface;
 use ApiPlatform\Validator\Exception\ValidationException;
 use App\Dto\SourceInput;
 use App\Entity\Source;
-use App\Library\UrlNormalizer;
-use App\Message\FetchSourceMetadata;
-use App\Repository\SourceRepository;
+use App\Library\LinkSaver;
 use App\Security\CurrentHousehold;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
 
 /**
- * Saves a link to the library: normalizes it, refuses duplicates, and queues the preview fetch.
+ * Saves a link to the library from the app (see LinkSaver), refusing duplicates.
  *
  * @implements ProcessorInterface<SourceInput, Source>
  */
@@ -30,10 +26,7 @@ final readonly class CreateSourceProcessor implements ProcessorInterface
 
     public function __construct(
         private CurrentHousehold $current,
-        private UrlNormalizer $urlNormalizer,
-        private SourceRepository $sources,
-        private EntityManagerInterface $entityManager,
-        private MessageBusInterface $bus,
+        private LinkSaver $links,
     ) {
     }
 
@@ -41,23 +34,13 @@ final readonly class CreateSourceProcessor implements ProcessorInterface
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Source
     {
         try {
-            $url = $this->urlNormalizer->withScheme($data->url);
-            $normalizedUrl = $this->urlNormalizer->normalize($url);
+            [$source, $saved] = $this->links->save($this->current->user(), $data->url);
         } catch (\InvalidArgumentException) {
             throw $this->violation($data, 'This is not a valid web link.', self::INVALID_URL_ERROR);
         }
-
-        $household = $this->current->household();
-        $existing = $this->sources->findOneBy(['household' => $household, 'normalizedUrl' => $normalizedUrl]);
-        if (null !== $existing) {
+        if (!$saved) {
             throw $this->violation($data, 'This link is already in your library.', self::DUPLICATE_ERROR);
         }
-
-        $source = new Source($household, $url, $normalizedUrl, $this->urlNormalizer->detectPlatform($url), $this->current->user());
-        $this->entityManager->persist($source);
-        $this->entityManager->flush();
-
-        $this->bus->dispatch(new FetchSourceMetadata($source->getId()->toRfc4122()));
 
         return $source;
     }

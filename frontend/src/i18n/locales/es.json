@@ -139,10 +139,42 @@
     "signedInAs": "Has iniciado sesión como {{email}}",
     "household": "Hogar",
     "language": "Idioma",
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "share": {
+      "title": "Guardar desde el móvil",
+      "android": "En Android, instala Tabooki (menú del navegador → Añadir a pantalla de inicio). Después aparecerá en el menú Compartir de Instagram, TikTok, YouTube o el navegador.",
+      "iphone": "iPhone",
+      "iphoneIntro": "El iPhone no deja a las apps web salir en el menú Compartir, así que se hace con un atajo de la app Atajos. Crea una clave para tu iPhone y sigue los pasos.",
+      "deviceName": "Nombre del dispositivo",
+      "create": "Crear clave",
+      "lastUsed": "Usada por última vez el {{date}}",
+      "neverUsed": "Aún no se ha usado",
+      "revoke": "Revocar la clave de {{name}}",
+      "copyNow": "Copia la clave ahora: no se volverá a mostrar. Solo sirve para guardar enlaces, y puedes revocarla aquí.",
+      "token": "Valor de la cabecera Authorization",
+      "address": "Dirección",
+      "copy": "Copiar {{what}}",
+      "done": "Hecho",
+      "steps": {
+        "open": "En el iPhone, abre <b>Atajos</b> y crea un atajo nuevo con <b>+</b>.",
+        "shareSheet": "Toca <b>ⓘ</b> y activa <b>Mostrar en la hoja de compartir</b>. En <b>Recibir</b>, deja solo <b>URL</b> y <b>Texto</b>.",
+        "getContents": "Añade la acción <b>Obtener contenido de URL</b> con la dirección de arriba y, en <b>Mostrar más</b>, el método <b>POST</b>.",
+        "headers": "En <b>Encabezados</b>, añade <code>Authorization</code> con el valor de arriba (empieza por <code>Bearer</code>).",
+        "body": "En <b>Cuerpo de la solicitud</b>, elige <b>JSON</b> y añade el campo <code>url</code> con la variable <b>Entrada del atajo</b>.",
+        "notify": "Añade <b>Obtener valor del diccionario</b> con la clave <code>message</code> y, después, <b>Mostrar notificación</b> con ese valor.",
+        "name": "Llámalo <b>Guardar en Tabooki</b>. Para usarlo: Compartir → Guardar en Tabooki."
+      }
+    }
   },
   "languages": {
     "es": "Español",
     "en": "English"
+  },
+  "share": {
+    "saving": "Guardando el enlace…",
+    "duplicate": "Ya estaba en tu biblioteca",
+    "noLink": "No hemos encontrado ningún enlace en lo que has compartido",
+    "failed": "No se ha podido guardar el enlace",
+    "toLibrary": "Ir a la biblioteca"
   }
 }

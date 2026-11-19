@@ -2,6 +2,7 @@ import { LogOut } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useLogout, useMe, useUpdateMe } from '@/auth/useAuth'
 import { PageHeader } from '@/components/PageHeader'
+import { ShareSettings } from '@/components/ShareSettings'
 import { LOCALES, type Locale } from '@/i18n'
 import { cn } from '@/lib/utils'
 
@@ -49,6 +50,8 @@ export function SettingsPage() {
             ))}
           </div>
         </fieldset>
+
+        <ShareSettings />
 
         <button
           type="button"
