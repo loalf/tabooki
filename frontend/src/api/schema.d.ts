@@ -28,6 +28,154 @@ export interface paths {
         patch: operations["api_me_patch"];
         trace?: never;
     };
+    "/api/meal-plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of MealPlan resources.
+         * @description Retrieves the collection of MealPlan resources.
+         */
+        get: operations["api_meal-plans_get_collection"];
+        put?: never;
+        /**
+         * Creates a MealPlan resource.
+         * @description Creates a MealPlan resource.
+         */
+        post: operations["api_meal-plans_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/meal-plans/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a MealPlan resource.
+         * @description Retrieves a MealPlan resource.
+         */
+        get: operations["api_meal-plans_id_get"];
+        put?: never;
+        post?: never;
+        /**
+         * Removes the MealPlan resource.
+         * @description Removes the MealPlan resource.
+         */
+        delete: operations["api_meal-plans_id_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/meal-plans/{id}/entries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a MealPlan resource.
+         * @description Creates a MealPlan resource.
+         */
+        post: operations["meal_plan_add_entry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/meal-plans/{id}/entries/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a MealPlan resource.
+         * @description Creates a MealPlan resource.
+         */
+        post: operations["meal_plan_remove_entry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/meal-plans/{id}/entries/swap": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a MealPlan resource.
+         * @description Creates a MealPlan resource.
+         */
+        post: operations["meal_plan_swap_entry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/meal-plans/{id}/entries/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a MealPlan resource.
+         * @description Creates a MealPlan resource.
+         */
+        post: operations["meal_plan_update_entry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/meal-plans/{id}/regenerate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a MealPlan resource.
+         * @description Creates a MealPlan resource.
+         */
+        post: operations["meal_plan_regenerate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/recipes": {
         parameters: {
             query?: never;
@@ -416,6 +564,165 @@ export interface components {
             /** @default 4 */
             defaultServings: number;
         };
+        /**
+         * @description A week's lunches and dinners (docs/PLAN.md §6). Weeks start on Monday. Each planned meal is an
+         *     entry; a meal that isn't planned (eating out) has none. Every action answers with the whole
+         *     plan, so the app redraws the week from one response.
+         */
+        "MealPlan-meal_plan.read_recipe.list": {
+            /** Format: uuid */
+            readonly id?: string;
+            /** Format: date */
+            weekStart?: string;
+            /**
+             * @description Cook dinner for two meals: the next day's lunch is its leftovers.
+             * @default false
+             */
+            leftovers: boolean;
+            /** @description Longest recipe (prep + cook) for Monday to Friday; null for no limit. */
+            weekdayMaxMinutes?: number | null;
+            entries?: components["schemas"]["MealPlanEntry-meal_plan.read_recipe.list"][];
+            /** Format: date-time */
+            readonly createdAt?: string;
+        };
+        /** @description Pick another recipe for one meal. */
+        "MealPlan.MealPlanEntryAction": {
+            /**
+             * Format: uuid
+             * @default
+             */
+            entry: string;
+            locked?: boolean | null;
+            servings?: number | null;
+            /**
+             * Format: uuid
+             * @description Id of a library recipe to cook for this meal.
+             */
+            recipe?: string | null;
+        };
+        /** @description Plan a week: the meals to fill and how, filled from the library. */
+        "MealPlan.MealPlanInput": {
+            /**
+             * @description Any day of the week to plan (its Monday is used), YYYY-MM-DD.
+             * @default
+             */
+            weekStart: string;
+            slots?: components["schemas"]["MealPlanSlotInput"][];
+            /**
+             * @description Cook dinner for two meals: the next day's lunch is its leftovers.
+             * @default false
+             */
+            leftovers: boolean;
+            /** @description Longest recipe (prep + cook) for Monday to Friday; null for no limit. */
+            weekdayMaxMinutes?: number | null;
+        };
+        /** @description Plan one more meal (and fill it). */
+        "MealPlan.MealPlanSlotInput": {
+            /** @default  */
+            date: string;
+            /**
+             * @default lunch
+             * @enum {string}
+             */
+            slot: "lunch" | "dinner";
+            /** @description null: the household's default. */
+            servings?: number | null;
+        };
+        /**
+         * @description A week's lunches and dinners (docs/PLAN.md §6). Weeks start on Monday. Each planned meal is an
+         *     entry; a meal that isn't planned (eating out) has none. Every action answers with the whole
+         *     plan, so the app redraws the week from one response.
+         */
+        "MealPlan.jsonld-meal_plan.read_recipe.list": components["schemas"]["HydraItemBaseSchema"] & {
+            /** Format: uuid */
+            readonly id?: string;
+            /** Format: date */
+            weekStart?: string;
+            /**
+             * @description Cook dinner for two meals: the next day's lunch is its leftovers.
+             * @default false
+             */
+            leftovers: boolean;
+            /** @description Longest recipe (prep + cook) for Monday to Friday; null for no limit. */
+            weekdayMaxMinutes?: number | null;
+            entries?: components["schemas"]["MealPlanEntry.jsonld-meal_plan.read_recipe.list"][];
+            /** Format: date-time */
+            readonly createdAt?: string;
+        };
+        "MealPlanEntry-meal_plan.read_recipe.list": {
+            /** Format: uuid */
+            readonly id?: string;
+            /** @description null when the library has nothing that fits (or the recipe was deleted). */
+            recipe?: components["schemas"]["Recipe-meal_plan.read_recipe.list"] | null;
+            servings?: number;
+            /**
+             * @description Kept as it is when the plan is regenerated.
+             * @default false
+             */
+            locked: boolean;
+            /** Format: date */
+            date?: string;
+            /** @enum {string} */
+            slot?: "lunch" | "dinner";
+            /** Format: uuid */
+            leftoverOfId?: string | null;
+        };
+        "MealPlanEntry.jsonld-meal_plan.read_recipe.list": {
+            /** Format: uuid */
+            readonly id?: string;
+            /** @description null when the library has nothing that fits (or the recipe was deleted). */
+            recipe?: components["schemas"]["Recipe.jsonld-meal_plan.read_recipe.list"] | null;
+            servings?: number;
+            /**
+             * @description Kept as it is when the plan is regenerated.
+             * @default false
+             */
+            locked: boolean;
+            /** Format: date */
+            date?: string;
+            /** @enum {string} */
+            slot?: "lunch" | "dinner";
+            /** Format: uuid */
+            leftoverOfId?: string | null;
+        };
+        MealPlanSlotInput: {
+            /** @default  */
+            date: string;
+            /**
+             * @default lunch
+             * @enum {string}
+             */
+            slot: "lunch" | "dinner";
+            /** @description null: the household's default. */
+            servings?: number | null;
+        };
+        "Recipe-meal_plan.read_recipe.list": {
+            /** Format: uuid */
+            readonly id?: string;
+            /** @description The link this recipe comes from; null for recipes typed in by hand. */
+            source?: components["schemas"]["Source-meal_plan.read_recipe.list"] | null;
+            /** @default  */
+            title: string;
+            /**
+             * @default es
+             * @enum {string}
+             */
+            language: "es" | "en";
+            /** @default 4 */
+            servings: number;
+            /** @description lowercase, unique */
+            tags?: string[];
+            /** @default false */
+            favorite: boolean;
+            rating?: number | null;
+            /**
+             * @description Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).
+             * @default false
+             */
+            needsReview: boolean;
+            readonly totalMinutes?: number | null;
+            mealTypes?: ("lunch" | "dinner")[];
+        };
         "Recipe-recipe.list": {
             /** Format: uuid */
             readonly id?: string;
@@ -547,6 +854,33 @@ export interface components {
              * @default false
              */
             needsReview: boolean;
+            mealTypes?: ("lunch" | "dinner")[];
+        };
+        "Recipe.jsonld-meal_plan.read_recipe.list": components["schemas"]["HydraItemBaseSchema"] & {
+            /** Format: uuid */
+            readonly id?: string;
+            /** @description The link this recipe comes from; null for recipes typed in by hand. */
+            source?: components["schemas"]["Source.jsonld-meal_plan.read_recipe.list"] | null;
+            /** @default  */
+            title: string;
+            /**
+             * @default es
+             * @enum {string}
+             */
+            language: "es" | "en";
+            /** @default 4 */
+            servings: number;
+            /** @description lowercase, unique */
+            tags?: string[];
+            /** @default false */
+            favorite: boolean;
+            rating?: number | null;
+            /**
+             * @description Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).
+             * @default false
+             */
+            needsReview: boolean;
+            readonly totalMinutes?: number | null;
             mealTypes?: ("lunch" | "dinner")[];
         };
         "Recipe.jsonld-recipe.list": components["schemas"]["HydraItemBaseSchema"] & {
@@ -746,6 +1080,21 @@ export interface components {
          *     Extraction (M2) turns it into one or more recipes; until then it can be turned
          *     into a recipe by hand.
          */
+        "Source-meal_plan.read_recipe.list": {
+            /** Format: uuid */
+            readonly id?: string;
+            title?: string | null;
+            url?: string;
+            /** @enum {string} */
+            platform?: "web" | "youtube" | "instagram" | "tiktok";
+            /** @description Image URL for the app: our cached copy when we have one, else the original. */
+            readonly thumbnail?: string | null;
+        };
+        /**
+         * @description A link saved to the library (blog post, YouTube video, Instagram reel, ...).
+         *     Extraction (M2) turns it into one or more recipes; until then it can be turned
+         *     into a recipe by hand.
+         */
         "Source-recipe.list": {
             /** Format: uuid */
             readonly id?: string;
@@ -825,6 +1174,21 @@ export interface components {
         "Source.SourceTextInput-source.text": {
             /** @default  */
             text: string;
+        };
+        /**
+         * @description A link saved to the library (blog post, YouTube video, Instagram reel, ...).
+         *     Extraction (M2) turns it into one or more recipes; until then it can be turned
+         *     into a recipe by hand.
+         */
+        "Source.jsonld-meal_plan.read_recipe.list": components["schemas"]["HydraItemBaseSchema"] & {
+            /** Format: uuid */
+            readonly id?: string;
+            title?: string | null;
+            url?: string;
+            /** @enum {string} */
+            platform?: "web" | "youtube" | "instagram" | "tiktok";
+            /** @description Image URL for the app: our cached copy when we have one, else the original. */
+            readonly thumbnail?: string | null;
         };
         /**
          * @description A link saved to the library (blog post, YouTube video, Instagram reel, ...).
@@ -989,6 +1353,501 @@ export interface operations {
             };
             /** @description Not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    "api_meal-plans_get_collection": {
+        parameters: {
+            query?: {
+                /** @description Only the plan of the week containing this day (YYYY-MM-DD) */
+                week?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MealPlan collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchemaNoPagination"] & {
+                        member: components["schemas"]["MealPlan.jsonld-meal_plan.read_recipe.list"][];
+                    };
+                    "application/json": components["schemas"]["MealPlan-meal_plan.read_recipe.list"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    "api_meal-plans_post": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new MealPlan resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["MealPlan.MealPlanInput"];
+                "application/json": components["schemas"]["MealPlan.MealPlanInput"];
+            };
+        };
+        responses: {
+            /** @description MealPlan resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["MealPlan.jsonld-meal_plan.read_recipe.list"];
+                    "application/json": components["schemas"]["MealPlan-meal_plan.read_recipe.list"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    "api_meal-plans_id_get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description MealPlan identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MealPlan resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["MealPlan.jsonld-meal_plan.read_recipe.list"];
+                    "application/json": components["schemas"]["MealPlan-meal_plan.read_recipe.list"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    "api_meal-plans_id_delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description MealPlan identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MealPlan resource deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    meal_plan_add_entry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description MealPlan identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new MealPlan resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["MealPlan.MealPlanSlotInput"];
+                "application/json": components["schemas"]["MealPlan.MealPlanSlotInput"];
+            };
+        };
+        responses: {
+            /** @description MealPlan resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["MealPlan.jsonld-meal_plan.read_recipe.list"];
+                    "application/json": components["schemas"]["MealPlan-meal_plan.read_recipe.list"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    meal_plan_remove_entry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description MealPlan identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new MealPlan resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["MealPlan.MealPlanEntryAction"];
+                "application/json": components["schemas"]["MealPlan.MealPlanEntryAction"];
+            };
+        };
+        responses: {
+            /** @description MealPlan resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["MealPlan.jsonld-meal_plan.read_recipe.list"];
+                    "application/json": components["schemas"]["MealPlan-meal_plan.read_recipe.list"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    meal_plan_swap_entry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description MealPlan identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new MealPlan resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["MealPlan.MealPlanEntryAction"];
+                "application/json": components["schemas"]["MealPlan.MealPlanEntryAction"];
+            };
+        };
+        responses: {
+            /** @description MealPlan resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["MealPlan.jsonld-meal_plan.read_recipe.list"];
+                    "application/json": components["schemas"]["MealPlan-meal_plan.read_recipe.list"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    meal_plan_update_entry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description MealPlan identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new MealPlan resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["MealPlan.MealPlanEntryAction"];
+                "application/json": components["schemas"]["MealPlan.MealPlanEntryAction"];
+            };
+        };
+        responses: {
+            /** @description MealPlan resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["MealPlan.jsonld-meal_plan.read_recipe.list"];
+                    "application/json": components["schemas"]["MealPlan-meal_plan.read_recipe.list"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    meal_plan_regenerate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description MealPlan identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MealPlan resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["MealPlan.jsonld-meal_plan.read_recipe.list"];
+                    "application/json": components["schemas"]["MealPlan-meal_plan.read_recipe.list"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

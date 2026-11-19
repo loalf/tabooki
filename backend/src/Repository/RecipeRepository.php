@@ -17,6 +17,23 @@ final class RecipeRepository extends ServiceEntityRepository
         parent::__construct($registry, Recipe::class);
     }
 
+    /**
+     * The household's whole library with ingredients, for the meal planner.
+     *
+     * @return list<Recipe>
+     */
+    public function libraryOf(Household $household): array
+    {
+        /* @var list<Recipe> */
+        return $this->createQueryBuilder('r')
+            ->addSelect('i')
+            ->leftJoin('r.ingredients', 'i')
+            ->where('r.household = :household')
+            ->setParameter('household', $household->getId(), 'uuid')
+            ->getQuery()
+            ->getResult();
+    }
+
     /** @return list<array{tag: string, count: int}> every tag used in the household's library, most used first */
     public function tagCounts(Household $household): array
     {

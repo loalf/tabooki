@@ -204,6 +204,939 @@
                 }
             }
         },
+        "/api/meal-plans": {
+            "get": {
+                "operationId": "api_meal-plans_get_collection",
+                "tags": [
+                    "MealPlan"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MealPlan collection",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "MealPlan.jsonld-meal_plan.read_recipe.list collection.",
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/HydraCollectionBaseSchemaNoPagination"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "member"
+                                            ],
+                                            "properties": {
+                                                "member": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/MealPlan.jsonld-meal_plan.read_recipe.list"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/MealPlan-meal_plan.read_recipe.list"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves the collection of MealPlan resources.",
+                "description": "Retrieves the collection of MealPlan resources.",
+                "parameters": [
+                    {
+                        "name": "week",
+                        "in": "query",
+                        "description": "Only the plan of the week containing this day (YYYY-MM-DD)",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "style": "form",
+                        "explode": true
+                    }
+                ]
+            },
+            "post": {
+                "operationId": "api_meal-plans_post",
+                "tags": [
+                    "MealPlan"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "MealPlan resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan.jsonld-meal_plan.read_recipe.list"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan-meal_plan.read_recipe.list"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a MealPlan resource.",
+                "description": "Creates a MealPlan resource.",
+                "parameters": [],
+                "requestBody": {
+                    "description": "The new MealPlan resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MealPlan.MealPlanInput"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MealPlan.MealPlanInput"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/meal-plans/{id}": {
+            "get": {
+                "operationId": "api_meal-plans_id_get",
+                "tags": [
+                    "MealPlan"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MealPlan resource",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan.jsonld-meal_plan.read_recipe.list"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan-meal_plan.read_recipe.list"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves a MealPlan resource.",
+                "description": "Retrieves a MealPlan resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "MealPlan identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            },
+            "delete": {
+                "operationId": "api_meal-plans_id_delete",
+                "tags": [
+                    "MealPlan"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "MealPlan resource deleted"
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Removes the MealPlan resource.",
+                "description": "Removes the MealPlan resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "MealPlan identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            }
+        },
+        "/api/meal-plans/{id}/entries": {
+            "post": {
+                "operationId": "meal_plan_add_entry",
+                "tags": [
+                    "MealPlan"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MealPlan resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan.jsonld-meal_plan.read_recipe.list"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan-meal_plan.read_recipe.list"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a MealPlan resource.",
+                "description": "Creates a MealPlan resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "MealPlan identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The new MealPlan resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MealPlan.MealPlanSlotInput"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MealPlan.MealPlanSlotInput"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/meal-plans/{id}/entries/remove": {
+            "post": {
+                "operationId": "meal_plan_remove_entry",
+                "tags": [
+                    "MealPlan"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MealPlan resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan.jsonld-meal_plan.read_recipe.list"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan-meal_plan.read_recipe.list"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a MealPlan resource.",
+                "description": "Creates a MealPlan resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "MealPlan identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The new MealPlan resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MealPlan.MealPlanEntryAction"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MealPlan.MealPlanEntryAction"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/meal-plans/{id}/entries/swap": {
+            "post": {
+                "operationId": "meal_plan_swap_entry",
+                "tags": [
+                    "MealPlan"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MealPlan resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan.jsonld-meal_plan.read_recipe.list"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan-meal_plan.read_recipe.list"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a MealPlan resource.",
+                "description": "Creates a MealPlan resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "MealPlan identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The new MealPlan resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MealPlan.MealPlanEntryAction"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MealPlan.MealPlanEntryAction"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/meal-plans/{id}/entries/update": {
+            "post": {
+                "operationId": "meal_plan_update_entry",
+                "tags": [
+                    "MealPlan"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MealPlan resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan.jsonld-meal_plan.read_recipe.list"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan-meal_plan.read_recipe.list"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a MealPlan resource.",
+                "description": "Creates a MealPlan resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "MealPlan identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The new MealPlan resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MealPlan.MealPlanEntryAction"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MealPlan.MealPlanEntryAction"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/meal-plans/{id}/regenerate": {
+            "post": {
+                "operationId": "meal_plan_regenerate",
+                "tags": [
+                    "MealPlan"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MealPlan resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan.jsonld-meal_plan.read_recipe.list"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan-meal_plan.read_recipe.list"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a MealPlan resource.",
+                "description": "Creates a MealPlan resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "MealPlan identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            }
+        },
         "/api/recipes": {
             "get": {
                 "operationId": "api_recipes_get_collection",
@@ -2180,6 +3113,414 @@
                 ],
                 "description": "The signed-in user and their household: what the SPA needs to boot."
             },
+            "MealPlan-meal_plan.read_recipe.list": {
+                "type": "object",
+                "description": "A week's lunches and dinners (docs/PLAN.md \u00a76). Weeks start on Monday. Each planned meal is an\nentry; a meal that isn't planned (eating out) has none. Every action answers with the whole\nplan, so the app redraws the week from one response.",
+                "properties": {
+                    "id": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "weekStart": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "leftovers": {
+                        "description": "Cook dinner for two meals: the next day's lunch is its leftovers.",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "weekdayMaxMinutes": {
+                        "description": "Longest recipe (prep + cook) for Monday to Friday; null for no limit.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "entries": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MealPlanEntry-meal_plan.read_recipe.list"
+                        }
+                    },
+                    "createdAt": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "MealPlan.MealPlanEntryAction": {
+                "type": "object",
+                "description": "Pick another recipe for one meal.",
+                "required": [
+                    "entry"
+                ],
+                "properties": {
+                    "entry": {
+                        "format": "uuid",
+                        "externalDocs": {
+                            "url": "https://schema.org/identifier"
+                        },
+                        "default": "",
+                        "type": "string"
+                    },
+                    "locked": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ]
+                    },
+                    "servings": {
+                        "minimum": 1,
+                        "maximum": 50,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "recipe": {
+                        "format": "uuid",
+                        "description": "Id of a library recipe to cook for this meal.",
+                        "externalDocs": {
+                            "url": "https://schema.org/identifier"
+                        },
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "MealPlan.MealPlanInput": {
+                "type": "object",
+                "description": "Plan a week: the meals to fill and how, filled from the library.",
+                "required": [
+                    "weekStart"
+                ],
+                "properties": {
+                    "weekStart": {
+                        "description": "Any day of the week to plan (its Monday is used), YYYY-MM-DD.",
+                        "externalDocs": {
+                            "url": "https://schema.org/Date"
+                        },
+                        "default": "",
+                        "type": "string"
+                    },
+                    "slots": {
+                        "minItems": 1,
+                        "maxItems": 14,
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MealPlanSlotInput"
+                        }
+                    },
+                    "leftovers": {
+                        "description": "Cook dinner for two meals: the next day's lunch is its leftovers.",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "weekdayMaxMinutes": {
+                        "minimum": 5,
+                        "maximum": 600,
+                        "description": "Longest recipe (prep + cook) for Monday to Friday; null for no limit.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "MealPlan.MealPlanSlotInput": {
+                "type": "object",
+                "description": "Plan one more meal (and fill it).",
+                "required": [
+                    "date"
+                ],
+                "properties": {
+                    "date": {
+                        "externalDocs": {
+                            "url": "https://schema.org/Date"
+                        },
+                        "default": "",
+                        "type": "string"
+                    },
+                    "slot": {
+                        "enum": [
+                            "lunch",
+                            "dinner"
+                        ],
+                        "default": "lunch",
+                        "type": "string"
+                    },
+                    "servings": {
+                        "minimum": 1,
+                        "maximum": 50,
+                        "description": "null: the household's default.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "MealPlan.jsonld-meal_plan.read_recipe.list": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "weekStart": {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            "leftovers": {
+                                "description": "Cook dinner for two meals: the next day's lunch is its leftovers.",
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "weekdayMaxMinutes": {
+                                "description": "Longest recipe (prep + cook) for Monday to Friday; null for no limit.",
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "entries": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/MealPlanEntry.jsonld-meal_plan.read_recipe.list"
+                                }
+                            },
+                            "createdAt": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        }
+                    }
+                ],
+                "description": "A week's lunches and dinners (docs/PLAN.md \u00a76). Weeks start on Monday. Each planned meal is an\nentry; a meal that isn't planned (eating out) has none. Every action answers with the whole\nplan, so the app redraws the week from one response."
+            },
+            "MealPlanEntry-meal_plan.read_recipe.list": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "recipe": {
+                        "description": "null when the library has nothing that fits (or the recipe was deleted).",
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Recipe-meal_plan.read_recipe.list"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "servings": {
+                        "type": "integer"
+                    },
+                    "locked": {
+                        "description": "Kept as it is when the plan is regenerated.",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "slot": {
+                        "type": "string",
+                        "enum": [
+                            "lunch",
+                            "dinner"
+                        ]
+                    },
+                    "leftoverOfId": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "uuid"
+                    }
+                }
+            },
+            "MealPlanEntry.jsonld-meal_plan.read_recipe.list": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "recipe": {
+                        "description": "null when the library has nothing that fits (or the recipe was deleted).",
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Recipe.jsonld-meal_plan.read_recipe.list"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "servings": {
+                        "type": "integer"
+                    },
+                    "locked": {
+                        "description": "Kept as it is when the plan is regenerated.",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "slot": {
+                        "type": "string",
+                        "enum": [
+                            "lunch",
+                            "dinner"
+                        ]
+                    },
+                    "leftoverOfId": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "uuid"
+                    }
+                }
+            },
+            "MealPlanSlotInput": {
+                "type": "object",
+                "required": [
+                    "date"
+                ],
+                "properties": {
+                    "date": {
+                        "externalDocs": {
+                            "url": "https://schema.org/Date"
+                        },
+                        "default": "",
+                        "type": "string"
+                    },
+                    "slot": {
+                        "enum": [
+                            "lunch",
+                            "dinner"
+                        ],
+                        "default": "lunch",
+                        "type": "string"
+                    },
+                    "servings": {
+                        "minimum": 1,
+                        "maximum": 50,
+                        "description": "null: the household's default.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "Recipe-meal_plan.read_recipe.list": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "source": {
+                        "description": "The link this recipe comes from; null for recipes typed in by hand.",
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Source-meal_plan.read_recipe.list"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "title": {
+                        "maxLength": 200,
+                        "default": "",
+                        "type": "string"
+                    },
+                    "language": {
+                        "default": "es",
+                        "type": "string",
+                        "enum": [
+                            "es",
+                            "en"
+                        ]
+                    },
+                    "servings": {
+                        "minimum": 1,
+                        "maximum": 50,
+                        "default": 4,
+                        "type": "integer"
+                    },
+                    "tags": {
+                        "maxItems": 20,
+                        "description": "lowercase, unique",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "favorite": {
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "rating": {
+                        "minimum": 1,
+                        "maximum": 5,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "needsReview": {
+                        "description": "Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "totalMinutes": {
+                        "readOnly": true,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "mealTypes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "lunch",
+                                "dinner"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "title"
+                ]
+            },
             "Recipe-recipe.list": {
                 "type": "object",
                 "properties": {
@@ -2625,6 +3966,98 @@
                         }
                     }
                 }
+            },
+            "Recipe.jsonld-meal_plan.read_recipe.list": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "source": {
+                                "description": "The link this recipe comes from; null for recipes typed in by hand.",
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Source.jsonld-meal_plan.read_recipe.list"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "title": {
+                                "maxLength": 200,
+                                "default": "",
+                                "type": "string"
+                            },
+                            "language": {
+                                "default": "es",
+                                "type": "string",
+                                "enum": [
+                                    "es",
+                                    "en"
+                                ]
+                            },
+                            "servings": {
+                                "minimum": 1,
+                                "maximum": 50,
+                                "default": 4,
+                                "type": "integer"
+                            },
+                            "tags": {
+                                "maxItems": 20,
+                                "description": "lowercase, unique",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "favorite": {
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "rating": {
+                                "minimum": 1,
+                                "maximum": 5,
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "needsReview": {
+                                "description": "Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).",
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "totalMinutes": {
+                                "readOnly": true,
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "mealTypes": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "lunch",
+                                        "dinner"
+                                    ]
+                                }
+                            }
+                        },
+                        "required": [
+                            "title"
+                        ]
+                    }
+                ]
             },
             "Recipe.jsonld-recipe.list": {
                 "allOf": [
@@ -3259,6 +4692,44 @@
                 ],
                 "description": "A personal token that lets one device save links without a session: the iPhone Shortcut\nsends it to POST /api/share (ShareController). Only its SHA-256 hash is stored; the token\nitself is shown once, when created. It can do nothing else."
             },
+            "Source-meal_plan.read_recipe.list": {
+                "type": "object",
+                "description": "A link saved to the library (blog post, YouTube video, Instagram reel, ...).\nExtraction (M2) turns it into one or more recipes; until then it can be turned\ninto a recipe by hand.",
+                "properties": {
+                    "id": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "maxLength": 200,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "platform": {
+                        "type": "string",
+                        "enum": [
+                            "web",
+                            "youtube",
+                            "instagram",
+                            "tiktok"
+                        ]
+                    },
+                    "thumbnail": {
+                        "readOnly": true,
+                        "description": "Image URL for the app: our cached copy when we have one, else the original.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
             "Source-recipe.list": {
                 "type": "object",
                 "description": "A link saved to the library (blog post, YouTube video, Instagram reel, ...).\nExtraction (M2) turns it into one or more recipes; until then it can be turned\ninto a recipe by hand.",
@@ -3468,6 +4939,51 @@
                     }
                 }
             },
+            "Source.jsonld-meal_plan.read_recipe.list": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "title": {
+                                "maxLength": 200,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "url": {
+                                "type": "string"
+                            },
+                            "platform": {
+                                "type": "string",
+                                "enum": [
+                                    "web",
+                                    "youtube",
+                                    "instagram",
+                                    "tiktok"
+                                ]
+                            },
+                            "thumbnail": {
+                                "readOnly": true,
+                                "description": "Image URL for the app: our cached copy when we have one, else the original.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "description": "A link saved to the library (blog post, YouTube video, Instagram reel, ...).\nExtraction (M2) turns it into one or more recipes; until then it can be turned\ninto a recipe by hand."
+            },
             "Source.jsonld-recipe.list": {
                 "allOf": [
                     {
@@ -3674,6 +5190,10 @@
         {
             "name": "RecipeTag",
             "description": "A tag used in the household's library and how many recipes carry it: the library's filter chips."
+        },
+        {
+            "name": "MealPlan",
+            "description": "A week's lunches and dinners (docs/PLAN.md \u00a76). Weeks start on Monday. Each planned meal is an\nentry; a meal that isn't planned (eating out) has none. Every action answers with the whole\nplan, so the app redraws the week from one response."
         },
         {
             "name": "Recipe",

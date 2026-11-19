@@ -127,8 +127,49 @@
     "extractedBy": "Extracted with {{model}}"
   },
   "plan": {
-    "title": "Weekly plan",
-    "empty": "This week's lunches and dinners will show up here."
+    "title": "Weekly menu",
+    "weeks": "Weeks",
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "backToThisWeek": "Back to this week",
+    "today": "today",
+    "loadError": "Couldn't load the menu. Please try again.",
+    "emptyLibrary": "A menu needs recipes: save a few to your library.",
+    "toLibrary": "Go to the library",
+    "error": "Couldn't save. Please try again.",
+    "setup": {
+      "title": "Which meals shall we plan?",
+      "subtitle": "Tap the ones you'll eat out to leave them out.",
+      "out": "Out",
+      "servings": "Servings per meal",
+      "leftovers": "Cook once, eat twice",
+      "leftoversHint": "Each dinner is cooked double and its leftovers are the next day's lunch.",
+      "weekdayTime": "Monday to Friday, recipes up to",
+      "noLimit": "No limit",
+      "create_one": "Create menu ({{count}} meal)",
+      "create_other": "Create menu ({{count}} meals)",
+      "creating": "Creating the menu…"
+    },
+    "regenerate": "Regenerate",
+    "regenerateHint": "Picks again every meal without the lock on.",
+    "delete": "Delete menu",
+    "add": "Add {{meal}}",
+    "noRecipe": "Your library has no recipe for this meal.",
+    "leftoversOf": "Leftovers from {{day}}'s dinner",
+    "lock": "Lock: keep when regenerating",
+    "unlock": "Unlock",
+    "swap": "Another recipe",
+    "options": "More options",
+    "fewer": "One serving fewer",
+    "more": "One serving more",
+    "choose": "Choose recipe",
+    "remove": "Eating out",
+    "picker": {
+      "title": "Recipe for {{meal}}",
+      "search": "Search your library",
+      "empty": "No matching recipes.",
+      "otherMeal": "Meant for {{meal}}"
+    }
   },
   "shopping": {
     "title": "Shopping list",

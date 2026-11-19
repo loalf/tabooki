@@ -1,0 +1,24 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Dto;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+/** A change to one planned meal. Only the fields that are set are changed. */
+final class MealPlanEntryAction
+{
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    public string $entry = '';
+
+    public ?bool $locked = null;
+
+    #[Assert\Range(min: 1, max: 50)]
+    public ?int $servings = null;
+
+    /** Id of a library recipe to cook for this meal. */
+    #[Assert\Uuid]
+    public ?string $recipe = null;
+}
