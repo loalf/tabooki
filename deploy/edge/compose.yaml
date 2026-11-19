@@ -1,0 +1,12 @@
+# The server's shared HAProxy on ports 80/443 (see haproxy.cfg). On the server: /opt/edge,
+#   docker compose up -d        # start or apply a changed haproxy.cfg (then: restart)
+services:
+  haproxy:
+    image: haproxy:3.2-alpine
+    restart: unless-stopped
+    # Host networking: binds the public 80/443 and reaches the apps on 127.0.0.1.
+    network_mode: host
+    # Ports below 1024 need root; HAProxy only forwards bytes.
+    user: root
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro

@@ -1,91 +1,94 @@
-# Deploying Tabooki to the VPS (Contabo + Tailscale)
+# Deploying Tabooki
 
-The app is reachable **only over Tailscale**, at `https://tabooki.<your-tailnet>.ts.net`.
-Caddy gets a real HTTPS certificate for that name from the host's `tailscaled`, so no
-public domain, open ports or Let's Encrypt setup are needed. Images are built on the VPS
-itself, so the ARM (Mac) vs x86 (VPS) difference doesn't matter.
+Tabooki runs at **https://tabooki.xyz** on a shared Ubuntu server (`demo.rootware.xyz` in
+`~/.ssh/config`, 13.140.143.9). It's public: sign-in protects everything but the sign-in page,
+with login throttling. Images are built on the server, so the Mac's ARM vs the server's x86
+doesn't matter.
 
-> First-deploy checklist. Steps marked ⚠️ haven't been tested end to end yet. Verify them
-> on the first deploy and fix this document if anything differs.
+## How the server is shared
 
-## 1. Prepare the VPS (once)
+Other apps run on the same server, so Tabooki doesn't own ports 80/443:
 
-Debian 12/13 or Ubuntu 24.04+.
+| What | Where | Ports |
+|---|---|---|
+| **edge**: HAProxy, the front door | `/opt/edge` (from `deploy/edge/`) | public 80, 443 (TCP) |
+| rootware demo (`demo.rootware.xyz`, behind Cloudflare) | `/opt/rootware/deploy/demo` | `127.0.0.1:8080`, `127.0.0.1:8443` (TCP and UDP) |
+| Tabooki | `/opt/tabooki` | `127.0.0.1:9080`, `127.0.0.1:9443` |
+| gamen | `/opt/gamen` | 8787, untouched |
 
-```sh
-# Docker Engine + Compose plugin
-curl -fsSL https://get.docker.com | sh
+HAProxy reads the hostname of each connection (the TLS SNI name, or the `Host` header on port
+80) and hands it over: `tabooki.xyz` to Tabooki, everything else to rootware. HTTPS stays
+encrypted end to end, so each app's Caddy gets and renews its own Let's Encrypt certificate as
+if it had the ports itself. Tabooki also receives the visitor's IP address (PROXY protocol);
+rootware sees connections from 127.0.0.1.
 
-# Tailscale. --ssh enables Tailscale SSH, so port 22 can be closed later
-curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up --ssh --hostname=tabooki
-```
-
-In the Tailscale admin console (DNS page): enable **MagicDNS** and **HTTPS Certificates**.
-The server is now `tabooki.<your-tailnet>.ts.net`.
-
-⚠️ The production container runs as `www-data` (uid 33), which needs permission to ask
-`tailscaled` for certificates:
+rootware's ports are moved by two lines in its `/opt/rootware/deploy/demo/.env` (which its own
+deploys keep):
 
 ```sh
-echo 'TS_PERMIT_CERT_UID=33' | sudo tee -a /etc/default/tailscaled
-sudo systemctl restart tailscaled
+HTTP_PORT=127.0.0.1:8080
+HTTPS_PORT=127.0.0.1:8443
 ```
 
-**Firewall.** Docker publishes port 443 only on the Tailscale IP (see `compose.prod.yaml`),
-so nothing is exposed on the public interface. Once you've confirmed Tailscale SSH works
-(`ssh root@tabooki` from a machine on the tailnet), you can block public SSH as well, e.g.
-with `ufw default deny incoming && ufw allow in on tailscale0 && ufw enable`.
+To add another app later: give it localhost ports, add a `use_backend` line and a backend to
+`/opt/edge/haproxy.cfg`, then `docker compose restart` in `/opt/edge`.
 
-## 2. Configure
+## First install (done 2026-11-19)
+
+1. DNS (GoDaddy): one A record for `tabooki.xyz` → 13.140.143.9. Delete GoDaddy's default
+   parking A records (`3.33.130.190`, `15.197.148.33`): with them, most visitors and Let's
+   Encrypt land on GoDaddy instead.
+2. Copy the project (see Update), then create `/opt/tabooki/.env` (mode 600, never committed):
+
+   ```sh
+   SERVER_NAME=tabooki.xyz
+   APP_SECRET=...                 # openssl rand -hex 32
+   CADDY_MERCURE_JWT_SECRET=...   # openssl rand -hex 32
+   CADDY_MERCURE_JWT_ISSUER=https://tabooki.xyz
+   POSTGRES_PASSWORD=...          # openssl rand -hex 24
+   AWS_BEARER_TOKEN_BEDROCK=...   # Amazon Bedrock API key (recipe extraction)
+   AWS_REGION=eu-west-1
+   # Optional (defaults in backend/.env): BEDROCK_TEXT_MODEL, BEDROCK_VIDEO_MODEL, EXTRACTION_THINKING=0
+   ```
+
+   Keep a copy in your password manager.
+3. Start Tabooki: `cd /opt/tabooki && make prod-up`.
+4. Edge: copy `deploy/edge/` to `/opt/edge`, check it with
+   `docker run --rm -v /opt/edge/haproxy.cfg:/c.cfg:ro haproxy:3.2-alpine haproxy -c -f /c.cfg`,
+   move rootware's ports (`.env` above, then
+   `docker compose -f deploy/demo/compose.yaml up -d --no-deps --no-build web` in `/opt/rootware`)
+   and right after `docker compose up -d` in `/opt/edge`. rootware is unreachable for the few
+   seconds in between.
+5. Your account: `docker compose -f compose.yaml -f compose.prod.yaml exec -it php php bin/console app:user:create you@example.com --name="You" --household="Casa"`
+   (it asks for the password).
+6. Check extraction can reach Bedrock: `docker compose -f compose.yaml -f compose.prod.yaml exec php php bin/console app:bedrock:check`.
+
+**Undo the edge** (rootware back on 80/443): `docker compose down` in `/opt/edge`, delete the two
+port lines from rootware's `.env`, and recreate its web container as in step 4.
+
+## Update
+
+From the repo on the Mac, copy what git tracks (never `.env.local`, cookies or builds), then
+rebuild on the server:
 
 ```sh
-git clone <repo> /opt/tabooki && cd /opt/tabooki
-cat > .env <<EOF
-SERVER_NAME=tabooki.<your-tailnet>.ts.net
-TAILSCALE_IP=$(tailscale ip -4)
-APP_SECRET=$(openssl rand -hex 32)
-CADDY_MERCURE_JWT_SECRET=$(openssl rand -hex 32)
-CADDY_MERCURE_JWT_ISSUER=https://tabooki.<your-tailnet>.ts.net
-POSTGRES_PASSWORD=$(openssl rand -hex 24)
-AWS_BEARER_TOKEN_BEDROCK=...   # Amazon Bedrock API key (recipe extraction)
-AWS_REGION=eu-west-1
-# Optional, to change models (defaults in backend/.env):
-# BEDROCK_TEXT_MODEL=...
-# BEDROCK_VIDEO_MODEL=...
-# EXTRACTION_THINKING=0
-EOF
-chmod 600 .env
+git ls-files -co --exclude-standard | rsync -az --files-from=- ./ demo.rootware.xyz:/opt/tabooki/
+ssh demo.rootware.xyz 'cd /opt/tabooki && make prod-up'
 ```
 
-`.env` is git-ignored. Keep a copy in your password manager.
+`make prod-up` builds the image, runs migrations and restarts php and worker. Logs:
+`make prod-logs`.
 
-Check that extraction can reach Bedrock (and which models your key can use) once it's running:
-`docker compose -f compose.yaml -f compose.prod.yaml exec php php bin/console app:bedrock:check`.
+## Phones
 
-## 3. Deploy / update
+Open https://tabooki.xyz, sign in, and install it: **Share → Add to Home Screen** (iPhone Safari)
+or **⋮ → Install app** (Android Chrome). Then **Settings → Save from your phone** explains the
+Android share menu and the iPhone Shortcut.
 
-```sh
-git pull
-make prod-up                               # builds the images, runs migrations, starts app + worker + db
-docker compose -f compose.yaml -f compose.prod.yaml exec -it php \
-  php bin/console app:user:create you@example.com --name="You" --household="Casa"
-```
-
-## 4. Phones (iPhone and Android)
-
-1. Install the **Tailscale** app and sign in to the same tailnet.
-   - iOS: in the Tailscale app settings, enable **VPN On Demand** so it connects automatically.
-2. Open `https://tabooki.<your-tailnet>.ts.net` and sign in.
-3. Install it: **Share → Add to Home Screen** (iOS Safari) or **⋮ → Install app** (Android Chrome).
-
-(From M3: the "Save to Tabooki" Apple Shortcut and the Android share target.)
-
-## 5. Backups (to do before real data goes in)
+## Backups (to do before real data goes in)
 
 Nightly database dump plus the media volume (`tabooki_media_data`: cached thumbnails, later
-uploads), copied **off the VPS** with restic (Contabo Object Storage, Backblaze B2, or a home
-NAS over Tailscale). Sketch:
+uploads), copied **off the server** with restic (object storage or a home NAS). Sketch:
 
 ```sh
 docker compose -f compose.yaml -f compose.prod.yaml exec -T database \
