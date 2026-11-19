@@ -7,11 +7,8 @@ x-app-env: &app-env
   MERCURE_PUBLIC_URL: ${CADDY_MERCURE_PUBLIC_URL:-https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}/.well-known/mercure}
   MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
   MERCURE_JWT_ISSUER: ${CADDY_MERCURE_JWT_ISSUER:-https://localhost}
-  # Google AI Studio (Gemini) and Amazon Bedrock credentials, used from M2 on.
-  GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-  AWS_REGION: ${AWS_REGION:-}
-  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
-  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+  # Bedrock settings (API key, region, models) are not set here: in development they come from
+  # backend/.env.local, in production from compose.prod.yaml. An empty value here would hide them.
 
 services:
   # FrankenPHP: Caddy (HTTPS, Mercure hub, SPA) + the Symfony API
@@ -32,6 +29,7 @@ services:
     volumes:
       - caddy_data:/data
       - caddy_config:/config
+      - media_data:/app/var/media
     depends_on:
       database:
         condition: service_healthy
@@ -58,6 +56,8 @@ services:
     environment:
       <<: *app-env
       SKIP_MIGRATIONS: "1"
+    volumes:
+      - media_data:/app/var/media
     healthcheck:
       # The consumer runs as PID 1 (exec'd by the entrypoint): healthy while it's alive.
       test: ["CMD-SHELL", "kill -0 1"]
@@ -86,3 +86,5 @@ volumes:
   caddy_data:
   caddy_config:
   database_data:
+  # Cached thumbnails (later: uploads). Shared by php and worker; include it in backups.
+  media_data:

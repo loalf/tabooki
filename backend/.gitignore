@@ -18,3 +18,8 @@
 /phpunit.xml
 /.phpunit.cache/
 ###< phpunit/phpunit ###
+
+###> tabooki ###
+# Instagram cookies for yt-dlp (README, "Recipe extraction")
+/.ytdlp-cookies.txt
+###< tabooki ###

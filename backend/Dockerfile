@@ -51,6 +51,24 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 
 ENV PHP_INI_SCAN_DIR=":$PHP_INI_DIR/app.conf.d"
 
+# yt-dlp (standalone build, no Python needed): captions, transcripts and short videos from
+# YouTube, Instagram and TikTok for recipe extraction. Platforms change often and old builds
+# stop working, so it follows the latest release unless pinned with --build-arg YT_DLP_VERSION=2026.xx.xx.
+ARG TARGETARCH
+ARG YT_DLP_VERSION=latest
+RUN <<-EOF
+	case "$TARGETARCH" in
+		amd64) asset=yt-dlp_linux ;;
+		arm64) asset=yt-dlp_linux_aarch64 ;;
+		*) echo "unsupported architecture: $TARGETARCH"; exit 1 ;;
+	esac
+	if [ "$YT_DLP_VERSION" = latest ]; then base=https://github.com/yt-dlp/yt-dlp/releases/latest/download; \
+	else base="https://github.com/yt-dlp/yt-dlp/releases/download/$YT_DLP_VERSION"; fi
+	curl -fsSL -o /usr/local/bin/yt-dlp "$base/$asset"
+	chmod 755 /usr/local/bin/yt-dlp
+	/usr/local/bin/yt-dlp --version
+EOF
+
 ###> recipes ###
 ###< recipes ###
 
@@ -120,7 +138,7 @@ RUN composer install --no-cache --prefer-dist --no-dev --no-autoloader --no-scri
 COPY --link --exclude=frankenphp/ . ./
 
 RUN <<-EOF
-	mkdir -p var/cache var/log var/share
+	mkdir -p var/cache var/log var/share var/media
 	composer dump-autoload --classmap-authoritative --no-dev
 	composer dump-env prod
 	composer run-script --no-dev post-install-cmd
@@ -172,6 +190,7 @@ COPY --from=frankenphp_prod_builder /etc/frankenphp/Caddyfile /etc/frankenphp/Ca
 COPY --from=frankenphp_prod_builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=frankenphp_prod_builder /etc/ssl/openssl.cnf /etc/ssl/openssl.cnf
 COPY --from=frankenphp_prod_builder /usr/bin/file /usr/bin/file
+COPY --from=frankenphp_prod_builder /usr/local/bin/yt-dlp /usr/local/bin/yt-dlp
 COPY --from=frankenphp_prod_builder /usr/lib/file/magic.mgc /usr/lib/file/magic.mgc
 
 ENV  OPENSSL_CONF=/etc/ssl/openssl.cnf XDG_CONFIG_HOME=/config XDG_DATA_HOME=/data SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt

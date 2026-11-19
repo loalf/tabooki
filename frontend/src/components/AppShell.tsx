@@ -1,6 +1,6 @@
 import { BookOpen, CalendarDays, Settings, ShoppingCart } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Navigate, NavLink, Outlet } from 'react-router'
+import { Navigate, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router'
 import { useMe } from '@/auth/useAuth'
 import { Splash } from '@/components/Splash'
 import { cn } from '@/lib/utils'
@@ -16,12 +16,16 @@ const tabs = [
 export function AppShell() {
   const { t } = useTranslation()
   const { data: me, isPending } = useMe()
+  const { pathname } = useLocation()
 
   if (isPending) return <Splash />
   if (!me) return <Navigate to="/login" replace />
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-2xl flex-col">
+      {/* New pages start at the top and going back restores where you were. Keyed by path, so
+          changing search filters (query string) doesn't jump to the top. */}
+      <ScrollRestoration getKey={(location) => location.pathname} />
       <main className="flex-1 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-24">
         <Outlet />
       </main>
@@ -38,7 +42,8 @@ export function AppShell() {
                 className={({ isActive }) =>
                   cn(
                     'flex flex-col items-center gap-1 py-2.5 text-xs font-medium text-muted-foreground transition-colors',
-                    isActive && 'text-primary',
+                    // Recipe pages belong to the library tab.
+                    (isActive || (key === 'library' && pathname.startsWith('/recipes'))) && 'text-primary',
                   )
                 }
               >

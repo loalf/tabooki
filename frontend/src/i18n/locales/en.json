@@ -1,6 +1,21 @@
 {
-  "app": { "name": "Tabooki", "loading": "Loading…" },
-  "nav": { "library": "Recipes", "plan": "Plan", "shopping": "Shopping", "settings": "Settings" },
+  "app": {
+    "name": "Tabooki",
+    "loading": "Loading…"
+  },
+  "nav": {
+    "library": "Recipes",
+    "plan": "Plan",
+    "shopping": "Shopping",
+    "settings": "Settings"
+  },
+  "common": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving…",
+    "confirmDelete": "Tap again to delete"
+  },
   "login": {
     "title": "Sign in",
     "subtitle": "Your recipe library, weekly meal plan and shopping list.",
@@ -11,9 +26,114 @@
     "invalid": "Wrong email or password.",
     "error": "Couldn't sign in. Please try again."
   },
-  "library": { "title": "Recipes", "empty": "No recipes yet. Soon you'll be able to save links from blogs, YouTube and Instagram." },
-  "plan": { "title": "Weekly plan", "empty": "This week's lunches and dinners will show up here." },
-  "shopping": { "title": "Shopping list", "empty": "The shopping list will be generated from the meal plan." },
+  "library": {
+    "title": "Recipes",
+    "empty": "No recipes yet. Paste a link above, or write one yourself.",
+    "newRecipe": "New recipe",
+    "recipes": "Your recipes",
+    "search": "Search recipes or ingredients",
+    "clearSearch": "Clear search",
+    "favorites": "Favorites",
+    "noMatches": "No recipes match.",
+    "clearFilters": "Clear filters",
+    "loadError": "Couldn't load your recipes. Check your connection and try again.",
+    "openOriginal": "Open the original",
+    "save": {
+      "label": "Recipe link",
+      "placeholder": "Paste a link (blog, YouTube, Instagram…)",
+      "submit": "Save",
+      "saving": "Saving…",
+      "paste": "Paste",
+      "saved": "Saved. It's in your links below.",
+      "duplicate": "That link is already in your library.",
+      "invalid": "That doesn't look like a web link.",
+      "error": "Couldn't save the link. Please try again."
+    },
+    "inbox": {
+      "title": "Saved links",
+      "subtitle": "Recipes are extracted automatically. If something can't be read, paste the text or write it up yourself.",
+      "loadingPreview": "Getting the preview…",
+      "writeRecipe": "Write recipe",
+      "delete": "Delete link",
+      "showAll": "Show all {{count}}",
+      "showLess": "Show less",
+      "queued": "Waiting to be extracted…",
+      "extracting": "Extracting the recipe…",
+      "needsInput": "Needs your help",
+      "failed": "Couldn't extract it",
+      "pasteText": "Paste the text",
+      "pasteLabel": "The recipe text (caption, comment, description…)",
+      "pastePlaceholder": "Paste here the ingredients and steps, as they are",
+      "extractText": "Extract from this text",
+      "retry": "Retry",
+      "extract": "Extract"
+    },
+    "toReview_one": "{{count}} to review",
+    "toReview_other": "{{count}} to review"
+  },
+  "recipe": {
+    "favorite": "Favorite",
+    "minutes": "{{count}} min",
+    "servings": "Servings",
+    "servingsCount_one": "{{count}} serving",
+    "servingsCount_other": "{{count}} servings",
+    "time": "Time",
+    "prepShort": "{{count}} prep",
+    "cookShort": "{{count}} cook",
+    "mealTypes": "Good for",
+    "meal": {
+      "lunch": "Lunch",
+      "dinner": "Dinner"
+    },
+    "edit": "Edit",
+    "delete": "Delete recipe",
+    "openOn": "Open on {{site}}",
+    "tags": "Tags",
+    "ingredients": "Ingredients",
+    "noIngredients": "No ingredients yet.",
+    "steps": "Steps",
+    "noSteps": "No steps yet.",
+    "notes": "Notes",
+    "rating": "Rating",
+    "stars_one": "{{count}} star",
+    "stars_other": "{{count}} stars",
+    "notFound": "This recipe doesn't exist (or was deleted).",
+    "form": {
+      "newTitle": "New recipe",
+      "editTitle": "Edit recipe",
+      "fromLink": "From the link",
+      "title": "Title",
+      "language": "Language",
+      "fewer": "Fewer servings",
+      "more": "More servings",
+      "prepMinutes": "Prep (min)",
+      "cookMinutes": "Cooking (min)",
+      "tagsPlaceholder": "vegetarian, quick…",
+      "removeTag": "Remove {{tag}}",
+      "ingredientsHint": "One per line. End a line with \":\" to start a group (\"For the sauce:\").",
+      "ingredientsPlaceholder": "200 g flour\n2 eggs\n\nFor the sauce:\n1 onion",
+      "stepsHint": "One step per line.",
+      "stepsPlaceholder": "Preheat the oven to 180 °C.\nMix the flour and the eggs.",
+      "saveError": "Couldn't save the recipe. Please try again.",
+      "fixErrors": "Please fix the highlighted fields."
+    },
+    "review": {
+      "badge": "Review",
+      "message": "Extracted automatically. Check the quantities and steps against the original before cooking.",
+      "looksGood": "Looks good",
+      "fix": "Fix it"
+    },
+    "originalText": "Original text",
+    "extractedBy": "Extracted with {{model}}"
+  },
+  "plan": {
+    "title": "Weekly plan",
+    "empty": "This week's lunches and dinners will show up here."
+  },
+  "shopping": {
+    "title": "Shopping list",
+    "empty": "The shopping list will be generated from the meal plan."
+  },
   "settings": {
     "title": "Settings",
     "signedInAs": "Signed in as {{email}}",
@@ -21,5 +141,8 @@
     "language": "Language",
     "logout": "Sign out"
   },
-  "languages": { "es": "Español", "en": "English" }
+  "languages": {
+    "es": "Español",
+    "en": "English"
+  }
 }

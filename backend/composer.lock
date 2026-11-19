@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a834c292b2fa791c9330610b2ec1cd62",
+    "content-hash": "6d77af849fdaacb639f8c8bd61c6310f",
     "packages": [
         {
             "name": "api-platform/doctrine-common",
@@ -4761,7 +4761,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-11-04T08:27:22+00:00"
+            "time": "2026-11-04T08:27:22+00:00",
+            "published-time": "2026-11-04T11:28:32+00:00"
         },
         {
             "name": "symfony/http-client-contracts",
@@ -6196,6 +6197,72 @@
                 }
             ],
             "time": "2026-09-24T05:20:52+00:00"
+        },
+        {
+            "name": "symfony/process",
+            "version": "v7.4.22",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/process.git",
+                "reference": "a5a6912edbbfc4c98cd080bc4bbe37c8e7eeb20a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/process/zipball/a5a6912edbbfc4c98cd080bc4bbe37c8e7eeb20a",
+                "reference": "a5a6912edbbfc4c98cd080bc4bbe37c8e7eeb20a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Process\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Executes commands in sub-processes",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/process/tree/v7.4.22"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-10-25T14:40:16+00:00",
+            "published-time": "2026-10-28T18:21:18+00:00"
         },
         {
             "name": "symfony/property-access",
@@ -12091,71 +12158,6 @@
                 }
             ],
             "time": "2026-09-12T21:13:48+00:00"
-        },
-        {
-            "name": "symfony/process",
-            "version": "v7.4.22",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/process.git",
-                "reference": "a5a6912edbbfc4c98cd080bc4bbe37c8e7eeb20a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/process/zipball/a5a6912edbbfc4c98cd080bc4bbe37c8e7eeb20a",
-                "reference": "a5a6912edbbfc4c98cd080bc4bbe37c8e7eeb20a",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=8.2"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Symfony\\Component\\Process\\": ""
-                },
-                "exclude-from-classmap": [
-                    "/Tests/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Executes commands in sub-processes",
-            "homepage": "https://symfony.com",
-            "support": {
-                "source": "https://github.com/symfony/process/tree/v7.4.22"
-            },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://github.com/nicolas-grekas",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2026-10-25T14:40:16+00:00"
         }
     ],
     "aliases": [],
@@ -12172,5 +12174,5 @@
     "platform-overrides": {
         "php": "8.5.0"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.11.0"
 }

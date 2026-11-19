@@ -7,7 +7,8 @@ import type { paths } from './schema'
  *
  * The SPA and the API share one origin, so the session cookie is sent automatically.
  */
-export const api = createClient<paths>({
+// Responses are always requested as plain JSON (not JSON-LD), so type them that way.
+export const api = createClient<paths, 'application/json'>({
   baseUrl: '',
   credentials: 'same-origin',
   headers: { Accept: 'application/json' },

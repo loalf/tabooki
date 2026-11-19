@@ -203,6 +203,1299 @@
                     "required": true
                 }
             }
+        },
+        "/api/recipes": {
+            "get": {
+                "operationId": "api_recipes_get_collection",
+                "tags": [
+                    "Recipe"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Recipe collection",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "Recipe.jsonld-recipe.list collection.",
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/HydraCollectionBaseSchemaNoPagination"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "member"
+                                            ],
+                                            "properties": {
+                                                "member": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Recipe.jsonld-recipe.list"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Recipe-recipe.list"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves the collection of Recipe resources.",
+                "description": "Retrieves the collection of Recipe resources.",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Words to look for in the title, tags and ingredients (case and accent insensitive)",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "form",
+                        "explode": true
+                    },
+                    {
+                        "name": "tags[]",
+                        "in": "query",
+                        "description": "Only recipes that have all of these tags",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "style": "deepObject",
+                        "explode": true
+                    },
+                    {
+                        "name": "needsReview",
+                        "in": "query",
+                        "description": "Only extracted recipes nobody has checked yet",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "style": "form",
+                        "explode": true
+                    },
+                    {
+                        "name": "favorite",
+                        "in": "query",
+                        "description": "Only favorites (true) or only non-favorites (false)",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "style": "form",
+                        "explode": true
+                    }
+                ]
+            },
+            "post": {
+                "operationId": "api_recipes_post",
+                "tags": [
+                    "Recipe"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Recipe resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Recipe.jsonld-recipe.read"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Recipe-recipe.read"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a Recipe resource.",
+                "description": "Creates a Recipe resource.",
+                "parameters": [],
+                "requestBody": {
+                    "description": "The new Recipe resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Recipe-recipe.write"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Recipe-recipe.write"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/recipes/{id}": {
+            "get": {
+                "operationId": "api_recipes_id_get",
+                "tags": [
+                    "Recipe"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Recipe resource",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Recipe.jsonld-recipe.read"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Recipe-recipe.read"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves a Recipe resource.",
+                "description": "Retrieves a Recipe resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Recipe identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            },
+            "delete": {
+                "operationId": "api_recipes_id_delete",
+                "tags": [
+                    "Recipe"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Recipe resource deleted"
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Removes the Recipe resource.",
+                "description": "Removes the Recipe resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Recipe identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            },
+            "patch": {
+                "operationId": "api_recipes_id_patch",
+                "tags": [
+                    "Recipe"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Recipe resource updated",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Recipe.jsonld-recipe.read"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Recipe-recipe.read"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Updates the Recipe resource.",
+                "description": "Updates the Recipe resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Recipe identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The updated Recipe resource",
+                    "content": {
+                        "application/merge-patch+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Recipe-recipe.write.jsonMergePatch"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/recipe-tags": {
+            "get": {
+                "operationId": "api_recipe-tags_get_collection",
+                "tags": [
+                    "RecipeTag"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "RecipeTag collection",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "RecipeTag.jsonld collection.",
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/HydraCollectionBaseSchemaNoPagination"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "member"
+                                            ],
+                                            "properties": {
+                                                "member": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/RecipeTag.jsonld"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/RecipeTag"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves the collection of RecipeTag resources.",
+                "description": "Retrieves the collection of RecipeTag resources.",
+                "parameters": []
+            }
+        },
+        "/api/sources": {
+            "get": {
+                "operationId": "api_sources_get_collection",
+                "tags": [
+                    "Source"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Source collection",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "Source.jsonld-source.read collection.",
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/HydraCollectionBaseSchemaNoPagination"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "member"
+                                            ],
+                                            "properties": {
+                                                "member": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Source.jsonld-source.read"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Source-source.read"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves the collection of Source resources.",
+                "description": "Retrieves the collection of Source resources.",
+                "parameters": [
+                    {
+                        "name": "hasRecipe",
+                        "in": "query",
+                        "description": "Only links that have (true) or have not (false) been turned into a recipe yet",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "style": "form",
+                        "explode": true
+                    }
+                ]
+            },
+            "post": {
+                "operationId": "api_sources_post",
+                "tags": [
+                    "Source"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Source resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Source.jsonld-source.read"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Source-source.read"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a Source resource.",
+                "description": "Creates a Source resource.",
+                "parameters": [],
+                "requestBody": {
+                    "description": "The new Source resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Source.SourceInput-source.create"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Source.SourceInput-source.create"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/sources/{id}": {
+            "get": {
+                "operationId": "api_sources_id_get",
+                "tags": [
+                    "Source"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Source resource",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Source.jsonld-source.read"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Source-source.read"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves a Source resource.",
+                "description": "Retrieves a Source resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Source identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            },
+            "delete": {
+                "operationId": "api_sources_id_delete",
+                "tags": [
+                    "Source"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Source resource deleted"
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Removes the Source resource.",
+                "description": "Removes the Source resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Source identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            },
+            "patch": {
+                "operationId": "api_sources_id_patch",
+                "tags": [
+                    "Source"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Source resource updated",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Source.jsonld-source.read"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Source-source.read"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Updates the Source resource.",
+                "description": "Updates the Source resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Source identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The updated Source resource",
+                    "content": {
+                        "application/merge-patch+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Source-source.write.jsonMergePatch"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/sources/{id}/extract": {
+            "post": {
+                "operationId": "api_sources_idextract_post",
+                "tags": [
+                    "Source"
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Source resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Source.jsonld-source.read"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Source-source.read"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a Source resource.",
+                "description": "Creates a Source resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Source identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            }
+        },
+        "/api/sources/{id}/text": {
+            "post": {
+                "operationId": "api_sources_idtext_post",
+                "tags": [
+                    "Source"
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Source resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Source.jsonld-source.read"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Source-source.read"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a Source resource.",
+                "description": "Creates a Source resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Source identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The new Source resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Source.SourceTextInput-source.text"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Source.SourceTextInput-source.text"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
         }
     },
     "components": {
@@ -452,6 +1745,112 @@
                 ],
                 "description": "A representation of common errors."
             },
+            "HydraCollectionBaseSchema": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraCollectionBaseSchemaNoPagination"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "view": {
+                                "type": "object",
+                                "properties": {
+                                    "@id": {
+                                        "type": "string",
+                                        "format": "iri-reference"
+                                    },
+                                    "@type": {
+                                        "type": "string"
+                                    },
+                                    "first": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "iri-reference"
+                                    },
+                                    "last": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "iri-reference"
+                                    },
+                                    "previous": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "iri-reference"
+                                    },
+                                    "next": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "iri-reference"
+                                    }
+                                },
+                                "example": {
+                                    "@id": "string",
+                                    "@type": "string",
+                                    "first": "string",
+                                    "last": "string",
+                                    "previous": "string",
+                                    "next": "string"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "HydraCollectionBaseSchemaNoPagination": {
+                "type": "object",
+                "properties": {
+                    "totalItems": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "search": {
+                        "type": "object",
+                        "properties": {
+                            "@type": {
+                                "type": "string"
+                            },
+                            "template": {
+                                "type": "string"
+                            },
+                            "variableRepresentation": {
+                                "type": "string"
+                            },
+                            "mapping": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "@type": {
+                                            "type": "string"
+                                        },
+                                        "variable": {
+                                            "type": "string"
+                                        },
+                                        "property": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "required": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             "HydraItemBaseSchema": {
                 "type": "object",
                 "properties": {
@@ -594,6 +1993,1311 @@
                     }
                 ],
                 "description": "The signed-in user and their household: what the SPA needs to boot."
+            },
+            "Recipe-recipe.list": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "source": {
+                        "description": "The link this recipe comes from; null for recipes typed in by hand.",
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Source-recipe.list"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "title": {
+                        "maxLength": 200,
+                        "default": "",
+                        "type": "string"
+                    },
+                    "language": {
+                        "default": "es",
+                        "type": "string",
+                        "enum": [
+                            "es",
+                            "en"
+                        ]
+                    },
+                    "servings": {
+                        "minimum": 1,
+                        "maximum": 50,
+                        "default": 4,
+                        "type": "integer"
+                    },
+                    "tags": {
+                        "maxItems": 20,
+                        "description": "lowercase, unique",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "favorite": {
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "rating": {
+                        "minimum": 1,
+                        "maximum": 5,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "needsReview": {
+                        "description": "Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "totalMinutes": {
+                        "readOnly": true,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "mealTypes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "lunch",
+                                "dinner"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "title"
+                ]
+            },
+            "Recipe-recipe.read": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "source": {
+                        "description": "The link this recipe comes from; null for recipes typed in by hand.",
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Source-recipe.read"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "title": {
+                        "maxLength": 200,
+                        "default": "",
+                        "type": "string"
+                    },
+                    "language": {
+                        "default": "es",
+                        "type": "string",
+                        "enum": [
+                            "es",
+                            "en"
+                        ]
+                    },
+                    "servings": {
+                        "minimum": 1,
+                        "maximum": 50,
+                        "default": 4,
+                        "type": "integer"
+                    },
+                    "prepMinutes": {
+                        "minimum": 0,
+                        "maximum": 1440,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "cookMinutes": {
+                        "minimum": 0,
+                        "maximum": 1440,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "tags": {
+                        "maxItems": 20,
+                        "description": "lowercase, unique",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "ingredients": {
+                        "maxItems": 150,
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RecipeIngredient-recipe.read"
+                        }
+                    },
+                    "steps": {
+                        "maxItems": 100,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "notes": {
+                        "maxLength": 10000,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "favorite": {
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "rating": {
+                        "minimum": 1,
+                        "maximum": 5,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "needsReview": {
+                        "description": "Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "confidence": {
+                        "readOnly": true,
+                        "description": "The extraction's own estimate (0-1); null for recipes typed by hand.",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "extractedBy": {
+                        "readOnly": true,
+                        "description": "Model that extracted it; null for recipes typed by hand.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "createdAt": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updatedAt": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "totalMinutes": {
+                        "readOnly": true,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "mealTypes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "lunch",
+                                "dinner"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "title"
+                ]
+            },
+            "Recipe-recipe.write": {
+                "type": "object",
+                "properties": {
+                    "source": {
+                        "description": "The link this recipe comes from; null for recipes typed in by hand.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "iri-reference",
+                        "example": "https://example.com/"
+                    },
+                    "title": {
+                        "maxLength": 200,
+                        "default": "",
+                        "type": "string"
+                    },
+                    "language": {
+                        "default": "es",
+                        "type": "string",
+                        "enum": [
+                            "es",
+                            "en"
+                        ]
+                    },
+                    "servings": {
+                        "minimum": 1,
+                        "maximum": 50,
+                        "default": 4,
+                        "type": "integer"
+                    },
+                    "prepMinutes": {
+                        "minimum": 0,
+                        "maximum": 1440,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "cookMinutes": {
+                        "minimum": 0,
+                        "maximum": 1440,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "tags": {
+                        "maxItems": 20,
+                        "description": "lowercase, unique",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "ingredients": {
+                        "maxItems": 150,
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RecipeIngredient-recipe.write"
+                        }
+                    },
+                    "steps": {
+                        "maxItems": 100,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "notes": {
+                        "maxLength": 10000,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "favorite": {
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "rating": {
+                        "minimum": 1,
+                        "maximum": 5,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "needsReview": {
+                        "description": "Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "mealTypes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "lunch",
+                                "dinner"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "title"
+                ]
+            },
+            "Recipe-recipe.write.jsonMergePatch": {
+                "type": "object",
+                "properties": {
+                    "source": {
+                        "description": "The link this recipe comes from; null for recipes typed in by hand.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "iri-reference",
+                        "example": "https://example.com/"
+                    },
+                    "title": {
+                        "maxLength": 200,
+                        "default": "",
+                        "type": "string"
+                    },
+                    "language": {
+                        "default": "es",
+                        "type": "string",
+                        "enum": [
+                            "es",
+                            "en"
+                        ]
+                    },
+                    "servings": {
+                        "minimum": 1,
+                        "maximum": 50,
+                        "default": 4,
+                        "type": "integer"
+                    },
+                    "prepMinutes": {
+                        "minimum": 0,
+                        "maximum": 1440,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "cookMinutes": {
+                        "minimum": 0,
+                        "maximum": 1440,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "tags": {
+                        "maxItems": 20,
+                        "description": "lowercase, unique",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "ingredients": {
+                        "maxItems": 150,
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RecipeIngredient-recipe.write"
+                        }
+                    },
+                    "steps": {
+                        "maxItems": 100,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "notes": {
+                        "maxLength": 10000,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "favorite": {
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "rating": {
+                        "minimum": 1,
+                        "maximum": 5,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "needsReview": {
+                        "description": "Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "mealTypes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "lunch",
+                                "dinner"
+                            ]
+                        }
+                    }
+                }
+            },
+            "Recipe.jsonld-recipe.list": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "source": {
+                                "description": "The link this recipe comes from; null for recipes typed in by hand.",
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Source.jsonld-recipe.list"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "title": {
+                                "maxLength": 200,
+                                "default": "",
+                                "type": "string"
+                            },
+                            "language": {
+                                "default": "es",
+                                "type": "string",
+                                "enum": [
+                                    "es",
+                                    "en"
+                                ]
+                            },
+                            "servings": {
+                                "minimum": 1,
+                                "maximum": 50,
+                                "default": 4,
+                                "type": "integer"
+                            },
+                            "tags": {
+                                "maxItems": 20,
+                                "description": "lowercase, unique",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "favorite": {
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "rating": {
+                                "minimum": 1,
+                                "maximum": 5,
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "needsReview": {
+                                "description": "Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).",
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "totalMinutes": {
+                                "readOnly": true,
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "mealTypes": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "lunch",
+                                        "dinner"
+                                    ]
+                                }
+                            }
+                        },
+                        "required": [
+                            "title"
+                        ]
+                    }
+                ]
+            },
+            "Recipe.jsonld-recipe.read": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "source": {
+                                "description": "The link this recipe comes from; null for recipes typed in by hand.",
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Source.jsonld-recipe.read"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "title": {
+                                "maxLength": 200,
+                                "default": "",
+                                "type": "string"
+                            },
+                            "language": {
+                                "default": "es",
+                                "type": "string",
+                                "enum": [
+                                    "es",
+                                    "en"
+                                ]
+                            },
+                            "servings": {
+                                "minimum": 1,
+                                "maximum": 50,
+                                "default": 4,
+                                "type": "integer"
+                            },
+                            "prepMinutes": {
+                                "minimum": 0,
+                                "maximum": 1440,
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "cookMinutes": {
+                                "minimum": 0,
+                                "maximum": 1440,
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "tags": {
+                                "maxItems": 20,
+                                "description": "lowercase, unique",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "ingredients": {
+                                "maxItems": 150,
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/RecipeIngredient.jsonld-recipe.read"
+                                }
+                            },
+                            "steps": {
+                                "maxItems": 100,
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "notes": {
+                                "maxLength": 10000,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "favorite": {
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "rating": {
+                                "minimum": 1,
+                                "maximum": 5,
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "needsReview": {
+                                "description": "Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).",
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "confidence": {
+                                "readOnly": true,
+                                "description": "The extraction's own estimate (0-1); null for recipes typed by hand.",
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "extractedBy": {
+                                "readOnly": true,
+                                "description": "Model that extracted it; null for recipes typed by hand.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "createdAt": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "updatedAt": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "totalMinutes": {
+                                "readOnly": true,
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "mealTypes": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "lunch",
+                                        "dinner"
+                                    ]
+                                }
+                            }
+                        },
+                        "required": [
+                            "title"
+                        ]
+                    }
+                ]
+            },
+            "RecipeIngredient-recipe.read": {
+                "type": "object",
+                "properties": {
+                    "groupName": {
+                        "maxLength": 100,
+                        "description": "Sub-heading the line belongs to (\"For the sauce\"), if the recipe has groups.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "rawText": {
+                        "maxLength": 255,
+                        "default": "",
+                        "type": "string"
+                    },
+                    "quantity": {
+                        "minimum": 0,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "unit": {
+                        "maxLength": 20,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "name": {
+                        "maxLength": 150,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "prep": {
+                        "maxLength": 150,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "canonicalKey": {
+                        "maxLength": 80,
+                        "description": "Language-independent key (\"onion\" for \"cebolla\") the shopping list merges on.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "optional": {
+                        "default": false,
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "rawText"
+                ]
+            },
+            "RecipeIngredient-recipe.write": {
+                "type": "object",
+                "properties": {
+                    "groupName": {
+                        "maxLength": 100,
+                        "description": "Sub-heading the line belongs to (\"For the sauce\"), if the recipe has groups.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "rawText": {
+                        "maxLength": 255,
+                        "default": "",
+                        "type": "string"
+                    },
+                    "quantity": {
+                        "minimum": 0,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "unit": {
+                        "maxLength": 20,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "name": {
+                        "maxLength": 150,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "prep": {
+                        "maxLength": 150,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "canonicalKey": {
+                        "maxLength": 80,
+                        "description": "Language-independent key (\"onion\" for \"cebolla\") the shopping list merges on.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "optional": {
+                        "default": false,
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "rawText"
+                ]
+            },
+            "RecipeIngredient.jsonld-recipe.read": {
+                "type": "object",
+                "properties": {
+                    "groupName": {
+                        "maxLength": 100,
+                        "description": "Sub-heading the line belongs to (\"For the sauce\"), if the recipe has groups.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "rawText": {
+                        "maxLength": 255,
+                        "default": "",
+                        "type": "string"
+                    },
+                    "quantity": {
+                        "minimum": 0,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "unit": {
+                        "maxLength": 20,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "name": {
+                        "maxLength": 150,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "prep": {
+                        "maxLength": 150,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "canonicalKey": {
+                        "maxLength": 80,
+                        "description": "Language-independent key (\"onion\" for \"cebolla\") the shopping list merges on.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "optional": {
+                        "default": false,
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "rawText"
+                ]
+            },
+            "RecipeTag": {
+                "type": "object",
+                "description": "A tag used in the household's library and how many recipes carry it: the library's filter chips.",
+                "properties": {
+                    "tag": {
+                        "type": "string"
+                    },
+                    "count": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "RecipeTag.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "tag": {
+                                "type": "string"
+                            },
+                            "count": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "description": "A tag used in the household's library and how many recipes carry it: the library's filter chips."
+            },
+            "Source-recipe.list": {
+                "type": "object",
+                "description": "A link saved to the library (blog post, YouTube video, Instagram reel, ...).\nExtraction (M2) turns it into one or more recipes; until then it can be turned\ninto a recipe by hand.",
+                "properties": {
+                    "id": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "maxLength": 200,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "platform": {
+                        "type": "string",
+                        "enum": [
+                            "web",
+                            "youtube",
+                            "instagram",
+                            "tiktok"
+                        ]
+                    },
+                    "thumbnail": {
+                        "readOnly": true,
+                        "description": "Image URL for the app: our cached copy when we have one, else the original.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "Source-recipe.read": {
+                "type": "object",
+                "description": "A link saved to the library (blog post, YouTube video, Instagram reel, ...).\nExtraction (M2) turns it into one or more recipes; until then it can be turned\ninto a recipe by hand.",
+                "properties": {
+                    "id": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "maxLength": 200,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "author": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "platform": {
+                        "type": "string",
+                        "enum": [
+                            "web",
+                            "youtube",
+                            "instagram",
+                            "tiktok"
+                        ]
+                    },
+                    "thumbnail": {
+                        "readOnly": true,
+                        "description": "Image URL for the app: our cached copy when we have one, else the original.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "originalText": {
+                        "readOnly": true,
+                        "description": "The caption or transcript the recipe came from, for checking it side by side.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "Source-source.read": {
+                "type": "object",
+                "description": "A link saved to the library (blog post, YouTube video, Instagram reel, ...).\nExtraction (M2) turns it into one or more recipes; until then it can be turned\ninto a recipe by hand.",
+                "properties": {
+                    "id": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "maxLength": 200,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "author": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "status": {
+                        "default": "pending",
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "extracting",
+                            "ready",
+                            "needs_review",
+                            "needs_input",
+                            "failed"
+                        ]
+                    },
+                    "statusMessage": {
+                        "readOnly": true,
+                        "description": "For the cook, when extraction needs them or failed: \"The recipe is in the comments\", .",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "metadataFetchedAt": {
+                        "readOnly": true,
+                        "description": "When the link preview (title, thumbnail) was last fetched, successfully or not.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "createdAt": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "platform": {
+                        "type": "string",
+                        "enum": [
+                            "web",
+                            "youtube",
+                            "instagram",
+                            "tiktok"
+                        ]
+                    },
+                    "thumbnail": {
+                        "readOnly": true,
+                        "description": "Image URL for the app: our cached copy when we have one, else the original.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "Source-source.write.jsonMergePatch": {
+                "type": "object",
+                "description": "A link saved to the library (blog post, YouTube video, Instagram reel, ...).\nExtraction (M2) turns it into one or more recipes; until then it can be turned\ninto a recipe by hand.",
+                "properties": {
+                    "title": {
+                        "maxLength": 200,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "Source.SourceInput-source.create": {
+                "type": "object",
+                "description": "A link saved to the library (blog post, YouTube video, Instagram reel, ...).\nExtraction (M2) turns it into one or more recipes; until then it can be turned\ninto a recipe by hand.",
+                "required": [
+                    "url"
+                ],
+                "properties": {
+                    "url": {
+                        "maxLength": 2048,
+                        "default": "",
+                        "type": "string"
+                    }
+                }
+            },
+            "Source.SourceTextInput-source.text": {
+                "type": "object",
+                "description": "Give the recipe text by hand (e.g. a caption that couldn't be read) and extract from it.",
+                "required": [
+                    "text"
+                ],
+                "properties": {
+                    "text": {
+                        "maxLength": 20000,
+                        "default": "",
+                        "type": "string"
+                    }
+                }
+            },
+            "Source.jsonld-recipe.list": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "title": {
+                                "maxLength": 200,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "url": {
+                                "type": "string"
+                            },
+                            "platform": {
+                                "type": "string",
+                                "enum": [
+                                    "web",
+                                    "youtube",
+                                    "instagram",
+                                    "tiktok"
+                                ]
+                            },
+                            "thumbnail": {
+                                "readOnly": true,
+                                "description": "Image URL for the app: our cached copy when we have one, else the original.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "description": "A link saved to the library (blog post, YouTube video, Instagram reel, ...).\nExtraction (M2) turns it into one or more recipes; until then it can be turned\ninto a recipe by hand."
+            },
+            "Source.jsonld-recipe.read": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "title": {
+                                "maxLength": 200,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "author": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "url": {
+                                "type": "string"
+                            },
+                            "platform": {
+                                "type": "string",
+                                "enum": [
+                                    "web",
+                                    "youtube",
+                                    "instagram",
+                                    "tiktok"
+                                ]
+                            },
+                            "thumbnail": {
+                                "readOnly": true,
+                                "description": "Image URL for the app: our cached copy when we have one, else the original.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "originalText": {
+                                "readOnly": true,
+                                "description": "The caption or transcript the recipe came from, for checking it side by side.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "description": "A link saved to the library (blog post, YouTube video, Instagram reel, ...).\nExtraction (M2) turns it into one or more recipes; until then it can be turned\ninto a recipe by hand."
+            },
+            "Source.jsonld-source.read": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "title": {
+                                "maxLength": 200,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "author": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "status": {
+                                "default": "pending",
+                                "type": "string",
+                                "enum": [
+                                    "pending",
+                                    "extracting",
+                                    "ready",
+                                    "needs_review",
+                                    "needs_input",
+                                    "failed"
+                                ]
+                            },
+                            "statusMessage": {
+                                "readOnly": true,
+                                "description": "For the cook, when extraction needs them or failed: \"The recipe is in the comments\", .",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "metadataFetchedAt": {
+                                "readOnly": true,
+                                "description": "When the link preview (title, thumbnail) was last fetched, successfully or not.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "createdAt": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "url": {
+                                "type": "string"
+                            },
+                            "platform": {
+                                "type": "string",
+                                "enum": [
+                                    "web",
+                                    "youtube",
+                                    "instagram",
+                                    "tiktok"
+                                ]
+                            },
+                            "thumbnail": {
+                                "readOnly": true,
+                                "description": "Image URL for the app: our cached copy when we have one, else the original.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "description": "A link saved to the library (blog post, YouTube video, Instagram reel, ...).\nExtraction (M2) turns it into one or more recipes; until then it can be turned\ninto a recipe by hand."
             }
         },
         "responses": {},
@@ -608,6 +3312,18 @@
         {
             "name": "Me",
             "description": "The signed-in user and their household: what the SPA needs to boot."
+        },
+        {
+            "name": "RecipeTag",
+            "description": "A tag used in the household's library and how many recipes carry it: the library's filter chips."
+        },
+        {
+            "name": "Recipe",
+            "description": "Resource 'Recipe' operations."
+        },
+        {
+            "name": "Source",
+            "description": "A link saved to the library (blog post, YouTube video, Instagram reel, ...).\nExtraction (M2) turns it into one or more recipes; until then it can be turned\ninto a recipe by hand."
         }
     ],
     "webhooks": {}

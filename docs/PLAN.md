@@ -15,7 +15,7 @@ A personal/household meal planner. The household keeps a **library** of recipe l
 | Hosting | **Fully self-hosted** (Docker Compose) |
 | Backend | **PHP + Symfony** (API) |
 | Frontend | **React** SPA (Vite + TypeScript) |
-| Extraction | LLM-based, provider-agnostic. **Google AI Studio (Gemini) as the primary provider** (text, images, video). **Amazon Bedrock as the secondary provider** (text/images). The app is self-hosted, the models stay cloud APIs |
+| Extraction | LLM-based, provider-agnostic. **Amazon Bedrock** (API key) is the provider since M2 (2026-11-19): a text model for captions, transcripts and pages, and Amazon Nova for videos. Gemini could be added behind the same interface. The app is self-hosted, the models stay cloud APIs |
 | Phones | **iPhone and Android**: Web Share Target on Android, Apple Shortcut on iOS |
 | Languages | **Spanish and English**: bilingual UI, recipes in either language, one shared ingredient catalog |
 | Meals | **Lunch and dinner**, default **4 servings** (adjustable per meal) |

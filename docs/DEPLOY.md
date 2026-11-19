@@ -48,15 +48,20 @@ APP_SECRET=$(openssl rand -hex 32)
 CADDY_MERCURE_JWT_SECRET=$(openssl rand -hex 32)
 CADDY_MERCURE_JWT_ISSUER=https://tabooki.<your-tailnet>.ts.net
 POSTGRES_PASSWORD=$(openssl rand -hex 24)
-GEMINI_API_KEY=...
+AWS_BEARER_TOKEN_BEDROCK=...   # Amazon Bedrock API key (recipe extraction)
 AWS_REGION=eu-west-1
-AWS_ACCESS_KEY_ID=...
-AWS_SECRET_ACCESS_KEY=...
+# Optional, to change models (defaults in backend/.env):
+# BEDROCK_TEXT_MODEL=...
+# BEDROCK_VIDEO_MODEL=...
+# EXTRACTION_THINKING=0
 EOF
 chmod 600 .env
 ```
 
 `.env` is git-ignored. Keep a copy in your password manager.
+
+Check that extraction can reach Bedrock (and which models your key can use) once it's running:
+`docker compose -f compose.yaml -f compose.prod.yaml exec php php bin/console app:bedrock:check`.
 
 ## 3. Deploy / update
 
@@ -78,11 +83,12 @@ docker compose -f compose.yaml -f compose.prod.yaml exec -it php \
 
 ## 5. Backups (to do before real data goes in)
 
-Nightly database dump plus the uploads volume, copied **off the VPS** with restic (Contabo
-Object Storage, Backblaze B2, or a home NAS over Tailscale). Sketch:
+Nightly database dump plus the media volume (`tabooki_media_data`: cached thumbnails, later
+uploads), copied **off the VPS** with restic (Contabo Object Storage, Backblaze B2, or a home
+NAS over Tailscale). Sketch:
 
 ```sh
 docker compose -f compose.yaml -f compose.prod.yaml exec -T database \
   pg_dump -U app -Fc tabooki > /var/backups/tabooki/$(date +%F).dump
-restic backup /var/backups/tabooki
+restic backup /var/backups/tabooki "$(docker volume inspect -f '{{ .Mountpoint }}' tabooki_media_data)"
 ```

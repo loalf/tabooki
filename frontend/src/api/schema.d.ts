@@ -28,6 +28,170 @@ export interface paths {
         patch: operations["api_me_patch"];
         trace?: never;
     };
+    "/api/recipes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of Recipe resources.
+         * @description Retrieves the collection of Recipe resources.
+         */
+        get: operations["api_recipes_get_collection"];
+        put?: never;
+        /**
+         * Creates a Recipe resource.
+         * @description Creates a Recipe resource.
+         */
+        post: operations["api_recipes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/recipes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a Recipe resource.
+         * @description Retrieves a Recipe resource.
+         */
+        get: operations["api_recipes_id_get"];
+        put?: never;
+        post?: never;
+        /**
+         * Removes the Recipe resource.
+         * @description Removes the Recipe resource.
+         */
+        delete: operations["api_recipes_id_delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Updates the Recipe resource.
+         * @description Updates the Recipe resource.
+         */
+        patch: operations["api_recipes_id_patch"];
+        trace?: never;
+    };
+    "/api/recipe-tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of RecipeTag resources.
+         * @description Retrieves the collection of RecipeTag resources.
+         */
+        get: operations["api_recipe-tags_get_collection"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of Source resources.
+         * @description Retrieves the collection of Source resources.
+         */
+        get: operations["api_sources_get_collection"];
+        put?: never;
+        /**
+         * Creates a Source resource.
+         * @description Creates a Source resource.
+         */
+        post: operations["api_sources_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/sources/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a Source resource.
+         * @description Retrieves a Source resource.
+         */
+        get: operations["api_sources_id_get"];
+        put?: never;
+        post?: never;
+        /**
+         * Removes the Source resource.
+         * @description Removes the Source resource.
+         */
+        delete: operations["api_sources_id_delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Updates the Source resource.
+         * @description Updates the Source resource.
+         */
+        patch: operations["api_sources_id_patch"];
+        trace?: never;
+    };
+    "/api/sources/{id}/extract": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a Source resource.
+         * @description Creates a Source resource.
+         */
+        post: operations["api_sources_idextract_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/sources/{id}/text": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a Source resource.
+         * @description Creates a Source resource.
+         */
+        post: operations["api_sources_idtext_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -112,6 +276,45 @@ export interface components {
             readonly type?: string;
             readonly description?: string | null;
         };
+        HydraCollectionBaseSchema: components["schemas"]["HydraCollectionBaseSchemaNoPagination"] & {
+            /**
+             * @example {
+             *       "@id": "string",
+             *       "@type": "string",
+             *       "first": "string",
+             *       "last": "string",
+             *       "previous": "string",
+             *       "next": "string"
+             *     }
+             */
+            view?: {
+                /** Format: iri-reference */
+                "@id"?: string;
+                "@type"?: string;
+                /** Format: iri-reference */
+                first?: string | null;
+                /** Format: iri-reference */
+                last?: string | null;
+                /** Format: iri-reference */
+                previous?: string | null;
+                /** Format: iri-reference */
+                next?: string | null;
+            };
+        };
+        HydraCollectionBaseSchemaNoPagination: {
+            totalItems?: number;
+            search?: {
+                "@type"?: string;
+                template?: string;
+                variableRepresentation?: string;
+                mapping?: {
+                    "@type"?: string;
+                    variable?: string;
+                    property?: string | null;
+                    required?: boolean;
+                }[];
+            };
+        };
         HydraItemBaseSchema: {
             "@context"?: string | ({
                 "@vocab": string;
@@ -168,6 +371,406 @@ export interface components {
             householdName: string;
             /** @default 4 */
             defaultServings: number;
+        };
+        "Recipe-recipe.list": {
+            /** Format: uuid */
+            readonly id?: string;
+            /** @description The link this recipe comes from; null for recipes typed in by hand. */
+            source?: components["schemas"]["Source-recipe.list"] | null;
+            /** @default  */
+            title: string;
+            /**
+             * @default es
+             * @enum {string}
+             */
+            language: "es" | "en";
+            /** @default 4 */
+            servings: number;
+            /** @description lowercase, unique */
+            tags?: string[];
+            /** @default false */
+            favorite: boolean;
+            rating?: number | null;
+            /**
+             * @description Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).
+             * @default false
+             */
+            needsReview: boolean;
+            readonly totalMinutes?: number | null;
+            mealTypes?: ("lunch" | "dinner")[];
+        };
+        "Recipe-recipe.read": {
+            /** Format: uuid */
+            readonly id?: string;
+            /** @description The link this recipe comes from; null for recipes typed in by hand. */
+            source?: components["schemas"]["Source-recipe.read"] | null;
+            /** @default  */
+            title: string;
+            /**
+             * @default es
+             * @enum {string}
+             */
+            language: "es" | "en";
+            /** @default 4 */
+            servings: number;
+            prepMinutes?: number | null;
+            cookMinutes?: number | null;
+            /** @description lowercase, unique */
+            tags?: string[];
+            ingredients?: components["schemas"]["RecipeIngredient-recipe.read"][];
+            steps?: string[];
+            notes?: string | null;
+            /** @default false */
+            favorite: boolean;
+            rating?: number | null;
+            /**
+             * @description Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).
+             * @default false
+             */
+            needsReview: boolean;
+            /** @description The extraction's own estimate (0-1); null for recipes typed by hand. */
+            readonly confidence?: number | null;
+            /** @description Model that extracted it; null for recipes typed by hand. */
+            readonly extractedBy?: string | null;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+            readonly totalMinutes?: number | null;
+            mealTypes?: ("lunch" | "dinner")[];
+        };
+        "Recipe-recipe.write": {
+            /**
+             * Format: iri-reference
+             * @description The link this recipe comes from; null for recipes typed in by hand.
+             * @example https://example.com/
+             */
+            source?: string | null;
+            /** @default  */
+            title: string;
+            /**
+             * @default es
+             * @enum {string}
+             */
+            language: "es" | "en";
+            /** @default 4 */
+            servings: number;
+            prepMinutes?: number | null;
+            cookMinutes?: number | null;
+            /** @description lowercase, unique */
+            tags?: string[];
+            ingredients?: components["schemas"]["RecipeIngredient-recipe.write"][];
+            steps?: string[];
+            notes?: string | null;
+            /** @default false */
+            favorite: boolean;
+            rating?: number | null;
+            /**
+             * @description Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).
+             * @default false
+             */
+            needsReview: boolean;
+            mealTypes?: ("lunch" | "dinner")[];
+        };
+        "Recipe-recipe.write.jsonMergePatch": {
+            /**
+             * Format: iri-reference
+             * @description The link this recipe comes from; null for recipes typed in by hand.
+             * @example https://example.com/
+             */
+            source?: string | null;
+            /** @default  */
+            title: string;
+            /**
+             * @default es
+             * @enum {string}
+             */
+            language: "es" | "en";
+            /** @default 4 */
+            servings: number;
+            prepMinutes?: number | null;
+            cookMinutes?: number | null;
+            /** @description lowercase, unique */
+            tags?: string[];
+            ingredients?: components["schemas"]["RecipeIngredient-recipe.write"][];
+            steps?: string[];
+            notes?: string | null;
+            /** @default false */
+            favorite: boolean;
+            rating?: number | null;
+            /**
+             * @description Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).
+             * @default false
+             */
+            needsReview: boolean;
+            mealTypes?: ("lunch" | "dinner")[];
+        };
+        "Recipe.jsonld-recipe.list": components["schemas"]["HydraItemBaseSchema"] & {
+            /** Format: uuid */
+            readonly id?: string;
+            /** @description The link this recipe comes from; null for recipes typed in by hand. */
+            source?: components["schemas"]["Source.jsonld-recipe.list"] | null;
+            /** @default  */
+            title: string;
+            /**
+             * @default es
+             * @enum {string}
+             */
+            language: "es" | "en";
+            /** @default 4 */
+            servings: number;
+            /** @description lowercase, unique */
+            tags?: string[];
+            /** @default false */
+            favorite: boolean;
+            rating?: number | null;
+            /**
+             * @description Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).
+             * @default false
+             */
+            needsReview: boolean;
+            readonly totalMinutes?: number | null;
+            mealTypes?: ("lunch" | "dinner")[];
+        };
+        "Recipe.jsonld-recipe.read": components["schemas"]["HydraItemBaseSchema"] & {
+            /** Format: uuid */
+            readonly id?: string;
+            /** @description The link this recipe comes from; null for recipes typed in by hand. */
+            source?: components["schemas"]["Source.jsonld-recipe.read"] | null;
+            /** @default  */
+            title: string;
+            /**
+             * @default es
+             * @enum {string}
+             */
+            language: "es" | "en";
+            /** @default 4 */
+            servings: number;
+            prepMinutes?: number | null;
+            cookMinutes?: number | null;
+            /** @description lowercase, unique */
+            tags?: string[];
+            ingredients?: components["schemas"]["RecipeIngredient.jsonld-recipe.read"][];
+            steps?: string[];
+            notes?: string | null;
+            /** @default false */
+            favorite: boolean;
+            rating?: number | null;
+            /**
+             * @description Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).
+             * @default false
+             */
+            needsReview: boolean;
+            /** @description The extraction's own estimate (0-1); null for recipes typed by hand. */
+            readonly confidence?: number | null;
+            /** @description Model that extracted it; null for recipes typed by hand. */
+            readonly extractedBy?: string | null;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+            readonly totalMinutes?: number | null;
+            mealTypes?: ("lunch" | "dinner")[];
+        };
+        "RecipeIngredient-recipe.read": {
+            /** @description Sub-heading the line belongs to ("For the sauce"), if the recipe has groups. */
+            groupName?: string | null;
+            /** @default  */
+            rawText: string;
+            quantity?: number | null;
+            unit?: string | null;
+            name?: string | null;
+            prep?: string | null;
+            /** @description Language-independent key ("onion" for "cebolla") the shopping list merges on. */
+            canonicalKey?: string | null;
+            /** @default false */
+            optional: boolean;
+        };
+        "RecipeIngredient-recipe.write": {
+            /** @description Sub-heading the line belongs to ("For the sauce"), if the recipe has groups. */
+            groupName?: string | null;
+            /** @default  */
+            rawText: string;
+            quantity?: number | null;
+            unit?: string | null;
+            name?: string | null;
+            prep?: string | null;
+            /** @description Language-independent key ("onion" for "cebolla") the shopping list merges on. */
+            canonicalKey?: string | null;
+            /** @default false */
+            optional: boolean;
+        };
+        "RecipeIngredient.jsonld-recipe.read": {
+            /** @description Sub-heading the line belongs to ("For the sauce"), if the recipe has groups. */
+            groupName?: string | null;
+            /** @default  */
+            rawText: string;
+            quantity?: number | null;
+            unit?: string | null;
+            name?: string | null;
+            prep?: string | null;
+            /** @description Language-independent key ("onion" for "cebolla") the shopping list merges on. */
+            canonicalKey?: string | null;
+            /** @default false */
+            optional: boolean;
+        };
+        /** @description A tag used in the household's library and how many recipes carry it: the library's filter chips. */
+        RecipeTag: {
+            tag?: string;
+            count?: number;
+        };
+        /** @description A tag used in the household's library and how many recipes carry it: the library's filter chips. */
+        "RecipeTag.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            tag?: string;
+            count?: number;
+        };
+        /**
+         * @description A link saved to the library (blog post, YouTube video, Instagram reel, ...).
+         *     Extraction (M2) turns it into one or more recipes; until then it can be turned
+         *     into a recipe by hand.
+         */
+        "Source-recipe.list": {
+            /** Format: uuid */
+            readonly id?: string;
+            title?: string | null;
+            url?: string;
+            /** @enum {string} */
+            platform?: "web" | "youtube" | "instagram" | "tiktok";
+            /** @description Image URL for the app: our cached copy when we have one, else the original. */
+            readonly thumbnail?: string | null;
+        };
+        /**
+         * @description A link saved to the library (blog post, YouTube video, Instagram reel, ...).
+         *     Extraction (M2) turns it into one or more recipes; until then it can be turned
+         *     into a recipe by hand.
+         */
+        "Source-recipe.read": {
+            /** Format: uuid */
+            readonly id?: string;
+            title?: string | null;
+            author?: string | null;
+            url?: string;
+            /** @enum {string} */
+            platform?: "web" | "youtube" | "instagram" | "tiktok";
+            /** @description Image URL for the app: our cached copy when we have one, else the original. */
+            readonly thumbnail?: string | null;
+            /** @description The caption or transcript the recipe came from, for checking it side by side. */
+            readonly originalText?: string | null;
+        };
+        /**
+         * @description A link saved to the library (blog post, YouTube video, Instagram reel, ...).
+         *     Extraction (M2) turns it into one or more recipes; until then it can be turned
+         *     into a recipe by hand.
+         */
+        "Source-source.read": {
+            /** Format: uuid */
+            readonly id?: string;
+            title?: string | null;
+            author?: string | null;
+            /**
+             * @default pending
+             * @enum {string}
+             */
+            status: "pending" | "extracting" | "ready" | "needs_review" | "needs_input" | "failed";
+            /** @description For the cook, when extraction needs them or failed: "The recipe is in the comments", . */
+            readonly statusMessage?: string | null;
+            /**
+             * Format: date-time
+             * @description When the link preview (title, thumbnail) was last fetched, successfully or not.
+             */
+            readonly metadataFetchedAt?: string | null;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            url?: string;
+            /** @enum {string} */
+            platform?: "web" | "youtube" | "instagram" | "tiktok";
+            /** @description Image URL for the app: our cached copy when we have one, else the original. */
+            readonly thumbnail?: string | null;
+        };
+        /**
+         * @description A link saved to the library (blog post, YouTube video, Instagram reel, ...).
+         *     Extraction (M2) turns it into one or more recipes; until then it can be turned
+         *     into a recipe by hand.
+         */
+        "Source-source.write.jsonMergePatch": {
+            title?: string | null;
+        };
+        /**
+         * @description A link saved to the library (blog post, YouTube video, Instagram reel, ...).
+         *     Extraction (M2) turns it into one or more recipes; until then it can be turned
+         *     into a recipe by hand.
+         */
+        "Source.SourceInput-source.create": {
+            /** @default  */
+            url: string;
+        };
+        /** @description Give the recipe text by hand (e.g. a caption that couldn't be read) and extract from it. */
+        "Source.SourceTextInput-source.text": {
+            /** @default  */
+            text: string;
+        };
+        /**
+         * @description A link saved to the library (blog post, YouTube video, Instagram reel, ...).
+         *     Extraction (M2) turns it into one or more recipes; until then it can be turned
+         *     into a recipe by hand.
+         */
+        "Source.jsonld-recipe.list": components["schemas"]["HydraItemBaseSchema"] & {
+            /** Format: uuid */
+            readonly id?: string;
+            title?: string | null;
+            url?: string;
+            /** @enum {string} */
+            platform?: "web" | "youtube" | "instagram" | "tiktok";
+            /** @description Image URL for the app: our cached copy when we have one, else the original. */
+            readonly thumbnail?: string | null;
+        };
+        /**
+         * @description A link saved to the library (blog post, YouTube video, Instagram reel, ...).
+         *     Extraction (M2) turns it into one or more recipes; until then it can be turned
+         *     into a recipe by hand.
+         */
+        "Source.jsonld-recipe.read": components["schemas"]["HydraItemBaseSchema"] & {
+            /** Format: uuid */
+            readonly id?: string;
+            title?: string | null;
+            author?: string | null;
+            url?: string;
+            /** @enum {string} */
+            platform?: "web" | "youtube" | "instagram" | "tiktok";
+            /** @description Image URL for the app: our cached copy when we have one, else the original. */
+            readonly thumbnail?: string | null;
+            /** @description The caption or transcript the recipe came from, for checking it side by side. */
+            readonly originalText?: string | null;
+        };
+        /**
+         * @description A link saved to the library (blog post, YouTube video, Instagram reel, ...).
+         *     Extraction (M2) turns it into one or more recipes; until then it can be turned
+         *     into a recipe by hand.
+         */
+        "Source.jsonld-source.read": components["schemas"]["HydraItemBaseSchema"] & {
+            /** Format: uuid */
+            readonly id?: string;
+            title?: string | null;
+            author?: string | null;
+            /**
+             * @default pending
+             * @enum {string}
+             */
+            status: "pending" | "extracting" | "ready" | "needs_review" | "needs_input" | "failed";
+            /** @description For the cook, when extraction needs them or failed: "The recipe is in the comments", . */
+            readonly statusMessage?: string | null;
+            /**
+             * Format: date-time
+             * @description When the link preview (title, thumbnail) was last fetched, successfully or not.
+             */
+            readonly metadataFetchedAt?: string | null;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            url?: string;
+            /** @enum {string} */
+            platform?: "web" | "youtube" | "instagram" | "tiktok";
+            /** @description Image URL for the app: our cached copy when we have one, else the original. */
+            readonly thumbnail?: string | null;
         };
     };
     responses: never;
@@ -269,6 +872,684 @@ export interface operations {
             };
             /** @description Not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_recipes_get_collection: {
+        parameters: {
+            query?: {
+                /** @description Words to look for in the title, tags and ingredients (case and accent insensitive) */
+                q?: string;
+                /** @description Only recipes that have all of these tags */
+                "tags[]"?: string[];
+                /** @description Only extracted recipes nobody has checked yet */
+                needsReview?: boolean;
+                /** @description Only favorites (true) or only non-favorites (false) */
+                favorite?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Recipe collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchemaNoPagination"] & {
+                        member: components["schemas"]["Recipe.jsonld-recipe.list"][];
+                    };
+                    "application/json": components["schemas"]["Recipe-recipe.list"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_recipes_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new Recipe resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["Recipe-recipe.write"];
+                "application/json": components["schemas"]["Recipe-recipe.write"];
+            };
+        };
+        responses: {
+            /** @description Recipe resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Recipe.jsonld-recipe.read"];
+                    "application/json": components["schemas"]["Recipe-recipe.read"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_recipes_id_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Recipe identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Recipe resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Recipe.jsonld-recipe.read"];
+                    "application/json": components["schemas"]["Recipe-recipe.read"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_recipes_id_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Recipe identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Recipe resource deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_recipes_id_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Recipe identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The updated Recipe resource */
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["Recipe-recipe.write.jsonMergePatch"];
+            };
+        };
+        responses: {
+            /** @description Recipe resource updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Recipe.jsonld-recipe.read"];
+                    "application/json": components["schemas"]["Recipe-recipe.read"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    "api_recipe-tags_get_collection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description RecipeTag collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchemaNoPagination"] & {
+                        member: components["schemas"]["RecipeTag.jsonld"][];
+                    };
+                    "application/json": components["schemas"]["RecipeTag"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_sources_get_collection: {
+        parameters: {
+            query?: {
+                /** @description Only links that have (true) or have not (false) been turned into a recipe yet */
+                hasRecipe?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Source collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchemaNoPagination"] & {
+                        member: components["schemas"]["Source.jsonld-source.read"][];
+                    };
+                    "application/json": components["schemas"]["Source-source.read"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_sources_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new Source resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["Source.SourceInput-source.create"];
+                "application/json": components["schemas"]["Source.SourceInput-source.create"];
+            };
+        };
+        responses: {
+            /** @description Source resource created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Source.jsonld-source.read"];
+                    "application/json": components["schemas"]["Source-source.read"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_sources_id_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Source identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Source resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Source.jsonld-source.read"];
+                    "application/json": components["schemas"]["Source-source.read"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_sources_id_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Source identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Source resource deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_sources_id_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Source identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The updated Source resource */
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["Source-source.write.jsonMergePatch"];
+            };
+        };
+        responses: {
+            /** @description Source resource updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Source.jsonld-source.read"];
+                    "application/json": components["schemas"]["Source-source.read"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_sources_idextract_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Source identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Source resource created */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Source.jsonld-source.read"];
+                    "application/json": components["schemas"]["Source-source.read"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_sources_idtext_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Source identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new Source resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["Source.SourceTextInput-source.text"];
+                "application/json": components["schemas"]["Source.SourceTextInput-source.text"];
+            };
+        };
+        responses: {
+            /** @description Source resource created */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Source.jsonld-source.read"];
+                    "application/json": components["schemas"]["Source-source.read"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -38,6 +38,27 @@ docker compose cp php:/data/caddy/pki/authorities/local/root.crt /tmp/caddy-root
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/caddy-root.crt
 ```
 
+### Recipe extraction (Amazon Bedrock)
+
+Saved links are turned into recipes by an LLM on Amazon Bedrock. Create `backend/.env.local`
+(git-ignored) with your Bedrock API key, then restart the worker:
+
+```sh
+AWS_BEARER_TOKEN_BEDROCK=ABSK...
+AWS_REGION=eu-west-1          # the region your key works in
+# Optional, defaults in backend/.env:
+# BEDROCK_TEXT_MODEL=...       # reads captions, transcripts and pages
+# BEDROCK_VIDEO_MODEL=...      # watches reels when the caption isn't enough (Amazon Nova)
+# EXTRACTION_THINKING=0        # Claude answers without thinking first: faster, fewer tokens
+```
+
+```sh
+docker compose restart worker
+make console c=app:bedrock:check          # lists the models your key can use, runs a test extraction
+make console c="app:extract --all"        # extract links saved before the key was set
+make console c="app:extract <id> --sync"  # extract one link here and print the result
+```
+
 Useful commands (`make` lists all of them):
 
 | Command | What it does |

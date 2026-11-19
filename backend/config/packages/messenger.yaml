@@ -14,7 +14,8 @@ framework:
             sync: 'sync://'
 
         routing:
-            # 'App\Message\ExtractSource': async
+            'App\Message\FetchSourceMetadata': async
+            'App\Message\ExtractSource': async
 
 when@test:
     framework:

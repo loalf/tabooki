@@ -9,6 +9,8 @@ import '@/index.css'
 import { LibraryPage } from '@/pages/LibraryPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { PlanPage } from '@/pages/PlanPage'
+import { RecipeEditPage } from '@/pages/RecipeEditPage'
+import { RecipePage } from '@/pages/RecipePage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { ShoppingPage } from '@/pages/ShoppingPage'
 
@@ -20,6 +22,9 @@ const router = createBrowserRouter([
     element: <AppShell />,
     children: [
       { index: true, element: <LibraryPage /> },
+      { path: 'recipes/new', element: <RecipeEditPage /> },
+      { path: 'recipes/:id', element: <RecipePage /> },
+      { path: 'recipes/:id/edit', element: <RecipeEditPage /> },
       { path: 'plan', element: <PlanPage /> },
       { path: 'shopping', element: <ShoppingPage /> },
       { path: 'settings', element: <SettingsPage /> },
