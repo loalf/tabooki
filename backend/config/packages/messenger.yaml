@@ -16,6 +16,7 @@ framework:
         routing:
             'App\Message\FetchSourceMetadata': async
             'App\Message\ExtractSource': async
+            'App\Message\ClassifyIngredients': async
 
 when@test:
     framework:

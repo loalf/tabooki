@@ -52,7 +52,7 @@ To add another app later: give it localhost ports, add a `use_backend` line and 
    ```
 
    Keep a copy in your password manager.
-3. Start Tabooki: `cd /opt/tabooki && make prod-up`.
+3. Start Tabooki: `cd /opt/tabooki && docker compose -f compose.yaml -f compose.prod.yaml up -d --build --wait`.
 4. Edge: copy `deploy/edge/` to `/opt/edge`, check it with
    `docker run --rm -v /opt/edge/haproxy.cfg:/c.cfg:ro haproxy:3.2-alpine haproxy -c -f /c.cfg`,
    move rootware's ports (`.env` above, then
@@ -73,11 +73,12 @@ rebuild on the server:
 
 ```sh
 git ls-files -co --exclude-standard | rsync -az --files-from=- ./ demo.rootware.xyz:/opt/tabooki/
-ssh demo.rootware.xyz 'cd /opt/tabooki && make prod-up'
+ssh demo.rootware.xyz 'cd /opt/tabooki && docker compose -f compose.yaml -f compose.prod.yaml up -d --build --wait'
 ```
 
-`make prod-up` builds the image, runs migrations and restarts php and worker. Logs:
-`make prod-logs`.
+That builds the image, runs migrations (php's entrypoint) and restarts php and worker. The
+server has no `make`, so the Makefile's `prod-*` targets are for a server that does. Logs:
+`docker compose -f compose.yaml -f compose.prod.yaml logs -f worker`.
 
 ## Phones
 

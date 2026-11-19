@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/api/ingredients/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Updates the Ingredient resource.
+         * @description Updates the Ingredient resource.
+         */
+        patch: operations["api_ingredients_id_patch"];
+        trace?: never;
+    };
     "/api/me": {
         parameters: {
             query?: never;
@@ -292,6 +312,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/shopping-lists/{week}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a ShoppingList resource.
+         * @description Retrieves a ShoppingList resource.
+         */
+        get: operations["api_shopping-lists_week_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shopping-lists/{week}/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a ShoppingList resource.
+         * @description Creates a ShoppingList resource.
+         */
+        post: operations["shopping_list_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shopping-lists/{week}/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a ShoppingList resource.
+         * @description Creates a ShoppingList resource.
+         */
+        post: operations["shopping_list_add_item"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/shopping-lists/{week}/items/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a ShoppingList resource.
+         * @description Creates a ShoppingList resource.
+         */
+        post: operations["shopping_list_remove_item"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/sources": {
         parameters: {
             query?: never;
@@ -517,6 +617,72 @@ export interface components {
             });
             "@id": string;
             "@type": string;
+        };
+        /**
+         * @description The household's catalog of ingredients, one per canonical key ("onion", whatever the recipe
+         *     language), so a shopping list can merge them, name them in each viewer's language and put
+         *     them in the right aisle (docs/PLAN.md §7). New ones are classified by the text model
+         *     (ClassifyIngredientsHandler); a fix made in the app is kept for good.
+         */
+        "Ingredient-ingredient.read": {
+            /** Format: uuid */
+            readonly id?: string;
+            canonicalKey?: string;
+            nameEs?: string | null;
+            nameEn?: string | null;
+            /**
+             * @default other
+             * @enum {string}
+             */
+            aisle: "produce" | "meat_fish" | "dairy_eggs" | "bakery" | "pantry" | "spices" | "frozen" | "drinks" | "other";
+            /**
+             * @description Always in the kitchen (salt, oil…): listed apart, to check rather than buy.
+             * @default false
+             */
+            staple: boolean;
+        };
+        /**
+         * @description The household's catalog of ingredients, one per canonical key ("onion", whatever the recipe
+         *     language), so a shopping list can merge them, name them in each viewer's language and put
+         *     them in the right aisle (docs/PLAN.md §7). New ones are classified by the text model
+         *     (ClassifyIngredientsHandler); a fix made in the app is kept for good.
+         */
+        "Ingredient-ingredient.write.jsonMergePatch": {
+            nameEs?: string | null;
+            nameEn?: string | null;
+            /**
+             * @default other
+             * @enum {string}
+             */
+            aisle: "produce" | "meat_fish" | "dairy_eggs" | "bakery" | "pantry" | "spices" | "frozen" | "drinks" | "other";
+            /**
+             * @description Always in the kitchen (salt, oil…): listed apart, to check rather than buy.
+             * @default false
+             */
+            staple: boolean;
+        };
+        /**
+         * @description The household's catalog of ingredients, one per canonical key ("onion", whatever the recipe
+         *     language), so a shopping list can merge them, name them in each viewer's language and put
+         *     them in the right aisle (docs/PLAN.md §7). New ones are classified by the text model
+         *     (ClassifyIngredientsHandler); a fix made in the app is kept for good.
+         */
+        "Ingredient.jsonld-ingredient.read": components["schemas"]["HydraItemBaseSchema"] & {
+            /** Format: uuid */
+            readonly id?: string;
+            canonicalKey?: string;
+            nameEs?: string | null;
+            nameEn?: string | null;
+            /**
+             * @default other
+             * @enum {string}
+             */
+            aisle: "produce" | "meat_fish" | "dairy_eggs" | "bakery" | "pantry" | "spices" | "frozen" | "drinks" | "other";
+            /**
+             * @description Always in the kitchen (salt, oil…): listed apart, to check rather than buy.
+             * @default false
+             */
+            staple: boolean;
         };
         /** @description The signed-in user and their household: what the SPA needs to boot. */
         "Me-me.read": {
@@ -1076,6 +1242,144 @@ export interface components {
             readonly token?: string | null;
         };
         /**
+         * @description A week's shopping list (see App\Shopping\ShoppingListBuilder). Every action answers with the
+         *     whole list. Lines are identified by `key`: the ingredient key, or "item:<id>" for items
+         *     added by hand.
+         */
+        ShoppingList: {
+            /** Format: date */
+            week?: string;
+            /**
+             * @description Whether the week has a meal plan.
+             * @default false
+             */
+            planned: boolean;
+            /**
+             * @description Planned meals counted (with a recipe, from `from` on).
+             * @default 0
+             */
+            meals: number;
+            /** Format: date */
+            from?: string | null;
+            /**
+             * @description Some ingredients are still being named and sorted into aisles (refresh in a moment).
+             * @default false
+             */
+            classifying: boolean;
+            /** @description by aisle, then name; items added by hand last */
+            items?: components["schemas"]["ShoppingListViewItem"][];
+        };
+        /** @description Check a line off, or uncheck it. */
+        "ShoppingList.ShoppingCheckInput": {
+            /** @default  */
+            key: string;
+            /** @default true */
+            checked: boolean;
+        };
+        /** @description Add something by hand. */
+        "ShoppingList.ShoppingItemInput": {
+            /** @default  */
+            text: string;
+        };
+        /**
+         * @description A week's shopping list (see App\Shopping\ShoppingListBuilder). Every action answers with the
+         *     whole list. Lines are identified by `key`: the ingredient key, or "item:<id>" for items
+         *     added by hand.
+         */
+        "ShoppingList.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            /** Format: date */
+            week?: string;
+            /**
+             * @description Whether the week has a meal plan.
+             * @default false
+             */
+            planned: boolean;
+            /**
+             * @description Planned meals counted (with a recipe, from `from` on).
+             * @default 0
+             */
+            meals: number;
+            /** Format: date */
+            from?: string | null;
+            /**
+             * @description Some ingredients are still being named and sorted into aisles (refresh in a moment).
+             * @default false
+             */
+            classifying: boolean;
+            /** @description by aisle, then name; items added by hand last */
+            items?: components["schemas"]["ShoppingListViewItem.jsonld"][];
+        };
+        ShoppingListViewItem: {
+            /**
+             * @description Identifies the line for checking it off: the ingredient key, or "item:<id>".
+             * @default
+             */
+            key: string;
+            /** Format: uuid */
+            ingredientId?: string | null;
+            /**
+             * @description In the viewer's language when known, else as the recipe has it.
+             * @default
+             */
+            name: string;
+            /** @enum {string} */
+            aisle?: "produce" | "meat_fish" | "dairy_eggs" | "bakery" | "pantry" | "spices" | "frozen" | "drinks" | "other";
+            /**
+             * @description Usually at home already: shown apart, to check.
+             * @default false
+             */
+            staple: boolean;
+            /**
+             * @description Added by hand.
+             * @default false
+             */
+            manual: boolean;
+            amounts?: {
+                quantity: number;
+                /** @enum {string|null} */
+                unit: "g" | "kg" | "ml" | "l" | "tsp" | "tbsp" | "pinch" | "clove" | "can" | "slice" | "bunch" | "sprig" | "piece" | "pack" | null;
+            }[];
+            /** @description titles of the recipes that need it */
+            recipes?: string[];
+            /** @default false */
+            checked: boolean;
+        };
+        "ShoppingListViewItem.jsonld": {
+            /**
+             * @description Identifies the line for checking it off: the ingredient key, or "item:<id>".
+             * @default
+             */
+            key: string;
+            /** Format: uuid */
+            ingredientId?: string | null;
+            /**
+             * @description In the viewer's language when known, else as the recipe has it.
+             * @default
+             */
+            name: string;
+            /** @enum {string} */
+            aisle?: "produce" | "meat_fish" | "dairy_eggs" | "bakery" | "pantry" | "spices" | "frozen" | "drinks" | "other";
+            /**
+             * @description Usually at home already: shown apart, to check.
+             * @default false
+             */
+            staple: boolean;
+            /**
+             * @description Added by hand.
+             * @default false
+             */
+            manual: boolean;
+            amounts?: {
+                quantity: number;
+                /** @enum {string|null} */
+                unit: "g" | "kg" | "ml" | "l" | "tsp" | "tbsp" | "pinch" | "clove" | "can" | "slice" | "bunch" | "sprig" | "piece" | "pack" | null;
+            }[];
+            /** @description titles of the recipes that need it */
+            recipes?: string[];
+            /** @default false */
+            checked: boolean;
+        };
+        /**
          * @description A link saved to the library (blog post, YouTube video, Instagram reel, ...).
          *     Extraction (M2) turns it into one or more recipes; until then it can be turned
          *     into a recipe by hand.
@@ -1262,6 +1566,79 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    api_ingredients_id_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Ingredient identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The updated Ingredient resource */
+        requestBody: {
+            content: {
+                "application/merge-patch+json": components["schemas"]["Ingredient-ingredient.write.jsonMergePatch"];
+            };
+        };
+        responses: {
+            /** @description Ingredient resource updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Ingredient.jsonld-ingredient.read"];
+                    "application/json": components["schemas"]["Ingredient-ingredient.read"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
     api_me_get: {
         parameters: {
             query?: never;
@@ -2269,6 +2646,253 @@ export interface operations {
                     "application/ld+json": components["schemas"]["Error.jsonld"];
                     "application/problem+json": components["schemas"]["Error"];
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    "api_shopping-lists_week_get": {
+        parameters: {
+            query?: {
+                /** @description Only meals from this day on (what's left of the week) */
+                from?: string;
+            };
+            header?: never;
+            path: {
+                /** @description ShoppingList identifier */
+                week: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ShoppingList resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ShoppingList.jsonld"];
+                    "application/json": components["schemas"]["ShoppingList"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shopping_list_check: {
+        parameters: {
+            query?: {
+                /** @description Only meals from this day on (what's left of the week) */
+                from?: string;
+            };
+            header?: never;
+            path: {
+                /** @description ShoppingList identifier */
+                week: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new ShoppingList resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["ShoppingList.ShoppingCheckInput"];
+                "application/json": components["schemas"]["ShoppingList.ShoppingCheckInput"];
+            };
+        };
+        responses: {
+            /** @description ShoppingList resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ShoppingList.jsonld"];
+                    "application/json": components["schemas"]["ShoppingList"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    shopping_list_add_item: {
+        parameters: {
+            query?: {
+                /** @description Only meals from this day on (what's left of the week) */
+                from?: string;
+            };
+            header?: never;
+            path: {
+                /** @description ShoppingList identifier */
+                week: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new ShoppingList resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["ShoppingList.ShoppingItemInput"];
+                "application/json": components["schemas"]["ShoppingList.ShoppingItemInput"];
+            };
+        };
+        responses: {
+            /** @description ShoppingList resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ShoppingList.jsonld"];
+                    "application/json": components["schemas"]["ShoppingList"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    shopping_list_remove_item: {
+        parameters: {
+            query?: {
+                /** @description Only meals from this day on (what's left of the week) */
+                from?: string;
+            };
+            header?: never;
+            path: {
+                /** @description ShoppingList identifier */
+                week: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new ShoppingList resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["ShoppingList.ShoppingCheckInput"];
+                "application/json": components["schemas"]["ShoppingList.ShoppingCheckInput"];
+            };
+        };
+        responses: {
+            /** @description ShoppingList resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ShoppingList.jsonld"];
+                    "application/json": components["schemas"]["ShoppingList"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
                 };
             };
         };

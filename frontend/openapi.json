@@ -12,6 +12,143 @@
         }
     ],
     "paths": {
+        "/api/ingredients/{id}": {
+            "patch": {
+                "operationId": "api_ingredients_id_patch",
+                "tags": [
+                    "Ingredient"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ingredient resource updated",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ingredient.jsonld-ingredient.read"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ingredient-ingredient.read"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Updates the Ingredient resource.",
+                "description": "Updates the Ingredient resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Ingredient identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The updated Ingredient resource",
+                    "content": {
+                        "application/merge-patch+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Ingredient-ingredient.write.jsonMergePatch"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
         "/api/me": {
             "get": {
                 "operationId": "api_me_get",
@@ -1912,6 +2049,504 @@
                 ]
             }
         },
+        "/api/shopping-lists/{week}": {
+            "get": {
+                "operationId": "api_shopping-lists_week_get",
+                "tags": [
+                    "ShoppingList"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ShoppingList resource",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShoppingList.jsonld"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShoppingList"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves a ShoppingList resource.",
+                "description": "Retrieves a ShoppingList resource.",
+                "parameters": [
+                    {
+                        "name": "week",
+                        "in": "path",
+                        "description": "ShoppingList identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    },
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "description": "Only meals from this day on (what's left of the week)",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "style": "form",
+                        "explode": true
+                    }
+                ]
+            }
+        },
+        "/api/shopping-lists/{week}/check": {
+            "post": {
+                "operationId": "shopping_list_check",
+                "tags": [
+                    "ShoppingList"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ShoppingList resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShoppingList.jsonld"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShoppingList"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a ShoppingList resource.",
+                "description": "Creates a ShoppingList resource.",
+                "parameters": [
+                    {
+                        "name": "week",
+                        "in": "path",
+                        "description": "ShoppingList identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    },
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "description": "Only meals from this day on (what's left of the week)",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "style": "form",
+                        "explode": true
+                    }
+                ],
+                "requestBody": {
+                    "description": "The new ShoppingList resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShoppingList.ShoppingCheckInput"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShoppingList.ShoppingCheckInput"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/shopping-lists/{week}/items": {
+            "post": {
+                "operationId": "shopping_list_add_item",
+                "tags": [
+                    "ShoppingList"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ShoppingList resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShoppingList.jsonld"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShoppingList"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a ShoppingList resource.",
+                "description": "Creates a ShoppingList resource.",
+                "parameters": [
+                    {
+                        "name": "week",
+                        "in": "path",
+                        "description": "ShoppingList identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    },
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "description": "Only meals from this day on (what's left of the week)",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "style": "form",
+                        "explode": true
+                    }
+                ],
+                "requestBody": {
+                    "description": "The new ShoppingList resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShoppingList.ShoppingItemInput"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShoppingList.ShoppingItemInput"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/shopping-lists/{week}/items/remove": {
+            "post": {
+                "operationId": "shopping_list_remove_item",
+                "tags": [
+                    "ShoppingList"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ShoppingList resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShoppingList.jsonld"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShoppingList"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a ShoppingList resource.",
+                "description": "Creates a ShoppingList resource.",
+                "parameters": [
+                    {
+                        "name": "week",
+                        "in": "path",
+                        "description": "ShoppingList identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    },
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "description": "Only meals from this day on (what's left of the week)",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "style": "form",
+                        "explode": true
+                    }
+                ],
+                "requestBody": {
+                    "description": "The new ShoppingList resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShoppingList.ShoppingCheckInput"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShoppingList.ShoppingCheckInput"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
         "/api/sources": {
             "get": {
                 "operationId": "api_sources_get_collection",
@@ -3010,6 +3645,149 @@
                     "@id",
                     "@type"
                 ]
+            },
+            "Ingredient-ingredient.read": {
+                "type": "object",
+                "description": "The household's catalog of ingredients, one per canonical key (\"onion\", whatever the recipe\nlanguage), so a shopping list can merge them, name them in each viewer's language and put\nthem in the right aisle (docs/PLAN.md \u00a77). New ones are classified by the text model\n(ClassifyIngredientsHandler); a fix made in the app is kept for good.",
+                "properties": {
+                    "id": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "canonicalKey": {
+                        "type": "string"
+                    },
+                    "nameEs": {
+                        "maxLength": 100,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "nameEn": {
+                        "maxLength": 100,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "aisle": {
+                        "default": "other",
+                        "type": "string",
+                        "enum": [
+                            "produce",
+                            "meat_fish",
+                            "dairy_eggs",
+                            "bakery",
+                            "pantry",
+                            "spices",
+                            "frozen",
+                            "drinks",
+                            "other"
+                        ]
+                    },
+                    "staple": {
+                        "description": "Always in the kitchen (salt, oil\u2026): listed apart, to check rather than buy.",
+                        "default": false,
+                        "type": "boolean"
+                    }
+                }
+            },
+            "Ingredient-ingredient.write.jsonMergePatch": {
+                "type": "object",
+                "description": "The household's catalog of ingredients, one per canonical key (\"onion\", whatever the recipe\nlanguage), so a shopping list can merge them, name them in each viewer's language and put\nthem in the right aisle (docs/PLAN.md \u00a77). New ones are classified by the text model\n(ClassifyIngredientsHandler); a fix made in the app is kept for good.",
+                "properties": {
+                    "nameEs": {
+                        "maxLength": 100,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "nameEn": {
+                        "maxLength": 100,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "aisle": {
+                        "default": "other",
+                        "type": "string",
+                        "enum": [
+                            "produce",
+                            "meat_fish",
+                            "dairy_eggs",
+                            "bakery",
+                            "pantry",
+                            "spices",
+                            "frozen",
+                            "drinks",
+                            "other"
+                        ]
+                    },
+                    "staple": {
+                        "description": "Always in the kitchen (salt, oil\u2026): listed apart, to check rather than buy.",
+                        "default": false,
+                        "type": "boolean"
+                    }
+                }
+            },
+            "Ingredient.jsonld-ingredient.read": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "canonicalKey": {
+                                "type": "string"
+                            },
+                            "nameEs": {
+                                "maxLength": 100,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "nameEn": {
+                                "maxLength": 100,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "aisle": {
+                                "default": "other",
+                                "type": "string",
+                                "enum": [
+                                    "produce",
+                                    "meat_fish",
+                                    "dairy_eggs",
+                                    "bakery",
+                                    "pantry",
+                                    "spices",
+                                    "frozen",
+                                    "drinks",
+                                    "other"
+                                ]
+                            },
+                            "staple": {
+                                "description": "Always in the kitchen (salt, oil\u2026): listed apart, to check rather than buy.",
+                                "default": false,
+                                "type": "boolean"
+                            }
+                        }
+                    }
+                ],
+                "description": "The household's catalog of ingredients, one per canonical key (\"onion\", whatever the recipe\nlanguage), so a shopping list can merge them, name them in each viewer's language and put\nthem in the right aisle (docs/PLAN.md \u00a77). New ones are classified by the text model\n(ClassifyIngredientsHandler); a fix made in the app is kept for good."
             },
             "Me-me.read": {
                 "type": "object",
@@ -4692,6 +5470,313 @@
                 ],
                 "description": "A personal token that lets one device save links without a session: the iPhone Shortcut\nsends it to POST /api/share (ShareController). Only its SHA-256 hash is stored; the token\nitself is shown once, when created. It can do nothing else."
             },
+            "ShoppingList": {
+                "type": "object",
+                "description": "A week's shopping list (see App\\Shopping\\ShoppingListBuilder). Every action answers with the\nwhole list. Lines are identified by `key`: the ingredient key, or \"item:<id>\" for items\nadded by hand.",
+                "properties": {
+                    "week": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "planned": {
+                        "description": "Whether the week has a meal plan.",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "meals": {
+                        "description": "Planned meals counted (with a recipe, from `from` on).",
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "from": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date"
+                    },
+                    "classifying": {
+                        "description": "Some ingredients are still being named and sorted into aisles (refresh in a moment).",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "items": {
+                        "description": "by aisle, then name; items added by hand last",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ShoppingListViewItem"
+                        }
+                    }
+                }
+            },
+            "ShoppingList.ShoppingCheckInput": {
+                "type": "object",
+                "description": "Check a line off, or uncheck it.",
+                "required": [
+                    "key"
+                ],
+                "properties": {
+                    "key": {
+                        "maxLength": 120,
+                        "default": "",
+                        "type": "string"
+                    },
+                    "checked": {
+                        "default": true,
+                        "type": "boolean"
+                    }
+                }
+            },
+            "ShoppingList.ShoppingItemInput": {
+                "type": "object",
+                "description": "Add something by hand.",
+                "required": [
+                    "text"
+                ],
+                "properties": {
+                    "text": {
+                        "maxLength": 200,
+                        "default": "",
+                        "type": "string"
+                    }
+                }
+            },
+            "ShoppingList.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "week": {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            "planned": {
+                                "description": "Whether the week has a meal plan.",
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "meals": {
+                                "description": "Planned meals counted (with a recipe, from `from` on).",
+                                "default": 0,
+                                "type": "integer"
+                            },
+                            "from": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date"
+                            },
+                            "classifying": {
+                                "description": "Some ingredients are still being named and sorted into aisles (refresh in a moment).",
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "items": {
+                                "description": "by aisle, then name; items added by hand last",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/ShoppingListViewItem.jsonld"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "A week's shopping list (see App\\Shopping\\ShoppingListBuilder). Every action answers with the\nwhole list. Lines are identified by `key`: the ingredient key, or \"item:<id>\" for items\nadded by hand."
+            },
+            "ShoppingListViewItem": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "description": "Identifies the line for checking it off: the ingredient key, or \"item:<id>\".",
+                        "default": "",
+                        "type": "string"
+                    },
+                    "ingredientId": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "description": "In the viewer's language when known, else as the recipe has it.",
+                        "default": "",
+                        "type": "string"
+                    },
+                    "aisle": {
+                        "type": "string",
+                        "enum": [
+                            "produce",
+                            "meat_fish",
+                            "dairy_eggs",
+                            "bakery",
+                            "pantry",
+                            "spices",
+                            "frozen",
+                            "drinks",
+                            "other"
+                        ]
+                    },
+                    "staple": {
+                        "description": "Usually at home already: shown apart, to check.",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "manual": {
+                        "description": "Added by hand.",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "amounts": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "quantity",
+                                "unit"
+                            ],
+                            "properties": {
+                                "quantity": {
+                                    "type": "number"
+                                },
+                                "unit": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "enum": [
+                                        "g",
+                                        "kg",
+                                        "ml",
+                                        "l",
+                                        "tsp",
+                                        "tbsp",
+                                        "pinch",
+                                        "clove",
+                                        "can",
+                                        "slice",
+                                        "bunch",
+                                        "sprig",
+                                        "piece",
+                                        "pack",
+                                        null
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "recipes": {
+                        "description": "titles of the recipes that need it",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "checked": {
+                        "default": false,
+                        "type": "boolean"
+                    }
+                }
+            },
+            "ShoppingListViewItem.jsonld": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "description": "Identifies the line for checking it off: the ingredient key, or \"item:<id>\".",
+                        "default": "",
+                        "type": "string"
+                    },
+                    "ingredientId": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "description": "In the viewer's language when known, else as the recipe has it.",
+                        "default": "",
+                        "type": "string"
+                    },
+                    "aisle": {
+                        "type": "string",
+                        "enum": [
+                            "produce",
+                            "meat_fish",
+                            "dairy_eggs",
+                            "bakery",
+                            "pantry",
+                            "spices",
+                            "frozen",
+                            "drinks",
+                            "other"
+                        ]
+                    },
+                    "staple": {
+                        "description": "Usually at home already: shown apart, to check.",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "manual": {
+                        "description": "Added by hand.",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "amounts": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "quantity",
+                                "unit"
+                            ],
+                            "properties": {
+                                "quantity": {
+                                    "type": "number"
+                                },
+                                "unit": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "enum": [
+                                        "g",
+                                        "kg",
+                                        "ml",
+                                        "l",
+                                        "tsp",
+                                        "tbsp",
+                                        "pinch",
+                                        "clove",
+                                        "can",
+                                        "slice",
+                                        "bunch",
+                                        "sprig",
+                                        "piece",
+                                        "pack",
+                                        null
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "recipes": {
+                        "description": "titles of the recipes that need it",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "checked": {
+                        "default": false,
+                        "type": "boolean"
+                    }
+                }
+            },
             "Source-meal_plan.read_recipe.list": {
                 "type": "object",
                 "description": "A link saved to the library (blog post, YouTube video, Instagram reel, ...).\nExtraction (M2) turns it into one or more recipes; until then it can be turned\ninto a recipe by hand.",
@@ -5190,6 +6275,14 @@
         {
             "name": "RecipeTag",
             "description": "A tag used in the household's library and how many recipes carry it: the library's filter chips."
+        },
+        {
+            "name": "ShoppingList",
+            "description": "A week's shopping list (see App\\Shopping\\ShoppingListBuilder). Every action answers with the\nwhole list. Lines are identified by `key`: the ingredient key, or \"item:<id>\" for items\nadded by hand."
+        },
+        {
+            "name": "Ingredient",
+            "description": "The household's catalog of ingredients, one per canonical key (\"onion\", whatever the recipe\nlanguage), so a shopping list can merge them, name them in each viewer's language and put\nthem in the right aisle (docs/PLAN.md \u00a77). New ones are classified by the text model\n(ClassifyIngredientsHandler); a fix made in the app is kept for good."
         },
         {
             "name": "MealPlan",
