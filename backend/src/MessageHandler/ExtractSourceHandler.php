@@ -87,7 +87,7 @@ final readonly class ExtractSourceHandler
             $this->entityManager->flush();
 
             $result = $evidence->hasText() ? $this->run($source, 'text', fn (): ExtractionResult => $this->extractor->fromText($evidence, $locale)) : null;
-            if ('complete' !== $result?->status && $this->canWatch($evidence)) {
+            if ('complete' !== $result?->status && self::canWatch($evidence)) {
                 $result = $this->better($result, $this->watch($source, $evidence, $locale));
             }
 
@@ -103,9 +103,10 @@ final readonly class ExtractSourceHandler
         $this->entityManager->flush();
     }
 
-    private function canWatch(Evidence $evidence): bool
+    /** A video of known, reasonable length: photo and carousel posts have no duration. */
+    public static function canWatch(Evidence $evidence): bool
     {
-        return $evidence->isVideo() && ($evidence->durationSeconds ?? 0) <= self::MAX_VIDEO_SECONDS;
+        return $evidence->isVideo() && ($evidence->durationSeconds ?? 0) > 0 && $evidence->durationSeconds <= self::MAX_VIDEO_SECONDS;
     }
 
     private function watch(Source $source, Evidence $evidence, string $locale): ?ExtractionResult
@@ -125,6 +126,11 @@ final readonly class ExtractSourceHandler
             $bytes = (string) file_get_contents($file);
 
             return $this->run($source, 'video', fn (): ExtractionResult => $this->extractor->fromVideo($evidence, $bytes, $locale));
+        } catch (LlmException|ExtractionException $e) {
+            // Logged as a failed run; whatever the text step found still counts.
+            $this->logger->warning('Video extraction failed for {url}: {error}', ['url' => $source->getUrl(), 'error' => $e->getMessage()]);
+
+            return null;
         } finally {
             @unlink($file);
             @rmdir(\dirname($file));
@@ -157,16 +163,32 @@ final readonly class ExtractSourceHandler
         return $count;
     }
 
-    /** @param callable(): ExtractionResult $extract */
+    /**
+     * One LLM call, logged in extraction_run. An answer the app can't read (no tool call, recipes
+     * as loose text) is asked for once more: it's rare and doesn't repeat.
+     *
+     * @param callable(): ExtractionResult $extract
+     */
     private function run(Source $source, string $step, callable $extract): ExtractionResult
     {
         $model = 'video' === $step ? $this->extractor->videoModel() : $this->extractor->textModel();
-        $started = hrtime(true);
-        try {
-            $result = $extract();
-        } catch (LlmException|ExtractionException $e) {
-            $this->entityManager->persist(new ExtractionRun($source, $step, 'bedrock', $model, 0, 0, null, false, $e->getMessage(), self::elapsedMs($started)));
-            throw $e;
+        for ($attempt = 1;; ++$attempt) {
+            $started = hrtime(true);
+            try {
+                $result = $extract();
+                break;
+            } catch (LlmException|ExtractionException $e) {
+                // An unreadable answer was still paid for.
+                $paid = $e instanceof ExtractionException ? $e->completion : null;
+                $this->entityManager->persist(new ExtractionRun(
+                    $source, $step, 'bedrock', $model, $paid->inputTokens ?? 0, $paid->outputTokens ?? 0,
+                    null === $paid ? null : $this->cost($model, $paid->inputTokens, $paid->outputTokens), false, $e->getMessage(), self::elapsedMs($started),
+                ));
+                if (!$e instanceof ExtractionException || $attempt >= 2) {
+                    throw $e;
+                }
+                $this->logger->info('Unreadable answer for {url}, asking again: {error}', ['url' => $source->getUrl(), 'error' => $e->getMessage()]);
+            }
         }
 
         $completion = $result->completion;

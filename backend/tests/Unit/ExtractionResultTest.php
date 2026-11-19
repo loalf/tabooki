@@ -69,6 +69,28 @@ final class ExtractionResultTest extends TestCase
         self::assertSame('no_recipe', $result->status);
     }
 
+    public function testListsSentAsJsonStringsAreRead(): void
+    {
+        // Seen in the extraction spike: Claude sometimes encodes a nested array as a string.
+        $recipe = ['title' => 'Gazpacho de melón', 'language' => 'es', 'ingredients' => '[{"raw": "500 g de melón", "name": "melón", "canonical_key": "melon", "quantity": 500, "unit": "g"}]', 'steps' => '["Triturar todo."]'];
+        $result = ExtractionResult::fromCompletion($this->completion(['status' => 'complete', 'confidence' => 0.9, 'recipes' => json_encode([$recipe])]));
+
+        self::assertSame('complete', $result->status);
+        self::assertCount(1, $result->recipes);
+        self::assertSame('melón', $result->recipes[0]->ingredients[0]['name']);
+        self::assertSame(['Triturar todo.'], $result->recipes[0]->steps);
+
+        // A single recipe object encoded as a string counts too; plain text doesn't.
+        self::assertCount(1, ExtractionResult::fromCompletion($this->completion(['status' => 'complete', 'confidence' => 0.9, 'recipes' => json_encode($recipe)]))->recipes);
+    }
+
+    public function testRecipesAsLooseTextAreAnErrorNotNoRecipe(): void
+    {
+        $this->expectException(ExtractionException::class);
+        $this->expectExceptionMessageMatches('/unreadable text \\(Gazpacho: melón/');
+        ExtractionResult::fromCompletion($this->completion(['status' => 'complete', 'confidence' => 0.9, 'recipes' => 'Gazpacho: melón, pepino…']));
+    }
+
     public function testAnAnswerWithoutTheToolIsAnError(): void
     {
         $this->expectException(ExtractionException::class);

@@ -31,12 +31,14 @@ final readonly class RecipeExtractor
     }
 
     /**
+     * @param bool|null $thinking null: as configured (EXTRACTION_THINKING)
+     *
      * @throws LlmException
      * @throws ExtractionException
      */
-    public function fromText(Evidence $evidence, string $interfaceLanguage): ExtractionResult
+    public function fromText(Evidence $evidence, string $interfaceLanguage, ?bool $thinking = null): ExtractionResult
     {
-        return $this->extract($this->textModel, [Content::text($evidence->toPrompt($interfaceLanguage))], $interfaceLanguage);
+        return $this->extract($this->textModel, [Content::text($evidence->toPrompt($interfaceLanguage))], $interfaceLanguage, thinking: $thinking);
     }
 
     /**
@@ -64,7 +66,7 @@ final readonly class RecipeExtractor
     }
 
     /** @param list<Content> $content */
-    private function extract(string $model, array $content, string $interfaceLanguage, int $maxTokens = 16000): ExtractionResult
+    private function extract(string $model, array $content, string $interfaceLanguage, int $maxTokens = 16000, ?bool $thinking = null): ExtractionResult
     {
         $completion = $this->llm->complete(new Prompt(
             model: $model,
@@ -74,7 +76,7 @@ final readonly class RecipeExtractor
             toolDescription: 'Save the recipes found in the material, or report that there is none.',
             toolSchema: ExtractionSchema::schema(),
             maxTokens: $maxTokens,
-            thinking: $this->thinking,
+            thinking: $thinking ?? $this->thinking,
         ));
 
         return ExtractionResult::fromCompletion($completion);

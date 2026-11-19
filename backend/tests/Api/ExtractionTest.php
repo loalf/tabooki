@@ -117,6 +117,61 @@ final class ExtractionTest extends ApiTestCase
         self::assertSame([], glob(sys_get_temp_dir().'/tabooki-test-video-*/video.mp4'), 'the downloaded video is deleted');
     }
 
+    public function testAFailedVideoStepKeepsWhatTheTextFound(): void
+    {
+        $url = 'https://instagram.com/reel/V1d3oF4il';
+        $id = $this->saveLink($url);
+        $this->media()->infos[$url] = new MediaInfo(title: 'Video by chef', description: 'Pasta: 200 g de pasta, 1 limón. Cocer y mezclar.', uploader: 'chef', durationSeconds: 45);
+        $this->media()->videos[$url] = 'fake-mp4-bytes';
+        $this->mockBedrock([
+            $this->answer('partial', 0.8, [$this->recipe('Pasta al limón')]),
+            new JsonMockResponse(['message' => 'Invalid Input: The input does not adhere to the expected standards.'], ['http_code' => 400]),
+        ]);
+
+        $this->runExtraction($id);
+
+        $source = $this->findSource($id);
+        self::assertSame('needs_review', $source->getStatus()->value);
+        self::assertSame(['Pasta al limón'], array_map(static fn ($r) => $r->getTitle(), $source->getRecipes()->toArray()));
+        self::assertSame([true, false], array_map(static fn (ExtractionRun $r): bool => $r->isOk(), $this->runs($id)));
+    }
+
+    public function testAnUnreadableAnswerIsAskedForAgain(): void
+    {
+        $url = 'https://example.com/gazpacho';
+        $id = $this->saveLink($url);
+        $this->mockPage($url, '<html><head><title>Gazpacho</title></head><body><article><p>Gazpacho: 500 g de melón. Triturar.</p></article></body></html>');
+        $this->runPreview($id);
+        $this->mockBedrock([
+            new JsonMockResponse([
+                'output' => ['message' => ['content' => [['toolUse' => ['toolUseId' => 't', 'name' => 'save_recipes', 'input' => ['status' => 'complete', 'confidence' => 0.9, 'recipes' => 'Gazpacho: melón…']]]]]],
+                'stopReason' => 'tool_use',
+                'usage' => ['inputTokens' => 900, 'outputTokens' => 400],
+            ]),
+            $this->answer('complete', 0.9, [$this->recipe('Gazpacho de melón')]),
+        ]);
+
+        $this->runExtraction($id);
+
+        self::assertSame('ready', $this->findSource($id)->getStatus()->value);
+        $runs = $this->runs($id);
+        self::assertSame([false, true], array_map(static fn (ExtractionRun $r): bool => $r->isOk(), $runs));
+        self::assertSame(400, $runs[0]->getOutputTokens(), 'the unreadable answer is still counted');
+    }
+
+    public function testAPhotoPostIsNotWatched(): void
+    {
+        $url = 'https://instagram.com/p/Ph0toP0st';
+        $id = $this->saveLink($url);
+        $this->media()->infos[$url] = new MediaInfo(title: 'Post by chef', description: 'Guiso: la receta en los comentarios', uploader: 'chef');
+        $this->mockBedrock([$this->answer('elsewhere', 0.9, [], message: 'La receta está en los comentarios.')]);
+
+        $this->runExtraction($id);
+
+        self::assertSame(['test.text-model'], array_column($this->bedrockRequests, 'model'));
+        self::assertSame('needs_input', $this->findSource($id)->getStatus()->value);
+    }
+
     public function testAnUnreadablePostAsksForTheText(): void
     {
         $url = 'https://instagram.com/p/PRIVATE1234';

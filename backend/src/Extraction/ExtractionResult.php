@@ -38,7 +38,7 @@ final readonly class ExtractionResult
     {
         $input = $completion->toolInput;
         if (null === $input) {
-            throw new ExtractionException(\sprintf('The model answered without calling %s (stop reason: %s).', ExtractionSchema::TOOL_NAME, $completion->stopReason));
+            throw new ExtractionException(\sprintf('The model answered without calling %s (stop reason: %s).', ExtractionSchema::TOOL_NAME, $completion->stopReason), $completion);
         }
 
         $status = \is_string($input['status'] ?? null) && \in_array($input['status'], ExtractionSchema::STATUSES, true) ? $input['status'] : 'partial';
@@ -50,6 +50,11 @@ final readonly class ExtractionResult
                     $recipes[] = $parsed;
                 }
             }
+        }
+        // Recipes sent as text that isn't JSON: unreadable, not "no recipe" (the handler retries).
+        $raw = $input['recipes'] ?? null;
+        if ([] === $recipes && \is_string($raw) && '' !== trim($raw) && 'no_recipe' !== $status) {
+            throw new ExtractionException(\sprintf('The model sent the recipes as unreadable text (%s…).', mb_substr($raw, 0, 80)), $completion);
         }
         if ([] === $recipes && \in_array($status, ['complete', 'partial'], true)) {
             $status = 'no_recipe';
@@ -118,6 +123,14 @@ final readonly class ExtractionResult
     /** @return list<mixed> */
     private static function list(mixed $value): array
     {
+        // Models sometimes send a nested array as a JSON-encoded string ("recipes": "[{...}]").
+        if (\is_string($value) && \in_array(ltrim($value)[0] ?? '', ['[', '{'], true)) {
+            $value = json_decode($value, true);
+            if (\is_array($value) && !array_is_list($value)) {
+                $value = [$value];
+            }
+        }
+
         return \is_array($value) ? array_values($value) : [];
     }
 

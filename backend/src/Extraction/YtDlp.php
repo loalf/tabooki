@@ -34,7 +34,8 @@ final readonly class YtDlp implements MediaFetcher
 
     public function info(string $url): MediaInfo
     {
-        $json = $this->run(['--dump-single-json', '--skip-download', '--no-playlist', $url], timeout: 90);
+        // --ignore-no-formats-error: photo and carousel posts have no video but do have a caption.
+        $json = $this->run(['--dump-single-json', '--skip-download', '--no-playlist', '--ignore-no-formats-error', $url], timeout: 90);
 
         try {
             $data = json_decode($json, true, 512, \JSON_THROW_ON_ERROR);
@@ -65,10 +66,17 @@ final readonly class YtDlp implements MediaFetcher
         mkdir($directory, 0700, true);
         $megabytes = intdiv($maxBytes, 1024 * 1024);
 
-        // A single file with audio and video (no ffmpeg merge needed), as small as is still watchable.
+        // One H.264 mp4 file, no ffmpeg merge: with audio when there is one (Instagram, TikTok), else
+        // the picture alone (YouTube mostly serves separate streams now). Nova only reads the
+        // picture (what is said comes from the transcript) and rejects AV1/VP9.
         $this->run([
             '--no-playlist',
-            '-f', \sprintf('b[ext=mp4][filesize<%1$dM]/b[ext=mp4][filesize_approx<%1$dM]/b[ext=mp4][height<=720]/w[ext=mp4]', $megabytes),
+            '-f', \sprintf(
+                'b[ext=mp4][vcodec^=avc1][filesize<%1$dM]/b[ext=mp4][vcodec^=avc1][filesize_approx<%1$dM]/b[ext=mp4][vcodec^=avc1][height<=720]'
+                .'/bv[ext=mp4][vcodec^=avc1][height<=720][filesize<%1$dM]/bv[ext=mp4][vcodec^=avc1][height<=720][filesize_approx<%1$dM]'
+                .'/bv[ext=mp4][vcodec^=avc1][height<=480]/b[ext=mp4][height<=720]/w[ext=mp4]',
+                $megabytes,
+            ),
             '--max-filesize', (string) $maxBytes,
             '-o', $directory.'/video.%(ext)s',
             $url,

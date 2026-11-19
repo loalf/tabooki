@@ -28,7 +28,9 @@ final class HtmlText
         \assert($root instanceof \Dom\Element);
 
         foreach ($root->querySelectorAll(self::NOISE) as $element) {
-            $element->remove();
+            // Not $element->remove(): PHP throws "Not Found Error" for nodes without a parent
+            // (seen on x.com's inline SVGs).
+            $element->parentNode?->removeChild($element);
         }
         foreach ($root->querySelectorAll(self::BLOCKS) as $element) {
             $element->append("\n");
