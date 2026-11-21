@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\ApiResource\Me;
 use App\Entity\User;
+use App\Extraction\RecipeExtractor;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -21,6 +22,7 @@ final readonly class MeProcessor implements ProcessorInterface
 {
     public function __construct(
         private Security $security,
+        private RecipeExtractor $extractor,
         private EntityManagerInterface $entityManager,
     ) {
     }
@@ -37,6 +39,6 @@ final readonly class MeProcessor implements ProcessorInterface
         $user->setLocale($data->locale);
         $this->entityManager->flush();
 
-        return Me::fromUser($user);
+        return Me::fromUser($user, [$this->extractor->textModel(), $this->extractor->videoModel()]);
     }
 }

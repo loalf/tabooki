@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\MessageHandler;
 
+use App\Entity\ExtractionRun;
 use App\Entity\Household;
 use App\Entity\Ingredient;
 use App\Enum\Aisle;
 use App\Llm\Content;
 use App\Llm\LlmClient;
 use App\Llm\LlmException;
+use App\Llm\Pricing;
 use App\Llm\Prompt;
 use App\Message\ClassifyIngredients;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,6 +24,7 @@ use Symfony\Component\Uid\Uuid;
  * Asks the text model to name the household's new ingredients in Spanish and English, put each
  * in an aisle and say whether it's a pantry staple. One call for up to 150 of them. On failure
  * they stay as they are (recipe names, "other" aisle) and are tried again with the next new ones.
+ * Each call is logged in extraction_run (step "classify") for the costs page.
  */
 #[AsMessageHandler]
 final readonly class ClassifyIngredientsHandler
@@ -33,6 +36,7 @@ final readonly class ClassifyIngredientsHandler
         private EntityManagerInterface $entityManager,
         private LlmClient $llm,
         private LoggerInterface $logger,
+        private Pricing $pricing,
         #[Autowire('%env(BEDROCK_TEXT_MODEL)%')]
         private string $model,
     ) {
@@ -54,6 +58,7 @@ final readonly class ClassifyIngredientsHandler
             static fn (Ingredient $i): string => \sprintf('- %s (seen as: %s)', $i->getCanonicalKey(), $i->getNameEs() ?? $i->getNameEn() ?? $i->getCanonicalKey()),
             $pending,
         );
+        $started = hrtime(true);
         try {
             $completion = $this->llm->complete(new Prompt(
                 model: $this->model,
@@ -67,9 +72,15 @@ final readonly class ClassifyIngredientsHandler
             ));
         } catch (LlmException $e) {
             $this->logger->warning('Ingredient classification failed: {error}', ['error' => $e->getMessage()]);
+            $this->entityManager->persist(new ExtractionRun($household, null, 'classify', 'bedrock', $this->model, 0, 0, null, false, $e->getMessage(), self::elapsedMs($started)));
+            $this->entityManager->flush();
 
             return;
         }
+        $this->entityManager->persist(new ExtractionRun(
+            $household, null, 'classify', 'bedrock', $completion->model, $completion->inputTokens, $completion->outputTokens,
+            $this->pricing->cost($completion->model, $completion->inputTokens, $completion->outputTokens), true, null, self::elapsedMs($started),
+        ));
 
         $byKey = [];
         foreach ($pending as $ingredient) {
@@ -92,6 +103,11 @@ final readonly class ClassifyIngredientsHandler
         $this->logger->info('Classified {count} ingredients ({in} in / {out} out tokens)', [
             'count' => \count($answers), 'in' => $completion->inputTokens, 'out' => $completion->outputTokens,
         ]);
+    }
+
+    private static function elapsedMs(int|float $started): int
+    {
+        return (int) ((hrtime(true) - $started) / 1_000_000);
     }
 
     private const string INSTRUCTIONS = <<<'TXT'

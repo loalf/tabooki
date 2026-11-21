@@ -38,6 +38,11 @@ class MealPlanEntry
     #[Groups(['meal_plan:read'])]
     private bool $locked = false;
 
+    /** How it turned out this time (1-5), given after eating it; also becomes the recipe's rating. */
+    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    #[Groups(['meal_plan:read'])]
+    private ?int $rating = null;
+
     /** This meal is what was left of another one (cook once, eat twice). */
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
@@ -110,6 +115,9 @@ class MealPlanEntry
 
     public function setRecipe(?Recipe $recipe): void
     {
+        if ($recipe !== $this->recipe) {
+            $this->rating = null;
+        }
         $this->recipe = $recipe;
     }
 
@@ -137,6 +145,22 @@ class MealPlanEntry
     public function setLocked(bool $locked): void
     {
         $this->locked = $locked;
+    }
+
+    public function getRating(): ?int
+    {
+        return $this->rating;
+    }
+
+    /**
+     * Rating a meal rates its recipe too (the latest meal is the best guide for the planner), and
+     * locks it: it was eaten, regenerating the week mustn't rewrite it.
+     */
+    public function rate(int $rating): void
+    {
+        $this->rating = $rating;
+        $this->locked = true;
+        $this->recipe?->setRating($rating);
     }
 
     public function getLeftoverOf(): ?self

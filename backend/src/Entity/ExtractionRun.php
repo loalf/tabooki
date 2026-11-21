@@ -9,9 +9,13 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-/** One LLM call made to extract a link: what it cost and whether it worked (docs/PLAN.md §5). */
+/**
+ * One paid LLM call: extracting a link ("text", "video") or sorting new ingredients into aisles
+ * ("classify"). What it cost and whether it worked (docs/PLAN.md §5); the costs page adds them up.
+ */
 #[ORM\Entity]
 #[ORM\Index(name: 'extraction_run_created', columns: ['created_at'])]
+#[ORM\Index(name: 'extraction_run_household_created', columns: ['household_id', 'created_at'])]
 class ExtractionRun
 {
     #[ORM\Id]
@@ -24,8 +28,12 @@ class ExtractionRun
     public function __construct(
         #[ORM\ManyToOne]
         #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-        private Source $source,
-        /** "text" or "video" */
+        private Household $household,
+        /** The link extracted; null for calls about no link (classify), or once the link is deleted. */
+        #[ORM\ManyToOne]
+        #[ORM\JoinColumn(onDelete: 'SET NULL')]
+        private ?Source $source,
+        /** "text", "video" or "classify" */
         #[ORM\Column(length: 20)]
         private string $step,
         #[ORM\Column(length: 30)]
@@ -50,7 +58,12 @@ class ExtractionRun
         $this->error = null === $error ? null : mb_substr($error, 0, 1000);
     }
 
-    public function getSource(): Source
+    public function getHousehold(): Household
+    {
+        return $this->household;
+    }
+
+    public function getSource(): ?Source
     {
         return $this->source;
     }

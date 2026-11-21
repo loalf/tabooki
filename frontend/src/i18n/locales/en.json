@@ -124,7 +124,17 @@
       "fix": "Fix it"
     },
     "originalText": "Original text",
-    "extractedBy": "Extracted with {{model}}"
+    "extractedBy": "Extracted with {{model}}",
+    "reextract": {
+      "typed": "Written by hand from the link",
+      "newer": "a newer model is available",
+      "action": "Extract again",
+      "confirm": "Yes, extract again",
+      "confirmHint": "The link is read again with the current model and the ingredients, steps and times are replaced (your corrections are lost). The rating, favorite and menu stay.",
+      "working": "Extracting again… this can take a minute.",
+      "done": "Extracted again. Check everything looks right.",
+      "error": "Couldn't extract it again. Try again later."
+    }
   },
   "plan": {
     "title": "Weekly menu",
@@ -169,7 +179,10 @@
       "search": "Search your library",
       "empty": "No matching recipes.",
       "otherMeal": "Meant for {{meal}}"
-    }
+    },
+    "howWasIt": "How was it?",
+    "rated_one": "Rated {{count}} star",
+    "rated_other": "Rated {{count}} stars"
   },
   "shopping": {
     "title": "Shopping list",
@@ -269,5 +282,69 @@
     "noLink": "We didn't find a link in what you shared",
     "failed": "Couldn't save the link",
     "toLibrary": "Go to the library"
+  },
+  "cook": {
+    "open": "Cook",
+    "openFor_one": "Cook ({{count}} serving)",
+    "openFor_other": "Cook ({{count}} servings)",
+    "close": "Leave cook mode",
+    "wake": {
+      "on": "The screen won't turn off",
+      "off": "The screen may turn off",
+      "unsupported": "This browser can't keep the screen on"
+    },
+    "prepare": "Get the ingredients ready",
+    "scaled": "Amounts scaled from {{from}} to {{to}} servings. Those marked × couldn't be adjusted: multiply them yourself.",
+    "notScaled": "Multiply this amount",
+    "stepOf": "Step {{n}} of {{total}}",
+    "start": "Start",
+    "next": "Next",
+    "previous": "Previous",
+    "finish": "Finish",
+    "startTimer": "Timer {{time}}",
+    "stopTimer": "Stop the {{time}} timer",
+    "dismissTimer": "Dismiss the {{time}} alert",
+    "timeUp": "Time's up!",
+    "timers": "Timers",
+    "closeIngredients": "Close ingredients",
+    "done": "Enjoy!",
+    "howWasIt": "How did it turn out?",
+    "thanks": "Saved. The menu will take it into account.",
+    "rateError": "Couldn't save the rating.",
+    "backToRecipe": "Back to the recipe",
+    "again": "Start over"
+  },
+  "costs": {
+    "title": "AI costs",
+    "settingsHint": "What extracting recipes and sorting the list costs",
+    "loadError": "Couldn't load the costs.",
+    "none": "No AI calls yet.",
+    "summary": "Summary",
+    "thisMonth": "This month",
+    "lastMonth": "Last month",
+    "allTime": "All time",
+    "perLink": "Per extracted link, on average",
+    "links_one": "{{count}} link with a recipe",
+    "links_other": "{{count}} links with a recipe",
+    "calls_one": "{{count}} call",
+    "calls_other": "{{count}} calls",
+    "failed_one": "{{count}} failed",
+    "failed_other": "{{count}} failed",
+    "failedWith": "failed: {{error}}",
+    "tokens": "{{input}} in / {{output}} out",
+    "months": "Last 6 months",
+    "byStep": "By task",
+    "byModel": "By model",
+    "recent": "Latest calls",
+    "step": {
+      "text": "Reading the text",
+      "video": "Watching the video",
+      "classify": "Sorting ingredients"
+    },
+    "classifyWhat": "New ingredients on the list",
+    "deletedLink": "Deleted link",
+    "unpriced_one": "{{count}} call uses a model with no price configured and is not in the totals.",
+    "unpriced_other": "{{count}} calls use a model with no price configured and are not in the totals.",
+    "footnote": "Amazon Bedrock list prices in US dollars, before tax. Months in UTC."
   }
 }

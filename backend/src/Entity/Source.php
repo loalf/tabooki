@@ -112,12 +112,12 @@ class Source implements HouseholdOwned
     private ?string $thumbnailPath = null;
 
     #[ORM\Column(enumType: SourceStatus::class, length: 20, options: ['default' => 'pending'])]
-    #[Groups(['source:read'])]
+    #[Groups(['source:read', 'recipe:read'])]
     private SourceStatus $status = SourceStatus::Pending;
 
     /** For the cook, when extraction needs them or failed: "The recipe is in the comments", ... */
     #[ORM\Column(length: 500, nullable: true)]
-    #[Groups(['source:read'])]
+    #[Groups(['source:read', 'recipe:read'])]
     private ?string $statusMessage = null;
 
     /**

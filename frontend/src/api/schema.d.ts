@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/api/costs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a Costs resource.
+         * @description Retrieves a Costs resource.
+         */
+        get: operations["api_costs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ingredients/{id}": {
         parameters: {
             query?: never;
@@ -246,6 +266,26 @@ export interface paths {
          * @description Updates the Recipe resource.
          */
         patch: operations["api_recipes_id_patch"];
+        trace?: never;
+    };
+    "/api/recipes/{id}/extract": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a Recipe resource.
+         * @description Creates a Recipe resource.
+         */
+        post: operations["recipe_reextract"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/recipe-tags": {
@@ -535,6 +575,178 @@ export interface components {
             readonly title?: string | null;
             readonly instance?: string | null;
         };
+        CostCall: {
+            /** Format: date-time */
+            at?: string;
+            /** @enum {string} */
+            step?: "text" | "video" | "classify";
+            /** @default  */
+            model: string;
+            /** @default 0 */
+            inputTokens: number;
+            /** @default 0 */
+            outputTokens: number;
+            /** @description null when the model has no price configured. */
+            usd?: number | null;
+            /** @default true */
+            ok: boolean;
+            error?: string | null;
+            /** @description The link it was about (null for classify, or once the link is deleted). */
+            sourceTitle?: string | null;
+            sourceUrl?: string | null;
+            /** Format: uuid */
+            recipeId?: string | null;
+        };
+        "CostCall.jsonld": {
+            /** Format: date-time */
+            at?: string;
+            /** @enum {string} */
+            step?: "text" | "video" | "classify";
+            /** @default  */
+            model: string;
+            /** @default 0 */
+            inputTokens: number;
+            /** @default 0 */
+            outputTokens: number;
+            /** @description null when the model has no price configured. */
+            usd?: number | null;
+            /** @default true */
+            ok: boolean;
+            error?: string | null;
+            /** @description The link it was about (null for classify, or once the link is deleted). */
+            sourceTitle?: string | null;
+            sourceUrl?: string | null;
+            /** Format: uuid */
+            recipeId?: string | null;
+        };
+        CostGroup: {
+            /**
+             * @description The step ("text", "video", "classify") or the model id.
+             * @default
+             */
+            name: string;
+            /** @default 0 */
+            usd: number;
+            /** @default 0 */
+            calls: number;
+            /** @default 0 */
+            failed: number;
+            /** @default 0 */
+            inputTokens: number;
+            /** @default 0 */
+            outputTokens: number;
+        };
+        "CostGroup.jsonld": {
+            /**
+             * @description The step ("text", "video", "classify") or the model id.
+             * @default
+             */
+            name: string;
+            /** @default 0 */
+            usd: number;
+            /** @default 0 */
+            calls: number;
+            /** @default 0 */
+            failed: number;
+            /** @default 0 */
+            inputTokens: number;
+            /** @default 0 */
+            outputTokens: number;
+        };
+        CostMonth: {
+            month?: string;
+            /** @default 0 */
+            usd: number;
+            /** @default 0 */
+            calls: number;
+        };
+        "CostMonth.jsonld": {
+            month?: string;
+            /** @default 0 */
+            usd: number;
+            /** @default 0 */
+            calls: number;
+        };
+        CostTotal: {
+            /** @default 0 */
+            usd: number;
+            /** @default 0 */
+            calls: number;
+            /** @default 0 */
+            inputTokens: number;
+            /** @default 0 */
+            outputTokens: number;
+        };
+        "CostTotal.jsonld": {
+            /** @default 0 */
+            usd: number;
+            /** @default 0 */
+            calls: number;
+            /** @default 0 */
+            inputTokens: number;
+            /** @default 0 */
+            outputTokens: number;
+        };
+        /**
+         * @description What the household's AI calls have cost (extracting links, sorting ingredients), in USD at
+         *     list price (config/services.yaml app.llm_prices). Months are calendar months in UTC.
+         */
+        Costs: {
+            /** @default costs */
+            id: string;
+            thisMonth?: components["schemas"]["CostTotal"];
+            lastMonth?: components["schemas"]["CostTotal"];
+            allTime?: components["schemas"]["CostTotal"];
+            /** @description the last 6 months, oldest first, months without calls included */
+            months?: components["schemas"]["CostMonth"][];
+            /** @description by step: text, video, classify */
+            byStep?: components["schemas"]["CostGroup"][];
+            byModel?: components["schemas"]["CostGroup"][];
+            /**
+             * @description Links that got at least one recipe from extraction.
+             * @default 0
+             */
+            linksExtracted: number;
+            /** @description Average extraction cost (text + video, failed calls included) of those links. */
+            perLink?: number | null;
+            /**
+             * @description Calls whose model has no price configured: not in the totals.
+             * @default 0
+             */
+            unpricedCalls: number;
+            /** @description newest first */
+            recent?: components["schemas"]["CostCall"][];
+        };
+        /**
+         * @description What the household's AI calls have cost (extracting links, sorting ingredients), in USD at
+         *     list price (config/services.yaml app.llm_prices). Months are calendar months in UTC.
+         */
+        "Costs.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            /** @default costs */
+            id: string;
+            thisMonth?: components["schemas"]["CostTotal.jsonld"];
+            lastMonth?: components["schemas"]["CostTotal.jsonld"];
+            allTime?: components["schemas"]["CostTotal.jsonld"];
+            /** @description the last 6 months, oldest first, months without calls included */
+            months?: components["schemas"]["CostMonth.jsonld"][];
+            /** @description by step: text, video, classify */
+            byStep?: components["schemas"]["CostGroup.jsonld"][];
+            byModel?: components["schemas"]["CostGroup.jsonld"][];
+            /**
+             * @description Links that got at least one recipe from extraction.
+             * @default 0
+             */
+            linksExtracted: number;
+            /** @description Average extraction cost (text + video, failed calls included) of those links. */
+            perLink?: number | null;
+            /**
+             * @description Calls whose model has no price configured: not in the totals.
+             * @default 0
+             */
+            unpricedCalls: number;
+            /** @description newest first */
+            recent?: components["schemas"]["CostCall.jsonld"][];
+        };
         /** @description A representation of common errors. */
         Error: {
             /** @description A short, human-readable summary of the problem. */
@@ -701,6 +913,11 @@ export interface components {
             householdName: string;
             /** @default 4 */
             defaultServings: number;
+            /**
+             * @description The models extraction uses now (text, video): a recipe extracted with another one can be
+             *     extracted again with them.
+             */
+            extractionModels?: string[];
         };
         /** @description The signed-in user and their household: what the SPA needs to boot. */
         "Me-me.write.jsonMergePatch": {
@@ -729,6 +946,11 @@ export interface components {
             householdName: string;
             /** @default 4 */
             defaultServings: number;
+            /**
+             * @description The models extraction uses now (text, video): a recipe extracted with another one can be
+             *     extracted again with them.
+             */
+            extractionModels?: string[];
         };
         /**
          * @description A week's lunches and dinners (docs/PLAN.md §6). Weeks start on Monday. Each planned meal is an
@@ -760,6 +982,8 @@ export interface components {
             entry: string;
             locked?: boolean | null;
             servings?: number | null;
+            /** @description How it turned out (1-5): rates the meal and its recipe. */
+            rating?: number | null;
             /**
              * Format: uuid
              * @description Id of a library recipe to cook for this meal.
@@ -826,6 +1050,8 @@ export interface components {
              * @default false
              */
             locked: boolean;
+            /** @description How it turned out this time (1-5), given after eating it; also becomes the recipe's rating. */
+            readonly rating?: number | null;
             /** Format: date */
             date?: string;
             /** @enum {string} */
@@ -844,6 +1070,8 @@ export interface components {
              * @default false
              */
             locked: boolean;
+            /** @description How it turned out this time (1-5), given after eating it; also becomes the recipe's rating. */
+            readonly rating?: number | null;
             /** Format: date */
             date?: string;
             /** @enum {string} */
@@ -949,6 +1177,11 @@ export interface components {
             readonly confidence?: number | null;
             /** @description Model that extracted it; null for recipes typed by hand. */
             readonly extractedBy?: string | null;
+            /**
+             * Format: date-time
+             * @description When it was (last) extracted; null for recipes typed by hand.
+             */
+            readonly extractedAt?: string | null;
             /** Format: date-time */
             readonly createdAt?: string;
             /** Format: date-time */
@@ -1109,6 +1342,11 @@ export interface components {
             readonly confidence?: number | null;
             /** @description Model that extracted it; null for recipes typed by hand. */
             readonly extractedBy?: string | null;
+            /**
+             * Format: date-time
+             * @description When it was (last) extracted; null for recipes typed by hand.
+             */
+            readonly extractedAt?: string | null;
             /** Format: date-time */
             readonly createdAt?: string;
             /** Format: date-time */
@@ -1419,6 +1657,13 @@ export interface components {
             readonly id?: string;
             title?: string | null;
             author?: string | null;
+            /**
+             * @default pending
+             * @enum {string}
+             */
+            status: "pending" | "extracting" | "ready" | "needs_review" | "needs_input" | "failed";
+            /** @description For the cook, when extraction needs them or failed: "The recipe is in the comments", . */
+            readonly statusMessage?: string | null;
             url?: string;
             /** @enum {string} */
             platform?: "web" | "youtube" | "instagram" | "tiktok";
@@ -1519,6 +1764,13 @@ export interface components {
             readonly id?: string;
             title?: string | null;
             author?: string | null;
+            /**
+             * @default pending
+             * @enum {string}
+             */
+            status: "pending" | "extracting" | "ready" | "needs_review" | "needs_input" | "failed";
+            /** @description For the cook, when extraction needs them or failed: "The recipe is in the comments", . */
+            readonly statusMessage?: string | null;
             url?: string;
             /** @enum {string} */
             platform?: "web" | "youtube" | "instagram" | "tiktok";
@@ -1566,6 +1818,49 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    api_costs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Costs resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Costs.jsonld"];
+                    "application/json": components["schemas"]["Costs"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     api_ingredients_id_patch: {
         parameters: {
             query?: never;
@@ -2490,6 +2785,63 @@ export interface operations {
             };
             /** @description Not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    recipe_reextract: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Recipe identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Recipe resource created */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Recipe.jsonld-recipe.read"];
+                    "application/json": components["schemas"]["Recipe-recipe.read"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

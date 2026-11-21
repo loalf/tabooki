@@ -12,6 +12,76 @@
         }
     ],
     "paths": {
+        "/api/costs": {
+            "get": {
+                "operationId": "api_costs_get",
+                "tags": [
+                    "Costs"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Costs resource",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Costs.jsonld"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Costs"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves a Costs resource.",
+                "description": "Retrieves a Costs resource.",
+                "parameters": []
+            }
+        },
         "/api/ingredients/{id}": {
             "patch": {
                 "operationId": "api_ingredients_id_patch",
@@ -1791,6 +1861,111 @@
                 }
             }
         },
+        "/api/recipes/{id}/extract": {
+            "post": {
+                "operationId": "recipe_reextract",
+                "tags": [
+                    "Recipe"
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Recipe resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Recipe.jsonld-recipe.read"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Recipe-recipe.read"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a Recipe resource.",
+                "description": "Creates a Recipe resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Recipe identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            }
+        },
         "/api/recipe-tags": {
             "get": {
                 "operationId": "api_recipe-tags_get_collection",
@@ -3395,6 +3570,407 @@
                 ],
                 "description": "Unprocessable entity"
             },
+            "CostCall": {
+                "type": "object",
+                "properties": {
+                    "at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "step": {
+                        "type": "string",
+                        "enum": [
+                            "text",
+                            "video",
+                            "classify"
+                        ]
+                    },
+                    "model": {
+                        "default": "",
+                        "type": "string"
+                    },
+                    "inputTokens": {
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "outputTokens": {
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "usd": {
+                        "description": "null when the model has no price configured.",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "ok": {
+                        "default": true,
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "sourceTitle": {
+                        "description": "The link it was about (null for classify, or once the link is deleted).",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "sourceUrl": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "recipeId": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "uuid"
+                    }
+                }
+            },
+            "CostCall.jsonld": {
+                "type": "object",
+                "properties": {
+                    "at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "step": {
+                        "type": "string",
+                        "enum": [
+                            "text",
+                            "video",
+                            "classify"
+                        ]
+                    },
+                    "model": {
+                        "default": "",
+                        "type": "string"
+                    },
+                    "inputTokens": {
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "outputTokens": {
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "usd": {
+                        "description": "null when the model has no price configured.",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "ok": {
+                        "default": true,
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "sourceTitle": {
+                        "description": "The link it was about (null for classify, or once the link is deleted).",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "sourceUrl": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "recipeId": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "uuid"
+                    }
+                }
+            },
+            "CostGroup": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "The step (\"text\", \"video\", \"classify\") or the model id.",
+                        "default": "",
+                        "type": "string"
+                    },
+                    "usd": {
+                        "default": 0,
+                        "type": "number"
+                    },
+                    "calls": {
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "failed": {
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "inputTokens": {
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "outputTokens": {
+                        "default": 0,
+                        "type": "integer"
+                    }
+                }
+            },
+            "CostGroup.jsonld": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "The step (\"text\", \"video\", \"classify\") or the model id.",
+                        "default": "",
+                        "type": "string"
+                    },
+                    "usd": {
+                        "default": 0,
+                        "type": "number"
+                    },
+                    "calls": {
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "failed": {
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "inputTokens": {
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "outputTokens": {
+                        "default": 0,
+                        "type": "integer"
+                    }
+                }
+            },
+            "CostMonth": {
+                "type": "object",
+                "properties": {
+                    "month": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}$"
+                    },
+                    "usd": {
+                        "default": 0,
+                        "type": "number"
+                    },
+                    "calls": {
+                        "default": 0,
+                        "type": "integer"
+                    }
+                }
+            },
+            "CostMonth.jsonld": {
+                "type": "object",
+                "properties": {
+                    "month": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}$"
+                    },
+                    "usd": {
+                        "default": 0,
+                        "type": "number"
+                    },
+                    "calls": {
+                        "default": 0,
+                        "type": "integer"
+                    }
+                }
+            },
+            "CostTotal": {
+                "type": "object",
+                "properties": {
+                    "usd": {
+                        "default": 0,
+                        "type": "number"
+                    },
+                    "calls": {
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "inputTokens": {
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "outputTokens": {
+                        "default": 0,
+                        "type": "integer"
+                    }
+                }
+            },
+            "CostTotal.jsonld": {
+                "type": "object",
+                "properties": {
+                    "usd": {
+                        "default": 0,
+                        "type": "number"
+                    },
+                    "calls": {
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "inputTokens": {
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "outputTokens": {
+                        "default": 0,
+                        "type": "integer"
+                    }
+                }
+            },
+            "Costs": {
+                "type": "object",
+                "description": "What the household's AI calls have cost (extracting links, sorting ingredients), in USD at\nlist price (config/services.yaml app.llm_prices). Months are calendar months in UTC.",
+                "properties": {
+                    "id": {
+                        "default": "costs",
+                        "type": "string"
+                    },
+                    "thisMonth": {
+                        "$ref": "#/components/schemas/CostTotal"
+                    },
+                    "lastMonth": {
+                        "$ref": "#/components/schemas/CostTotal"
+                    },
+                    "allTime": {
+                        "$ref": "#/components/schemas/CostTotal"
+                    },
+                    "months": {
+                        "description": "the last 6 months, oldest first, months without calls included",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CostMonth"
+                        }
+                    },
+                    "byStep": {
+                        "description": "by step: text, video, classify",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CostGroup"
+                        }
+                    },
+                    "byModel": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CostGroup"
+                        }
+                    },
+                    "linksExtracted": {
+                        "description": "Links that got at least one recipe from extraction.",
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "perLink": {
+                        "description": "Average extraction cost (text + video, failed calls included) of those links.",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "unpricedCalls": {
+                        "description": "Calls whose model has no price configured: not in the totals.",
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "recent": {
+                        "description": "newest first",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CostCall"
+                        }
+                    }
+                }
+            },
+            "Costs.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "default": "costs",
+                                "type": "string"
+                            },
+                            "thisMonth": {
+                                "$ref": "#/components/schemas/CostTotal.jsonld"
+                            },
+                            "lastMonth": {
+                                "$ref": "#/components/schemas/CostTotal.jsonld"
+                            },
+                            "allTime": {
+                                "$ref": "#/components/schemas/CostTotal.jsonld"
+                            },
+                            "months": {
+                                "description": "the last 6 months, oldest first, months without calls included",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/CostMonth.jsonld"
+                                }
+                            },
+                            "byStep": {
+                                "description": "by step: text, video, classify",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/CostGroup.jsonld"
+                                }
+                            },
+                            "byModel": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/CostGroup.jsonld"
+                                }
+                            },
+                            "linksExtracted": {
+                                "description": "Links that got at least one recipe from extraction.",
+                                "default": 0,
+                                "type": "integer"
+                            },
+                            "perLink": {
+                                "description": "Average extraction cost (text + video, failed calls included) of those links.",
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "unpricedCalls": {
+                                "description": "Calls whose model has no price configured: not in the totals.",
+                                "default": 0,
+                                "type": "integer"
+                            },
+                            "recent": {
+                                "description": "newest first",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/CostCall.jsonld"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "What the household's AI calls have cost (extracting links, sorting ingredients), in USD at\nlist price (config/services.yaml app.llm_prices). Months are calendar months in UTC."
+            },
             "Error": {
                 "type": "object",
                 "description": "A representation of common errors.",
@@ -3821,6 +4397,13 @@
                     "defaultServings": {
                         "default": 4,
                         "type": "integer"
+                    },
+                    "extractionModels": {
+                        "description": "The models extraction uses now (text, video): a recipe extracted with another one can be\nextracted again with them.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 },
                 "required": [
@@ -3882,6 +4465,13 @@
                             "defaultServings": {
                                 "default": 4,
                                 "type": "integer"
+                            },
+                            "extractionModels": {
+                                "description": "The models extraction uses now (text, video): a recipe extracted with another one can be\nextracted again with them.",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
                             }
                         },
                         "required": [
@@ -3953,6 +4543,15 @@
                     "servings": {
                         "minimum": 1,
                         "maximum": 50,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "rating": {
+                        "minimum": 1,
+                        "maximum": 5,
+                        "description": "How it turned out (1-5): rates the meal and its recipe.",
                         "type": [
                             "integer",
                             "null"
@@ -4115,6 +4714,14 @@
                         "default": false,
                         "type": "boolean"
                     },
+                    "rating": {
+                        "readOnly": true,
+                        "description": "How it turned out this time (1-5), given after eating it; also becomes the recipe's rating.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
                     "date": {
                         "type": "string",
                         "format": "date"
@@ -4161,6 +4768,14 @@
                         "description": "Kept as it is when the plan is regenerated.",
                         "default": false,
                         "type": "boolean"
+                    },
+                    "rating": {
+                        "readOnly": true,
+                        "description": "How it turned out this time (1-5), given after eating it; also becomes the recipe's rating.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
                     },
                     "date": {
                         "type": "string",
@@ -4499,6 +5114,15 @@
                             "string",
                             "null"
                         ]
+                    },
+                    "extractedAt": {
+                        "readOnly": true,
+                        "description": "When it was (last) extracted; null for recipes typed by hand.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
                     },
                     "createdAt": {
                         "readOnly": true,
@@ -5049,6 +5673,15 @@
                                     "string",
                                     "null"
                                 ]
+                            },
+                            "extractedAt": {
+                                "readOnly": true,
+                                "description": "When it was (last) extracted; null for recipes typed by hand.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
                             },
                             "createdAt": {
                                 "readOnly": true,
@@ -5875,6 +6508,26 @@
                             "null"
                         ]
                     },
+                    "status": {
+                        "default": "pending",
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "extracting",
+                            "ready",
+                            "needs_review",
+                            "needs_input",
+                            "failed"
+                        ]
+                    },
+                    "statusMessage": {
+                        "readOnly": true,
+                        "description": "For the cook, when extraction needs them or failed: \"The recipe is in the comments\", .",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
                     "url": {
                         "type": "string"
                     },
@@ -6140,6 +6793,26 @@
                                     "null"
                                 ]
                             },
+                            "status": {
+                                "default": "pending",
+                                "type": "string",
+                                "enum": [
+                                    "pending",
+                                    "extracting",
+                                    "ready",
+                                    "needs_review",
+                                    "needs_input",
+                                    "failed"
+                                ]
+                            },
+                            "statusMessage": {
+                                "readOnly": true,
+                                "description": "For the cook, when extraction needs them or failed: \"The recipe is in the comments\", .",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
                             "url": {
                                 "type": "string"
                             },
@@ -6268,6 +6941,10 @@
     },
     "security": [],
     "tags": [
+        {
+            "name": "Costs",
+            "description": "What the household's AI calls have cost (extracting links, sorting ingredients), in USD at\nlist price (config/services.yaml app.llm_prices). Months are calendar months in UTC."
+        },
         {
             "name": "Me",
             "description": "The signed-in user and their household: what the SPA needs to boot."

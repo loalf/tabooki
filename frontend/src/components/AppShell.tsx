@@ -23,6 +23,16 @@ export function AppShell() {
   // Come back here after signing in (e.g. a link shared from another app).
   if (!me) return <Navigate to="/login" replace state={{ from: location }} />
 
+  // Cook mode takes the whole screen.
+  if (pathname.endsWith('/cook')) {
+    return (
+      <>
+        <ScrollRestoration getKey={(location) => location.pathname} />
+        <Outlet />
+      </>
+    )
+  }
+
   return (
     <div className="mx-auto flex min-h-dvh max-w-2xl flex-col">
       {/* New pages start at the top and going back restores where you were. Keyed by path, so

@@ -86,6 +86,10 @@ final readonly class MealPlanActionProcessor implements ProcessorInterface
             }
             $this->planner->choose($plan, $entry, $recipe);
         }
+        // After choosing: the rating is about the recipe that was eaten.
+        if (null !== $input->rating) {
+            $entry->rate($input->rating);
+        }
     }
 
     private function plan(mixed $id): MealPlan

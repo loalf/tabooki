@@ -154,6 +154,12 @@ export function useRecipes(filters: RecipeFilters) {
   })
 }
 
+/** The recipe's link is being extracted again (POST /api/recipes/{id}/extract). */
+export function isReextracting(recipe: Recipe | undefined): boolean {
+  const status = recipe?.source?.status
+  return status === 'pending' || status === 'extracting'
+}
+
 export function useRecipe(id: string | null) {
   return useQuery({
     queryKey: keys.recipe(id ?? ''),
@@ -164,6 +170,7 @@ export function useRecipe(id: string | null) {
       return data
     },
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2,
+    refetchInterval: (query) => (isReextracting(query.state.data) ? 2500 : false),
   })
 }
 
@@ -242,6 +249,28 @@ export function useUpdateRecipe(id: string) {
     },
     onSuccess: (recipe) => invalidate(recipe),
   })
+}
+
+/** Extract the recipe again from its link with the current model; poll useRecipe to follow it. */
+export function useReextractRecipe(id: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error, response } = await api.POST('/api/recipes/{id}/extract', { params: { path: { id } } })
+      if (!data) throw failure(response, error)
+      return data
+    },
+    onSuccess: (recipe) => queryClient.setQueryData(keys.recipe(id), recipe),
+  })
+}
+
+/** Lists show the title and tags, which re-extracting may have changed. */
+export function useRefreshRecipeLists() {
+  const queryClient = useQueryClient()
+  return () => {
+    void queryClient.invalidateQueries({ queryKey: ['recipes', 'list'] })
+    void queryClient.invalidateQueries({ queryKey: keys.tags })
+  }
 }
 
 export function useDeleteRecipe() {

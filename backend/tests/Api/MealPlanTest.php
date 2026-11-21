@@ -13,7 +13,7 @@ use App\Enum\MealType;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
- * @phpstan-type Entry array{id: string, date: string, slot: string, servings: int, locked: bool, leftoverOfId?: string|null, recipe: array{id: string, title: string}}
+ * @phpstan-type Entry array{id: string, date: string, slot: string, servings: int, locked: bool, rating?: int|null, leftoverOfId?: string|null, recipe: array{id: string, title: string}}
  * @phpstan-type Plan array{id: string, weekStart: string, entries: list<Entry>}
  */
 final class MealPlanTest extends ApiTestCase
@@ -145,6 +145,28 @@ final class MealPlanTest extends ApiTestCase
         $this->client->request('DELETE', '/api/meal-plans/'.$plan['id']);
         self::assertResponseStatusCodeSame(204);
         self::assertSame([], $this->client->request('GET', '/api/meal-plans')->toArray());
+    }
+
+    public function testRatingAMealRatesItsRecipeAndKeepsIt(): void
+    {
+        $lentejas = $this->recipe('Lentejas');
+        $garbanzos = $this->recipe('Garbanzos');
+        $plan = $this->createPlan([['date' => '2026-11-23', 'slot' => 'lunch']]);
+        $entry = $plan['entries'][0]['id'];
+        $plan = $this->action($plan, 'update', ['entry' => $entry, 'recipe' => $lentejas->getId()->toRfc4122()]);
+
+        $plan = $this->action($plan, 'update', ['entry' => $entry, 'rating' => 4]);
+        self::assertSame(4, $plan['entries'][0]['rating'] ?? null);
+        self::assertTrue($plan['entries'][0]['locked'], 'eaten: regenerating keeps it');
+        self::assertSame(4, $this->client->request('GET', '/api/recipes/'.$lentejas->getId())->toArray()['rating']);
+
+        $this->client->request('POST', '/api/meal-plans/'.$plan['id'].'/entries/update', ['json' => ['entry' => $entry, 'rating' => 6]]);
+        self::assertResponseStatusCodeSame(422);
+
+        // Another recipe for that meal: the rating was about the old one.
+        $plan = $this->action($plan, 'update', ['entry' => $entry, 'recipe' => $garbanzos->getId()->toRfc4122()]);
+        self::assertNull($plan['entries'][0]['rating'] ?? null);
+        self::assertSame(4, $this->client->request('GET', '/api/recipes/'.$lentejas->getId())->toArray()['rating'], 'the recipe keeps it');
     }
 
     public function testRecentWeeksAreNotRepeatedWhileThereAreOtherRecipes(): void

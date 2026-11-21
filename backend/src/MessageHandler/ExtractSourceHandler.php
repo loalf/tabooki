@@ -12,17 +12,18 @@ use App\Enum\MealType;
 use App\Enum\SourceStatus;
 use App\Extraction\Evidence;
 use App\Extraction\EvidenceCollector;
+use App\Extraction\ExtractedRecipe;
 use App\Extraction\ExtractionException;
 use App\Extraction\ExtractionResult;
 use App\Extraction\MediaFetcher;
 use App\Extraction\MediaFetchException;
 use App\Extraction\RecipeExtractor;
 use App\Llm\LlmException;
+use App\Llm\Pricing;
 use App\Message\ExtractSource;
 use App\Repository\SourceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Uid\Uuid;
 
@@ -30,6 +31,10 @@ use Symfony\Component\Uid\Uuid;
  * The extraction pipeline for one link (docs/PLAN.md §4): gather material, read it with the
  * text model, and when that isn't enough on a video platform, watch the video. Always ends in
  * a status the cook can act on; failures never retry by themselves (the app has a Retry button).
+ *
+ * Re-extracting a recipe (newer model, better prompt) runs the same pipeline on the material
+ * already stored and rewrites that recipe in place, so its rating, favorite and planned meals
+ * stay. If it doesn't work, the recipe stays as it was.
  */
 #[AsMessageHandler]
 final readonly class ExtractSourceHandler
@@ -47,6 +52,7 @@ final readonly class ExtractSourceHandler
             'no_recipe' => 'No hemos encontrado ninguna receta en este enlace.',
             'llm' => 'No se ha podido extraer la receta (%s). Inténtalo de nuevo más tarde.',
             'unexpected' => 'Algo ha fallado al extraer la receta. Inténtalo de nuevo.',
+            'kept' => 'No se ha podido volver a extraer la receta, así que se queda como estaba.',
         ],
         'en' => [
             'unreadable' => "We couldn't read this post. Paste the recipe text to extract it.",
@@ -54,10 +60,10 @@ final readonly class ExtractSourceHandler
             'no_recipe' => "We didn't find a recipe at this link.",
             'llm' => "Couldn't extract the recipe (%s). Please try again later.",
             'unexpected' => 'Something went wrong extracting the recipe. Please try again.',
+            'kept' => "Couldn't extract the recipe again, so it's unchanged.",
         ],
     ];
 
-    /** @param array<string, array{input: float, output: float}> $prices USD per million tokens, by model */
     public function __construct(
         private SourceRepository $sources,
         private EvidenceCollector $collector,
@@ -65,16 +71,28 @@ final readonly class ExtractSourceHandler
         private MediaFetcher $media,
         private EntityManagerInterface $entityManager,
         private LoggerInterface $logger,
-        #[Autowire('%app.llm_prices%')]
-        private array $prices = [],
+        private Pricing $pricing,
     ) {
     }
 
     public function __invoke(ExtractSource $message): void
     {
         $source = $this->sources->find(Uuid::fromString($message->sourceId));
-        // Deleted, or already has a recipe (typed by hand meanwhile, or a duplicate message).
-        if (null === $source || !$source->getRecipes()->isEmpty()) {
+        if (null === $source) {
+            return;
+        }
+        $target = null;
+        if (null !== $message->recipeId) {
+            $target = $source->getRecipes()->findFirst(static fn (int $i, Recipe $r): bool => $r->getId()->toRfc4122() === $message->recipeId);
+            if (null === $target) {
+                // Deleted meanwhile.
+                $this->settle($source);
+                $this->entityManager->flush();
+
+                return;
+            }
+        } elseif (!$source->getRecipes()->isEmpty()) {
+            // Already has a recipe (typed by hand meanwhile, or a duplicate message).
             return;
         }
 
@@ -91,13 +109,17 @@ final readonly class ExtractSourceHandler
                 $result = $this->better($result, $this->watch($source, $evidence, $locale));
             }
 
-            $this->apply($source, $result, $locale);
+            null === $target ? $this->apply($source, $result, $locale) : $this->reapply($source, $target, $result, $locale);
         } catch (LlmException|ExtractionException $e) {
             $this->logger->warning('Extraction failed for {url}: {error}', ['url' => $source->getUrl(), 'error' => $e->getMessage()]);
-            $source->setStatus(SourceStatus::Failed, \sprintf(self::MESSAGES[$locale]['llm'], mb_substr($e->getMessage(), 0, 200)));
+            null === $target
+                ? $source->setStatus(SourceStatus::Failed, \sprintf(self::MESSAGES[$locale]['llm'], mb_substr($e->getMessage(), 0, 200)))
+                : $this->settle($source, self::MESSAGES[$locale]['kept']);
         } catch (\Throwable $e) {
             $this->logger->error('Extraction crashed for {url}: {error}', ['url' => $source->getUrl(), 'error' => $e->getMessage(), 'exception' => $e]);
-            $source->setStatus(SourceStatus::Failed, self::MESSAGES[$locale]['unexpected']);
+            null === $target
+                ? $source->setStatus(SourceStatus::Failed, self::MESSAGES[$locale]['unexpected'])
+                : $this->settle($source, self::MESSAGES[$locale]['kept']);
         }
 
         $this->entityManager->flush();
@@ -181,8 +203,8 @@ final readonly class ExtractSourceHandler
                 // An unreadable answer was still paid for.
                 $paid = $e instanceof ExtractionException ? $e->completion : null;
                 $this->entityManager->persist(new ExtractionRun(
-                    $source, $step, 'bedrock', $model, $paid->inputTokens ?? 0, $paid->outputTokens ?? 0,
-                    null === $paid ? null : $this->cost($model, $paid->inputTokens, $paid->outputTokens), false, $e->getMessage(), self::elapsedMs($started),
+                    $source->getHousehold(), $source, $step, 'bedrock', $model, $paid->inputTokens ?? 0, $paid->outputTokens ?? 0,
+                    null === $paid ? null : $this->pricing->cost($model, $paid->inputTokens, $paid->outputTokens), false, $e->getMessage(), self::elapsedMs($started),
                 ));
                 if (!$e instanceof ExtractionException || $attempt >= 2) {
                     throw $e;
@@ -193,8 +215,8 @@ final readonly class ExtractSourceHandler
 
         $completion = $result->completion;
         $this->entityManager->persist(new ExtractionRun(
-            $source, $step, 'bedrock', $completion->model, $completion->inputTokens, $completion->outputTokens,
-            $this->cost($completion->model, $completion->inputTokens, $completion->outputTokens), true, null, self::elapsedMs($started),
+            $source->getHousehold(), $source, $step, 'bedrock', $completion->model, $completion->inputTokens, $completion->outputTokens,
+            $this->pricing->cost($completion->model, $completion->inputTokens, $completion->outputTokens), true, null, self::elapsedMs($started),
         ));
 
         return $result;
@@ -220,31 +242,9 @@ final readonly class ExtractSourceHandler
             $recipe = new Recipe();
             $recipe->assignHousehold($source->getHousehold());
             $recipe->setSource($source);
-            $recipe->setTitle($extracted->title);
-            $recipe->setLanguage($extracted->language);
-            $recipe->setServings($extracted->servings ?? $source->getHousehold()->getDefaultServings());
-            $recipe->setPrepMinutes($extracted->prepMinutes);
-            $recipe->setCookMinutes($extracted->cookMinutes);
-            $recipe->setMealTypes([] !== $extracted->mealTypes ? $extracted->mealTypes : MealType::cases());
-            $recipe->setTags($extracted->tags);
-            $recipe->setSteps($extracted->steps);
-            $recipe->setNotes($extracted->notes);
-
-            $ingredients = [];
-            foreach ($extracted->ingredients as $line) {
-                $ingredient = new RecipeIngredient();
-                $ingredient->setRawText($line['raw']);
-                $ingredient->setGroupName($line['group']);
-                $ingredient->setQuantity($line['quantity']);
-                $ingredient->setUnit($line['unit']);
-                $ingredient->setName($line['name']);
-                $ingredient->setCanonicalKey($line['canonicalKey']);
-                $ingredient->setPrep($line['prep']);
-                $ingredient->setOptional($line['optional']);
-                $ingredients[] = $ingredient;
-            }
-            $recipe->setIngredients($ingredients);
-            $recipe->markExtracted($result->completion->model, $result->confidence, $result->needsReview());
+            $recipe->setServings($source->getHousehold()->getDefaultServings());
+            $recipe->setMealTypes(MealType::cases());
+            $this->fill($recipe, $extracted, $result);
 
             $source->getRecipes()->add($recipe);
             $this->entityManager->persist($recipe);
@@ -255,11 +255,81 @@ final readonly class ExtractSourceHandler
             : $source->setStatus(SourceStatus::Ready);
     }
 
-    private function cost(string $model, int $inputTokens, int $outputTokens): ?float
+    /** A new extraction of one recipe of the link: the closest by title replaces its contents. */
+    private function reapply(Source $source, Recipe $recipe, ?ExtractionResult $result, string $locale): void
     {
-        $price = $this->prices[$model] ?? null;
+        if (null === $result || [] === $result->recipes) {
+            $this->settle($source, self::MESSAGES[$locale]['kept']);
 
-        return null === $price ? null : round(($inputTokens * $price['input'] + $outputTokens * $price['output']) / 1_000_000, 6);
+            return;
+        }
+
+        $extracted = self::closest($recipe->getTitle(), $result->recipes);
+        $userTags = $recipe->getTags();
+        $this->fill($recipe, $extracted, $result);
+        // Tags the cook added are theirs: keep them after the new ones.
+        $recipe->setTags(\array_slice([...$recipe->getTags(), ...$userTags], 0, Recipe::MAX_TAGS));
+
+        $this->settle($source, $result->needsReview() ? $result->message : null);
+    }
+
+    /** Back to ready (or "needs review" while a recipe of the link is unchecked) after re-extracting. */
+    private function settle(Source $source, ?string $message = null): void
+    {
+        $pending = $source->getRecipes()->exists(static fn (int $i, Recipe $r): bool => $r->getNeedsReview());
+        $source->setStatus($pending ? SourceStatus::NeedsReview : SourceStatus::Ready, $message);
+    }
+
+    /**
+     * What the model found, written onto a recipe. Servings and meal types are only replaced when
+     * the evidence says.
+     */
+    private function fill(Recipe $recipe, ExtractedRecipe $extracted, ExtractionResult $result): void
+    {
+        $recipe->setTitle($extracted->title);
+        $recipe->setLanguage($extracted->language);
+        if (null !== $extracted->servings) {
+            $recipe->setServings($extracted->servings);
+        }
+        $recipe->setPrepMinutes($extracted->prepMinutes);
+        $recipe->setCookMinutes($extracted->cookMinutes);
+        if ([] !== $extracted->mealTypes) {
+            $recipe->setMealTypes($extracted->mealTypes);
+        }
+        $recipe->setTags($extracted->tags);
+        $recipe->setSteps($extracted->steps);
+        $recipe->setNotes($extracted->notes);
+
+        $ingredients = [];
+        foreach ($extracted->ingredients as $line) {
+            $ingredient = new RecipeIngredient();
+            $ingredient->setRawText($line['raw']);
+            $ingredient->setGroupName($line['group']);
+            $ingredient->setQuantity($line['quantity']);
+            $ingredient->setUnit($line['unit']);
+            $ingredient->setName($line['name']);
+            $ingredient->setCanonicalKey($line['canonicalKey']);
+            $ingredient->setPrep($line['prep']);
+            $ingredient->setOptional($line['optional']);
+            $ingredients[] = $ingredient;
+        }
+        $recipe->setIngredients($ingredients);
+        $recipe->markExtracted($result->completion->model, $result->confidence, $result->needsReview());
+    }
+
+    /** @param non-empty-list<ExtractedRecipe> $recipes */
+    private static function closest(string $title, array $recipes): ExtractedRecipe
+    {
+        $best = $recipes[0];
+        $bestScore = -1.0;
+        foreach ($recipes as $candidate) {
+            similar_text(mb_strtolower($title), mb_strtolower($candidate->title), $score);
+            if ($score > $bestScore) {
+                [$best, $bestScore] = [$candidate, $score];
+            }
+        }
+
+        return $best;
     }
 
     private static function elapsedMs(int|float $started): int

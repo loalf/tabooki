@@ -20,6 +20,7 @@ use App\Filter\RecipeTagsFilter;
 use App\Library\SearchText;
 use App\Repository\RecipeRepository;
 use App\State\HouseholdOwnedProcessor;
+use App\State\ReextractRecipeProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -77,6 +78,15 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Get(),
         new Post(processor: HouseholdOwnedProcessor::class),
         new Patch(processor: HouseholdOwnedProcessor::class),
+        new Post(
+            uriTemplate: '/recipes/{id}/extract',
+            status: 202,
+            description: 'Extract the recipe again from its link, with the current model, rewriting it in place (rating, favorite and planned meals stay). Follow it through source.status.',
+            input: false,
+            read: false,
+            processor: ReextractRecipeProcessor::class,
+            name: 'recipe_reextract',
+        ),
         new Delete(),
     ],
     normalizationContext: ['groups' => ['recipe:read']],
@@ -180,6 +190,11 @@ class Recipe implements HouseholdOwned
     #[ORM\Column(length: 120, nullable: true)]
     #[Groups(['recipe:read'])]
     private ?string $extractedBy = null;
+
+    /** When it was (last) extracted; null for recipes typed by hand. */
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    #[Groups(['recipe:read'])]
+    private ?\DateTimeImmutable $extractedAt = null;
 
     /** Title, tags and ingredients, lowercased and without accents: what the library search matches. */
     #[ORM\Column(type: Types::TEXT, options: ['default' => ''])]
@@ -417,9 +432,15 @@ class Recipe implements HouseholdOwned
         return $this->extractedBy;
     }
 
+    public function getExtractedAt(): ?\DateTimeImmutable
+    {
+        return $this->extractedAt;
+    }
+
     public function markExtracted(string $model, float $confidence, bool $needsReview): void
     {
         $this->extractedBy = $model;
+        $this->extractedAt = new \DateTimeImmutable();
         $this->confidence = $confidence;
         $this->needsReview = $needsReview;
     }

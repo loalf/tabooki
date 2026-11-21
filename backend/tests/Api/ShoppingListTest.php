@@ -6,6 +6,7 @@ namespace App\Tests\Api;
 
 use ApiPlatform\Test\ApiTestCase;
 use ApiPlatform\Test\Client;
+use App\Entity\ExtractionRun;
 use App\Entity\Ingredient;
 use App\Entity\Recipe;
 use App\Entity\RecipeIngredient;
@@ -94,6 +95,11 @@ final class ShoppingListTest extends ApiTestCase
         ]));
 
         (self::getContainer()->get(ClassifyIngredientsHandler::class))(new ClassifyIngredients($this->ana->getHousehold()->getId()->toRfc4122()));
+
+        $runs = self::getContainer()->get(EntityManagerInterface::class)->getRepository(ExtractionRun::class)->findBy(['step' => 'classify']);
+        self::assertCount(1, $runs, 'the call is logged for the costs page');
+        self::assertSame([300, 80, true], [$runs[0]->getInputTokens(), $runs[0]->getOutputTokens(), $runs[0]->isOk()]);
+        self::assertNull($runs[0]->getSource());
 
         $this->client->request('PATCH', '/api/me', ['json' => ['locale' => 'en'], 'headers' => ['Content-Type' => 'application/merge-patch+json']]);
         $list = $this->list();

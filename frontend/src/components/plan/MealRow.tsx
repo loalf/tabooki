@@ -1,4 +1,4 @@
-import { Clock, Lock, LockOpen, Minus, MoreHorizontal, Plus, Shuffle, UtensilsCrossed, BookOpen } from 'lucide-react'
+import { BookOpen, ChefHat, Clock, Lock, LockOpen, Minus, MoreHorizontal, Plus, Shuffle, Star, UtensilsCrossed } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
@@ -6,8 +6,10 @@ import { type MealPlan, type MealPlanEntry, type Slot, useAddMeal, useRemoveMeal
 import { Thumbnail } from '@/components/library/Thumbnail'
 import { formatWeekday } from '@/components/plan/format'
 import { RecipePicker } from '@/components/plan/RecipePicker'
+import { StarRating } from '@/components/StarRating'
 import { Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
+import { addDays, today } from '@/lib/week'
 
 /** One lunch or dinner of the week: planned (with its actions) or not (a button to plan it). */
 export function MealRow({ plan, date, slot, entry }: { plan: MealPlan; date: string; slot: Slot; entry?: MealPlanEntry }) {
@@ -43,6 +45,12 @@ function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: MealPlanEnt
   const busy = swap.isPending || update.isPending || remove.isPending
   const ids = { planId: plan.id!, entry: entry.id! }
   const leftoverOf = entry.leftoverOfId ? plan.entries?.find((e) => e.id === entry.leftoverOfId) : undefined
+  // Opening the recipe from here carries the meal: its servings, and which meal to rate after cooking.
+  const meal = leftoverOf ? '' : `?servings=${entry.servings}&plan=${plan.id}&entry=${entry.id}`
+  // Once it's been eaten (or is about to be, today), ask how it was: only for the last few days,
+  // so an unrated week doesn't nag forever. Leftovers are the same dish.
+  const now = today()
+  const askRating = Boolean(recipe) && !leftoverOf && entry.rating == null && entry.date! <= now && entry.date! >= addDays(now, -2)
 
   return (
     <li className={cn('rounded-md border bg-card', entry.locked && 'border-primary/50', busy && 'opacity-60')}>
@@ -53,7 +61,7 @@ function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: MealPlanEnt
             {t(`recipe.meal.${slot}`)} · {t('recipe.servingsCount', { count: entry.servings })}
           </p>
           {recipe ? (
-            <Link to={`/recipes/${recipe.id}`} className="line-clamp-2 leading-snug font-medium hover:underline">
+            <Link to={`/recipes/${recipe.id}${meal}`} className="line-clamp-2 leading-snug font-medium hover:underline">
               {recipe.title}
             </Link>
           ) : (
@@ -62,10 +70,20 @@ function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: MealPlanEnt
           {leftoverOf ? (
             <p className="text-xs text-primary">{t('plan.leftoversOf', { day: formatWeekday(leftoverOf.date!, i18n.language) })}</p>
           ) : (
-            recipe?.totalMinutes != null && (
-              <p className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock className="size-3" aria-hidden />
-                {t('recipe.minutes', { count: recipe.totalMinutes })}
+            (recipe?.totalMinutes != null || entry.rating != null) && (
+              <p className="inline-flex items-center gap-3 text-xs text-muted-foreground">
+                {recipe?.totalMinutes != null && (
+                  <span className="inline-flex items-center gap-1">
+                    <Clock className="size-3" aria-hidden />
+                    {t('recipe.minutes', { count: recipe.totalMinutes })}
+                  </span>
+                )}
+                {entry.rating != null && (
+                  <span className="inline-flex items-center gap-1" aria-label={t('plan.rated', { count: entry.rating })}>
+                    <Star className="size-3 fill-current text-primary" aria-hidden />
+                    {entry.rating}
+                  </span>
+                )}
               </p>
             )
           )}
@@ -91,6 +109,13 @@ function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: MealPlanEnt
         </div>
       </div>
 
+      {askRating && (
+        <div className="flex flex-wrap items-center justify-between gap-x-2 border-t py-1 pr-1 pl-3">
+          <span className="text-sm text-muted-foreground">{t('plan.howWasIt')}</span>
+          <StarRating value={null} clearable={false} label={t('plan.howWasIt')} onChange={(rating) => rating && update.mutate({ ...ids, rating })} />
+        </div>
+      )}
+
       {open && (
         <div className="flex flex-wrap items-center gap-2 border-t px-2 py-2">
           <div className="flex items-center gap-1" role="group" aria-label={t('recipe.servings')}>
@@ -114,6 +139,12 @@ function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: MealPlanEnt
               <Plus className="size-4" aria-hidden />
             </Button>
           </div>
+          {recipe && (
+            <Link to={`/recipes/${recipe.id}/cook${meal}`} className="inline-flex h-9 items-center gap-1.5 rounded-md border bg-card px-3 text-sm font-medium">
+              <ChefHat className="size-4" aria-hidden />
+              {t('cook.open')}
+            </Link>
+          )}
           <Button variant="secondary" size="sm" disabled={busy} onClick={() => setPicking(true)}>
             <BookOpen className="size-4" aria-hidden />
             {t('plan.choose')}

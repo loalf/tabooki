@@ -1,11 +1,22 @@
-import { ArrowLeft, Check, Clock, ExternalLink, Heart, Pencil, Sparkles, Star, Trash2, Users } from 'lucide-react'
+import { ArrowLeft, Check, ChefHat, Clock, ExternalLink, Heart, LoaderCircle, Pencil, RefreshCw, Sparkles, Trash2, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { ApiError } from '@/api/client'
-import { platformLabel, type Recipe, useDeleteRecipe, useRecipe, useUpdateRecipe } from '@/api/library'
+import {
+  isReextracting,
+  platformLabel,
+  type Recipe,
+  useDeleteRecipe,
+  useReextractRecipe,
+  useRecipe,
+  useRefreshRecipeLists,
+  useUpdateRecipe,
+} from '@/api/library'
+import { useMe } from '@/auth/useAuth'
 import { Thumbnail } from '@/components/library/Thumbnail'
 import { EmptyState } from '@/components/PageHeader'
+import { StarRating } from '@/components/StarRating'
 import { Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { groupIngredients } from '@/lib/recipeText'
@@ -46,6 +57,8 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
   const navigate = useNavigate()
   const remove = useDeleteRecipe()
   const [confirming, setConfirming] = useState(false)
+  // Opened from the menu: cook mode gets that meal's servings and rates that meal.
+  const [params] = useSearchParams()
 
   useEffect(() => {
     if (!confirming) return
@@ -98,6 +111,18 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
           )}
         </dl>
       </header>
+
+      {(steps.length > 0 || ingredients.length > 0) && (
+        <Link
+          to={`/recipes/${id}/cook${params.size ? `?${params}` : ''}`}
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-primary px-4 text-base font-medium text-primary-foreground"
+        >
+          <ChefHat className="size-5" aria-hidden />
+          {params.get('servings') && Number(params.get('servings')) !== recipe.servings
+            ? t('cook.openFor', { count: Number(params.get('servings')) })
+            : t('cook.open')}
+        </Link>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         <Button
@@ -227,9 +252,7 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
         </details>
       )}
 
-      {recipe.extractedBy && (
-        <p className="text-xs text-muted-foreground">{t('recipe.extractedBy', { model: recipe.extractedBy })}</p>
-      )}
+      {source && <Reextract recipe={recipe} />}
 
       {recipe.notes && (
         <section aria-labelledby="notes-title">
@@ -243,23 +266,73 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
   )
 }
 
-function StarRating({ value, onChange }: { value: number | null; onChange: (value: number | null) => void }) {
+/**
+ * "Extracted with <model>" and a way to extract it again: after switching to a newer model, or
+ * when the first try missed things. It replaces the contents, so it asks twice.
+ */
+function Reextract({ recipe }: { recipe: Recipe }) {
   const { t } = useTranslation()
+  const { data: me } = useMe()
+  const reextract = useReextractRecipe(recipe.id!)
+  const refreshLists = useRefreshRecipeLists()
+  const [confirming, setConfirming] = useState(false)
+  // What extractedAt was when we asked: if it changes, it worked; if not, say why.
+  const [asked, setAsked] = useState<{ at: string | null } | null>(null)
+  const working = isReextracting(recipe) || reextract.isPending
+  const models = me?.extractionModels ?? []
+  const outdated = Boolean(recipe.extractedBy && models.length && !models.includes(recipe.extractedBy))
+
+  useEffect(() => {
+    if (!confirming) return
+    // Long enough to read what it replaces.
+    const timer = setTimeout(() => setConfirming(false), 15000)
+    return () => clearTimeout(timer)
+  }, [confirming])
+
+  const finished = asked !== null && !working
+  useEffect(() => {
+    if (finished) refreshLists()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per finished run
+  }, [finished])
+
+  const start = () => {
+    setConfirming(false)
+    setAsked({ at: recipe.extractedAt ?? null })
+    reextract.mutate()
+  }
+
   return (
-    <div className="flex" role="group" aria-label={t('recipe.rating')}>
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          // Tapping the current rating again clears it.
-          onClick={() => onChange(value === star ? null : star)}
-          aria-label={t('recipe.stars', { count: star })}
-          aria-pressed={value !== null && star <= value}
-          className="grid size-9 place-items-center text-primary"
-        >
-          <Star className={cn('size-5', value !== null && star <= value ? 'fill-current' : 'text-muted-foreground/50')} />
-        </button>
-      ))}
+    <div className="flex flex-col gap-2 rounded-lg border bg-card p-3 text-sm">
+      <p className="text-muted-foreground">
+        {recipe.extractedBy ? t('recipe.extractedBy', { model: recipe.extractedBy }) : t('recipe.reextract.typed')}
+        {outdated && <span className="font-medium text-foreground"> · {t('recipe.reextract.newer')}</span>}
+      </p>
+      {working ? (
+        <p className="flex items-center gap-2 font-medium" role="status">
+          <LoaderCircle className="size-4 animate-spin" aria-hidden />
+          {t('recipe.reextract.working')}
+        </p>
+      ) : (
+        <>
+          {finished &&
+            (recipe.extractedAt !== asked?.at ? (
+              <p className="font-medium text-primary" role="status">
+                {t('recipe.reextract.done')}
+              </p>
+            ) : (
+              <p className="text-destructive" role="status">
+                {reextract.isError ? t('recipe.reextract.error') : (recipe.source?.statusMessage ?? t('recipe.reextract.error'))}
+              </p>
+            ))}
+          {confirming && <p>{t('recipe.reextract.confirmHint')}</p>}
+          <div>
+            <Button variant={confirming ? 'primary' : 'secondary'} size="sm" onClick={() => (confirming ? start() : setConfirming(true))}>
+              <RefreshCw className="size-4" aria-hidden />
+              {confirming ? t('recipe.reextract.confirm') : t('recipe.reextract.action')}
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   )
 }

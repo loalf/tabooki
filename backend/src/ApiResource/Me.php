@@ -52,7 +52,17 @@ final class Me
     #[Groups(['me:read'])]
     public int $defaultServings = 4;
 
-    public static function fromUser(User $user): self
+    /**
+     * The models extraction uses now (text, video): a recipe extracted with another one can be
+     * extracted again with them.
+     *
+     * @var list<string>
+     */
+    #[Groups(['me:read'])]
+    public array $extractionModels = [];
+
+    /** @param list<string> $extractionModels */
+    public static function fromUser(User $user, array $extractionModels = []): self
     {
         $me = new self();
         $me->id = $user->getId()->toRfc4122();
@@ -61,6 +71,7 @@ final class Me
         $me->locale = $user->getLocale();
         $me->householdName = $user->getHousehold()->getName();
         $me->defaultServings = $user->getHousehold()->getDefaultServings();
+        $me->extractionModels = $extractionModels;
 
         return $me;
     }

@@ -68,7 +68,7 @@ export function useSwapMeal() {
 
 export function useUpdateMeal() {
   return useWeekMutation(
-    ({ planId, ...body }: EntryAction & { locked?: boolean; servings?: number; recipe?: string }) =>
+    ({ planId, ...body }: EntryAction & { locked?: boolean; servings?: number; recipe?: string; rating?: number }) =>
       api.POST('/api/meal-plans/{id}/entries/update', { params: { path: { id: planId } }, body }).then(unwrap),
   )
 }

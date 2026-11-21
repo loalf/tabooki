@@ -9,6 +9,8 @@ import { AppShell } from '@/components/AppShell'
 import { LocaleSync } from '@/components/LocaleSync'
 import '@/i18n'
 import '@/index.css'
+import { CookPage } from '@/pages/CookPage'
+import { CostsPage } from '@/pages/CostsPage'
 import { LibraryPage } from '@/pages/LibraryPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { PlanPage } from '@/pages/PlanPage'
@@ -68,9 +70,11 @@ const router = createBrowserRouter([
       { path: 'recipes/new', element: <RecipeEditPage /> },
       { path: 'recipes/:id', element: <RecipePage /> },
       { path: 'recipes/:id/edit', element: <RecipeEditPage /> },
+      { path: 'recipes/:id/cook', element: <CookPage /> },
       { path: 'plan', element: <PlanPage /> },
       { path: 'shopping', element: <ShoppingPage /> },
       { path: 'settings', element: <SettingsPage /> },
+      { path: 'settings/costs', element: <CostsPage /> },
       { path: 'share', element: <SharePage /> },
     ],
   },

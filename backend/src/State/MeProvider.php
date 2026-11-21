@@ -8,13 +8,14 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\ApiResource\Me;
 use App\Entity\User;
+use App\Extraction\RecipeExtractor;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 /** @implements ProviderInterface<Me> */
 final readonly class MeProvider implements ProviderInterface
 {
-    public function __construct(private Security $security)
+    public function __construct(private Security $security, private RecipeExtractor $extractor)
     {
     }
 
@@ -25,6 +26,6 @@ final readonly class MeProvider implements ProviderInterface
             throw new AccessDeniedException();
         }
 
-        return Me::fromUser($user);
+        return Me::fromUser($user, [$this->extractor->textModel(), $this->extractor->videoModel()]);
     }
 }

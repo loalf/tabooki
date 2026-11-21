@@ -266,6 +266,83 @@ final class ExtractionTest extends ApiTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
+    public function testARecipeIsExtractedAgainInPlace(): void
+    {
+        $id = $this->saveLink('https://recetas.example/lentejas');
+        $this->mockPage('https://recetas.example/lentejas', '<script type="application/ld+json">{"@type":"Recipe","name":"Lentejas"}</script>');
+        $this->mockBedrock([$this->answer('partial', 0.6, [$this->recipe('Lentejas')])]);
+        $this->runPreview($id);
+        $this->runExtraction($id);
+
+        /** @var list<array{id: string}> $recipes */
+        $recipes = $this->client->request('GET', '/api/recipes')->toArray();
+        $recipeId = $recipes[0]['id'];
+        $this->client->request('PATCH', '/api/recipes/'.$recipeId, [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'json' => ['rating' => 5, 'favorite' => true, 'tags' => ['legumbres', 'de la abuela']],
+        ]);
+
+        $this->client->request('POST', '/api/recipes/'.$recipeId.'/extract');
+        self::assertResponseStatusCodeSame(202);
+        self::assertJsonContains(['id' => $recipeId, 'source' => ['status' => 'pending']]);
+        self::assertEquals(new ExtractSource($id, $recipeId), array_last($this->asyncTransport()->getSent())?->getMessage());
+
+        $better = ['ingredients' => [
+            ['raw' => '300 g de lentejas', 'quantity' => 300, 'unit' => 'g', 'name' => 'lentejas', 'canonical_key' => 'lentils'],
+            ['raw' => 'Sal', 'quantity' => null, 'unit' => null, 'name' => 'sal', 'canonical_key' => 'salt'],
+            ['raw' => '1 zanahoria', 'quantity' => 1, 'unit' => null, 'name' => 'zanahoria', 'canonical_key' => 'carrot'],
+        ]] + $this->recipe('Lentejas estofadas');
+        $this->mockBedrock([$this->answer('complete', 0.95, [$this->recipe('Postre'), $better])]);
+        self::getContainer()->get(ExtractSourceHandler::class)(new ExtractSource($id, $recipeId));
+        self::getContainer()->get(EntityManagerInterface::class)->clear();
+
+        self::assertStringContainsString('"name":"Lentejas"', $this->promptText(0), 'from the stored page, not fetched again');
+        /** @var array{id: string, title: string, rating: int, favorite: bool, needsReview: bool, tags: list<string>, ingredients: list<array<mixed>>, source: array{status: string}} $after */
+        $after = $this->client->request('GET', '/api/recipes/'.$recipeId)->toArray();
+        self::assertSame('Lentejas estofadas', $after['title'], 'the closest recipe by title');
+        self::assertCount(3, $after['ingredients']);
+        self::assertSame([5, true, false], [$after['rating'], $after['favorite'], $after['needsReview']]);
+        self::assertSame(['legumbres', 'de la abuela'], $after['tags'], "the cook's tags stay");
+        self::assertSame('ready', $after['source']['status']);
+        self::assertCount(1, $this->client->request('GET', '/api/recipes')->toArray(), 'no new recipe');
+        self::assertCount(2, $this->runs($id));
+    }
+
+    public function testAFailedReextractionLeavesTheRecipeAsItWas(): void
+    {
+        $id = $this->saveLink('https://recetas.example/sopa');
+        $this->mockPage('https://recetas.example/sopa', '<script type="application/ld+json">{"@type":"Recipe","name":"Sopa"}</script>');
+        $this->mockBedrock([$this->answer('complete', 0.9, [$this->recipe('Sopa')])]);
+        $this->runPreview($id);
+        $this->runExtraction($id);
+        /** @var list<array{id: string}> $recipes */
+        $recipes = $this->client->request('GET', '/api/recipes')->toArray();
+        $recipeId = $recipes[0]['id'];
+
+        $this->client->request('POST', '/api/recipes/'.$recipeId.'/extract');
+        $this->mockBedrock([new JsonMockResponse(['message' => 'Too many requests'], ['http_code' => 429])]);
+        self::getContainer()->get(ExtractSourceHandler::class)(new ExtractSource($id, $recipeId));
+        self::getContainer()->get(EntityManagerInterface::class)->clear();
+
+        /** @var array{title: string, ingredients: list<array<mixed>>, source: array{status: string, statusMessage: string}} $after */
+        $after = $this->client->request('GET', '/api/recipes/'.$recipeId)->toArray();
+        self::assertSame(['Sopa', 2, 'ready'], [$after['title'], \count($after['ingredients']), $after['source']['status']]);
+        self::assertStringContainsString('se queda como estaba', $after['source']['statusMessage']);
+    }
+
+    public function testReextractionNeedsALinkAndIsPrivate(): void
+    {
+        /** @var string $typed */
+        $typed = $this->client->request('POST', '/api/recipes', ['json' => ['title' => 'A mano']])->toArray()['id'];
+        $this->client->request('POST', '/api/recipes/'.$typed.'/extract');
+        self::assertResponseStatusCodeSame(409);
+
+        $other = self::createClient([], ['headers' => ['Accept' => 'application/json']]);
+        $this->signIn($other, $this->createUser('bea@example.com', 'Otra casa'));
+        $other->request('POST', '/api/recipes/'.$typed.'/extract');
+        self::assertResponseStatusCodeSame(404);
+    }
+
     private function saveLink(string $url): string
     {
         $id = $this->client->request('POST', '/api/sources', ['json' => ['url' => $url]])->toArray()['id'];

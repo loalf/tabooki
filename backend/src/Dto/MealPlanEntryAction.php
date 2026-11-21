@@ -18,6 +18,10 @@ final class MealPlanEntryAction
     #[Assert\Range(min: 1, max: 50)]
     public ?int $servings = null;
 
+    /** How it turned out (1-5): rates the meal and its recipe. */
+    #[Assert\Range(min: 1, max: 5)]
+    public ?int $rating = null;
+
     /** Id of a library recipe to cook for this meal. */
     #[Assert\Uuid]
     public ?string $recipe = null;

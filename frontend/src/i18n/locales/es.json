@@ -124,7 +124,17 @@
       "fix": "Corregir"
     },
     "originalText": "Texto original",
-    "extractedBy": "Extraída con {{model}}"
+    "extractedBy": "Extraída con {{model}}",
+    "reextract": {
+      "typed": "Escrita a mano a partir del enlace",
+      "newer": "hay un modelo más nuevo",
+      "action": "Volver a extraer",
+      "confirm": "Sí, volver a extraer",
+      "confirmHint": "Se vuelve a leer el enlace con el modelo actual y se reemplazan los ingredientes, los pasos y los tiempos (perderás lo que hayas corregido). La valoración, la favorita y el menú se quedan.",
+      "working": "Extrayendo de nuevo… puede tardar un minuto.",
+      "done": "Extraída de nuevo. Comprueba que todo esté bien.",
+      "error": "No se ha podido volver a extraer. Inténtalo más tarde."
+    }
   },
   "plan": {
     "title": "Menú semanal",
@@ -169,7 +179,10 @@
       "search": "Buscar en tu biblioteca",
       "empty": "No hay recetas que coincidan.",
       "otherMeal": "Pensada para la {{meal}}"
-    }
+    },
+    "howWasIt": "¿Qué tal estuvo?",
+    "rated_one": "Valorada con {{count}} estrella",
+    "rated_other": "Valorada con {{count}} estrellas"
   },
   "shopping": {
     "title": "Lista de la compra",
@@ -269,5 +282,69 @@
     "noLink": "No hemos encontrado ningún enlace en lo que has compartido",
     "failed": "No se ha podido guardar el enlace",
     "toLibrary": "Ir a la biblioteca"
+  },
+  "cook": {
+    "open": "Cocinar",
+    "openFor_one": "Cocinar ({{count}} ración)",
+    "openFor_other": "Cocinar ({{count}} raciones)",
+    "close": "Salir del modo cocina",
+    "wake": {
+      "on": "La pantalla no se apagará",
+      "off": "La pantalla puede apagarse",
+      "unsupported": "Este navegador no puede mantener la pantalla encendida"
+    },
+    "prepare": "Prepara los ingredientes",
+    "scaled": "Cantidades de {{from}} a {{to}} raciones. Las marcadas con × no se han podido ajustar: multiplícalas tú.",
+    "notScaled": "Multiplica esta cantidad",
+    "stepOf": "Paso {{n}} de {{total}}",
+    "start": "Empezar",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "finish": "Terminar",
+    "startTimer": "Temporizador {{time}}",
+    "stopTimer": "Parar el temporizador de {{time}}",
+    "dismissTimer": "Quitar el aviso de {{time}}",
+    "timeUp": "¡Tiempo!",
+    "timers": "Temporizadores",
+    "closeIngredients": "Cerrar ingredientes",
+    "done": "¡A comer!",
+    "howWasIt": "¿Qué tal ha salido?",
+    "thanks": "Guardado. El menú lo tendrá en cuenta.",
+    "rateError": "No se ha podido guardar la valoración.",
+    "backToRecipe": "Volver a la receta",
+    "again": "Empezar de nuevo"
+  },
+  "costs": {
+    "title": "Costes de IA",
+    "settingsHint": "Lo que cuesta extraer recetas y ordenar la lista",
+    "loadError": "No se han podido cargar los costes.",
+    "none": "Aún no se ha hecho ninguna llamada a la IA.",
+    "summary": "Resumen",
+    "thisMonth": "Este mes",
+    "lastMonth": "El mes pasado",
+    "allTime": "En total",
+    "perLink": "Por enlace extraído, de media",
+    "links_one": "{{count}} enlace con receta",
+    "links_other": "{{count}} enlaces con receta",
+    "calls_one": "{{count}} llamada",
+    "calls_other": "{{count}} llamadas",
+    "failed_one": "{{count}} fallida",
+    "failed_other": "{{count}} fallidas",
+    "failedWith": "falló: {{error}}",
+    "tokens": "{{input}} entrada / {{output}} salida",
+    "months": "Últimos 6 meses",
+    "byStep": "Por tarea",
+    "byModel": "Por modelo",
+    "recent": "Últimas llamadas",
+    "step": {
+      "text": "Leer el texto",
+      "video": "Ver el vídeo",
+      "classify": "Ordenar ingredientes"
+    },
+    "classifyWhat": "Ingredientes nuevos de la lista",
+    "deletedLink": "Enlace borrado",
+    "unpriced_one": "{{count}} llamada usa un modelo sin precio configurado y no cuenta en los totales.",
+    "unpriced_other": "{{count}} llamadas usan un modelo sin precio configurado y no cuentan en los totales.",
+    "footnote": "Precios de lista de Amazon Bedrock en dólares, sin impuestos. Meses en hora UTC."
   }
 }

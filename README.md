@@ -59,6 +59,18 @@ make console c="app:extract --all"        # extract links saved before the key w
 make console c="app:extract <id> --sync"  # extract one link here and print the result
 ```
 
+After switching `BEDROCK_TEXT_MODEL` or `BEDROCK_VIDEO_MODEL` to a newer model, extract the old
+recipes again (in place: ratings, favorites and planned meals stay). One recipe at a time from its
+page (**Extract again**), or all of them:
+
+```sh
+make console c="app:reextract --dry-run"   # list recipes made with another model
+make console c="app:reextract"             # queue the unreviewed ones; --reviewed also redoes
+                                           # reviewed ones (their edits are replaced)
+```
+
+What it all costs is in **Settings → AI costs** (prices in `config/services.yaml`, `app.llm_prices`).
+
 Useful commands (`make` lists all of them):
 
 | Command | What it does |

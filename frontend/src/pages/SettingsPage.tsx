@@ -1,5 +1,6 @@
-import { LogOut } from 'lucide-react'
+import { ChevronRight, LogOut, Receipt } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 import { useLogout, useMe, useUpdateMe } from '@/auth/useAuth'
 import { PageHeader } from '@/components/PageHeader'
 import { ShareSettings } from '@/components/ShareSettings'
@@ -52,6 +53,15 @@ export function SettingsPage() {
         </fieldset>
 
         <ShareSettings />
+
+        <Link to="/settings/costs" className="flex items-center gap-3 rounded-lg border bg-card p-4">
+          <Receipt className="size-5 shrink-0 text-primary" aria-hidden />
+          <span className="flex-1">
+            <span className="block font-medium">{t('costs.title')}</span>
+            <span className="block text-sm text-muted-foreground">{t('costs.settingsHint')}</span>
+          </span>
+          <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+        </Link>
 
         <button
           type="button"
