@@ -9,6 +9,9 @@ export const ANIMAL_PROTEIN: FoodGroup[] = ['red_meat', 'pork', 'poultry', 'proc
 /** One line of the review screen and the settings page: a rule, said in words. */
 export type RuleLine = {
   id: string
+  /** What it is, to edit it: which part of the rules, and where in its list. */
+  kind: 'diet' | 'group' | 'ingredient' | 'weekly' | 'meals' | 'prefer' | 'spice'
+  index: number
   text: string
   /** Recipes it leaves out of the library, when it does. */
   removes?: number | null
@@ -35,11 +38,13 @@ export function ruleLines(rules: TasteRules, impact: TasteImpact | undefined, t:
   const lines: RuleLine[] = []
 
   if (rules.diet) {
-    lines.push({ id: 'diet', text: t(`taste.rule.diet.${rules.diet}`), removes: impact?.diet, firm: true, without: () => ({ ...rules, diet: null }) })
+    lines.push({ id: 'diet', kind: 'diet', index: 0, text: t(`taste.rule.diet.${rules.diet}`), removes: impact?.diet, firm: true, without: () => ({ ...rules, diet: null }) })
   }
   rules.excludeGroups.forEach((rule, i) =>
     lines.push({
       id: `group-${rule.group}`,
+      kind: 'group',
+      index: i,
       text: t(`taste.rule.${rule.strength}`, { what: t(`recipe.facts.group.${rule.group}`) }),
       removes: impact?.excludeGroups?.[i],
       firm: rule.strength === 'never',
@@ -49,6 +54,8 @@ export function ruleLines(rules: TasteRules, impact: TasteImpact | undefined, t:
   rules.excludeIngredients.forEach((rule, i) =>
     lines.push({
       id: `ingredient-${i}`,
+      kind: 'ingredient',
+      index: i,
       text: t(`taste.rule.${rule.strength}`, { what: rule.name[l] }),
       removes: impact?.excludeIngredients?.[i],
       firm: rule.strength === 'never',
@@ -63,7 +70,7 @@ export function ruleLines(rules: TasteRules, impact: TasteImpact | undefined, t:
         : rule.max != null
           ? t('taste.rule.atMost', { what, count: rule.max })
           : t('taste.rule.atLeast', { what, count: rule.min ?? 0 })
-    lines.push({ id: `weekly-${i}`, text, without: () => ({ ...rules, weekly: rules.weekly.filter((_, j) => j !== i) }) })
+    lines.push({ id: `weekly-${i}`, kind: 'weekly', index: i, text, without: () => ({ ...rules, weekly: rules.weekly.filter((_, j) => j !== i) }) })
   })
   const { lunch, dinner } = rules.mealHeaviness
   if (lunch || dinner) {
@@ -71,17 +78,19 @@ export function ruleLines(rules: TasteRules, impact: TasteImpact | undefined, t:
       lunch && t('taste.rule.mealIs', { meal: t('recipe.meal.lunch'), heaviness: t(`recipe.facts.heaviness.${lunch}`).toLowerCase() }),
       dinner && t('taste.rule.mealIs', { meal: t('recipe.meal.dinner'), heaviness: t(`recipe.facts.heaviness.${dinner}`).toLowerCase() }),
     ].filter(Boolean)
-    lines.push({ id: 'meals', text: parts.join(' · '), without: () => ({ ...rules, mealHeaviness: { lunch: null, dinner: null } }) })
+    lines.push({ id: 'meals', kind: 'meals', index: 0, text: parts.join(' · '), without: () => ({ ...rules, mealHeaviness: { lunch: null, dinner: null } }) })
   }
   rules.prefer.forEach((rule, i) =>
     lines.push({
       id: `prefer-${i}`,
+      kind: 'prefer',
+      index: i,
       text: t(`taste.rule.${rule.weight}`, { what: rule.name[l] }),
       without: () => ({ ...rules, prefer: rules.prefer.filter((_, j) => j !== i) }),
     }),
   )
   if (rules.maxSpice != null) {
-    lines.push({ id: 'spice', text: t(`taste.rule.spice.${rules.maxSpice}`), without: () => ({ ...rules, maxSpice: null }) })
+    lines.push({ id: 'spice', kind: 'spice', index: 0, text: t(`taste.rule.spice.${rules.maxSpice}`), without: () => ({ ...rules, maxSpice: null }) })
   }
   return lines
 }

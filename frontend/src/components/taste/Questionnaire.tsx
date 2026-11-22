@@ -2,6 +2,7 @@ import { ArrowLeft, Plus } from 'lucide-react'
 import { type FormEvent, type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Diet, Strength, TasteAnswers } from '@/api/taste'
+import { DictateButton } from '@/components/DictateButton'
 import { Button, Chip, CheckMark, inputClass, textareaClass } from '@/components/ui'
 import type { FoodGroup } from '@/lib/facts'
 import { cn } from '@/lib/utils'
@@ -105,15 +106,18 @@ export function Questionnaire({ initial, onDone, onCancel }: { initial: TasteAns
         <Options value={answers.spice ?? null} options={['none', 'mild', 'any'] as const} label={(value) => t(`taste.q.spice.${value}`)} onChange={(spice) => set({ spice })} />
       )}
       {name === 'other' && (
-        <textarea
-          rows={5}
-          value={answers.other ?? ''}
-          onChange={(e) => set({ other: e.target.value })}
-          placeholder={t('taste.q.other.placeholder')}
-          aria-labelledby="question-title"
-          maxLength={2000}
-          className={textareaClass}
-        />
+        <div className="flex flex-col gap-2">
+          <textarea
+            rows={5}
+            value={answers.other ?? ''}
+            onChange={(e) => set({ other: e.target.value })}
+            placeholder={t('taste.q.other.placeholder')}
+            aria-labelledby="question-title"
+            maxLength={2000}
+            className={textareaClass}
+          />
+          <DictateButton onText={(text) => set({ other: [answers.other?.trim(), text].filter(Boolean).join(' ') })} />
+        </div>
       )}
 
       <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] -mx-4 flex gap-2 border-t-2 border-outline bg-background px-4 py-3">

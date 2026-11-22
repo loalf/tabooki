@@ -14,7 +14,9 @@ use App\Enum\FoodGroup;
 use App\Enum\Heaviness;
 use App\Enum\MealType;
 use App\Message\JudgeNotes;
+use App\Message\SummarizeTaste;
 use App\MessageHandler\JudgeNotesHandler;
+use App\MessageHandler\SummarizeTasteHandler;
 use App\Planning\RecipeFacts;
 use App\Repository\SwapFeedbackRepository;
 use App\Taste\NotesJudge;
@@ -24,7 +26,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\JsonMockResponse;
 use Symfony\Component\HttpClient\Response\MockResponse;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
+use Symfony\Component\Process\Process;
 
 /**
  * What the household likes (docs/PLAN.md §6.1, §6.3): the questionnaire becomes rules, and the
@@ -428,6 +432,66 @@ final class TasteProfileTest extends ApiTestCase
 
         // Only the household's recipes, and only their ingredients.
         $this->client->request('POST', '/api/swap-feedback', ['json' => ['recipe' => $lasagna, 'reason' => 'dislike', 'whatKind' => 'ingredient', 'whatValue' => 'chickpeas', 'slot' => 'dinner', 'date' => self::WEEK]]);
+        self::assertResponseStatusCodeSame(422);
+    }
+
+    public function testTheSummaryIsWrittenAgainWhenTheLikingsChange(): void
+    {
+        // Saved with the model's summary: nothing to write.
+        $this->save(['maxSpice' => 0], summary: ['es' => 'Nada picante.', 'en' => 'Nothing spicy.']);
+        self::assertSame([], $this->queued(SummarizeTaste::class));
+
+        // A rule edited: the summary no longer says it, and is written again.
+        $this->save(['maxSpice' => 0, 'excludeGroups' => [['group' => 'fish', 'strength' => 'never']]]);
+        self::assertCount(1, $this->queued(SummarizeTaste::class));
+        /** @var array{summaryPending: bool} $pending */
+        $pending = $this->client->request('GET', '/api/taste-profile')->toArray();
+        self::assertTrue($pending['summaryPending']);
+
+        $this->mockBedrock([new JsonMockResponse([
+            'output' => ['message' => ['role' => 'assistant', 'content' => [['toolUse' => ['toolUseId' => 't1', 'name' => TasteCompiler::SUMMARY_TOOL, 'input' => ['es' => 'Nada picante ni pescado (alergia).', 'en' => 'Nothing spicy, no fish (allergy).']]]]]],
+            'stopReason' => 'tool_use',
+            'usage' => ['inputTokens' => 500, 'outputTokens' => 80],
+        ])]);
+        self::getContainer()->get(SummarizeTasteHandler::class)(new SummarizeTaste($this->ana->getHousehold()->getId()->toRfc4122()));
+        self::assertStringContainsString('"group": "fish"', $this->userText($this->bedrockRequests[0]));
+
+        /** @var array{summary: array{es: string}, summaryPending: bool} $profile */
+        $profile = $this->client->request('GET', '/api/taste-profile')->toArray();
+        self::assertSame('Nada picante ni pescado (alergia).', $profile['summary']['es']);
+        self::assertFalse($profile['summaryPending']);
+    }
+
+    public function testDictation(): void
+    {
+        $file = sys_get_temp_dir().'/tabooki-dictation-'.bin2hex(random_bytes(4)).'.webm';
+        $make = new Process(['ffmpeg', '-nostdin', '-loglevel', 'error', '-f', 'lavfi', '-i', 'sine=duration=2', '-c:a', 'libopus', $file]);
+        $make->run();
+        if (!$make->isSuccessful()) {
+            self::markTestSkipped('ffmpeg can\'t make a WebM recording here.');
+        }
+
+        $sent = [];
+        $httpClient = self::getContainer()->get('openrouter.http_client');
+        self::assertInstanceOf(MockHttpClient::class, $httpClient);
+        $httpClient->setResponseFactory(static function (string $method, string $url, array $options) use (&$sent): MockResponse {
+            $sent[] = json_decode(\is_string($options['body'] ?? null) ? $options['body'] : '{}', true);
+
+            return new JsonMockResponse(['language' => 'es', 'segments' => [['start' => 0, 'end' => 2, 'text' => ' Nada de cerdo esta semana.', 'avg_logprob' => -0.1]], 'usage' => ['cost' => 0.0004]]);
+        });
+
+        $response = $this->client->request('POST', '/api/dictation', ['extra' => ['files' => ['audio' => new UploadedFile($file, 'dictation.webm', 'audio/webm', null, true)]]]);
+        self::assertResponseIsSuccessful();
+        self::assertSame(['text' => 'Nada de cerdo esta semana.'], $response->toArray());
+        self::assertIsArray($sent[0] ?? null);
+        self::assertSame('es', $sent[0]['language'] ?? null, 'in the speaker\'s language');
+        @unlink($file);
+
+        $runs = self::getContainer()->get(EntityManagerInterface::class)->getRepository(ExtractionRun::class)->findBy(['step' => 'dictation']);
+        self::assertCount(1, $runs);
+        self::assertSame(0.0004, $runs[0]->getCostUsd());
+
+        $this->client->request('POST', '/api/dictation');
         self::assertResponseStatusCodeSame(422);
     }
 

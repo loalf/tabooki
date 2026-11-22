@@ -141,7 +141,7 @@ final readonly class SwapLearning
         $profile->adopt(TasteRules::fromArray($rules), $notes, $by);
         $profile->dismissSuggestion($key);
         $this->entityManager->flush();
-        $this->notes->notesSaved($household, $profile->getNotes());
+        $this->notes->likingsSaved($profile);
 
         return true;
     }

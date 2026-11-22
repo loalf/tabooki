@@ -5,6 +5,7 @@ import { Link } from 'react-router'
 import { useTasteProfile } from '@/api/taste'
 import { useMe } from '@/auth/useAuth'
 import { type MealPlan, type Slot, type SlotChoice, useCreateMealPlan } from '@/api/plan'
+import { DictateButton } from '@/components/DictateButton'
 import { Button, CheckMark, textareaClass } from '@/components/ui'
 import { formatDay } from '@/components/plan/format'
 import { cn } from '@/lib/utils'
@@ -165,6 +166,7 @@ export function PlanSetup({ week, previous }: { week: string; previous?: MealPla
           maxLength={500}
           className={textareaClass}
         />
+        <DictateButton onText={(text) => setTweak((current) => [current.trim(), text].filter(Boolean).join(' '))} />
       </section>
 
       {create.isError && <p className="text-sm text-destructive">{t('plan.error')}</p>}

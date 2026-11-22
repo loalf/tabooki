@@ -21,6 +21,7 @@ import { RuleList } from '@/components/taste/RuleList'
 import { Suggestions } from '@/components/taste/Suggestions'
 import { Button, Chip } from '@/components/ui'
 import { impactWarnings } from '@/lib/taste'
+import { cn } from '@/lib/utils'
 import { mondayOf, today } from '@/lib/week'
 
 type Stage =
@@ -190,9 +191,22 @@ function Review({ answers, draft, onBack, onSaved }: { answers: TasteAnswers; dr
           {t('taste.review.fallback')}
         </p>
       )}
-      {summary && <p className="rounded-lg sticker bg-card p-4 text-[15px] leading-relaxed">{summary[language]}</p>}
+      {summary ? (
+        <p className="rounded-lg sticker bg-card p-4 text-[15px] leading-relaxed">{summary[language]}</p>
+      ) : (
+        draft.summary && <p className="text-sm text-muted-foreground">{t('taste.review.summaryLater')}</p>
+      )}
       <div className="rounded-lg sticker bg-card px-4 py-1.5">
-        <RuleList rules={rules} impact={impact} notes={notes} onChange={change} onRemoveNotes={() => { setNotes(null); setSummary(null) }} />
+        <RuleList
+          rules={rules}
+          impact={impact}
+          notes={notes}
+          onChange={change}
+          onNotesChange={(next) => {
+            setNotes(next)
+            setSummary(null)
+          }}
+        />
       </div>
       {warnings.length > 0 && (
         <ul className="flex flex-col gap-2">
@@ -257,6 +271,9 @@ function Saved({ onDone }: { onDone: () => void }) {
 function ProfileView({ profile, onEdit }: { profile: TasteProfile; onEdit: () => void }) {
   const { t, i18n } = useTranslation()
   const forget = useForgetTaste()
+  const save = useSaveTaste()
+  // A rule changed here is saved at once; the summary is written again in the background.
+  const saveLikings = (rules: TasteRules, notes: string | null) => save.mutate({ answers: (profile.answers ?? {}) as TasteAnswers, rules, notes, summary: null })
   const [confirming, setConfirming] = useState(false)
   const language = i18n.language.startsWith('en') ? 'en' : 'es'
   const warnings = impactWarnings(profile.impact, t)
@@ -264,10 +281,26 @@ function ProfileView({ profile, onEdit }: { profile: TasteProfile; onEdit: () =>
   return (
     <section className="flex flex-col gap-5">
       <Suggestions />
-      {profile.summary && <p className="rounded-lg sticker bg-card p-4 text-[15px] leading-relaxed">{profile.summary[language]}</p>}
-      <div className="rounded-lg sticker bg-card px-4 py-1.5">
-        <RuleList rules={profile.rules as TasteRules} impact={profile.impact} notes={profile.notes} />
+      {profile.summary ? (
+        <p className="rounded-lg sticker bg-card p-4 text-[15px] leading-relaxed">{profile.summary[language]}</p>
+      ) : (
+        profile.summaryPending && (
+          <p className="flex items-center gap-2 rounded-lg sticker bg-card p-4 text-sm text-muted-foreground">
+            <LoaderCircle className="size-4 animate-spin" aria-hidden />
+            {t('taste.summaryPending')}
+          </p>
+        )
+      )}
+      <div className={cn('rounded-lg sticker bg-card px-4 py-1.5', save.isPending && 'opacity-60')}>
+        <RuleList
+          rules={profile.rules as TasteRules}
+          impact={profile.impact}
+          notes={profile.notes}
+          onChange={(rules) => saveLikings(rules, profile.notes ?? null)}
+          onNotesChange={(notes) => saveLikings(profile.rules as TasteRules, notes)}
+        />
       </div>
+      {save.isError && <p className="text-sm text-destructive">{t('taste.saveError')}</p>}
       {warnings.map((warning) => (
         <p key={warning} className="flex gap-2 text-sm font-semibold text-destructive">
           <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />

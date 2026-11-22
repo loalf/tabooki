@@ -81,6 +81,9 @@ final class TasteProfileView
     #[ApiProperty(schema: ['type' => ['object', 'null'], 'required' => ['es', 'en'], 'properties' => ['es' => ['type' => 'string'], 'en' => ['type' => 'string']]])]
     public ?array $summary = null;
 
+    /** Being written again in the background (the likings changed since the last one). */
+    public bool $summaryPending = false;
+
     /** Who last changed it (display name). */
     public ?string $updatedBy = null;
 

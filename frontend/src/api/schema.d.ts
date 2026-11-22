@@ -807,7 +807,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -829,7 +829,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -2692,6 +2692,11 @@ export interface components {
                 es: string;
                 en: string;
             } | null;
+            /**
+             * @description Being written again in the background (the likings changed since the last one).
+             * @default false
+             */
+            summaryPending: boolean;
             /** @description Who last changed it (display name). */
             updatedBy?: string | null;
             /** Format: date-time */
@@ -3063,6 +3068,11 @@ export interface components {
                 es: string;
                 en: string;
             } | null;
+            /**
+             * @description Being written again in the background (the likings changed since the last one).
+             * @default false
+             */
+            summaryPending: boolean;
             /** @description Who last changed it (display name). */
             updatedBy?: string | null;
             /** Format: date-time */

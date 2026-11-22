@@ -103,6 +103,42 @@ final readonly class TasteCompiler
         return [$rules, $label, $completion];
     }
 
+    public const string SUMMARY_TOOL = 'save_summary';
+
+    /**
+     * The summary again, for rules and notes changed since (a rule edited or removed, a
+     * suggestion taken).
+     *
+     * @return array{array{es: string, en: string}|null, Completion}
+     *
+     * @throws LlmException
+     */
+    public function summarize(TasteRules $rules, ?string $notes): array
+    {
+        $text = ['type' => 'string'];
+        $completion = $this->llm->complete(new Prompt(
+            model: $this->model,
+            system: self::SUMMARY_INSTRUCTIONS,
+            content: [Content::text(json_encode(['rules' => $rules->toArray(), 'notes' => $notes], \JSON_THROW_ON_ERROR | \JSON_UNESCAPED_UNICODE | \JSON_PRETTY_PRINT))],
+            toolName: self::SUMMARY_TOOL,
+            toolDescription: 'Save the summary in Spanish and English.',
+            toolSchema: ['type' => 'object', 'additionalProperties' => false, 'required' => ['es', 'en'], 'properties' => ['es' => $text, 'en' => $text]],
+            maxTokens: 1500,
+            thinking: false,
+        ));
+        $output = $completion->toolInput ?? [];
+        $summary = \is_string($output['es'] ?? null) && \is_string($output['en'] ?? null) && '' !== trim($output['es'])
+            ? ['es' => mb_substr(trim($output['es']), 0, 1000), 'en' => mb_substr(trim($output['en']), 0, 1000)]
+            : null;
+
+        return [$summary, $completion];
+    }
+
+    private const string SUMMARY_INSTRUCTIONS = <<<'TXT'
+        A household in Spain told its meal planner what it likes, as rules (JSON) and free-text notes. Write a summary of them to show the household: es (Spanish, speaking to them as "vosotros") and en (English, "you"), 2–4 short sentences covering every rule and the notes, saying exactly what the rules say and nothing more (a rule about fish isn't one about shellfish). Strength "never" is an allergy or something they can't eat; "avoid" is a dislike. Weekly limits, heaviness, spice and "more of" are preferences, not bans: say them as such ("como mucho", "mejor"), never "no podéis". Plain and short: "carne o pescado" rather than every group. "Coméis de todo menos pescado (alergia) y preferís evitar el cilantro. Carne o pescado, como mucho dos veces por semana…"
+        Answer by calling the save_summary tool once.
+        TXT;
+
     public const string WEEK_TOOL = 'save_week_rules';
 
     private const string WEEK_INSTRUCTIONS = <<<'TXT'

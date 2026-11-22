@@ -4785,7 +4785,8 @@
                             "annotate",
                             "taste_profile",
                             "notes_fit",
-                            "tweak"
+                            "tweak",
+                            "dictation"
                         ]
                     },
                     "model": {
@@ -4858,7 +4859,8 @@
                             "annotate",
                             "taste_profile",
                             "notes_fit",
-                            "tweak"
+                            "tweak",
+                            "dictation"
                         ]
                     },
                     "model": {
@@ -10704,6 +10706,11 @@
                             }
                         }
                     },
+                    "summaryPending": {
+                        "description": "Being written again in the background (the likings changed since the last one).",
+                        "default": false,
+                        "type": "boolean"
+                    },
                     "updatedBy": {
                         "description": "Who last changed it (display name).",
                         "type": [
@@ -12319,6 +12326,11 @@
                                         "type": "string"
                                     }
                                 }
+                            },
+                            "summaryPending": {
+                                "description": "Being written again in the background (the likings changed since the last one).",
+                                "default": false,
+                                "type": "boolean"
                             },
                             "updatedBy": {
                                 "description": "Who last changed it (display name).",

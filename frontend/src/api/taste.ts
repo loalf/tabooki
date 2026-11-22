@@ -55,7 +55,13 @@ export function useTasteProfile() {
       return data
     },
     // The recipes are being judged against new notes in the background: show it as it happens.
-    refetchInterval: (query) => ((query.state.data?.impact?.notesPending ?? 0) > 0 ? 4000 : false),
+    // In the background, after a change: recipes judged against new notes, the summary written
+    // again. Shown as it happens (for a couple of minutes, in case the worker is down).
+    refetchInterval: (query) => {
+      const profile = query.state.data
+      const recent = profile?.updatedAt && Date.parse(profile.updatedAt) > Date.now() - 2 * 60_000
+      return (profile?.impact?.notesPending ?? 0) > 0 || (profile?.summaryPending && recent) ? 4000 : false
+    },
   })
 }
 

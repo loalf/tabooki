@@ -79,7 +79,7 @@ final readonly class TasteProfileProcessor implements ProcessorInterface
             : null;
         $profile->update($input->answers, TasteRules::fromArray($input->rules), $input->notes, $summary, $this->current->user());
         $this->entityManager->flush();
-        $this->notes->notesSaved($household, $profile->getNotes());
+        $this->notes->likingsSaved($profile);
 
         return $this->provider->view($profile);
     }

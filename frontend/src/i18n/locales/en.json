@@ -525,7 +525,8 @@
       "annotate": "Reading what it's like",
       "taste_profile": "Understanding your tastes",
       "notes_fit": "Checking recipes against your notes",
-      "tweak": "Understanding this week's wish"
+      "tweak": "Understanding this week's wish",
+      "dictation": "Dictation"
     },
     "classifyWhat": "New ingredients on the list",
     "translateWhat": "A recipe typed in",
@@ -717,7 +718,8 @@
       "fewFor_one": "Only {{count}} recipe left for {{meal}}: the menu will repeat often.",
       "fewFor_other": "Only {{count}} recipes left for {{meal}}: the menu will repeat often.",
       "fewMatching_one": "Only {{count}} recipe fits how you like {{meal}}: sometimes it won't be possible.",
-      "fewMatching_other": "Only {{count}} recipes fit how you like {{meal}}: sometimes it won't be possible."
+      "fewMatching_other": "Only {{count}} recipes fit how you like {{meal}}: sometimes it won't be possible.",
+      "summaryLater": "You changed something: the summary will be rewritten when you save."
     },
     "saved": {
       "title": "Saved!",
@@ -793,6 +795,24 @@
       "no": "No, thanks",
       "badge_one": "{{count}} suggestion",
       "badge_other": "{{count}} suggestions"
+    },
+    "summaryPending": "Rewriting the summary with the changes…",
+    "editRule": {
+      "atMost": "At most",
+      "atLeast": "At least",
+      "any": "Any",
+      "more": "More",
+      "less": "Less",
+      "fewer": "Fewer times",
+      "more_": "More times"
     }
+  },
+  "dictate": {
+    "start": "Dictate",
+    "stop": "Stop · {{seconds}} s",
+    "sending": "Writing it down…",
+    "error": "Couldn't transcribe it. Try again.",
+    "nothing": "Nothing was heard. Try again.",
+    "denied": "No microphone permission."
   }
 }

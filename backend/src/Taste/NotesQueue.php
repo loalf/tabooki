@@ -6,11 +6,13 @@ namespace App\Taste;
 
 use App\Entity\Household;
 use App\Entity\Recipe;
+use App\Entity\TasteProfile;
 use App\Message\JudgeNotes;
+use App\Message\SummarizeTaste;
 use App\Repository\TasteProfileRepository;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-/** Queues the judging of recipes against the household's notes when there is something to judge. */
+/** Queues the judging of recipes against the household's notes, and the summary of its likings, when there is something to do. */
 final readonly class NotesQueue
 {
     public function __construct(
@@ -33,6 +35,15 @@ final readonly class NotesQueue
     {
         if (null !== Taste::notesHash($notes)) {
             $this->bus->dispatch(new JudgeNotes($household->getId()->toRfc4122()));
+        }
+    }
+
+    /** After the likings were saved: their summary written again, when they no longer have one. */
+    public function likingsSaved(TasteProfile $profile): void
+    {
+        $this->notesSaved($profile->getHousehold(), $profile->getNotes());
+        if ($profile->needsSummary()) {
+            $this->bus->dispatch(new SummarizeTaste($profile->getHousehold()->getId()->toRfc4122()));
         }
     }
 }

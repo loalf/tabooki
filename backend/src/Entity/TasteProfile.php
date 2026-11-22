@@ -107,6 +107,29 @@ class TasteProfile implements HouseholdOwned
         return $this->updatedAt;
     }
 
+    /** Identifies the rules and notes, to tell whether a summary written for them still applies. */
+    public function likingsHash(): string
+    {
+        return hash('xxh128', json_encode([$this->getRules()->toArray(), $this->notes], \JSON_THROW_ON_ERROR));
+    }
+
+    /** A summary is wanted: there are rules or notes, and none says them. */
+    public function needsSummary(): bool
+    {
+        return null === $this->summary && (!$this->getRules()->isEmpty() || null !== $this->notes);
+    }
+
+    /** @param array{es: string, en: string} $summary written for the rules and notes as they were ($from: likingsHash()) */
+    public function summarize(array $summary, string $from): bool
+    {
+        if ($from !== $this->likingsHash()) {
+            return false;
+        }
+        $this->summary = $summary;
+
+        return true;
+    }
+
     /** @return list<string> */
     public function getDismissedSuggestions(): array
     {

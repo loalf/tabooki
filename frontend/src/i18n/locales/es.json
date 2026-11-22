@@ -525,7 +525,8 @@
       "annotate": "Leer cómo es",
       "taste_profile": "Entender vuestros gustos",
       "notes_fit": "Revisar recetas con vuestras notas",
-      "tweak": "Entender lo especial de la semana"
+      "tweak": "Entender lo especial de la semana",
+      "dictation": "Dictado"
     },
     "classifyWhat": "Ingredientes nuevos de la lista",
     "translateWhat": "Receta escrita a mano",
@@ -717,7 +718,8 @@
       "fewFor_one": "Solo queda {{count}} receta para la {{meal}}: el menú se repetirá a menudo.",
       "fewFor_other": "Solo quedan {{count}} recetas para la {{meal}}: el menú se repetirá a menudo.",
       "fewMatching_one": "Solo {{count}} receta encaja como os gusta la {{meal}}: algunas veces no se podrá.",
-      "fewMatching_other": "Solo {{count}} recetas encajan como os gusta la {{meal}}: algunas veces no se podrá."
+      "fewMatching_other": "Solo {{count}} recetas encajan como os gusta la {{meal}}: algunas veces no se podrá.",
+      "summaryLater": "Has cambiado algo: el resumen se reescribirá al guardar."
     },
     "saved": {
       "title": "¡Guardado!",
@@ -793,6 +795,24 @@
       "no": "No, gracias",
       "badge_one": "{{count}} sugerencia",
       "badge_other": "{{count}} sugerencias"
+    },
+    "summaryPending": "Reescribiendo el resumen con los cambios…",
+    "editRule": {
+      "atMost": "Como mucho",
+      "atLeast": "Al menos",
+      "any": "Da igual",
+      "more": "Más",
+      "less": "Menos",
+      "fewer": "Menos veces",
+      "more_": "Más veces"
     }
+  },
+  "dictate": {
+    "start": "Dictar",
+    "stop": "Parar · {{seconds}} s",
+    "sending": "Escribiendo…",
+    "error": "No se ha podido transcribir. Inténtalo de nuevo.",
+    "nothing": "No se ha oído nada. Prueba otra vez.",
+    "denied": "Sin permiso para el micrófono."
   }
 }

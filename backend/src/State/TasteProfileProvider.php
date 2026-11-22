@@ -42,6 +42,7 @@ final readonly class TasteProfileProvider implements ProviderInterface
         $view->rules = $rules->toArray();
         $view->notes = $profile->getNotes();
         $view->summary = $profile->getSummary();
+        $view->summaryPending = $profile->needsSummary();
         $view->updatedBy = $profile->getUpdatedBy()?->getDisplayName();
         $view->updatedAt = $profile->getUpdatedAt();
         $view->impact = $this->impact->of($profile->getHousehold(), $rules, $profile->getNotes());

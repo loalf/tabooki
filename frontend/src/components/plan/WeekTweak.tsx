@@ -2,6 +2,7 @@ import { Pencil, RotateCw, Sparkles, TriangleAlert } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { type MealPlan, useTweakWeek } from '@/api/plan'
+import { DictateButton } from '@/components/DictateButton'
 import { Sheet } from '@/components/Sheet'
 import { Button, textareaClass } from '@/components/ui'
 
@@ -60,6 +61,7 @@ export function WeekTweakSheet({ plan, onClose }: { plan: MealPlan; onClose: () 
           maxLength={500}
           className={textareaClass}
         />
+        <DictateButton onText={(dictated) => setText((current) => [current.trim(), dictated].filter(Boolean).join(' '))} />
         {tweak.isError && <p className="text-sm text-destructive">{t('plan.error')}</p>}
         <Button disabled={tweak.isPending || !text.trim()} onClick={() => apply(text)}>
           {tweak.isPending ? t('plan.tweak.applying') : t('plan.tweak.apply')}
