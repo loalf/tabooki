@@ -18,6 +18,7 @@ framework:
             'App\Message\ExtractSource': async
             'App\Message\ClassifyIngredients': async
             'App\Message\TranslateRecipe': async
+            'App\Message\AnnotateRecipe': async
             'App\Message\SendPasswordResetLink': async
             # Emails go out from the worker: the request doesn't wait for the mail server.
             'Symfony\Component\Mailer\Messenger\SendEmailMessage': async

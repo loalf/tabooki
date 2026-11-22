@@ -1,4 +1,4 @@
-import { ChevronDown, Heart, ListChecks, Plus, Search, X } from 'lucide-react'
+import { ChevronDown, Feather, Heart, Leaf, ListChecks, Plus, Search, Soup, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
@@ -14,6 +14,8 @@ import { useDebounced } from '@/lib/useDebounced'
 import { parseIsoDate, today } from '@/lib/week'
 
 const SORTS = ['recent', 'quick', 'rating', 'az'] as const
+const HEAVY_FILTERS = ['light', 'hearty'] as const
+type HeavyFilter = (typeof HEAVY_FILTERS)[number]
 type Sort = (typeof SORTS)[number]
 
 function sortRecipes(recipes: RecipeListItem[], sort: Sort, locale: string): RecipeListItem[] {
@@ -35,6 +37,9 @@ export function LibraryPage() {
   const tags = params.getAll('tag')
   const favorite = params.get('fav') === '1'
   const needsReview = params.get('review') === '1'
+  // Filtered here rather than by the API: the whole library is already loaded.
+  const heavy: HeavyFilter | null = HEAVY_FILTERS.find((h) => h === params.get('heavy')) ?? null
+  const vegetarian = params.get('veg') === '1'
   const [query, setQuery] = useState(params.get('q') ?? '')
   const debouncedQuery = useDebounced(query)
 
@@ -71,7 +76,10 @@ export function LibraryPage() {
   const recipes = useRecipes(filters)
   const allTags = useTagNames()
   const reviewCount = useReviewCount()
-  const filtering = Boolean(filters.q.trim() || tags.length || favorite || needsReview)
+  const filtering = Boolean(filters.q.trim() || tags.length || favorite || needsReview || heavy || vegetarian)
+  const shown = (recipes.data ?? []).filter(
+    (r) => (!heavy || r.heaviness === heavy) && (!vegetarian || r.diet === 'vegetarian' || r.diet === 'vegan'),
+  )
 
   const toggleTag = (tag: string) =>
     setParams((current) => {
@@ -93,7 +101,15 @@ export function LibraryPage() {
       { replace: true },
     )
 
-  const toggleFlag = (key: 'fav' | 'review') =>
+  const toggleHeavy = (value: HeavyFilter) =>
+    setParams((current) => {
+      const next = new URLSearchParams(current)
+      if (next.get('heavy') === value) next.delete('heavy')
+      else next.set('heavy', value)
+      return next
+    })
+
+  const toggleFlag = (key: 'fav' | 'review' | 'veg') =>
     setParams((current) => {
       const next = new URLSearchParams(current)
       if (next.get(key) === '1') next.delete(key)
@@ -165,6 +181,18 @@ export function LibraryPage() {
             <Heart className={cn('size-4', favorite && 'fill-current')} aria-hidden />
             {t('library.favorites')}
           </Chip>
+          <Chip active={heavy === 'light'} onClick={() => toggleHeavy('light')}>
+            <Feather className="size-4" aria-hidden />
+            {t('library.light')}
+          </Chip>
+          <Chip active={heavy === 'hearty'} onClick={() => toggleHeavy('hearty')}>
+            <Soup className="size-4" aria-hidden />
+            {t('library.hearty')}
+          </Chip>
+          <Chip active={vegetarian} onClick={() => toggleFlag('veg')}>
+            <Leaf className="size-4" aria-hidden />
+            {t('library.vegetarian')}
+          </Chip>
           {tagChips.map((tag) => (
             <Chip key={tag} active={tags.includes(tag)} onClick={() => toggleTag(tag)}>
               {tag}
@@ -176,7 +204,7 @@ export function LibraryPage() {
           <RecipeGridSkeleton />
         ) : recipes.isError ? (
           <EmptyState>{t('library.loadError')}</EmptyState>
-        ) : recipes.data.length === 0 ? (
+        ) : shown.length === 0 ? (
           filtering ? (
             <EmptyState
               title={t('library.noMatches')}
@@ -206,7 +234,7 @@ export function LibraryPage() {
             {!filtering && <Rediscover recipes={recipes.data} />}
             <div className="mt-1 flex items-center justify-between gap-2">
               <h2 className="text-[17px] font-extrabold">
-                {filtering ? t('library.results', { count: recipes.data.length }) : t('library.allCount', { count: recipes.data.length })}
+                {filtering ? t('library.results', { count: shown.length }) : t('library.allCount', { count: shown.length })}
               </h2>
               <label className="relative inline-flex items-center text-sm font-semibold text-muted-foreground">
                 <span className="sr-only">{t('library.sort.label')}</span>
@@ -221,7 +249,7 @@ export function LibraryPage() {
               </label>
             </div>
             <ul className={cn('grid grid-cols-2 gap-3 sm:grid-cols-3', recipes.isPlaceholderData && 'opacity-60')}>
-              {sortRecipes(recipes.data, sort, i18n.language).map((recipe) => (
+              {sortRecipes(shown, sort, i18n.language).map((recipe) => (
                 <li key={recipe.id} className="flex">
                   <RecipeCard recipe={recipe} />
                 </li>

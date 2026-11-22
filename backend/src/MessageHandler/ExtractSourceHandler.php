@@ -27,6 +27,7 @@ use App\Extraction\Transcript;
 use App\Library\Metadata\MetadataFetcher;
 use App\Llm\LlmException;
 use App\Llm\Pricing;
+use App\Message\AnnotateRecipe;
 use App\Message\ExtractSource;
 use App\Message\TranslateRecipe;
 use App\Repository\SourceRepository;
@@ -146,11 +147,14 @@ final readonly class ExtractSourceHandler
 
         $this->entityManager->flush();
 
-        // New or rewritten recipes: write them in the other language too. (Asked to the
-        // repository: the link's own list doesn't know the recipes this run created.)
+        // New or rewritten recipes: write them in the other language too, and read their facts.
+        // (Asked to the repository: the link's own list doesn't know the recipes this run created.)
         foreach ($this->entityManager->getRepository(Recipe::class)->findBy(['source' => $source]) as $recipe) {
             if ($recipe->needsTranslation()) {
                 $this->bus->dispatch(new TranslateRecipe($recipe->getId()->toRfc4122()));
+            }
+            if ($recipe->needsFacts()) {
+                $this->bus->dispatch(new AnnotateRecipe($recipe->getId()->toRfc4122()));
             }
         }
     }

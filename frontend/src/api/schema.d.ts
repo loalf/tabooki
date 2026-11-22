@@ -639,7 +639,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -661,7 +661,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -1206,8 +1206,23 @@ export interface components {
              * @default false
              */
             needsReview: boolean;
+            /**
+             * @description How filling it is, how spicy, and what it contains (docs/PLAN.md §6.2): read by the text
+             *     model (App\Planning\RecipeAnnotator) after it is added and when its title or ingredients
+             *     change. Null and empty until then. A field fixed by hand is never overwritten.
+             * @enum {string|null}
+             */
+            heaviness?: "light" | "medium" | "hearty" | null;
+            /** @description 0 not spicy, 1 mild, 2 hot. */
+            spice?: number | null;
             readonly totalMinutes?: number | null;
             mealTypes?: ("lunch" | "dinner")[];
+            foodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+            /**
+             * @description The strictest diet it suits; null while nobody knows what it contains.
+             * @enum {string|null}
+             */
+            readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
         };
         "Recipe-recipe.list": {
             /** Format: uuid */
@@ -1240,8 +1255,23 @@ export interface components {
              * @default false
              */
             needsReview: boolean;
+            /**
+             * @description How filling it is, how spicy, and what it contains (docs/PLAN.md §6.2): read by the text
+             *     model (App\Planning\RecipeAnnotator) after it is added and when its title or ingredients
+             *     change. Null and empty until then. A field fixed by hand is never overwritten.
+             * @enum {string|null}
+             */
+            heaviness?: "light" | "medium" | "hearty" | null;
+            /** @description 0 not spicy, 1 mild, 2 hot. */
+            spice?: number | null;
             readonly totalMinutes?: number | null;
             mealTypes?: ("lunch" | "dinner")[];
+            foodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+            /**
+             * @description The strictest diet it suits; null while nobody knows what it contains.
+             * @enum {string|null}
+             */
+            readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
         };
         "Recipe-recipe.read": {
             /** Format: uuid */
@@ -1288,6 +1318,15 @@ export interface components {
              * @description When it was (last) extracted; null for recipes typed by hand.
              */
             readonly extractedAt?: string | null;
+            /**
+             * @description How filling it is, how spicy, and what it contains (docs/PLAN.md §6.2): read by the text
+             *     model (App\Planning\RecipeAnnotator) after it is added and when its title or ingredients
+             *     change. Null and empty until then. A field fixed by hand is never overwritten.
+             * @enum {string|null}
+             */
+            heaviness?: "light" | "medium" | "hearty" | null;
+            /** @description 0 not spicy, 1 mild, 2 hot. */
+            spice?: number | null;
             /** Format: date-time */
             readonly createdAt?: string;
             /** Format: date-time */
@@ -1299,6 +1338,13 @@ export interface components {
              * @enum {string|null}
              */
             readonly translatedFrom?: "es" | "en" | null;
+            foodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+            optionalFoodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+            /**
+             * @description The strictest diet it suits; null while nobody knows what it contains.
+             * @enum {string|null}
+             */
+            readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
         };
         "Recipe-recipe.write": {
             /**
@@ -1336,7 +1382,18 @@ export interface components {
              * @default false
              */
             needsReview: boolean;
+            /**
+             * @description How filling it is, how spicy, and what it contains (docs/PLAN.md §6.2): read by the text
+             *     model (App\Planning\RecipeAnnotator) after it is added and when its title or ingredients
+             *     change. Null and empty until then. A field fixed by hand is never overwritten.
+             * @enum {string|null}
+             */
+            heaviness?: "light" | "medium" | "hearty" | null;
+            /** @description 0 not spicy, 1 mild, 2 hot. */
+            spice?: number | null;
             mealTypes?: ("lunch" | "dinner")[];
+            foodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+            optionalFoodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
         };
         "Recipe-recipe.write.jsonMergePatch": {
             /**
@@ -1374,7 +1431,18 @@ export interface components {
              * @default false
              */
             needsReview: boolean;
+            /**
+             * @description How filling it is, how spicy, and what it contains (docs/PLAN.md §6.2): read by the text
+             *     model (App\Planning\RecipeAnnotator) after it is added and when its title or ingredients
+             *     change. Null and empty until then. A field fixed by hand is never overwritten.
+             * @enum {string|null}
+             */
+            heaviness?: "light" | "medium" | "hearty" | null;
+            /** @description 0 not spicy, 1 mild, 2 hot. */
+            spice?: number | null;
             mealTypes?: ("lunch" | "dinner")[];
+            foodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+            optionalFoodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
         };
         "Recipe.jsonld-meal_plan.read_recipe.list": components["schemas"]["HydraItemBaseSchema"] & {
             /** Format: uuid */
@@ -1407,8 +1475,23 @@ export interface components {
              * @default false
              */
             needsReview: boolean;
+            /**
+             * @description How filling it is, how spicy, and what it contains (docs/PLAN.md §6.2): read by the text
+             *     model (App\Planning\RecipeAnnotator) after it is added and when its title or ingredients
+             *     change. Null and empty until then. A field fixed by hand is never overwritten.
+             * @enum {string|null}
+             */
+            heaviness?: "light" | "medium" | "hearty" | null;
+            /** @description 0 not spicy, 1 mild, 2 hot. */
+            spice?: number | null;
             readonly totalMinutes?: number | null;
             mealTypes?: ("lunch" | "dinner")[];
+            foodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+            /**
+             * @description The strictest diet it suits; null while nobody knows what it contains.
+             * @enum {string|null}
+             */
+            readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
         };
         "Recipe.jsonld-recipe.list": components["schemas"]["HydraItemBaseSchema"] & {
             /** Format: uuid */
@@ -1441,8 +1524,23 @@ export interface components {
              * @default false
              */
             needsReview: boolean;
+            /**
+             * @description How filling it is, how spicy, and what it contains (docs/PLAN.md §6.2): read by the text
+             *     model (App\Planning\RecipeAnnotator) after it is added and when its title or ingredients
+             *     change. Null and empty until then. A field fixed by hand is never overwritten.
+             * @enum {string|null}
+             */
+            heaviness?: "light" | "medium" | "hearty" | null;
+            /** @description 0 not spicy, 1 mild, 2 hot. */
+            spice?: number | null;
             readonly totalMinutes?: number | null;
             mealTypes?: ("lunch" | "dinner")[];
+            foodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+            /**
+             * @description The strictest diet it suits; null while nobody knows what it contains.
+             * @enum {string|null}
+             */
+            readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
         };
         "Recipe.jsonld-recipe.read": components["schemas"]["HydraItemBaseSchema"] & {
             /** Format: uuid */
@@ -1489,6 +1587,15 @@ export interface components {
              * @description When it was (last) extracted; null for recipes typed by hand.
              */
             readonly extractedAt?: string | null;
+            /**
+             * @description How filling it is, how spicy, and what it contains (docs/PLAN.md §6.2): read by the text
+             *     model (App\Planning\RecipeAnnotator) after it is added and when its title or ingredients
+             *     change. Null and empty until then. A field fixed by hand is never overwritten.
+             * @enum {string|null}
+             */
+            heaviness?: "light" | "medium" | "hearty" | null;
+            /** @description 0 not spicy, 1 mild, 2 hot. */
+            spice?: number | null;
             /** Format: date-time */
             readonly createdAt?: string;
             /** Format: date-time */
@@ -1500,6 +1607,13 @@ export interface components {
              * @enum {string|null}
              */
             readonly translatedFrom?: "es" | "en" | null;
+            foodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+            optionalFoodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+            /**
+             * @description The strictest diet it suits; null while nobody knows what it contains.
+             * @enum {string|null}
+             */
+            readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
         };
         "RecipeIngredient-recipe.read": {
             /** @description Sub-heading the line belongs to ("For the sauce"), if the recipe has groups. */

@@ -110,7 +110,10 @@
       "writeHint": "Title, ingredients and steps",
       "share": "From Instagram, TikTok or YouTube",
       "shareHint": "Share it to Tabooki without opening the app. Set it up here."
-    }
+    },
+    "light": "Light",
+    "hearty": "Hearty",
+    "vegetarian": "Vegetarian"
   },
   "recipe": {
     "favorite": "Favorite",
@@ -186,7 +189,48 @@
     "planNext": "Waiting for the next menu",
     "contents": "Recipe contents",
     "for": "Serves",
-    "toMenu": "To menu"
+    "toMenu": "To menu",
+    "facts": {
+      "title": "What it's like",
+      "heavinessLabel": "How filling",
+      "heaviness": {
+        "light": "Light",
+        "medium": "Medium",
+        "hearty": "Hearty"
+      },
+      "spiceLabel": "Spicy",
+      "spice": {
+        "0": "Not spicy",
+        "1": "A bit spicy",
+        "2": "Spicy"
+      },
+      "diet": {
+        "vegan": "Vegan",
+        "vegetarian": "Vegetarian",
+        "pescatarian": "Pescatarian"
+      },
+      "contains": "Contains",
+      "optional": "Optional: {{groups}}",
+      "hint": "Tabooki fills this in when the recipe is saved. Fix it if it gets it wrong: what you change by hand stays.",
+      "group": {
+        "red_meat": "red meat",
+        "pork": "pork",
+        "poultry": "poultry",
+        "processed_meat": "cured meats",
+        "fish": "fish",
+        "shellfish": "shellfish",
+        "animal_stock": "meat stock",
+        "egg": "egg",
+        "dairy": "dairy",
+        "cheese": "cheese",
+        "gluten": "gluten",
+        "tree_nuts": "nuts",
+        "peanuts": "peanuts",
+        "soy": "soy",
+        "sesame": "sesame",
+        "alcohol": "alcohol"
+      }
+    }
   },
   "plan": {
     "title": "Menu",
@@ -432,14 +476,16 @@
       "video": "Watching the video",
       "images": "Reading the pictures",
       "classify": "Sorting ingredients",
-      "translate": "Translating the recipe"
+      "translate": "Translating the recipe",
+      "annotate": "Reading what it's like"
     },
     "classifyWhat": "New ingredients on the list",
     "translateWhat": "A recipe typed in",
     "deletedLink": "Deleted link",
     "unpriced_one": "{{count}} call uses a model with no price configured and is not in the totals.",
     "unpriced_other": "{{count}} calls use a model with no price configured and are not in the totals.",
-    "footnote": "Amazon Bedrock list prices in US dollars, before tax. Months in UTC."
+    "footnote": "Amazon Bedrock list prices in US dollars, before tax. Months in UTC.",
+    "annotateWhat": "A recipe typed in"
   },
   "password": {
     "current": "Current password",

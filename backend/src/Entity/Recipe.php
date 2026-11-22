@@ -13,12 +13,16 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\QueryParameter;
+use App\Enum\Diet;
+use App\Enum\FoodGroup;
+use App\Enum\Heaviness;
 use App\Enum\Language;
 use App\Enum\MealType;
 use App\Enum\SourceStatus;
 use App\Filter\RecipeSearchFilter;
 use App\Filter\RecipeTagsFilter;
 use App\Library\SearchText;
+use App\Planning\RecipeFacts;
 use App\Repository\RecipeRepository;
 use App\State\RecipeProcessor;
 use App\State\RecipeProvider;
@@ -100,6 +104,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Recipe implements HouseholdOwned
 {
     public const int MAX_TAGS = 20;
+
+    /** The facts someone can fix by hand. */
+    public const array FACTS = ['heaviness', 'spice', 'foodGroups', 'optionalFoodGroups'];
 
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
@@ -207,6 +214,37 @@ class Recipe implements HouseholdOwned
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     #[Groups(['recipe:read'])]
     private ?\DateTimeImmutable $extractedAt = null;
+
+    /**
+     * How filling it is, how spicy, and what it contains (docs/PLAN.md §6.2): read by the text
+     * model (App\Planning\RecipeAnnotator) after it is added and when its title or ingredients
+     * change. Null and empty until then. A field fixed by hand is never overwritten.
+     */
+    #[ORM\Column(enumType: Heaviness::class, length: 10, nullable: true)]
+    #[Groups(['recipe:read', 'recipe:list', 'recipe:write'])]
+    private ?Heaviness $heaviness = null;
+
+    /** 0 not spicy, 1 mild, 2 hot. */
+    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    #[Groups(['recipe:read', 'recipe:list', 'recipe:write'])]
+    #[Assert\Range(min: 0, max: 2)]
+    private ?int $spice = null;
+
+    /** @var list<string> FoodGroup values of the ingredients the dish needs */
+    #[ORM\Column(name: 'food_groups', type: Types::JSON, options: ['jsonb' => true, 'default' => '[]'])]
+    private array $foodGroupValues = [];
+
+    /** @var list<string> FoodGroup values only its optional ingredients bring */
+    #[ORM\Column(name: 'optional_food_groups', type: Types::JSON, options: ['jsonb' => true, 'default' => '[]'])]
+    private array $optionalFoodGroupValues = [];
+
+    /** Fingerprint of the text the model read the facts from (factsFingerprint()); null if it hasn't. */
+    #[ORM\Column(length: 32, nullable: true)]
+    private ?string $factsFrom = null;
+
+    /** @var list<string> facts fixed by hand (FACTS), which the model leaves alone */
+    #[ORM\Column(type: Types::JSON, options: ['jsonb' => true, 'default' => '[]'])]
+    private array $factsEdited = [];
 
     /** Title, tags and ingredients, lowercased and without accents: what the library search matches. */
     #[ORM\Column(type: Types::TEXT, options: ['default' => ''])]
@@ -601,6 +639,146 @@ class Recipe implements HouseholdOwned
         if (RecipeText::of($this)->equals($translation)) {
             $before->applyTo($this);
         }
+    }
+
+    public function getHeaviness(): ?Heaviness
+    {
+        return $this->heaviness;
+    }
+
+    public function setHeaviness(?Heaviness $heaviness): void
+    {
+        if ($heaviness !== $this->heaviness) {
+            $this->heaviness = $heaviness;
+            $this->markFactEdited('heaviness');
+        }
+    }
+
+    public function getSpice(): ?int
+    {
+        return $this->spice;
+    }
+
+    public function setSpice(?int $spice): void
+    {
+        if ($spice !== $this->spice) {
+            $this->spice = $spice;
+            $this->markFactEdited('spice');
+        }
+    }
+
+    /** @return list<FoodGroup> */
+    #[Groups(['recipe:read', 'recipe:list'])]
+    public function getFoodGroups(): array
+    {
+        return array_map(FoodGroup::from(...), $this->foodGroupValues);
+    }
+
+    /** @param list<FoodGroup> $groups */
+    #[Groups(['recipe:write'])]
+    public function setFoodGroups(array $groups): void
+    {
+        $values = self::groupValues($groups);
+        if ($values !== $this->foodGroupValues) {
+            $this->foodGroupValues = $values;
+            $this->markFactEdited('foodGroups');
+        }
+    }
+
+    /** @return list<FoodGroup> */
+    #[Groups(['recipe:read'])]
+    public function getOptionalFoodGroups(): array
+    {
+        return array_map(FoodGroup::from(...), $this->optionalFoodGroupValues);
+    }
+
+    /** @param list<FoodGroup> $groups */
+    #[Groups(['recipe:write'])]
+    public function setOptionalFoodGroups(array $groups): void
+    {
+        $values = self::groupValues($groups);
+        if ($values !== $this->optionalFoodGroupValues) {
+            $this->optionalFoodGroupValues = $values;
+            $this->markFactEdited('optionalFoodGroups');
+        }
+    }
+
+    /** The strictest diet it suits; null while nobody knows what it contains. */
+    #[Groups(['recipe:read', 'recipe:list'])]
+    public function getDiet(): ?Diet
+    {
+        return $this->hasFoodGroups() ? Diet::of($this->getFoodGroups()) : null;
+    }
+
+    /** Whether what it contains is known (read by the model or set by hand): an empty list then means "nothing to flag". */
+    public function hasFoodGroups(): bool
+    {
+        return null !== $this->factsFrom || \in_array('foodGroups', $this->factsEdited, true);
+    }
+
+    /** @return list<string> */
+    public function getFactsEdited(): array
+    {
+        return $this->factsEdited;
+    }
+
+    /** Identifies what the facts are read from: the title and the ingredient lines (steps hardly change them). */
+    public function factsFingerprint(): string
+    {
+        $ingredients = array_map(
+            static fn (RecipeIngredient $i): array => [$i->getRawText(), $i->isOptional()],
+            array_values($this->ingredients->toArray()),
+        );
+
+        return hash('xxh128', json_encode([$this->title, $ingredients], \JSON_THROW_ON_ERROR | \JSON_UNESCAPED_UNICODE));
+    }
+
+    /** Never read, or read from a title or ingredients that have changed since; and something is left to fill in. */
+    public function needsFacts(): bool
+    {
+        return $this->factsFrom !== $this->factsFingerprint() && \count(array_diff(self::FACTS, $this->factsEdited)) > 0;
+    }
+
+    /** What the model read from the recipe as it is now (one read from an older text is ignored), except the facts fixed by hand. */
+    public function applyFacts(RecipeFacts $facts, string $from): bool
+    {
+        if ($from !== $this->factsFingerprint()) {
+            return false;
+        }
+        $edited = fn (string $fact): bool => \in_array($fact, $this->factsEdited, true);
+        if (!$edited('heaviness')) {
+            $this->heaviness = $facts->heaviness;
+        }
+        if (!$edited('spice')) {
+            $this->spice = $facts->spice;
+        }
+        if (!$edited('foodGroups')) {
+            $this->foodGroupValues = self::groupValues($facts->foodGroups);
+        }
+        if (!$edited('optionalFoodGroups')) {
+            // Whatever the dish needs anyway isn't brought by its optional ingredients.
+            $this->optionalFoodGroupValues = array_values(array_diff(self::groupValues($facts->optionalFoodGroups), $this->foodGroupValues));
+        }
+        $this->factsFrom = $from;
+
+        return true;
+    }
+
+    private function markFactEdited(string $fact): void
+    {
+        if (!\in_array($fact, $this->factsEdited, true)) {
+            $this->factsEdited[] = $fact;
+        }
+    }
+
+    /**
+     * @param iterable<mixed> $groups
+     *
+     * @return list<string>
+     */
+    private static function groupValues(iterable $groups): array
+    {
+        return array_map(static fn (FoodGroup $g): string => $g->value, FoodGroup::listFrom($groups));
     }
 
     public function getSearchText(): string

@@ -7,12 +7,14 @@ namespace App\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Entity\Recipe;
+use App\Message\AnnotateRecipe;
 use App\Message\TranslateRecipe;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 /**
  * Saves a recipe typed or edited by hand, then has it translated into the other language when
- * its text changed (see Recipe::keepOriginalIfUntouched() for edits made to the translation).
+ * its text changed (see Recipe::keepOriginalIfUntouched() for edits made to the translation),
+ * and its facts read again when its title or ingredients did.
  *
  * @implements ProcessorInterface<Recipe, mixed>
  */
@@ -30,6 +32,9 @@ final readonly class RecipeProcessor implements ProcessorInterface
         $result = $this->persist->process($data, $operation, $uriVariables, $context);
         if ($data->needsTranslation()) {
             $this->bus->dispatch(new TranslateRecipe($data->getId()->toRfc4122()));
+        }
+        if ($data->needsFacts()) {
+            $this->bus->dispatch(new AnnotateRecipe($data->getId()->toRfc4122()));
         }
 
         return $result;

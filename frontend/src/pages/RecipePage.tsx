@@ -1,4 +1,4 @@
-import { CalendarCheck, CalendarPlus, Check, ChefHat, ChevronLeft, Clock, Ellipsis, ExternalLink, Heart, Languages, LoaderCircle, Minus, Pencil, Plus, RefreshCw, Sparkles, Star, Sun, Trash2 } from 'lucide-react'
+import { CalendarCheck, CalendarPlus, Check, ChefHat, ChevronLeft, Clock, Ellipsis, ExternalLink, Flame, Heart, Languages, Leaf, LoaderCircle, Minus, Pencil, Plus, RefreshCw, Scale, Sparkles, Star, Sun, Trash2 } from 'lucide-react'
 import { type ReactNode, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
@@ -21,6 +21,7 @@ import { Sheet, SheetRowContent, sheetRowClass } from '@/components/Sheet'
 import { StarRating } from '@/components/StarRating'
 import { Button, linkButtonClass } from '@/components/ui'
 import { scaleLine } from '@/lib/cook'
+import { sortGroups } from '@/lib/facts'
 import { cn } from '@/lib/utils'
 import { groupIngredients } from '@/lib/recipeText'
 import { useGoBack } from '@/lib/useGoBack'
@@ -97,6 +98,8 @@ function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) 
   const [toMenu, setToMenu] = useState(false)
   const source = recipe.source
   const tags = recipe.tags ?? []
+  const foodGroups = sortGroups(recipe.foodGroups ?? [])
+  const optionalGroups = sortGroups(recipe.optionalFoodGroups ?? [])
   const factor = servings / (recipe.servings || servings)
 
   const cookParams = new URLSearchParams(params)
@@ -168,6 +171,24 @@ function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) 
               {(recipe.mealTypes ?? []).map((type) => t(`recipe.meal.${type}`)).join(' · ')}
             </li>
           )}
+          {recipe.heaviness && (
+            <li className="inline-flex items-center gap-1.5">
+              <Scale className="size-4" aria-label={t('recipe.facts.heavinessLabel')} />
+              {t(`recipe.facts.heaviness.${recipe.heaviness}`)}
+            </li>
+          )}
+          {recipe.spice != null && recipe.spice > 0 && (
+            <li className="inline-flex items-center gap-1.5">
+              <Flame className="size-4" aria-hidden />
+              {t(`recipe.facts.spice.${recipe.spice}`)}
+            </li>
+          )}
+          {recipe.diet && (
+            <li className="inline-flex items-center gap-1.5">
+              <Leaf className="size-4" aria-hidden />
+              {t(`recipe.facts.diet.${recipe.diet}`)}
+            </li>
+          )}
           {recipe.translatedFrom && (
             <li className="inline-flex items-center gap-1.5">
               <Languages className="size-4" aria-hidden />
@@ -205,6 +226,13 @@ function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) 
             </li>
           ))}
         </ul>
+      )}
+
+      {foodGroups.length > 0 && (
+        <p className="-mt-1 text-[13px] text-muted-foreground">
+          <span className="font-semibold">{t('recipe.facts.contains')}:</span> {foodGroups.map((g) => t(`recipe.facts.group.${g}`)).join(' · ')}
+          {optionalGroups.length > 0 && <> ({t('recipe.facts.optional', { groups: optionalGroups.map((g) => t(`recipe.facts.group.${g}`)).join(' · ') })})</>}
+        </p>
       )}
 
       {recipe.needsReview && (

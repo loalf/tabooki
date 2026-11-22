@@ -153,7 +153,9 @@ sources           id, household_id, url, normalized_url (unique per household), 
 recipes           id, household_id, source_id (nullable for manual), language (es|en), title, servings,
                   prep_min, cook_min, total_min, cuisine, meal_types[], tags[], diet_flags[],
                   steps jsonb, notes, rating, is_favorite, confidence, extracted_by_model, reviewed_at,
-                  translation jsonb (the text in the other language + hash of the text it came from)
+                  translation jsonb (the text in the other language + hash of the text it came from),
+                  heaviness (light|medium|hearty), spice (0-2), food_groups[], optional_food_groups[],
+                  facts_from (hash of the text they were read from), facts_edited[] (fields fixed by hand)
 
 recipe_ingredients id, recipe_id, position, group_name, raw_text, quantity, unit,
                   ingredient_id, prep, optional
@@ -162,6 +164,9 @@ ingredients       id, household_id, canonical_key, name_es, name_en, aisle, is_s
                   density_g_per_ml (nullable)   -- grows as recipes arrive
 
 extraction_runs   id, source_id, step, provider, model, input_tokens, output_tokens, cost_usd, ok, error, created_at
+
+taste_profiles    id, household_id (unique), answers jsonb, rules jsonb, notes, summary jsonb {es, en},
+                  updated_by, updated_at
 
 meal_plans        id, household_id, week_start, created_at
 meal_plan_entries id, plan_id, date, slot (lunch|dinner), recipe_id, servings,
@@ -183,7 +188,85 @@ Start **deterministic, not LLM**: it's faster, free, predictable and easy to twe
 - **Scoring each candidate recipe:** favorites and rating ↑, recently cooked ↓ (no repeats within ~3 weeks), variety across the week (protein, cuisine) ↑, **overlap in fresh ingredients with already chosen recipes ↑** (less waste: half a bunch of cilantro gets used twice), fits the slot's time limit.
 - Weighted random pick, slot by slot, so "regenerate" gives a different plan each time.
 - **Leftovers / cook once, eat twice:** with both lunch and dinner planned, this matters a lot. Tonight's dinner cooked in double quantity can fill tomorrow's lunch (a takeaway container for work). The planner can propose these pairs, and the shopping list counts the ingredients once at the doubled amount.
-- **Later (optional):** a natural-language tweak box ("more vegetarian this week, nothing spicy on Thursday") where an LLM turns the request into constraints and weights. The LLM sets the parameters and the planner still does the picking.
+- **Later (optional):** a natural-language tweak box ("more vegetarian this week, nothing spicy on Thursday") where an LLM turns the request into constraints and weights. The LLM sets the parameters and the planner still does the picking. See §6.3.
+
+### 6.1 Taste profile: the household's likings
+
+Each household tells Tabooki what it likes ("no fish", "we don't like cheese", "heavy lunches and light dinners", "animal protein twice a week at most"). Nobody writes a prompt: a short questionnaire collects the answers, and an LLM turns them into **typed rules** the planner applies by itself. The LLM never picks the week: hard rules (an allergy) must hold every time, regenerate and swap stay instant and free, and locks, leftovers, history and shared ingredients keep working.
+
+The three kinds of rule, and the data each needs:
+
+| Rule | Example | Needs |
+|---|---|---|
+| Exclude a food group or ingredient | "no fish", "no cheese", "no coriander" | what each recipe contains |
+| Match a dish to the meal | "heavy lunches, light dinners" | how heavy each recipe is |
+| Weekly count | "meat or fish twice a week at most", "fish at least twice" | food groups, counted over the week |
+
+Wishes no rule can express ("nothing fiddly on weekdays", "the kids hate saucy dishes") are kept as free-text **notes**, judged once per recipe by the LLM and cached (§6.3).
+
+**Questionnaire** (Settings → "Gustos de la casa", plus a nudge in the plan setup until it exists). One tappable question per screen, all skippable, prefilled when retaken:
+
+1. Diet: omnivore · flexitarian · pescatarian · vegetarian · vegan.
+2. Never eaten: chips (fish, shellfish, pork, red meat, cheese, dairy, egg, gluten, nuts, mushrooms, coriander, spicy… + add your own), each marked **"we don't like it"** (only counts when the recipe really uses it: an optional garnish is fine) or **"allergy / can't"** (counts even when optional; never relaxed).
+3. Meat or fish per week: no limit · 1–2 · 3–4 · 5+, then "do eggs and dairy count?" (default no), and an optional minimum ("fish at least twice").
+4. Lunch vs dinner: heavy lunch and light dinner · the same · heavier dinner.
+5. More of: legumes, vegetables, rice, pasta, Asian…
+6. Spice: none · mild · we love it.
+7. Anything else? Free text, with dictation (Whisper is already wired).
+
+Then the LLM may ask **up to 3 multiple-choice follow-ups** where something is ambiguous, grounded in the library ("14 of your recipes have cheese: is melted cheese on a pizza fine?"). One round, no more.
+
+**"This is what we understood"**: one bullet per rule, each with its **effect on the library** ("No fish or shellfish: leaves out 12 of 140 recipes") and warnings when too little is left ("only 9 light weekday dinners: the menu will repeat often"). Bullets can be removed or edited; the readable summary (the "prompt") sits on top. Saving offers to redo this week's menu.
+
+**Decisions:** a leftover lunch counts as a meal for weekly limits (it is eaten twice); eggs and dairy aren't animal protein unless the household says so; one profile per household (no per-member profiles: "someone at home doesn't eat X" plans the same); a recipe chosen by hand or asked for "en el próximo menú" can break a dislike (with a warning), never an allergy without confirming.
+
+### 6.2 Recipe facts
+
+What the rules read, per recipe, from one small call to the text model (`AnnotateRecipe`, no thinking, the recipe's title, ingredients and steps). It runs after extraction and when the title or ingredients change, plus `app:annotate` for the existing library; each call is logged in `extraction_run` as step `annotate`.
+
+- **heaviness:** light (salads, soups, steamed fish and vegetables), medium, hearty (stews, legumes with meat, baked pasta, fried food).
+- **spice:** 0 none, 1 mild, 2 hot.
+- **food groups** of the ingredients the dish needs, and separately of its optional ones: `red_meat, pork, poultry, processed_meat, fish, shellfish, animal_stock, egg, dairy, cheese, gluten, tree_nuts, peanuts, soy, sesame, alcohol`. Composite ingredients count (pesto → cheese, tree nuts); `animal_stock` (stock, gelatin, lard) keeps a vegetable soup made with chicken stock out of a vegetarian week without counting it as a meat meal. Diets follow from the groups: vegan, vegetarian, pescatarian.
+
+They live on the recipe rather than on the ingredient catalog, which is only filled when a shopping list is built. They can be fixed by hand on the recipe form; a field fixed by hand is never overwritten by the model. The library can filter by them (light, hearty, vegetarian).
+
+### 6.3 How the planner uses the profile
+
+`rules` is a small typed, versioned vocabulary (the LLM answers through a tool whose schema has only these, with enums, so it can't invent others):
+
+```json
+{
+  "version": 1,
+  "diet": "omnivore",
+  "exclude": [
+    {"group": "fish", "strength": "never"},
+    {"group": "cheese", "strength": "avoid"},
+    {"ingredients": ["coriander", "fresh_coriander"], "strength": "avoid"}
+  ],
+  "weekly": [{"groups": ["red_meat", "pork", "poultry", "processed_meat", "fish", "shellfish"], "max": 2}],
+  "slotHeaviness": {"lunch": "hearty", "dinner": "light"},
+  "prefer": [{"tag": "legumes", "weight": "more"}],
+  "spice": "mild"
+}
+```
+
+**Compiling** (`POST /api/taste-profile/draft`, synchronous, nothing saved): answers + free text + the rule schema + the household's ingredient keys (so "cilantro" maps to keys that exist) → `rules`, `notes`, `summary {es, en}`, `interpretations[]` (the bullets) and up to 3 `questions[]`. The server validates it, drops unknown keys and computes the effect on the library itself. `PUT /api/taste-profile` saves what the user confirmed. Logged as step `taste_profile`.
+
+**Planning:**
+
+| Rule | Enforced as | Relaxes? |
+|---|---|---|
+| Allergy (`never`), diet | filtered out first | **never**: the meal stays empty, with the reason |
+| Dislike (`avoid`) | first filter tier | last, after the no-repeat tiers |
+| Weekly `max` | running count over the week (locked and leftover meals included); the group drops out once reached | yes, and the explanation says so |
+| Weekly `min` | weight grows as the remaining meals run out | — |
+| Meal heaviness, `prefer`, spice, notes fit | score multipliers (e.g. right heaviness ×1.5, wrong ×0.4, `fit: poor` ×0.2) | soft by design |
+
+The greedy slot-by-slot pick can't plan ahead for minimums, so it becomes the sampler: build ~100 weeks with it, score each whole week (rules broken, heaviness matches, variety, shared ingredients), keep the best. Milliseconds at household scale, and regenerate still varies. Each entry records why it was chosen (`meal_plan_entries.reasons`), shown in the meal sheet ("light dinner · uses Tuesday's coriander", or "no other light dinner under 30 min").
+
+**Notes fit:** when the profile has notes, one batched call (title, main ingredients, tags, minutes; ~40 tokens per recipe) returns `good|neutral|poor` + a reason per recipe, cached per recipe with the notes' hash; new recipes are judged on import. The planner reads the cache only.
+
+**Phases:** (1) recipe facts, backfill, editing, library filters; (2) questionnaire, compile, review screen, profile settings, planner rules, best-of-K, explanations; (3) notes fit, a per-week tweak box (temporary rules on the plan, same compiler), and "why are you swapping it?" feeding profile suggestions.
 
 ## 7. Shopping list
 

@@ -21,6 +21,7 @@ import { EmptyState, pageTitleClass } from '@/components/PageHeader'
 import { TagInput } from '@/components/TagInput'
 import { Button, Chip, Field, inputClass, textareaClass } from '@/components/ui'
 import { LOCALES } from '@/i18n'
+import { FOOD_GROUPS, type FoodGroup, HEAVINESS, type Heaviness, SPICE, sortGroups } from '@/lib/facts'
 import { ingredientsToText, stepsToText, textToIngredients, textToSteps } from '@/lib/recipeText'
 import { cn } from '@/lib/utils'
 import { useGoBack } from '@/lib/useGoBack'
@@ -80,6 +81,9 @@ function RecipeForm({ existing, source }: { existing?: Recipe; source?: Source }
   const [ingredientsText, setIngredientsText] = useState(ingredientsToText(existing?.ingredients ?? []))
   const [stepsText, setStepsText] = useState(stepsToText(existing?.steps ?? []))
   const [notes, setNotes] = useState(existing?.notes ?? '')
+  const [heaviness, setHeaviness] = useState<Heaviness | null>(existing?.heaviness ?? null)
+  const [spice, setSpice] = useState<number | null>(existing?.spice ?? null)
+  const [foodGroups, setFoodGroups] = useState<FoodGroup[]>(sortGroups(existing?.foodGroups ?? []))
 
   const linkedSource = existing?.source ?? source
   const violations = save.error instanceof ValidationError ? save.error.violations : []
@@ -104,6 +108,11 @@ function RecipeForm({ existing, source }: { existing?: Recipe; source?: Source }
       ingredients: textToIngredients(ingredientsText, existing?.ingredients),
       steps: textToSteps(stepsText),
       notes: notes.trim() || null,
+      // Facts only when changed here: the model may have read them while the form was open,
+      // and sending them back unchanged would pin its old (empty) answer as a fix by hand.
+      ...(heaviness !== (existing?.heaviness ?? null) ? { heaviness } : {}),
+      ...(spice !== (existing?.spice ?? null) ? { spice } : {}),
+      ...(foodGroups.join() !== sortGroups(existing?.foodGroups ?? []).join() ? { foodGroups } : {}),
       favorite: existing?.favorite ?? false,
       planNext: existing?.planNext ?? false,
       // Saving the form means someone has looked at it.
@@ -118,6 +127,9 @@ function RecipeForm({ existing, source }: { existing?: Recipe; source?: Source }
 
   const toggleMealType = (type: MealType) =>
     setMealTypes(mealTypes.includes(type) ? mealTypes.filter((m) => m !== type) : [...mealTypes, type])
+
+  const toggleGroup = (group: FoodGroup) =>
+    setFoodGroups(sortGroups(foodGroups.includes(group) ? foodGroups.filter((g) => g !== group) : [...foodGroups, group]))
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
@@ -191,6 +203,35 @@ function RecipeForm({ existing, source }: { existing?: Recipe; source?: Source }
               {t(`recipe.meal.${type}`)}
             </Chip>
           ))}
+        </div>
+      </fieldset>
+
+      <fieldset className="flex flex-col gap-3">
+        <legend className="text-sm font-semibold">{t('recipe.facts.title')}</legend>
+        <p className="-mt-1.5 text-xs text-muted-foreground">{t('recipe.facts.hint')}</p>
+        <div role="group" aria-label={t('recipe.facts.heavinessLabel')} className="flex flex-wrap gap-2">
+          {HEAVINESS.map((value) => (
+            <Chip key={value} active={heaviness === value} onClick={() => setHeaviness(heaviness === value ? null : value)}>
+              {t(`recipe.facts.heaviness.${value}`)}
+            </Chip>
+          ))}
+        </div>
+        <div role="group" aria-label={t('recipe.facts.spiceLabel')} className="flex flex-wrap gap-2">
+          {SPICE.map((value) => (
+            <Chip key={value} active={spice === value} onClick={() => setSpice(spice === value ? null : value)}>
+              {t(`recipe.facts.spice.${value}`)}
+            </Chip>
+          ))}
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <span className="text-xs font-semibold text-muted-foreground">{t('recipe.facts.contains')}</span>
+          <div role="group" aria-label={t('recipe.facts.contains')} className="flex flex-wrap gap-2">
+            {FOOD_GROUPS.map((group) => (
+              <Chip key={group} active={foodGroups.includes(group)} onClick={() => toggleGroup(group)}>
+                {t(`recipe.facts.group.${group}`)}
+              </Chip>
+            ))}
+          </div>
         </div>
       </fieldset>
 

@@ -110,7 +110,10 @@
       "writeHint": "Título, ingredientes y pasos",
       "share": "Desde Instagram, TikTok o YouTube",
       "shareHint": "Compártela con Tabooki sin abrir la app. Así se configura."
-    }
+    },
+    "light": "Ligeras",
+    "hearty": "Contundentes",
+    "vegetarian": "Vegetarianas"
   },
   "recipe": {
     "favorite": "Favorita",
@@ -186,7 +189,48 @@
     "planNext": "En cola para el próximo menú",
     "contents": "Contenido de la receta",
     "for": "Para",
-    "toMenu": "Al menú"
+    "toMenu": "Al menú",
+    "facts": {
+      "title": "Cómo es",
+      "heavinessLabel": "Cuánto llena",
+      "heaviness": {
+        "light": "Ligera",
+        "medium": "Normal",
+        "hearty": "Contundente"
+      },
+      "spiceLabel": "Picante",
+      "spice": {
+        "0": "No pica",
+        "1": "Pica un poco",
+        "2": "Picante"
+      },
+      "diet": {
+        "vegan": "Vegana",
+        "vegetarian": "Vegetariana",
+        "pescatarian": "Pescetariana"
+      },
+      "contains": "Lleva",
+      "optional": "Opcional: {{groups}}",
+      "hint": "Tabooki lo rellena solo al guardar la receta. Corrígelo si no acierta: lo que cambies a mano se queda.",
+      "group": {
+        "red_meat": "carne roja",
+        "pork": "cerdo",
+        "poultry": "pollo o aves",
+        "processed_meat": "embutido",
+        "fish": "pescado",
+        "shellfish": "marisco",
+        "animal_stock": "caldo de carne",
+        "egg": "huevo",
+        "dairy": "lácteos",
+        "cheese": "queso",
+        "gluten": "gluten",
+        "tree_nuts": "frutos secos",
+        "peanuts": "cacahuete",
+        "soy": "soja",
+        "sesame": "sésamo",
+        "alcohol": "alcohol"
+      }
+    }
   },
   "plan": {
     "title": "Menú",
@@ -432,14 +476,16 @@
       "video": "Ver el vídeo",
       "images": "Leer las imágenes",
       "classify": "Ordenar ingredientes",
-      "translate": "Traducir la receta"
+      "translate": "Traducir la receta",
+      "annotate": "Leer cómo es"
     },
     "classifyWhat": "Ingredientes nuevos de la lista",
     "translateWhat": "Receta escrita a mano",
     "deletedLink": "Enlace borrado",
     "unpriced_one": "{{count}} llamada usa un modelo sin precio configurado y no cuenta en los totales.",
     "unpriced_other": "{{count}} llamadas usan un modelo sin precio configurado y no cuentan en los totales.",
-    "footnote": "Precios de lista de Amazon Bedrock en dólares, sin impuestos. Meses en hora UTC."
+    "footnote": "Precios de lista de Amazon Bedrock en dólares, sin impuestos. Meses en hora UTC.",
+    "annotateWhat": "Receta escrita a mano"
   },
   "password": {
     "current": "Contraseña actual",

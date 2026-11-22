@@ -10,7 +10,7 @@ final class CostCall
 {
     public \DateTimeImmutable $at;
 
-    #[ApiProperty(schema: ['type' => 'string', 'enum' => ['text', 'transcript', 'video', 'images', 'classify', 'translate']])]
+    #[ApiProperty(schema: ['type' => 'string', 'enum' => ['text', 'transcript', 'video', 'images', 'classify', 'translate', 'annotate']])]
     public string $step = '';
 
     public string $model = '';

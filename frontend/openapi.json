@@ -3831,7 +3831,8 @@
                             "video",
                             "images",
                             "classify",
-                            "translate"
+                            "translate",
+                            "annotate"
                         ]
                     },
                     "model": {
@@ -3900,7 +3901,8 @@
                             "video",
                             "images",
                             "classify",
-                            "translate"
+                            "translate",
+                            "annotate"
                         ]
                     },
                     "model": {
@@ -5216,6 +5218,28 @@
                         "default": false,
                         "type": "boolean"
                     },
+                    "heaviness": {
+                        "description": "How filling it is, how spicy, and what it contains (docs/PLAN.md \u00a76.2): read by the text\nmodel (App\\Planning\\RecipeAnnotator) after it is added and when its title or ingredients\nchange. Null and empty until then. A field fixed by hand is never overwritten.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "light",
+                            "medium",
+                            "hearty",
+                            null
+                        ]
+                    },
+                    "spice": {
+                        "minimum": 0,
+                        "maximum": 2,
+                        "description": "0 not spicy, 1 mild, 2 hot.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
                     "totalMinutes": {
                         "readOnly": true,
                         "type": [
@@ -5232,6 +5256,44 @@
                                 "dinner"
                             ]
                         }
+                    },
+                    "foodGroups": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "red_meat",
+                                "pork",
+                                "poultry",
+                                "processed_meat",
+                                "fish",
+                                "shellfish",
+                                "animal_stock",
+                                "egg",
+                                "dairy",
+                                "cheese",
+                                "gluten",
+                                "tree_nuts",
+                                "peanuts",
+                                "soy",
+                                "sesame",
+                                "alcohol"
+                            ]
+                        }
+                    },
+                    "diet": {
+                        "readOnly": true,
+                        "description": "The strictest diet it suits; null while nobody knows what it contains.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "vegan",
+                            "vegetarian",
+                            "pescatarian",
+                            null
+                        ]
                     }
                 },
                 "required": [
@@ -5313,6 +5375,28 @@
                         "default": false,
                         "type": "boolean"
                     },
+                    "heaviness": {
+                        "description": "How filling it is, how spicy, and what it contains (docs/PLAN.md \u00a76.2): read by the text\nmodel (App\\Planning\\RecipeAnnotator) after it is added and when its title or ingredients\nchange. Null and empty until then. A field fixed by hand is never overwritten.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "light",
+                            "medium",
+                            "hearty",
+                            null
+                        ]
+                    },
+                    "spice": {
+                        "minimum": 0,
+                        "maximum": 2,
+                        "description": "0 not spicy, 1 mild, 2 hot.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
                     "totalMinutes": {
                         "readOnly": true,
                         "type": [
@@ -5329,6 +5413,44 @@
                                 "dinner"
                             ]
                         }
+                    },
+                    "foodGroups": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "red_meat",
+                                "pork",
+                                "poultry",
+                                "processed_meat",
+                                "fish",
+                                "shellfish",
+                                "animal_stock",
+                                "egg",
+                                "dairy",
+                                "cheese",
+                                "gluten",
+                                "tree_nuts",
+                                "peanuts",
+                                "soy",
+                                "sesame",
+                                "alcohol"
+                            ]
+                        }
+                    },
+                    "diet": {
+                        "readOnly": true,
+                        "description": "The strictest diet it suits; null while nobody knows what it contains.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "vegan",
+                            "vegetarian",
+                            "pescatarian",
+                            null
+                        ]
                     }
                 },
                 "required": [
@@ -5472,6 +5594,28 @@
                         ],
                         "format": "date-time"
                     },
+                    "heaviness": {
+                        "description": "How filling it is, how spicy, and what it contains (docs/PLAN.md \u00a76.2): read by the text\nmodel (App\\Planning\\RecipeAnnotator) after it is added and when its title or ingredients\nchange. Null and empty until then. A field fixed by hand is never overwritten.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "light",
+                            "medium",
+                            "hearty",
+                            null
+                        ]
+                    },
+                    "spice": {
+                        "minimum": 0,
+                        "maximum": 2,
+                        "description": "0 not spicy, 1 mild, 2 hot.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
                     "createdAt": {
                         "readOnly": true,
                         "type": "string",
@@ -5509,6 +5653,68 @@
                         "enum": [
                             "es",
                             "en",
+                            null
+                        ]
+                    },
+                    "foodGroups": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "red_meat",
+                                "pork",
+                                "poultry",
+                                "processed_meat",
+                                "fish",
+                                "shellfish",
+                                "animal_stock",
+                                "egg",
+                                "dairy",
+                                "cheese",
+                                "gluten",
+                                "tree_nuts",
+                                "peanuts",
+                                "soy",
+                                "sesame",
+                                "alcohol"
+                            ]
+                        }
+                    },
+                    "optionalFoodGroups": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "red_meat",
+                                "pork",
+                                "poultry",
+                                "processed_meat",
+                                "fish",
+                                "shellfish",
+                                "animal_stock",
+                                "egg",
+                                "dairy",
+                                "cheese",
+                                "gluten",
+                                "tree_nuts",
+                                "peanuts",
+                                "soy",
+                                "sesame",
+                                "alcohol"
+                            ]
+                        }
+                    },
+                    "diet": {
+                        "readOnly": true,
+                        "description": "The strictest diet it suits; null while nobody knows what it contains.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "vegan",
+                            "vegetarian",
+                            "pescatarian",
                             null
                         ]
                     }
@@ -5615,6 +5821,28 @@
                         "default": false,
                         "type": "boolean"
                     },
+                    "heaviness": {
+                        "description": "How filling it is, how spicy, and what it contains (docs/PLAN.md \u00a76.2): read by the text\nmodel (App\\Planning\\RecipeAnnotator) after it is added and when its title or ingredients\nchange. Null and empty until then. A field fixed by hand is never overwritten.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "light",
+                            "medium",
+                            "hearty",
+                            null
+                        ]
+                    },
+                    "spice": {
+                        "minimum": 0,
+                        "maximum": 2,
+                        "description": "0 not spicy, 1 mild, 2 hot.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
                     "mealTypes": {
                         "type": "array",
                         "items": {
@@ -5622,6 +5850,54 @@
                             "enum": [
                                 "lunch",
                                 "dinner"
+                            ]
+                        }
+                    },
+                    "foodGroups": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "red_meat",
+                                "pork",
+                                "poultry",
+                                "processed_meat",
+                                "fish",
+                                "shellfish",
+                                "animal_stock",
+                                "egg",
+                                "dairy",
+                                "cheese",
+                                "gluten",
+                                "tree_nuts",
+                                "peanuts",
+                                "soy",
+                                "sesame",
+                                "alcohol"
+                            ]
+                        }
+                    },
+                    "optionalFoodGroups": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "red_meat",
+                                "pork",
+                                "poultry",
+                                "processed_meat",
+                                "fish",
+                                "shellfish",
+                                "animal_stock",
+                                "egg",
+                                "dairy",
+                                "cheese",
+                                "gluten",
+                                "tree_nuts",
+                                "peanuts",
+                                "soy",
+                                "sesame",
+                                "alcohol"
                             ]
                         }
                     }
@@ -5728,6 +6004,28 @@
                         "default": false,
                         "type": "boolean"
                     },
+                    "heaviness": {
+                        "description": "How filling it is, how spicy, and what it contains (docs/PLAN.md \u00a76.2): read by the text\nmodel (App\\Planning\\RecipeAnnotator) after it is added and when its title or ingredients\nchange. Null and empty until then. A field fixed by hand is never overwritten.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "light",
+                            "medium",
+                            "hearty",
+                            null
+                        ]
+                    },
+                    "spice": {
+                        "minimum": 0,
+                        "maximum": 2,
+                        "description": "0 not spicy, 1 mild, 2 hot.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
                     "mealTypes": {
                         "type": "array",
                         "items": {
@@ -5735,6 +6033,54 @@
                             "enum": [
                                 "lunch",
                                 "dinner"
+                            ]
+                        }
+                    },
+                    "foodGroups": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "red_meat",
+                                "pork",
+                                "poultry",
+                                "processed_meat",
+                                "fish",
+                                "shellfish",
+                                "animal_stock",
+                                "egg",
+                                "dairy",
+                                "cheese",
+                                "gluten",
+                                "tree_nuts",
+                                "peanuts",
+                                "soy",
+                                "sesame",
+                                "alcohol"
+                            ]
+                        }
+                    },
+                    "optionalFoodGroups": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "red_meat",
+                                "pork",
+                                "poultry",
+                                "processed_meat",
+                                "fish",
+                                "shellfish",
+                                "animal_stock",
+                                "egg",
+                                "dairy",
+                                "cheese",
+                                "gluten",
+                                "tree_nuts",
+                                "peanuts",
+                                "soy",
+                                "sesame",
+                                "alcohol"
                             ]
                         }
                     }
@@ -5820,6 +6166,28 @@
                                 "default": false,
                                 "type": "boolean"
                             },
+                            "heaviness": {
+                                "description": "How filling it is, how spicy, and what it contains (docs/PLAN.md \u00a76.2): read by the text\nmodel (App\\Planning\\RecipeAnnotator) after it is added and when its title or ingredients\nchange. Null and empty until then. A field fixed by hand is never overwritten.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "light",
+                                    "medium",
+                                    "hearty",
+                                    null
+                                ]
+                            },
+                            "spice": {
+                                "minimum": 0,
+                                "maximum": 2,
+                                "description": "0 not spicy, 1 mild, 2 hot.",
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
                             "totalMinutes": {
                                 "readOnly": true,
                                 "type": [
@@ -5836,6 +6204,44 @@
                                         "dinner"
                                     ]
                                 }
+                            },
+                            "foodGroups": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "red_meat",
+                                        "pork",
+                                        "poultry",
+                                        "processed_meat",
+                                        "fish",
+                                        "shellfish",
+                                        "animal_stock",
+                                        "egg",
+                                        "dairy",
+                                        "cheese",
+                                        "gluten",
+                                        "tree_nuts",
+                                        "peanuts",
+                                        "soy",
+                                        "sesame",
+                                        "alcohol"
+                                    ]
+                                }
+                            },
+                            "diet": {
+                                "readOnly": true,
+                                "description": "The strictest diet it suits; null while nobody knows what it contains.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "vegan",
+                                    "vegetarian",
+                                    "pescatarian",
+                                    null
+                                ]
                             }
                         },
                         "required": [
@@ -5924,6 +6330,28 @@
                                 "default": false,
                                 "type": "boolean"
                             },
+                            "heaviness": {
+                                "description": "How filling it is, how spicy, and what it contains (docs/PLAN.md \u00a76.2): read by the text\nmodel (App\\Planning\\RecipeAnnotator) after it is added and when its title or ingredients\nchange. Null and empty until then. A field fixed by hand is never overwritten.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "light",
+                                    "medium",
+                                    "hearty",
+                                    null
+                                ]
+                            },
+                            "spice": {
+                                "minimum": 0,
+                                "maximum": 2,
+                                "description": "0 not spicy, 1 mild, 2 hot.",
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
                             "totalMinutes": {
                                 "readOnly": true,
                                 "type": [
@@ -5940,6 +6368,44 @@
                                         "dinner"
                                     ]
                                 }
+                            },
+                            "foodGroups": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "red_meat",
+                                        "pork",
+                                        "poultry",
+                                        "processed_meat",
+                                        "fish",
+                                        "shellfish",
+                                        "animal_stock",
+                                        "egg",
+                                        "dairy",
+                                        "cheese",
+                                        "gluten",
+                                        "tree_nuts",
+                                        "peanuts",
+                                        "soy",
+                                        "sesame",
+                                        "alcohol"
+                                    ]
+                                }
+                            },
+                            "diet": {
+                                "readOnly": true,
+                                "description": "The strictest diet it suits; null while nobody knows what it contains.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "vegan",
+                                    "vegetarian",
+                                    "pescatarian",
+                                    null
+                                ]
                             }
                         },
                         "required": [
@@ -6090,6 +6556,28 @@
                                 ],
                                 "format": "date-time"
                             },
+                            "heaviness": {
+                                "description": "How filling it is, how spicy, and what it contains (docs/PLAN.md \u00a76.2): read by the text\nmodel (App\\Planning\\RecipeAnnotator) after it is added and when its title or ingredients\nchange. Null and empty until then. A field fixed by hand is never overwritten.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "light",
+                                    "medium",
+                                    "hearty",
+                                    null
+                                ]
+                            },
+                            "spice": {
+                                "minimum": 0,
+                                "maximum": 2,
+                                "description": "0 not spicy, 1 mild, 2 hot.",
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
                             "createdAt": {
                                 "readOnly": true,
                                 "type": "string",
@@ -6127,6 +6615,68 @@
                                 "enum": [
                                     "es",
                                     "en",
+                                    null
+                                ]
+                            },
+                            "foodGroups": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "red_meat",
+                                        "pork",
+                                        "poultry",
+                                        "processed_meat",
+                                        "fish",
+                                        "shellfish",
+                                        "animal_stock",
+                                        "egg",
+                                        "dairy",
+                                        "cheese",
+                                        "gluten",
+                                        "tree_nuts",
+                                        "peanuts",
+                                        "soy",
+                                        "sesame",
+                                        "alcohol"
+                                    ]
+                                }
+                            },
+                            "optionalFoodGroups": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "red_meat",
+                                        "pork",
+                                        "poultry",
+                                        "processed_meat",
+                                        "fish",
+                                        "shellfish",
+                                        "animal_stock",
+                                        "egg",
+                                        "dairy",
+                                        "cheese",
+                                        "gluten",
+                                        "tree_nuts",
+                                        "peanuts",
+                                        "soy",
+                                        "sesame",
+                                        "alcohol"
+                                    ]
+                                }
+                            },
+                            "diet": {
+                                "readOnly": true,
+                                "description": "The strictest diet it suits; null while nobody knows what it contains.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "vegan",
+                                    "vegetarian",
+                                    "pescatarian",
                                     null
                                 ]
                             }
