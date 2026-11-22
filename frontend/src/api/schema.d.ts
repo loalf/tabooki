@@ -604,6 +604,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/swap-feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a SwapFeedback resource.
+         * @description Creates a SwapFeedback resource.
+         */
+        post: operations["swap_feedback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/taste-profile": {
         parameters: {
             query?: never;
@@ -666,6 +686,66 @@ export interface paths {
          * @description Creates a TasteProfile resource.
          */
         post: operations["taste_profile_impact"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/taste-suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of TasteSuggestion resources.
+         * @description Retrieves the collection of TasteSuggestion resources.
+         */
+        get: operations["api_taste-suggestions_get_collection"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/taste-suggestions/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a TasteSuggestion resource.
+         * @description Creates a TasteSuggestion resource.
+         */
+        post: operations["taste_suggestion_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/taste-suggestions/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a TasteSuggestion resource.
+         * @description Creates a TasteSuggestion resource.
+         */
+        post: operations["taste_suggestion_dismiss"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2442,6 +2522,33 @@ export interface components {
             /** @description Image URL for the app: our cached copy when we have one, else the original. */
             readonly thumbnail?: string | null;
         };
+        /** @description Say why a meal was swapped. Repeated reasons become suggestions (GET /api/taste-suggestions); a dish nobody likes comes up less. */
+        "SwapFeedback.SwapFeedbackInput": {
+            /**
+             * Format: uuid
+             * @default
+             */
+            recipe: string;
+            /**
+             * @default notToday
+             * @enum {string}
+             */
+            reason: "notToday" | "dislike" | "tooHeavy" | "tooLight" | "tooLong";
+            /**
+             * @description For a dislike: "group", "ingredient" or "dish".
+             * @enum {string|null}
+             */
+            whatKind?: "group" | "ingredient" | "dish" | null;
+            /** @description The food group, or the ingredient's canonical key. */
+            whatValue?: string | null;
+            /**
+             * @default dinner
+             * @enum {string}
+             */
+            slot: "lunch" | "dinner";
+            /** @default  */
+            date: string;
+        };
         TasteImpactView: {
             /**
              * @description Recipes in the library.
@@ -2961,6 +3068,81 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string | null;
             impact?: components["schemas"]["TasteImpactView.jsonld"];
+        };
+        /**
+         * @description Something the household's swaps say it could add to its likings (SwapLearning): "you swapped
+         *      * out three dishes with cheese: rather without cheese?". Taking one changes the profile;
+         *     turning it down hides it for good.
+         */
+        TasteSuggestion: {
+            /**
+             * @description Identifies it, to take it or turn it down: "group:cheese", "ingredient:mushroom", "heaviness:dinner", "long".
+             * @default
+             */
+            key: string;
+            /** @enum {string} */
+            kind?: "excludeGroup" | "excludeIngredient" | "mealHeaviness" | "note";
+            /** @description The food group, for excludeGroup. */
+            group?: string | null;
+            name?: {
+                es: string;
+                en: string;
+            } | null;
+            /** @description lunch or dinner, for mealHeaviness. */
+            slot?: string | null;
+            /** @description light or hearty, for mealHeaviness. */
+            heaviness?: string | null;
+            note?: {
+                es: string;
+                en: string;
+            } | null;
+            /**
+             * @description How many swaps (or swapped dishes) say so.
+             * @default 0
+             */
+            count: number;
+            /** @description some of the dishes swapped out */
+            examples?: string[];
+        };
+        /** @description Add the suggestion to the household's likings. */
+        "TasteSuggestion.TasteSuggestionInput": {
+            /** @default  */
+            key: string;
+        };
+        /**
+         * @description Something the household's swaps say it could add to its likings (SwapLearning): "you swapped
+         *      * out three dishes with cheese: rather without cheese?". Taking one changes the profile;
+         *     turning it down hides it for good.
+         */
+        "TasteSuggestion.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            /**
+             * @description Identifies it, to take it or turn it down: "group:cheese", "ingredient:mushroom", "heaviness:dinner", "long".
+             * @default
+             */
+            key: string;
+            /** @enum {string} */
+            kind?: "excludeGroup" | "excludeIngredient" | "mealHeaviness" | "note";
+            /** @description The food group, for excludeGroup. */
+            group?: string | null;
+            name?: {
+                es: string;
+                en: string;
+            } | null;
+            /** @description lunch or dinner, for mealHeaviness. */
+            slot?: string | null;
+            /** @description light or hearty, for mealHeaviness. */
+            heaviness?: string | null;
+            note?: {
+                es: string;
+                en: string;
+            } | null;
+            /**
+             * @description How many swaps (or swapped dishes) say so.
+             * @default 0
+             */
+            count: number;
+            /** @description some of the dishes swapped out */
+            examples?: string[];
         };
     };
     responses: never;
@@ -4993,6 +5175,63 @@ export interface operations {
             };
         };
     };
+    swap_feedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new SwapFeedback resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["SwapFeedback.SwapFeedbackInput"];
+                "application/json": components["schemas"]["SwapFeedback.SwapFeedbackInput"];
+            };
+        };
+        responses: {
+            /** @description SwapFeedback resource created */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
     "api_taste-profile_get": {
         parameters: {
             query?: never;
@@ -5231,6 +5470,154 @@ export interface operations {
                     "application/ld+json": components["schemas"]["TasteProfile.TasteImpactView.jsonld"];
                     "application/json": components["schemas"]["TasteProfile.TasteImpactView"];
                 };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    "api_taste-suggestions_get_collection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description TasteSuggestion collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchemaNoPagination"] & {
+                        member: components["schemas"]["TasteSuggestion.jsonld"][];
+                    };
+                    "application/json": components["schemas"]["TasteSuggestion"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    taste_suggestion_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new TasteSuggestion resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["TasteSuggestion.TasteSuggestionInput"];
+                "application/json": components["schemas"]["TasteSuggestion.TasteSuggestionInput"];
+            };
+        };
+        responses: {
+            /** @description TasteSuggestion resource created */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    taste_suggestion_dismiss: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new TasteSuggestion resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["TasteSuggestion.TasteSuggestionInput"];
+                "application/json": components["schemas"]["TasteSuggestion.TasteSuggestionInput"];
+            };
+        };
+        responses: {
+            /** @description TasteSuggestion resource created */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Invalid input */
             400: {

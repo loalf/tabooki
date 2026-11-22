@@ -586,7 +586,10 @@ class Recipe implements HouseholdOwned
             return null;
         }
 
-        return ['fit' => $judgement['fit'], 'when' => $judgement['when'], 'reason' => $judgement['reason']];
+        $reason = $judgement['reason'];
+
+        // (jsonb keeps object keys in its own order.)
+        return ['fit' => $judgement['fit'], 'when' => $judgement['when'], 'reason' => null === $reason ? null : ['es' => $reason['es'], 'en' => $reason['en']]];
     }
 
     public function needsNotesJudgement(string $notesHash): bool

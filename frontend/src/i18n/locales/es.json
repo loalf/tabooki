@@ -322,7 +322,23 @@
       "breaks": "Elegida a mano. {{conflicts}}.",
       "warning": "No encaja del todo con vuestros gustos",
       "notesFit": "{{reason}}, como pedís en las notas",
-      "notesMisfit": "Va contra vuestras notas ({{reason}}): no había otra opción."
+      "notesMisfit": "Va contra vuestras notas ({{reason}}): no había otra opción.",
+      "swap": {
+        "title": "¿Por qué la cambias?",
+        "hint": "«{{title}}». Nos ayuda a acertar más. Puedes saltarlo.",
+        "notToday": "Hoy no apetece",
+        "dislike": "No nos gusta…",
+        "tooHeavy": "Demasiado contundente para la {{meal}}",
+        "tooLight": "Demasiado ligera para la {{meal}}",
+        "tooLong": "Lleva demasiado tiempo",
+        "whatTitle": "¿Qué no os gusta?",
+        "wholeDish": "El plato entero",
+        "thanks": "¡Gracias! Lo tendremos en cuenta.",
+        "thanksDish": "¡Gracias! Saldrá mucho menos en el menú.",
+        "skip": "Saltar",
+        "never": "No preguntar más",
+        "done": "Hecho"
+      }
     },
     "tweak": {
       "title": "¿Algo especial esta semana?",
@@ -762,6 +778,21 @@
     "notesSay": {
       "good": "Según vuestras notas, encaja",
       "poor": "Según vuestras notas"
+    },
+    "suggest": {
+      "title": "Sugerencias de lo que habéis cambiado",
+      "exclude_one": "Habéis cambiado {{count}} plato que llevaba {{what}}. ¿Añadimos «Mejor sin {{what}}»?",
+      "exclude_other": "Habéis cambiado {{count}} platos que llevaban {{what}}. ¿Añadimos «Mejor sin {{what}}»?",
+      "heaviness": {
+        "light": "{{count}} veces habéis cambiado la {{meal}} por demasiado contundente. ¿Que la {{meal}} sea ligera?",
+        "hearty": "{{count}} veces habéis cambiado la {{meal}} por demasiado ligera. ¿Que la {{meal}} sea contundente?"
+      },
+      "note": "{{count}} veces habéis cambiado una receta por larga entre semana. ¿Añadimos a las notas «{{note}}»?",
+      "examples": "Por ejemplo: {{dishes}}.",
+      "yes": "Añadir",
+      "no": "No, gracias",
+      "badge_one": "{{count}} sugerencia",
+      "badge_other": "{{count}} sugerencias"
     }
   }
 }

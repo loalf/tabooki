@@ -63,10 +63,11 @@ final class WeekSampler
     private array $countsFor = [];
 
     /**
-     * @param list<MealPlanEntry>               $entries     the meals to fill, in order
-     * @param array<string, Candidate>          $library     by id
-     * @param array<string, \DateTimeImmutable> $lastPlanned by recipe id, the weeks before this one
-     * @param list<string>                      $avoid       recipe ids not to pick
+     * @param list<MealPlanEntry>               $entries        the meals to fill, in order
+     * @param array<string, Candidate>          $library        by id
+     * @param array<string, \DateTimeImmutable> $lastPlanned    by recipe id, the weeks before this one
+     * @param list<string>                      $avoid          recipe ids not to pick
+     * @param array<string, true>               $dislikedDishes recipes swapped out lately because nobody likes them
      */
     public function __construct(
         private readonly MealPlan $plan,
@@ -77,6 +78,7 @@ final class WeekSampler
         private readonly bool $leftovers,
         private readonly Taste $taste,
         private readonly Randomizer $random,
+        private readonly array $dislikedDishes = [],
     ) {
         foreach ($library as $candidate) {
             $this->remember($candidate);
@@ -190,7 +192,7 @@ final class WeekSampler
             return false;
         };
         $weight = function (Candidate $c) use ($slot, $weekday, $weekTags, $weekFresh, $needs, $remaining): float {
-            $weight = $c->score($weekTags, $weekFresh) * $this->tasteWeight[$c->id][self::meal($slot, $weekday)];
+            $weight = $c->score($weekTags, $weekFresh) * $this->tasteWeight[$c->id][self::meal($slot, $weekday)] * (isset($this->dislikedDishes[$c->id]) ? 0.2 : 1.0);
             foreach ($needs as $k => $need) {
                 if (\in_array($k, $this->countsFor[$c->id] ?? [], true)) {
                     $weight *= 1 + 4 * $need / max(1, $remaining);

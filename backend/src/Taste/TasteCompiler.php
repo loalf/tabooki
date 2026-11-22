@@ -112,7 +112,7 @@ final readonly class TasteCompiler
         - "A lighter week": mealHeaviness light for lunch and dinner. "More fish this week": a weekly minimum or a prefer rule. "Nothing spicy": maxSpice 0.
         - Ingredients that aren't food groups go in excludeIngredients, with keys from household_ingredients plus the usual canonical English snake_case keys; prefer tags from household_tags.
         - What no rule can say ("something special on Saturday") is left out.
-        - label: a few words in Spanish (es) and English (en) saying what the rules do, to show on the week ("Sin cerdo, más ligera" / "No pork, lighter"). Empty strings when no rule came out of it.
+        - label: a few words in Spanish (es) and English (en) saying what the rules do, to show after "This week:" on the week, so without saying "this week" again ("Sin cerdo, más ligera" / "No pork, lighter"). Empty strings when no rule came out of it.
         Answer by calling the save_week_rules tool once.
         TXT;
 

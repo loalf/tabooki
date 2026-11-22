@@ -18,6 +18,7 @@ import {
 import { EmptyState, PageHeader } from '@/components/PageHeader'
 import { Questionnaire } from '@/components/taste/Questionnaire'
 import { RuleList } from '@/components/taste/RuleList'
+import { Suggestions } from '@/components/taste/Suggestions'
 import { Button, Chip } from '@/components/ui'
 import { impactWarnings } from '@/lib/taste'
 import { mondayOf, today } from '@/lib/week'
@@ -65,14 +66,22 @@ function TasteFlow({ profile }: { profile: TasteProfile | null }) {
       onSuccess: (result) => setStage(result.questions?.length ? { kind: 'followUps', answers, draft: result } : { kind: 'review', answers, draft: result }),
     })
 
+  // A suggestion taken before the questionnaire makes a profile too: show it.
+  if (!started && profile && stage.kind === 'questions') {
+    return <ProfileView profile={profile} onEdit={() => setStarted(true)} />
+  }
+
   if (!started) {
     return (
-      <section className="flex flex-col gap-4 rounded-lg sticker bg-card p-5">
-        <Sparkles className="size-7 text-brand" aria-hidden />
-        <h2 className="text-xl font-extrabold text-balance">{t('taste.intro.title')}</h2>
-        <p className="text-[15px] leading-relaxed text-muted-foreground">{t('taste.intro.text')}</p>
-        <Button onClick={() => setStarted(true)}>{t('taste.intro.start')}</Button>
-      </section>
+      <div className="flex flex-col gap-5">
+        <Suggestions />
+        <section className="flex flex-col gap-4 rounded-lg sticker bg-card p-5">
+          <Sparkles className="size-7 text-brand" aria-hidden />
+          <h2 className="text-xl font-extrabold text-balance">{t('taste.intro.title')}</h2>
+          <p className="text-[15px] leading-relaxed text-muted-foreground">{t('taste.intro.text')}</p>
+          <Button onClick={() => setStarted(true)}>{t('taste.intro.start')}</Button>
+        </section>
+      </div>
     )
   }
 
@@ -254,6 +263,7 @@ function ProfileView({ profile, onEdit }: { profile: TasteProfile; onEdit: () =>
 
   return (
     <section className="flex flex-col gap-5">
+      <Suggestions />
       {profile.summary && <p className="rounded-lg sticker bg-card p-4 text-[15px] leading-relaxed">{profile.summary[language]}</p>}
       <div className="rounded-lg sticker bg-card px-4 py-1.5">
         <RuleList rules={profile.rules as TasteRules} impact={profile.impact} notes={profile.notes} />

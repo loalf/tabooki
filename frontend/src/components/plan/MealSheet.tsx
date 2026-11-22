@@ -9,9 +9,11 @@ import { formatDay, formatWeekday } from '@/components/plan/format'
 import { mealQuery } from '@/components/plan/meal'
 import { mealReasons } from '@/components/plan/reasons'
 import { RecipePicker } from '@/components/plan/RecipePicker'
+import { SwapWhy } from '@/components/plan/SwapWhy'
 import { Sheet } from '@/components/Sheet'
 import { Button } from '@/components/ui'
 import { type Reason, suggestFor } from '@/lib/suggest'
+import { askWhySwap } from '@/lib/swapWhy'
 import { conflictText } from '@/lib/taste'
 import { cn } from '@/lib/utils'
 import { parseIsoDate } from '@/lib/week'
@@ -32,96 +34,104 @@ export function MealSheet({ plan, entry, onClose }: { plan: MealPlan; entry: Mea
   const query = mealQuery(plan, entry)
   const leftoverOf = entry.leftoverOfId ? plan.entries?.find((e) => e.id === entry.leftoverOfId) : undefined
 
-  const choose = (id: string) => update.mutate({ ...ids, recipe: id }, { onSuccess: onClose })
+  // After a swap, ask why (once in a while that teaches the household's likings).
+  const [asking, setAsking] = useState<{ id: string; title: string } | null>(null)
+  const swappedOut = recipe?.id && !leftoverOf ? { id: recipe.id, title: recipe.title ?? '' } : null
+  const swapped = () => (swappedOut && askWhySwap() ? setAsking(swappedOut) : onClose())
+  const choose = (id: string) => update.mutate({ ...ids, recipe: id }, { onSuccess: () => (id === recipe?.id ? onClose() : swapped()) })
 
   return (
     <Sheet title={t('plan.sheet.title', { day: formatDay(entry.date!, i18n.language), meal: t(`recipe.meal.${entry.slot}`) })} onClose={onClose} hideTitle>
-      <div className={cn('flex flex-col gap-5', busy && 'opacity-70')}>
-        <header className="flex items-center gap-3">
-          <Thumbnail src={recipe?.source?.thumbnail} className="size-13 shrink-0 rounded-[11px] border-2 border-outline" />
-          <div className="min-w-0">
-            <p className="text-[11px] font-extrabold tracking-wider text-muted-foreground uppercase">
-              {formatDay(entry.date!, i18n.language)} · {t(`recipe.meal.${entry.slot}`)}
-            </p>
-            <p className="line-clamp-2 text-lg leading-tight font-extrabold">{recipe?.title ?? t('plan.noRecipe')}</p>
-            {leftoverOf && <p className="text-xs font-bold text-primary">{t('plan.leftoversOf', { day: formatWeekday(leftoverOf.date!, i18n.language) })}</p>}
-          </div>
-        </header>
-        <Why entry={entry} />
+      {asking ? (
+        <SwapWhy recipe={asking} entry={entry} onDone={onClose} />
+      ) : (
+        <div className={cn('flex flex-col gap-5', busy && 'opacity-70')}>
+          <header className="flex items-center gap-3">
+            <Thumbnail src={recipe?.source?.thumbnail} className="size-13 shrink-0 rounded-[11px] border-2 border-outline" />
+            <div className="min-w-0">
+              <p className="text-[11px] font-extrabold tracking-wider text-muted-foreground uppercase">
+                {formatDay(entry.date!, i18n.language)} · {t(`recipe.meal.${entry.slot}`)}
+              </p>
+              <p className="line-clamp-2 text-lg leading-tight font-extrabold">{recipe?.title ?? t('plan.noRecipe')}</p>
+              {leftoverOf && <p className="text-xs font-bold text-primary">{t('plan.leftoversOf', { day: formatWeekday(leftoverOf.date!, i18n.language) })}</p>}
+            </div>
+          </header>
+          <Why entry={entry} />
 
-        <div className="grid grid-cols-4 gap-2">
-          {recipe && !leftoverOf ? (
-            <Link to={`/recipes/${recipe.id}/cook${query}`} className={tileClass('primary')}>
-              <ChefHat aria-hidden />
-              {t('cook.open')}
-            </Link>
-          ) : (
-            <span className={cn(tileClass('primary'), 'opacity-50')} aria-disabled>
-              <ChefHat aria-hidden />
-              {t('cook.open')}
-            </span>
-          )}
-          {recipe ? (
-            <Link to={`/recipes/${recipe.id}${query}`} className={tileClass()}>
-              <BookOpen aria-hidden />
-              {t('plan.sheet.view')}
-            </Link>
-          ) : (
-            <span className={cn(tileClass(), 'opacity-50')} aria-disabled>
-              <BookOpen aria-hidden />
-              {t('plan.sheet.view')}
-            </span>
-          )}
-          <button type="button" className={tileClass(entry.locked ? 'on' : undefined)} disabled={busy} aria-pressed={entry.locked} onClick={() => update.mutate({ ...ids, locked: !entry.locked })}>
-            {entry.locked ? <Lock aria-hidden /> : <LockOpen aria-hidden />}
-            {entry.locked ? t('plan.sheet.locked') : t('plan.sheet.lock')}
-          </button>
-          <button type="button" className={tileClass()} disabled={busy} onClick={() => remove.mutate(ids, { onSuccess: onClose })}>
-            <UtensilsCrossed aria-hidden />
-            {t('plan.sheet.out')}
-          </button>
-        </div>
-        {entry.locked && <p className="-mt-3 text-xs text-muted-foreground">{t('plan.sheet.lockedHint')}</p>}
-
-        <div className="flex items-center justify-between gap-3">
-          <span className="font-extrabold">{t('recipe.servings')}</span>
-          <div className="flex items-center rounded-full border-2 border-outline bg-card" role="group" aria-label={t('recipe.servings')}>
-            <button
-              type="button"
-              className="grid size-10 place-items-center disabled:opacity-40"
-              disabled={busy || (entry.servings ?? 1) <= 1}
-              aria-label={t('plan.fewer')}
-              onClick={() => update.mutate({ ...ids, servings: (entry.servings ?? 1) - 1 })}
-            >
-              <Minus className="size-4" aria-hidden />
+          <div className="grid grid-cols-4 gap-2">
+            {recipe && !leftoverOf ? (
+              <Link to={`/recipes/${recipe.id}/cook${query}`} className={tileClass('primary')}>
+                <ChefHat aria-hidden />
+                {t('cook.open')}
+              </Link>
+            ) : (
+              <span className={cn(tileClass('primary'), 'opacity-50')} aria-disabled>
+                <ChefHat aria-hidden />
+                {t('cook.open')}
+              </span>
+            )}
+            {recipe ? (
+              <Link to={`/recipes/${recipe.id}${query}`} className={tileClass()}>
+                <BookOpen aria-hidden />
+                {t('plan.sheet.view')}
+              </Link>
+            ) : (
+              <span className={cn(tileClass(), 'opacity-50')} aria-disabled>
+                <BookOpen aria-hidden />
+                {t('plan.sheet.view')}
+              </span>
+            )}
+            <button type="button" className={tileClass(entry.locked ? 'on' : undefined)} disabled={busy} aria-pressed={entry.locked} onClick={() => update.mutate({ ...ids, locked: !entry.locked })}>
+              {entry.locked ? <Lock aria-hidden /> : <LockOpen aria-hidden />}
+              {entry.locked ? t('plan.sheet.locked') : t('plan.sheet.lock')}
             </button>
-            <span className="min-w-22 text-center text-sm font-bold tabular-nums">{t('recipe.servingsCount', { count: entry.servings })}</span>
-            <button
-              type="button"
-              className="grid size-10 place-items-center disabled:opacity-40"
-              disabled={busy || (entry.servings ?? 1) >= 50}
-              aria-label={t('plan.more')}
-              onClick={() => update.mutate({ ...ids, servings: (entry.servings ?? 1) + 1 })}
-            >
-              <Plus className="size-4" aria-hidden />
+            <button type="button" className={tileClass()} disabled={busy} onClick={() => remove.mutate(ids, { onSuccess: onClose })}>
+              <UtensilsCrossed aria-hidden />
+              {t('plan.sheet.out')}
             </button>
           </div>
-        </div>
+          {entry.locked && <p className="-mt-3 text-xs text-muted-foreground">{t('plan.sheet.lockedHint')}</p>}
 
-        <Suggestions plan={plan} entry={entry} disabled={busy} onChoose={choose} />
+          <div className="flex items-center justify-between gap-3">
+            <span className="font-extrabold">{t('recipe.servings')}</span>
+            <div className="flex items-center rounded-full border-2 border-outline bg-card" role="group" aria-label={t('recipe.servings')}>
+              <button
+                type="button"
+                className="grid size-10 place-items-center disabled:opacity-40"
+                disabled={busy || (entry.servings ?? 1) <= 1}
+                aria-label={t('plan.fewer')}
+                onClick={() => update.mutate({ ...ids, servings: (entry.servings ?? 1) - 1 })}
+              >
+                <Minus className="size-4" aria-hidden />
+              </button>
+              <span className="min-w-22 text-center text-sm font-bold tabular-nums">{t('recipe.servingsCount', { count: entry.servings })}</span>
+              <button
+                type="button"
+                className="grid size-10 place-items-center disabled:opacity-40"
+                disabled={busy || (entry.servings ?? 1) >= 50}
+                aria-label={t('plan.more')}
+                onClick={() => update.mutate({ ...ids, servings: (entry.servings ?? 1) + 1 })}
+              >
+                <Plus className="size-4" aria-hidden />
+              </button>
+            </div>
+          </div>
 
-        <div className="flex flex-col gap-2">
-          <Button variant="secondary" className="justify-start text-muted-foreground" onClick={() => setPicking(true)} disabled={busy}>
-            <Search className="size-5" aria-hidden />
-            <span className="flex-1 text-left">{t('plan.sheet.pick')}</span>
-          </Button>
-          <Button variant="ghost" size="sm" className="self-start text-primary" disabled={busy} onClick={() => swap.mutate(ids, { onSuccess: onClose })}>
-            <Wand2 className={cn('size-4', swap.isPending && 'animate-spin')} aria-hidden />
-            {t('plan.sheet.surprise')}
-          </Button>
+          <Suggestions plan={plan} entry={entry} disabled={busy} onChoose={choose} />
+
+          <div className="flex flex-col gap-2">
+            <Button variant="secondary" className="justify-start text-muted-foreground" onClick={() => setPicking(true)} disabled={busy}>
+              <Search className="size-5" aria-hidden />
+              <span className="flex-1 text-left">{t('plan.sheet.pick')}</span>
+            </Button>
+            <Button variant="ghost" size="sm" className="self-start text-primary" disabled={busy} onClick={() => swap.mutate(ids, { onSuccess: swapped })}>
+              <Wand2 className={cn('size-4', swap.isPending && 'animate-spin')} aria-hidden />
+              {t('plan.sheet.surprise')}
+            </Button>
+          </div>
+          {(update.isError || remove.isError || swap.isError) && <p className="text-sm text-destructive">{t('plan.error')}</p>}
         </div>
-        {(update.isError || remove.isError || swap.isError) && <p className="text-sm text-destructive">{t('plan.error')}</p>}
-      </div>
+      )}
 
       {picking && (
         <RecipePicker

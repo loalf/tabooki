@@ -9,6 +9,7 @@ use App\Entity\MealPlanEntry;
 use App\Entity\Recipe;
 use App\Repository\MealPlanRepository;
 use App\Repository\RecipeRepository;
+use App\Repository\SwapFeedbackRepository;
 use App\Repository\TasteProfileRepository;
 use App\Taste\Conflict;
 use App\Taste\Taste;
@@ -25,6 +26,7 @@ use Random\Randomizer;
  *   over the whole week, leftover and locked meals included;
  * - no recipe twice in a week, nor one planned in the previous three weeks, while the library
  *   has others (then those rules relax, in that order);
+ * - a dish someone swapped out lately because nobody likes it comes up much less;
  * - favorites and well-rated recipes come up more, unchecked extractions a little less, and so do
  *   dishes as filling as the household wants that meal, and what it asked for more of;
  * - recipes sharing a main tag with the week's others come up less (variety), recipes sharing
@@ -59,6 +61,7 @@ final readonly class Planner
         private RecipeRepository $recipes,
         private MealPlanRepository $plans,
         private TasteProfileRepository $tastes,
+        private SwapFeedbackRepository $feedback,
         ?Randomizer $random = null,
     ) {
         $this->random = $random ?? new Randomizer();
@@ -102,7 +105,7 @@ final readonly class Planner
         $lastPlanned = $this->plans->lastPlanned($plan->getHousehold(), $plan->getWeekStartDate(), self::NO_REPEAT_DAYS);
 
         usort($entries, static fn (MealPlanEntry $a, MealPlanEntry $b): int => $a->sortKey() <=> $b->sortKey());
-        $sampler = new WeekSampler($plan, $entries, $library, $lastPlanned, $avoid, $leftovers, $this->taste($plan), $this->random);
+        $sampler = new WeekSampler($plan, $entries, $library, $lastPlanned, $avoid, $leftovers, $this->taste($plan), $this->random, $this->feedback->dislikedDishes($plan->getHousehold()));
 
         $best = null;
         $bestPenalty = \INF;

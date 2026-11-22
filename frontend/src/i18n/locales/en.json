@@ -322,7 +322,23 @@
       "breaks": "Chosen by hand. {{conflicts}}.",
       "warning": "Doesn't quite fit your tastes",
       "notesFit": "{{reason}}, as your notes ask",
-      "notesMisfit": "Goes against your notes ({{reason}}): there was no other option."
+      "notesMisfit": "Goes against your notes ({{reason}}): there was no other option.",
+      "swap": {
+        "title": "Why are you swapping it?",
+        "hint": "\"{{title}}\". It helps us get it right. You can skip it.",
+        "notToday": "Not today",
+        "dislike": "We don't like it…",
+        "tooHeavy": "Too filling for {{meal}}",
+        "tooLight": "Too light for {{meal}}",
+        "tooLong": "Takes too long",
+        "whatTitle": "What don't you like?",
+        "wholeDish": "The whole dish",
+        "thanks": "Thanks! We'll keep it in mind.",
+        "thanksDish": "Thanks! It'll come up much less.",
+        "skip": "Skip",
+        "never": "Don't ask again",
+        "done": "Done"
+      }
     },
     "tweak": {
       "title": "Anything special this week?",
@@ -762,6 +778,21 @@
     "notesSay": {
       "good": "By your notes, it fits",
       "poor": "By your notes"
+    },
+    "suggest": {
+      "title": "Suggestions from what you swapped",
+      "exclude_one": "You swapped out {{count}} dish with {{what}}. Add \"Rather without {{what}}\"?",
+      "exclude_other": "You swapped out {{count}} dishes with {{what}}. Add \"Rather without {{what}}\"?",
+      "heaviness": {
+        "light": "{{count}} times you swapped {{meal}} for being too filling. Make {{meal}} light?",
+        "hearty": "{{count}} times you swapped {{meal}} for being too light. Make {{meal}} hearty?"
+      },
+      "note": "{{count}} times you swapped a recipe for taking too long on a weekday. Add to the notes \"{{note}}\"?",
+      "examples": "For example: {{dishes}}.",
+      "yes": "Add",
+      "no": "No, thanks",
+      "badge_one": "{{count}} suggestion",
+      "badge_other": "{{count}} suggestions"
     }
   }
 }

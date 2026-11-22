@@ -3793,6 +3793,102 @@
                 }
             }
         },
+        "/api/swap-feedback": {
+            "post": {
+                "operationId": "swap_feedback",
+                "tags": [
+                    "SwapFeedback"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "SwapFeedback resource created",
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a SwapFeedback resource.",
+                "description": "Creates a SwapFeedback resource.",
+                "parameters": [],
+                "requestBody": {
+                    "description": "The new SwapFeedback resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SwapFeedback.SwapFeedbackInput"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SwapFeedback.SwapFeedbackInput"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
         "/api/taste-profile": {
             "get": {
                 "operationId": "api_taste-profile_get",
@@ -4255,6 +4351,270 @@
                         "application/json": {
                             "schema": {
                                 "$ref": "#/components/schemas/TasteProfile.TasteRulesInput"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/taste-suggestions": {
+            "get": {
+                "operationId": "api_taste-suggestions_get_collection",
+                "tags": [
+                    "TasteSuggestion"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "TasteSuggestion collection",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "TasteSuggestion.jsonld collection.",
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/HydraCollectionBaseSchemaNoPagination"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "member"
+                                            ],
+                                            "properties": {
+                                                "member": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/TasteSuggestion.jsonld"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/TasteSuggestion"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves the collection of TasteSuggestion resources.",
+                "description": "Retrieves the collection of TasteSuggestion resources.",
+                "parameters": []
+            }
+        },
+        "/api/taste-suggestions/accept": {
+            "post": {
+                "operationId": "taste_suggestion_accept",
+                "tags": [
+                    "TasteSuggestion"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "TasteSuggestion resource created",
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a TasteSuggestion resource.",
+                "description": "Creates a TasteSuggestion resource.",
+                "parameters": [],
+                "requestBody": {
+                    "description": "The new TasteSuggestion resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TasteSuggestion.TasteSuggestionInput"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TasteSuggestion.TasteSuggestionInput"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/taste-suggestions/dismiss": {
+            "post": {
+                "operationId": "taste_suggestion_dismiss",
+                "tags": [
+                    "TasteSuggestion"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "TasteSuggestion resource created",
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a TasteSuggestion resource.",
+                "description": "Creates a TasteSuggestion resource.",
+                "parameters": [],
+                "requestBody": {
+                    "description": "The new TasteSuggestion resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TasteSuggestion.TasteSuggestionInput"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TasteSuggestion.TasteSuggestionInput"
                             }
                         }
                     },
@@ -9832,6 +10192,70 @@
                 ],
                 "description": "A link saved to the library (blog post, YouTube video, Instagram reel, ...).\nExtraction (M2) turns it into one or more recipes; until then it can be turned\ninto a recipe by hand."
             },
+            "SwapFeedback.SwapFeedbackInput": {
+                "type": "object",
+                "description": "Say why a meal was swapped. Repeated reasons become suggestions (GET /api/taste-suggestions); a dish nobody likes comes up less.",
+                "required": [
+                    "recipe",
+                    "date"
+                ],
+                "properties": {
+                    "recipe": {
+                        "format": "uuid",
+                        "externalDocs": {
+                            "url": "https://schema.org/identifier"
+                        },
+                        "default": "",
+                        "type": "string"
+                    },
+                    "reason": {
+                        "enum": [
+                            "notToday",
+                            "dislike",
+                            "tooHeavy",
+                            "tooLight",
+                            "tooLong"
+                        ],
+                        "default": "notToday",
+                        "type": "string"
+                    },
+                    "whatKind": {
+                        "enum": [
+                            "group",
+                            "ingredient",
+                            "dish"
+                        ],
+                        "description": "For a dislike: \"group\", \"ingredient\" or \"dish\".",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "whatValue": {
+                        "maxLength": 80,
+                        "description": "The food group, or the ingredient's canonical key.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "slot": {
+                        "enum": [
+                            "lunch",
+                            "dinner"
+                        ],
+                        "default": "dinner",
+                        "type": "string"
+                    },
+                    "date": {
+                        "externalDocs": {
+                            "url": "https://schema.org/Date"
+                        },
+                        "default": "",
+                        "type": "string"
+                    }
+                }
+            },
             "TasteImpactView": {
                 "type": "object",
                 "properties": {
@@ -11917,6 +12341,205 @@
                     }
                 ],
                 "description": "What the household likes (docs/PLAN.md \u00a76.1): the questionnaire's answers, the rules the\nplanner follows, the notes and summary, and what the rules do to the library. 404 until the\nhousehold has said."
+            },
+            "TasteSuggestion": {
+                "type": "object",
+                "description": "Something the household's swaps say it could add to its likings (SwapLearning): \"you swapped\n * out three dishes with cheese: rather without cheese?\". Taking one changes the profile;\nturning it down hides it for good.",
+                "properties": {
+                    "key": {
+                        "description": "Identifies it, to take it or turn it down: \"group:cheese\", \"ingredient:mushroom\", \"heaviness:dinner\", \"long\".",
+                        "default": "",
+                        "type": "string"
+                    },
+                    "kind": {
+                        "type": "string",
+                        "enum": [
+                            "excludeGroup",
+                            "excludeIngredient",
+                            "mealHeaviness",
+                            "note"
+                        ]
+                    },
+                    "group": {
+                        "description": "The food group, for excludeGroup.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "name": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "required": [
+                            "es",
+                            "en"
+                        ],
+                        "properties": {
+                            "es": {
+                                "type": "string"
+                            },
+                            "en": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "slot": {
+                        "description": "lunch or dinner, for mealHeaviness.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "heaviness": {
+                        "description": "light or hearty, for mealHeaviness.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "note": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "required": [
+                            "es",
+                            "en"
+                        ],
+                        "properties": {
+                            "es": {
+                                "type": "string"
+                            },
+                            "en": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "count": {
+                        "description": "How many swaps (or swapped dishes) say so.",
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "examples": {
+                        "description": "some of the dishes swapped out",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "TasteSuggestion.TasteSuggestionInput": {
+                "type": "object",
+                "description": "Add the suggestion to the household's likings.",
+                "required": [
+                    "key"
+                ],
+                "properties": {
+                    "key": {
+                        "maxLength": 120,
+                        "default": "",
+                        "type": "string"
+                    }
+                }
+            },
+            "TasteSuggestion.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "key": {
+                                "description": "Identifies it, to take it or turn it down: \"group:cheese\", \"ingredient:mushroom\", \"heaviness:dinner\", \"long\".",
+                                "default": "",
+                                "type": "string"
+                            },
+                            "kind": {
+                                "type": "string",
+                                "enum": [
+                                    "excludeGroup",
+                                    "excludeIngredient",
+                                    "mealHeaviness",
+                                    "note"
+                                ]
+                            },
+                            "group": {
+                                "description": "The food group, for excludeGroup.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "name": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "required": [
+                                    "es",
+                                    "en"
+                                ],
+                                "properties": {
+                                    "es": {
+                                        "type": "string"
+                                    },
+                                    "en": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "slot": {
+                                "description": "lunch or dinner, for mealHeaviness.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "heaviness": {
+                                "description": "light or hearty, for mealHeaviness.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "note": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "required": [
+                                    "es",
+                                    "en"
+                                ],
+                                "properties": {
+                                    "es": {
+                                        "type": "string"
+                                    },
+                                    "en": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "count": {
+                                "description": "How many swaps (or swapped dishes) say so.",
+                                "default": 0,
+                                "type": "integer"
+                            },
+                            "examples": {
+                                "description": "some of the dishes swapped out",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "Something the household's swaps say it could add to its likings (SwapLearning): \"you swapped\n * out three dishes with cheese: rather without cheese?\". Taking one changes the profile;\nturning it down hides it for good."
             }
         },
         "responses": {},
@@ -11949,6 +12572,10 @@
             "description": "A week's shopping list (see App\\Shopping\\ShoppingListBuilder). Every action answers with the\nwhole list. Lines are identified by `key`: the ingredient key, or \"item:<id>\" for items\nadded by hand."
         },
         {
+            "name": "SwapFeedback",
+            "description": "Why a planned meal was swapped (App\\Entity\\SwapFeedback): what the household's swaps teach."
+        },
+        {
             "name": "TasteProfile",
             "description": "What the household likes (docs/PLAN.md \u00a76.1): the questionnaire's answers, the rules the\nplanner follows, the notes and summary, and what the rules do to the library. 404 until the\nhousehold has said."
         },
@@ -11971,6 +12598,10 @@
         {
             "name": "Source",
             "description": "A link saved to the library (blog post, YouTube video, Instagram reel, ...).\nExtraction (M2) turns it into one or more recipes; until then it can be turned\ninto a recipe by hand."
+        },
+        {
+            "name": "TasteSuggestion",
+            "description": "Something the household's swaps say it could add to its likings (SwapLearning): \"you swapped\n * out three dishes with cheese: rather without cheese?\". Taking one changes the profile;\nturning it down hides it for good."
         }
     ],
     "webhooks": {}

@@ -12,6 +12,8 @@ export type TasteImpact = Schemas['TasteImpactView']
 export type TasteDraft = Schemas['TasteProfile.TasteDraftView']
 export type TasteConflict = NonNullable<Schemas['Recipe-recipe.list']['tasteConflicts']>[number]
 export type Strength = 'never' | 'avoid'
+export type TasteSuggestion = Schemas['TasteSuggestion']
+export type SwapReason = 'notToday' | 'dislike' | 'tooHeavy' | 'tooLight' | 'tooLong'
 export type Diet = 'vegan' | 'vegetarian' | 'pescatarian'
 
 /**
@@ -39,6 +41,7 @@ export type TasteAnswers = {
 
 const keys = {
   profile: ['taste-profile'] as const,
+  suggestions: ['taste-suggestions'] as const,
 }
 
 /** null until the household has said what it likes. */
@@ -83,8 +86,46 @@ function useRefresh() {
   const queryClient = useQueryClient()
   return () => {
     void queryClient.invalidateQueries({ queryKey: keys.profile })
+    void queryClient.invalidateQueries({ queryKey: keys.suggestions })
     void queryClient.invalidateQueries({ queryKey: ['recipes'] })
   }
+}
+
+/** What the household's swaps say it could add to its likings. */
+export function useTasteSuggestions() {
+  return useQuery({
+    queryKey: keys.suggestions,
+    queryFn: async (): Promise<TasteSuggestion[]> => {
+      const { data, response } = await api.GET('/api/taste-suggestions')
+      if (!data) throw new ApiError(response.status)
+      return data
+    },
+  })
+}
+
+export function useSuggestionChoice() {
+  const refresh = useRefresh()
+  return useMutation({
+    mutationFn: async ({ key, accept }: { key: string; accept: boolean }) => {
+      const { response } = accept
+        ? await api.POST('/api/taste-suggestions/accept', { body: { key } })
+        : await api.POST('/api/taste-suggestions/dismiss', { body: { key } })
+      if (!response.ok) throw new ApiError(response.status)
+    },
+    onSuccess: refresh,
+  })
+}
+
+/** Why a meal was swapped (the recipe swapped out). */
+export function useSwapFeedback() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (body: { recipe: string; reason: SwapReason; whatKind?: 'group' | 'ingredient' | 'dish'; whatValue?: string; slot: 'lunch' | 'dinner'; date: string }) => {
+      const { response } = await api.POST('/api/swap-feedback', { body })
+      if (!response.ok) throw new ApiError(response.status)
+    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: keys.suggestions }),
+  })
 }
 
 export function useSaveTaste() {

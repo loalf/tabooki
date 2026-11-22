@@ -16,6 +16,7 @@ use App\Enum\MealType;
 use App\Message\JudgeNotes;
 use App\MessageHandler\JudgeNotesHandler;
 use App\Planning\RecipeFacts;
+use App\Repository\SwapFeedbackRepository;
 use App\Taste\NotesJudge;
 use App\Taste\Taste;
 use App\Taste\TasteCompiler;
@@ -268,8 +269,7 @@ final class TasteProfileTest extends ApiTestCase
         /** @var list<array{title: string, notesFit?: array{fit: string, when: string, reason: array{es: string, en: string}|null}}> $recipes */
         $recipes = $this->client->request('GET', '/api/recipes')->toArray();
         $fits = array_column($recipes, 'notesFit', 'title');
-        // (assertEquals: jsonb keeps object keys in its own order.)
-        self::assertEquals(['fit' => 'poor', 'when' => 'weekdays', 'reason' => ['es' => 'Laboriosa para entre semana', 'en' => 'Fiddly for a weekday']], $fits['Cocido completo']);
+        self::assertSame(['fit' => 'poor', 'when' => 'weekdays', 'reason' => ['es' => 'Laboriosa para entre semana', 'en' => 'Fiddly for a weekday']], $fits['Cocido completo']);
         self::assertSame('good', $fits['Tortilla francesa']['fit']);
         self::assertArrayNotHasKey('Ensalada', $fits, 'left out by the model: neutral, nothing to say');
 
@@ -292,7 +292,8 @@ final class TasteProfileTest extends ApiTestCase
 
     public function testThePlannerFollowsTheNotes(): void
     {
-        foreach (range(1, 10) as $i) {
+        // A few more quick ones than weekday meals: the notes are a preference, given up when nothing else is left.
+        foreach (range(1, 15) as $i) {
             $this->recipe("Rápida $i", [], keys: ['onion', "veg_$i"]);
         }
         foreach (range(1, 3) as $i) {
@@ -309,7 +310,7 @@ final class TasteProfileTest extends ApiTestCase
         }
         $entityManager->flush();
 
-        // Monday to Friday, lunch and dinner: ten meals, ten quick recipes.
+        // Monday to Friday, lunch and dinner: ten meals.
         foreach (range(1, 3) as $_) {
             $plan = $this->createPlan(10);
             $titles = array_map(static fn (array $e): string => $e['recipe']['title'] ?? '', $plan['entries']);
@@ -369,6 +370,65 @@ final class TasteProfileTest extends ApiTestCase
         self::assertResponseIsSuccessful();
         self::assertSame('Más ligera', $failed['tweak']);
         self::assertArrayNotHasKey('tweakRules', $failed);
+    }
+
+    public function testSwapsTeachTheLikings(): void
+    {
+        $this->recipe('Lasaña', [FoodGroup::Cheese, FoodGroup::Gluten], keys: ['mozzarella', 'pasta_sheets'], minutes: 90);
+        $this->recipe('Pizza', [FoodGroup::Cheese, FoodGroup::Gluten], keys: ['mozzarella', 'pizza_dough'], minutes: 60);
+        $this->recipe('Cocido', [FoodGroup::RedMeat], keys: ['chickpeas'], minutes: 75);
+        $lasagna = $this->recipeId('Lasaña');
+        $pizza = $this->recipeId('Pizza');
+        $stew = $this->recipeId('Cocido');
+        self::assertSame([], $this->suggestions());
+
+        // Cheese, in two different dishes; mozzarella too. "Not today" teaches nothing.
+        $this->swapped($lasagna, 'dislike', 'group', 'cheese');
+        $this->swapped($pizza, 'dislike', 'group', 'cheese');
+        $this->swapped($lasagna, 'dislike', 'ingredient', 'mozzarella');
+        $this->swapped($pizza, 'dislike', 'ingredient', 'mozzarella');
+        $this->swapped($stew, 'notToday');
+        // Too filling for dinner three times, too long on a weekday three times.
+        foreach ([$lasagna, $pizza, $stew] as $recipe) {
+            $this->swapped($recipe, 'tooHeavy');
+            $this->swapped($recipe, 'tooLong');
+        }
+        $this->swapped($stew, 'dislike', 'dish');
+
+        $suggestions = array_column($this->suggestions(), null, 'key');
+        self::assertSame(['group:cheese', 'ingredient:mozzarella', 'heaviness:dinner:light', 'long:45'], array_keys($suggestions));
+        self::assertSame(2, $suggestions['group:cheese']['count']);
+        self::assertSame(['Pizza', 'Lasaña'], $suggestions['group:cheese']['examples'], 'the latest first');
+        self::assertSame(['es' => 'mozzarella', 'en' => 'mozzarella'], $suggestions['ingredient:mozzarella']['name'] ?? null);
+        self::assertArrayNotHasKey('ingredientKey', $suggestions['ingredient:mozzarella']);
+        self::assertSame('Entre semana, nada que lleve más de 45 minutos.', $suggestions['long:45']['note']['es'] ?? null, 'just under the quickest one swapped');
+
+        // Taken: in the likings, and no longer offered. Turned down: not offered again.
+        $this->client->request('POST', '/api/taste-suggestions/accept', ['json' => ['key' => 'group:cheese']]);
+        self::assertResponseStatusCodeSame(204);
+        $this->client->request('POST', '/api/taste-suggestions/dismiss', ['json' => ['key' => 'ingredient:mozzarella']]);
+        $this->client->request('POST', '/api/taste-suggestions/accept', ['json' => ['key' => 'heaviness:dinner:light']]);
+        $this->asyncTransport()->reset();
+        $this->client->request('POST', '/api/taste-suggestions/accept', ['json' => ['key' => 'long:45']]);
+        self::assertCount(1, $this->queued(JudgeNotes::class), 'a new note: the recipes are judged against it');
+        self::assertSame([], $this->suggestions());
+
+        /** @var array{rules: array{excludeGroups: list<array<string, string>>, mealHeaviness: array<string, ?string>}, notes: string} $profile */
+        $profile = $this->client->request('GET', '/api/taste-profile')->toArray();
+        self::assertSame([['group' => 'cheese', 'strength' => 'avoid']], $profile['rules']['excludeGroups']);
+        self::assertSame('light', $profile['rules']['mealHeaviness']['dinner']);
+        self::assertSame('Entre semana, nada que lleve más de 45 minutos.', $profile['notes']);
+
+        $this->client->request('POST', '/api/taste-suggestions/accept', ['json' => ['key' => 'group:cheese']]);
+        self::assertResponseStatusCodeSame(404, 'already taken');
+
+        // A dish nobody likes: the planner brings it up less.
+        $disliked = self::getContainer()->get(SwapFeedbackRepository::class)->dislikedDishes($this->ana->getHousehold());
+        self::assertSame([$stew], array_keys($disliked));
+
+        // Only the household's recipes, and only their ingredients.
+        $this->client->request('POST', '/api/swap-feedback', ['json' => ['recipe' => $lasagna, 'reason' => 'dislike', 'whatKind' => 'ingredient', 'whatValue' => 'chickpeas', 'slot' => 'dinner', 'date' => self::WEEK]]);
+        self::assertResponseStatusCodeSame(422);
     }
 
     // —— Helpers ————————————————————————————————————————————————
@@ -452,6 +512,23 @@ final class TasteProfileTest extends ApiTestCase
             'stopReason' => 'tool_use',
             'usage' => ['inputTokens' => 800, 'outputTokens' => 200],
         ]);
+    }
+
+    private function swapped(string $recipe, string $reason, ?string $whatKind = null, ?string $whatValue = null): void
+    {
+        $this->client->request('POST', '/api/swap-feedback', ['json' => [
+            'recipe' => $recipe, 'reason' => $reason, 'whatKind' => $whatKind, 'whatValue' => $whatValue, 'slot' => 'dinner', 'date' => self::WEEK,
+        ]]);
+        self::assertResponseStatusCodeSame(204);
+    }
+
+    /** @return list<array{key: string, count: int, examples: list<string>, name?: array{es: string, en: string}, note?: array{es: string, en: string}}> */
+    private function suggestions(): array
+    {
+        /** @var list<array{key: string, count: int, examples: list<string>, name?: array{es: string, en: string}, note?: array{es: string, en: string}}> $suggestions */
+        $suggestions = $this->client->request('GET', '/api/taste-suggestions')->toArray();
+
+        return $suggestions;
     }
 
     private function recipeId(string $title): string

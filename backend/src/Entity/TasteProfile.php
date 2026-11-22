@@ -42,6 +42,10 @@ class TasteProfile implements HouseholdOwned
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
     private ?array $summary = null;
 
+    /** @var list<string> suggestions (App\Taste\SwapLearning) the household turned down or took: not offered again */
+    #[ORM\Column(type: Types::JSON, options: ['jsonb' => true, 'default' => '[]'])]
+    private array $dismissedSuggestions = [];
+
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?User $updatedBy = null;
@@ -101,6 +105,25 @@ class TasteProfile implements HouseholdOwned
     public function getUpdatedAt(): \DateTimeImmutable
     {
         return $this->updatedAt;
+    }
+
+    /** @return list<string> */
+    public function getDismissedSuggestions(): array
+    {
+        return $this->dismissedSuggestions;
+    }
+
+    public function dismissSuggestion(string $key): void
+    {
+        if (!\in_array($key, $this->dismissedSuggestions, true)) {
+            $this->dismissedSuggestions[] = $key;
+        }
+    }
+
+    /** A suggestion taken: the new rules or notes. The summary was written for the old ones, so it goes. */
+    public function adopt(TasteRules $rules, ?string $notes, ?User $by): void
+    {
+        $this->update($this->answers, $rules, $notes, null, $by);
     }
 
     /**
