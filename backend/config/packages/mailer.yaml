@@ -1,0 +1,7 @@
+framework:
+    mailer:
+        # null://null (backend/.env) discards every email: set a real provider in .env.local or
+        # the server's .env, e.g. smtp://USER:PASS@smtp.example.com:587 (docs/DEPLOY.md).
+        dsn: '%env(MAILER_DSN)%'
+        headers:
+            From: '%env(MAILER_FROM)%'

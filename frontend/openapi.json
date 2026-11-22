@@ -411,6 +411,102 @@
                 }
             }
         },
+        "/api/me/password": {
+            "post": {
+                "operationId": "me_change_password",
+                "tags": [
+                    "Me"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Me resource created",
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a Me resource.",
+                "description": "Creates a Me resource.",
+                "parameters": [],
+                "requestBody": {
+                    "description": "The new Me resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Me.ChangePasswordInput-me.password"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Me.ChangePasswordInput-me.password"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
         "/api/meal-plans": {
             "get": {
                 "operationId": "api_meal-plans_get_collection",
@@ -1342,6 +1438,156 @@
                         "explode": false
                     }
                 ]
+            }
+        },
+        "/api/password/forgot": {
+            "post": {
+                "operationId": "password_forgot",
+                "tags": [
+                    "Password"
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Password resource created",
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a Password resource.",
+                "description": "Creates a Password resource.",
+                "parameters": [],
+                "requestBody": {
+                    "description": "The new Password resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Password.ForgotPasswordInput"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Password.ForgotPasswordInput"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/password/reset": {
+            "post": {
+                "operationId": "password_reset",
+                "tags": [
+                    "Password"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Password resource created",
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a Password resource.",
+                "description": "Creates a Password resource.",
+                "parameters": [],
+                "requestBody": {
+                    "description": "The new Password resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Password.ResetPasswordInput"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Password.ResetPasswordInput"
+                            }
+                        }
+                    },
+                    "required": true
+                }
             }
         },
         "/api/recipes": {
@@ -4429,6 +4675,26 @@
                     }
                 }
             },
+            "Me.ChangePasswordInput-me.password": {
+                "type": "object",
+                "description": "Change the password. Other devices are signed out; this one stays signed in.",
+                "required": [
+                    "currentPassword",
+                    "newPassword"
+                ],
+                "properties": {
+                    "currentPassword": {
+                        "default": "",
+                        "type": "string"
+                    },
+                    "newPassword": {
+                        "minLength": 8,
+                        "maxLength": 4096,
+                        "default": "",
+                        "type": "string"
+                    }
+                }
+            },
             "Me.jsonld-me.read": {
                 "allOf": [
                     {
@@ -4826,6 +5092,46 @@
                             "integer",
                             "null"
                         ]
+                    }
+                }
+            },
+            "Password.ForgotPasswordInput": {
+                "type": "object",
+                "description": "Email a link to choose a new password. Answers the same whether or not the address has an account.",
+                "required": [
+                    "email"
+                ],
+                "properties": {
+                    "email": {
+                        "format": "email",
+                        "maxLength": 180,
+                        "externalDocs": {
+                            "url": "https://schema.org/email"
+                        },
+                        "default": "",
+                        "type": "string"
+                    }
+                }
+            },
+            "Password.ResetPasswordInput": {
+                "type": "object",
+                "description": "Choose a new password with the token from the emailed link (once, within an hour). Signs out every device.",
+                "required": [
+                    "token",
+                    "password"
+                ],
+                "properties": {
+                    "token": {
+                        "maxLength": 200,
+                        "description": "From the emailed link: \"<selector>.<verifier>\".",
+                        "default": "",
+                        "type": "string"
+                    },
+                    "password": {
+                        "minLength": 8,
+                        "maxLength": 4096,
+                        "default": "",
+                        "type": "string"
                     }
                 }
             },
@@ -6948,6 +7254,10 @@
         {
             "name": "Me",
             "description": "The signed-in user and their household: what the SPA needs to boot."
+        },
+        {
+            "name": "Password",
+            "description": "Forgotten passwords, for people who aren't signed in (changing it while signed in is\nPOST /api/me/password). See App\\Security\\PasswordReset."
         },
         {
             "name": "RecipeTag",

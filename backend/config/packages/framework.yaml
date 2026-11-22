@@ -8,6 +8,17 @@ framework:
     #esi: true
     #fragments: true
 
+    # Password emails and attempts (App\Security\PasswordReset, App\State\ChangePasswordProcessor).
+    rate_limiter:
+        password_forgot:
+            policy: sliding_window
+            limit: 5
+            interval: '1 hour'
+        password_attempt:
+            policy: sliding_window
+            limit: 10
+            interval: '15 minutes'
+
 when@test:
     framework:
         test: true

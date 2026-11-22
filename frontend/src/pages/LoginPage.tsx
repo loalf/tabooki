@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { type Location, Navigate, useLocation } from 'react-router'
+import { type Location, Link, Navigate, useLocation } from 'react-router'
 import { ApiError } from '@/api/client'
 import { useLogin, useMe } from '@/auth/useAuth'
 import { Splash } from '@/components/Splash'
@@ -9,7 +9,8 @@ export function LoginPage() {
   const { t } = useTranslation()
   const { data: me, isPending } = useMe()
   const login = useLogin()
-  const from = (useLocation().state as { from?: Location } | null)?.from
+  const state = useLocation().state as { from?: Location; notice?: 'passwordReset' } | null
+  const from = state?.from
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -32,6 +33,11 @@ export function LoginPage() {
       <img src="/logo.svg" alt="" className="mb-6 size-16" />
       <h1 className="text-2xl font-semibold tracking-tight">{t('login.title')}</h1>
       <p className="mt-1 mb-6 text-sm text-muted-foreground">{t('login.subtitle')}</p>
+      {state?.notice === 'passwordReset' && (
+        <p className="mb-4 rounded-lg border bg-card p-3 text-sm" role="status">
+          {t('password.reset.done')}
+        </p>
+      )}
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1.5 text-sm font-medium">
           {t('login.email')}
@@ -67,6 +73,9 @@ export function LoginPage() {
         >
           {login.isPending ? t('login.submitting') : t('login.submit')}
         </button>
+        <Link to="/forgot-password" className="text-center text-sm font-medium text-primary">
+          {t('password.forgot.link')}
+        </Link>
       </form>
     </div>
   )

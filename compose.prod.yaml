@@ -14,6 +14,9 @@ services:
       BEDROCK_TEXT_MODEL: ${BEDROCK_TEXT_MODEL:-eu.anthropic.claude-haiku-5-5}
       BEDROCK_VIDEO_MODEL: ${BEDROCK_VIDEO_MODEL:-eu.amazon.nova-pro-v1:0}
       EXTRACTION_THINKING: ${EXTRACTION_THINKING:-1}
+      # Password emails (docs/DEPLOY.md). Without MAILER_DSN they are discarded.
+      MAILER_DSN: ${MAILER_DSN:-null://null}
+      MAILER_FROM: ${MAILER_FROM:-Tabooki <no-reply@tabooki.xyz>}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:?set CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:?set CADDY_MERCURE_JWT_SECRET}
       SPA_MODE: static
@@ -47,3 +50,6 @@ services:
       BEDROCK_TEXT_MODEL: ${BEDROCK_TEXT_MODEL:-eu.anthropic.claude-haiku-5-5}
       BEDROCK_VIDEO_MODEL: ${BEDROCK_VIDEO_MODEL:-eu.amazon.nova-pro-v1:0}
       EXTRACTION_THINKING: ${EXTRACTION_THINKING:-1}
+      # Password emails (docs/DEPLOY.md). Without MAILER_DSN they are discarded.
+      MAILER_DSN: ${MAILER_DSN:-null://null}
+      MAILER_FROM: ${MAILER_FROM:-Tabooki <no-reply@tabooki.xyz>}

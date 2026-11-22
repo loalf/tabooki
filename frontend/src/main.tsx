@@ -11,11 +11,13 @@ import '@/i18n'
 import '@/index.css'
 import { CookPage } from '@/pages/CookPage'
 import { CostsPage } from '@/pages/CostsPage'
+import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
 import { LibraryPage } from '@/pages/LibraryPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { PlanPage } from '@/pages/PlanPage'
 import { RecipeEditPage } from '@/pages/RecipeEditPage'
 import { RecipePage } from '@/pages/RecipePage'
+import { ResetPasswordPage } from '@/pages/ResetPasswordPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { SharePage } from '@/pages/SharePage'
 import { ShoppingPage } from '@/pages/ShoppingPage'
@@ -63,6 +65,8 @@ const persistOptions = {
 
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
+  { path: '/forgot-password', element: <ForgotPasswordPage /> },
+  { path: '/reset-password', element: <ResetPasswordPage /> },
   {
     element: <AppShell />,
     children: [

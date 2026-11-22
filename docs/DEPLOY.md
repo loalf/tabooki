@@ -80,6 +80,50 @@ That builds the image, runs migrations (php's entrypoint) and restarts php and w
 server has no `make`, so the Makefile's `prod-*` targets are for a server that does. Logs:
 `docker compose -f compose.yaml -f compose.prod.yaml logs -f worker`.
 
+## Email (password resets)
+
+"Forgot your password?" emails a link, and everyone gets a note when their password changes.
+Until a provider is set, those emails are silently discarded (`MAILER_DSN=null://null`), so a
+forgotten password can only be reset from the server (`app:user:password`, below).
+
+We use [Resend](https://resend.com). Its free plan (3,000 emails a month, 100 a day, one domain)
+is plenty for a household.
+
+1. In Resend, go to **Domains** and add `tabooki.xyz`.
+2. Add the DNS records Resend lists in GoDaddy: a DKIM TXT record, plus an MX and an SPF TXT
+   record on its `send` subdomain. Adding a DMARC record is optional but recommended. Wait until
+   Resend shows the domain as verified. Until then it only sends to your own Resend account's
+   address.
+3. Create an API key under **API Keys** with **Sending access** for that domain only, and save
+   it on the server. This script asks for the key without showing it, writes `MAILER_DSN` and
+   `MAILER_FROM` into `/opt/tabooki/.env`, restarts Tabooki and sends a test email:
+
+   ```sh
+   ssh -t demo.rootware.xyz /opt/tabooki/deploy/set-resend-key.sh you@example.com
+   ```
+
+   Doing it by hand instead, the two lines are:
+
+   ```sh
+   MAILER_DSN=smtp://resend:API_KEY@smtp.resend.com:587
+   MAILER_FROM="Tabooki <no-reply@tabooki.xyz>"
+   ```
+
+   The username is literally `resend`. Port 587 uses STARTTLS. If the server's network blocks
+   587, use 2587 instead (also STARTTLS), or `smtps://…@smtp.resend.com:465` (implicit TLS).
+   With another provider, URL-encode special characters in the username or password
+   (`/` → `%2F`, `+` → `%2B`…). Then recreate the containers
+   (`docker compose -f compose.yaml -f compose.prod.yaml up -d --wait`) and send a test, from the
+   verified domain (the default sender, `from@example.org`, would be rejected):
+   `docker compose -f compose.yaml -f compose.prod.yaml exec php php bin/console mailer:test you@example.com --from=no-reply@tabooki.xyz`.
+
+Emails are sent by the worker; if one fails it's retried, and its error is in
+`docker compose -f compose.yaml -f compose.prod.yaml logs worker`.
+
+Without email (or for someone locked out), set a password from the server; it asks for the new
+one and signs them out everywhere:
+`docker compose -f compose.yaml -f compose.prod.yaml exec -it php php bin/console app:user:password someone@example.com`.
+
 ## Phones
 
 Open https://tabooki.xyz, sign in, and install it: **Share → Add to Home Screen** (iPhone Safari)

@@ -2,6 +2,7 @@ import { ChevronRight, LogOut, Receipt } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useLogout, useMe, useUpdateMe } from '@/auth/useAuth'
+import { ChangePassword } from '@/components/ChangePassword'
 import { PageHeader } from '@/components/PageHeader'
 import { ShareSettings } from '@/components/ShareSettings'
 import { LOCALES, type Locale } from '@/i18n'
@@ -53,6 +54,8 @@ export function SettingsPage() {
         </fieldset>
 
         <ShareSettings />
+
+        <ChangePassword />
 
         <Link to="/settings/costs" className="flex items-center gap-3 rounded-lg border bg-card p-4">
           <Receipt className="size-5 shrink-0 text-primary" aria-hidden />

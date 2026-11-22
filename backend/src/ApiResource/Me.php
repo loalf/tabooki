@@ -8,9 +8,12 @@ use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use App\Dto\ChangePasswordInput;
 use App\Entity\User;
 use App\State\MeProcessor;
 use App\State\MeProvider;
+use App\State\PasswordProcessor;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -22,6 +25,18 @@ use Symfony\Component\Validator\Constraints as Assert;
         // read: true, so the current values are loaded before the merge-patch is applied
         // (API Platform skips reading on PATCH when the URI has no variables).
         new Patch(uriTemplate: '/me', uriVariables: [], read: true, processor: MeProcessor::class),
+        new Post(
+            uriTemplate: '/me/password',
+            uriVariables: [],
+            status: 204,
+            description: 'Change the password. Other devices are signed out; this one stays signed in.',
+            denormalizationContext: ['groups' => ['me:password']],
+            input: ChangePasswordInput::class,
+            output: false,
+            read: false,
+            processor: PasswordProcessor::class,
+            name: 'me_change_password',
+        ),
     ],
     normalizationContext: ['groups' => ['me:read']],
     denormalizationContext: ['groups' => ['me:write']],

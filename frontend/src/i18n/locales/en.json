@@ -346,5 +346,45 @@
     "unpriced_one": "{{count}} call uses a model with no price configured and is not in the totals.",
     "unpriced_other": "{{count}} calls use a model with no price configured and are not in the totals.",
     "footnote": "Amazon Bedrock list prices in US dollars, before tax. Months in UTC."
+  },
+  "password": {
+    "current": "Current password",
+    "new": "New password",
+    "repeat": "Repeat the new password",
+    "hint_one": "At least {{count}} character.",
+    "hint_other": "At least {{count}} characters.",
+    "tooShort_one": "The password needs at least {{count}} character.",
+    "tooShort_other": "The password needs at least {{count}} characters.",
+    "mismatch": "The two new passwords don't match.",
+    "tooMany": "Too many attempts. Wait a while and try again.",
+    "error": "Something went wrong. Please try again.",
+    "saving": "Saving…",
+    "sending": "Sending…",
+    "backToLogin": "Back to sign in",
+    "forgot": {
+      "link": "Forgot your password?",
+      "title": "Reset your password",
+      "subtitle": "Enter your email and we'll send you a link to choose a new password.",
+      "submit": "Send link",
+      "sent": "If {{email}} has a Tabooki account, we've just sent it a link. Check your email (and spam). The link works once and expires in an hour."
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "subtitle": "You'll be signed out on every device; then sign in with the new one.",
+      "submit": "Save password",
+      "done": "Password changed. Sign in with the new one.",
+      "badLinkTitle": "This link no longer works",
+      "badLink": "It was already used, it expired (it lasts an hour), or you asked for a newer one.",
+      "newLink": "Ask for a new link"
+    },
+    "change": {
+      "title": "Password",
+      "open": "Change",
+      "submit": "Change password",
+      "done": "Password changed.",
+      "wrongCurrent": "The current password is not correct.",
+      "same": "The new password must be different from the current one.",
+      "otherDevices": "Your other devices will be signed out; you stay signed in here."
+    }
   }
 }

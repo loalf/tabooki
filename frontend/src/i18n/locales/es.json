@@ -346,5 +346,45 @@
     "unpriced_one": "{{count}} llamada usa un modelo sin precio configurado y no cuenta en los totales.",
     "unpriced_other": "{{count}} llamadas usan un modelo sin precio configurado y no cuentan en los totales.",
     "footnote": "Precios de lista de Amazon Bedrock en dólares, sin impuestos. Meses en hora UTC."
+  },
+  "password": {
+    "current": "Contraseña actual",
+    "new": "Nueva contraseña",
+    "repeat": "Repite la nueva contraseña",
+    "hint_one": "Al menos {{count}} carácter.",
+    "hint_other": "Al menos {{count}} caracteres.",
+    "tooShort_one": "La contraseña necesita al menos {{count}} carácter.",
+    "tooShort_other": "La contraseña necesita al menos {{count}} caracteres.",
+    "mismatch": "Las dos contraseñas nuevas no coinciden.",
+    "tooMany": "Demasiados intentos. Espera un rato y vuelve a probar.",
+    "error": "Algo ha fallado. Inténtalo de nuevo.",
+    "saving": "Guardando…",
+    "sending": "Enviando…",
+    "backToLogin": "Volver a iniciar sesión",
+    "forgot": {
+      "link": "¿Has olvidado tu contraseña?",
+      "title": "Cambia tu contraseña",
+      "subtitle": "Escribe tu correo y te enviaremos un enlace para elegir una contraseña nueva.",
+      "submit": "Enviar enlace",
+      "sent": "Si {{email}} tiene una cuenta en Tabooki, te acabamos de enviar un enlace. Mira tu correo (también en spam). El enlace sirve una vez y caduca en una hora."
+    },
+    "reset": {
+      "title": "Elige una contraseña nueva",
+      "subtitle": "Se cerrará la sesión en todos tus dispositivos; luego entra con la nueva.",
+      "submit": "Guardar contraseña",
+      "done": "Contraseña cambiada. Ya puedes entrar con la nueva.",
+      "badLinkTitle": "Este enlace ya no sirve",
+      "badLink": "Ya se ha usado, ha caducado (dura una hora) o has pedido otro más nuevo.",
+      "newLink": "Pedir otro enlace"
+    },
+    "change": {
+      "title": "Contraseña",
+      "open": "Cambiar",
+      "submit": "Cambiar contraseña",
+      "done": "Contraseña cambiada.",
+      "wrongCurrent": "La contraseña actual no es correcta.",
+      "same": "La nueva contraseña tiene que ser distinta de la actual.",
+      "otherDevices": "Se cerrará la sesión en tus otros dispositivos; en este sigues dentro."
+    }
   }
 }

@@ -90,7 +90,7 @@ final readonly class ShoppingListBuilder
             $item->key = $extra->checkKey();
             $item->name = $extra->getText();
             $item->manual = true;
-            $item->checked = $list->isChecked($extra->checkKey());
+            $item->checked = $list?->isChecked($extra->checkKey()) ?? false;
             $view->items[] = $item;
         }
 

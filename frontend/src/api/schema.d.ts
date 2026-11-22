@@ -68,6 +68,26 @@ export interface paths {
         patch: operations["api_me_patch"];
         trace?: never;
     };
+    "/api/me/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a Me resource.
+         * @description Creates a Me resource.
+         */
+        post: operations["me_change_password"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/meal-plans": {
         parameters: {
             query?: never;
@@ -210,6 +230,46 @@ export interface paths {
          * @description Creates a MealPlan resource.
          */
         post: operations["meal_plan_regenerate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/password/forgot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a Password resource.
+         * @description Creates a Password resource.
+         */
+        post: operations["password_forgot"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/password/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a Password resource.
+         * @description Creates a Password resource.
+         */
+        post: operations["password_reset"];
         delete?: never;
         options?: never;
         head?: never;
@@ -929,6 +989,13 @@ export interface components {
              */
             locale: "es" | "en";
         };
+        /** @description Change the password. Other devices are signed out; this one stays signed in. */
+        "Me.ChangePasswordInput-me.password": {
+            /** @default  */
+            currentPassword: string;
+            /** @default  */
+            newPassword: string;
+        };
         /** @description The signed-in user and their household: what the SPA needs to boot. */
         "Me.jsonld-me.read": components["schemas"]["HydraItemBaseSchema"] & {
             /** @default  */
@@ -1089,6 +1156,24 @@ export interface components {
             slot: "lunch" | "dinner";
             /** @description null: the household's default. */
             servings?: number | null;
+        };
+        /** @description Email a link to choose a new password. Answers the same whether or not the address has an account. */
+        "Password.ForgotPasswordInput": {
+            /**
+             * Format: email
+             * @default
+             */
+            email: string;
+        };
+        /** @description Choose a new password with the token from the emailed link (once, within an hour). Signs out every device. */
+        "Password.ResetPasswordInput": {
+            /**
+             * @description From the emailed link: "<selector>.<verifier>".
+             * @default
+             */
+            token: string;
+            /** @default  */
+            password: string;
         };
         "Recipe-meal_plan.read_recipe.list": {
             /** Format: uuid */
@@ -2047,6 +2132,63 @@ export interface operations {
             };
         };
     };
+    me_change_password: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new Me resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["Me.ChangePasswordInput-me.password"];
+                "application/json": components["schemas"]["Me.ChangePasswordInput-me.password"];
+            };
+        };
+        responses: {
+            /** @description Me resource created */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
     "api_meal-plans_get_collection": {
         parameters: {
             query?: {
@@ -2520,6 +2662,98 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    password_forgot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new Password resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["Password.ForgotPasswordInput"];
+                "application/json": components["schemas"]["Password.ForgotPasswordInput"];
+            };
+        };
+        responses: {
+            /** @description Password resource created */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    password_reset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new Password resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["Password.ResetPasswordInput"];
+                "application/json": components["schemas"]["Password.ResetPasswordInput"];
+            };
+        };
+        responses: {
+            /** @description Password resource created */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };

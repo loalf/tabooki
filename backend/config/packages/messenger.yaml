@@ -17,6 +17,8 @@ framework:
             'App\Message\FetchSourceMetadata': async
             'App\Message\ExtractSource': async
             'App\Message\ClassifyIngredients': async
+            # Emails go out from the worker: the request doesn't wait for the mail server.
+            'Symfony\Component\Mailer\Messenger\SendEmailMessage': async
 
 when@test:
     framework:
