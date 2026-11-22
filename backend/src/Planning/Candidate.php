@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Planning;
 
 use App\Entity\Recipe;
+use App\Enum\FoodGroup;
+use App\Enum\Heaviness;
 use App\Enum\Language;
 use App\Enum\MealType;
 
@@ -12,9 +14,14 @@ use App\Enum\MealType;
 final readonly class Candidate
 {
     /**
-     * @param list<MealType> $mealTypes empty: suits any meal
-     * @param list<string>   $tags      main tags only (what the dish is, not how)
-     * @param list<string>   $fresh     canonical keys of non-staple ingredients
+     * @param list<MealType>                               $mealTypes          empty: suits any meal
+     * @param list<string>                                 $tags               main tags only (what the dish is, not how)
+     * @param list<string>                                 $fresh              canonical keys of non-staple ingredients
+     * @param list<FoodGroup>                              $foodGroups         what the dish needs (see $hasFacts)
+     * @param list<FoodGroup>                              $optionalFoodGroups
+     * @param list<string>                                 $keys               canonical keys of the ingredients it needs
+     * @param list<string>                                 $optionalKeys
+     * @param array<string, array{es: string, en: string}> $freshNames         the fresh ingredients' names, by key
      */
     public function __construct(
         public Recipe $recipe,
@@ -27,16 +34,43 @@ final readonly class Candidate
         public ?int $rating,
         public bool $needsReview,
         public bool $planNext = false,
+        public ?Heaviness $heaviness = null,
+        public ?int $spice = null,
+        public array $foodGroups = [],
+        public array $optionalFoodGroups = [],
+        public bool $hasFacts = false,
+        public array $keys = [],
+        public array $optionalKeys = [],
+        public array $freshNames = [],
     ) {
     }
 
     public static function fromRecipe(Recipe $recipe): self
     {
+        $language = $recipe->getLanguage();
+        $translated = $recipe->getTranslation()->ingredients ?? [];
         $fresh = [];
-        foreach ($recipe->getIngredients() as $ingredient) {
+        $freshNames = [];
+        $keys = [];
+        $optionalKeys = [];
+        foreach ($recipe->getIngredients() as $i => $ingredient) {
             $key = $ingredient->getCanonicalKey();
-            if (null !== $key && !$ingredient->isOptional() && Planner::isFresh($key)) {
+            if (null === $key || '' === $key) {
+                continue;
+            }
+            if ($ingredient->isOptional()) {
+                $optionalKeys[] = $key;
+                continue;
+            }
+            $keys[] = $key;
+            if (Planner::isFresh($key)) {
                 $fresh[] = $key;
+                // The ingredient's name alone ("cilantro"), never its whole line with the amount.
+                $name = $ingredient->getName() ?? $translated[$i]['name'] ?? null;
+                $other = $translated[$i]['name'] ?? $name;
+                if (null !== $name && null !== $other) {
+                    $freshNames[$key] ??= Language::Es === $language ? ['es' => $name, 'en' => $other] : ['es' => $other, 'en' => $name];
+                }
             }
         }
 
@@ -52,6 +86,14 @@ final readonly class Candidate
             rating: $recipe->getRating(),
             needsReview: $recipe->getNeedsReview(),
             planNext: $recipe->isPlanNext(),
+            heaviness: $recipe->getHeaviness(),
+            spice: $recipe->getSpice(),
+            foodGroups: $recipe->getFoodGroups(),
+            optionalFoodGroups: $recipe->getOptionalFoodGroups(),
+            hasFacts: $recipe->hasFoodGroups(),
+            keys: array_values(array_unique($keys)),
+            optionalKeys: array_values(array_unique($optionalKeys)),
+            freshNames: $freshNames,
         );
     }
 

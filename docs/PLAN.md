@@ -266,7 +266,9 @@ The greedy slot-by-slot pick can't plan ahead for minimums, so it becomes the sa
 
 **Notes fit:** when the profile has notes, one batched call (title, main ingredients, tags, minutes; ~40 tokens per recipe) returns `good|neutral|poor` + a reason per recipe, cached per recipe with the notes' hash; new recipes are judged on import. The planner reads the cache only.
 
-**Phases:** (1) recipe facts, backfill, editing, library filters; (2) questionnaire, compile, review screen, profile settings, planner rules, best-of-K, explanations; (3) notes fit, a per-week tweak box (temporary rules on the plan, same compiler), and "why are you swapping it?" feeding profile suggestions.
+**Phases:** (1) recipe facts, backfill, editing, library filters — done; (2) questionnaire, compile, review screen, profile settings, planner rules, best-of-K, explanations — done (not yet: dictating the free-text answer; editing a rule on the review screen, only removing it; removing one drops the model's summary, which no longer matches); (3) notes fit, a per-week tweak box (temporary rules on the plan, same compiler), and "why are you swapping it?" feeding profile suggestions.
+
+**As built (phase 2):** the tappable answers become rules without the model (`TasteRules::fromAnswers()`); the model refines them, and can't drop an allergy or the diet the household tapped. When the model can't be reached, the draft is the tapped answers alone and the free text is kept word for word as notes. Recipes whose facts haven't been read yet are left out by an allergy or a diet (we can't know), never by a dislike. The planner tries up to 30 weeks and keeps the one that gives up least (relaxed dislike 100, relaxed weekly limit 30, a weekly minimum short 20 per meal, a repeat 4 per tier, the opposite heaviness 2), stopping at the first that gives up nothing. Each recipe in the library and the picker says what it has against the profile (`tasteConflicts`).
 
 ## 7. Shopping list
 

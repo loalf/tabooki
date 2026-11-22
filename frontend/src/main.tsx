@@ -14,6 +14,7 @@ import '@/i18n'
 import '@/index.css'
 import { CookPage } from '@/pages/CookPage'
 import { CostsPage } from '@/pages/CostsPage'
+import { TastePage } from '@/pages/TastePage'
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
 import { LibraryPage } from '@/pages/LibraryPage'
 import { LoginPage } from '@/pages/LoginPage'
@@ -84,6 +85,7 @@ const router = createBrowserRouter([
       { path: 'shopping', element: <ShoppingPage /> },
       { path: 'settings', element: <SettingsPage /> },
       { path: 'settings/costs', element: <CostsPage /> },
+      { path: 'settings/taste', element: <TastePage /> },
       { path: 'share', element: <SharePage /> },
     ],
   },

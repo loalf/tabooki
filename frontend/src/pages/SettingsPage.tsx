@@ -1,6 +1,7 @@
-import { ChevronRight, LogOut, Receipt } from 'lucide-react'
+import { ChevronRight, LogOut, Receipt, Salad } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
+import { useTasteProfile } from '@/api/taste'
 import { useLogout, useMe, useUpdateMe } from '@/auth/useAuth'
 import { ChangePassword } from '@/components/ChangePassword'
 import { PageHeader } from '@/components/PageHeader'
@@ -89,6 +90,8 @@ function SettingsContent() {
         </div>
       </div>
 
+      <TasteLink />
+
       <ShareSettings />
 
       <ChangePassword />
@@ -107,5 +110,23 @@ function SettingsContent() {
         {t('settings.logout')}
       </button>
     </section>
+  )
+}
+
+/** The household's likings: their summary, or an invitation to tell them. */
+function TasteLink() {
+  const { t, i18n } = useTranslation()
+  const { data: profile, isPending } = useTasteProfile()
+  if (isPending) return null
+  const summary = profile?.summary?.[i18n.language.startsWith('en') ? 'en' : 'es']
+  return (
+    <Link to="/settings/taste" className="flex items-center gap-3 rounded-lg sticker bg-card p-4">
+      <Salad className="size-5 shrink-0 text-primary" aria-hidden />
+      <span className="min-w-0 flex-1">
+        <span className="block font-extrabold">{t('taste.title')}</span>
+        <span className="line-clamp-2 block text-sm text-muted-foreground">{profile ? (summary ?? t('taste.settingsSaved')) : t('taste.settingsHint')}</span>
+      </span>
+      <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+    </Link>
   )
 }

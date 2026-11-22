@@ -34,7 +34,8 @@ function random(seed: number) {
 
 /**
  * Recipes to swap a meal for, picked like the planner picks (suits the meal and the weekday time
- * limit, not already this week, nor eaten in the last two weeks while there are others; favorites,
+ * limit and the household's likings, not already this week, nor eaten in the last two weeks while
+ * there are others; favorites,
  * good ratings and long-forgotten ones weigh more), each with the reason it's worth a look.
  */
 export function suggestFor({
@@ -57,18 +58,24 @@ export function suggestFor({
   const inWeek = new Set((plan.entries ?? []).flatMap((e) => (e.recipe?.id ? [e.recipe.id] : [])))
   const limit = entry.date && isWeekday(entry.date) ? plan.weekdayMaxMinutes : null
 
+  // The household's likings: what it can't eat never comes up, what it doesn't like only when nothing else is left.
+  const forbidden = (r: RecipeListItem) => (r.tasteConflicts ?? []).some((c) => c.strength === 'never')
+  const liked = (r: RecipeListItem) => !r.tasteConflicts?.length
+
   const fits = library.filter(
     (r) =>
       r.id &&
       !exclude.includes(r.id) &&
+      !forbidden(r) &&
       (!r.mealTypes?.length || r.mealTypes.includes(slot)) &&
       (limit == null || r.totalMinutes == null || r.totalMinutes <= limit),
   )
   // The rules relax, in order, while there aren't enough (a small library): first recently
   // eaten ones come back, then ones already this week.
   const tiers = [
-    fits.filter((r) => !inWeek.has(r.id!) && (daysSince(r.lastCookedOn, now) ?? Infinity) > 14),
-    fits.filter((r) => !inWeek.has(r.id!)),
+    fits.filter((r) => liked(r) && !inWeek.has(r.id!) && (daysSince(r.lastCookedOn, now) ?? Infinity) > 14),
+    fits.filter((r) => liked(r) && !inWeek.has(r.id!)),
+    fits.filter(liked),
     fits,
   ]
   const pool = tiers.find((tier) => tier.length >= count) ?? fits

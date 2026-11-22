@@ -1,4 +1,4 @@
-import { BookOpen, ChefHat, Lock, LockOpen, Minus, Plus, RefreshCw, Search, Sparkles, Star, UtensilsCrossed, Wand2 } from 'lucide-react'
+import { BookOpen, ChefHat, Lock, LockOpen, Minus, Plus, RefreshCw, Search, Sparkles, Star, TriangleAlert, UtensilsCrossed, Wand2 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
@@ -7,10 +7,12 @@ import { type MealPlan, type MealPlanEntry, useRemoveMeal, useSwapMeal, useUpdat
 import { Thumbnail } from '@/components/library/Thumbnail'
 import { formatDay, formatWeekday } from '@/components/plan/format'
 import { mealQuery } from '@/components/plan/meal'
+import { mealReasons } from '@/components/plan/reasons'
 import { RecipePicker } from '@/components/plan/RecipePicker'
 import { Sheet } from '@/components/Sheet'
 import { Button } from '@/components/ui'
 import { type Reason, suggestFor } from '@/lib/suggest'
+import { conflictText } from '@/lib/taste'
 import { cn } from '@/lib/utils'
 import { parseIsoDate } from '@/lib/week'
 
@@ -45,6 +47,7 @@ export function MealSheet({ plan, entry, onClose }: { plan: MealPlan; entry: Mea
             {leftoverOf && <p className="text-xs font-bold text-primary">{t('plan.leftoversOf', { day: formatWeekday(leftoverOf.date!, i18n.language) })}</p>}
           </div>
         </header>
+        <Why entry={entry} />
 
         <div className="grid grid-cols-4 gap-2">
           {recipe && !leftoverOf ? (
@@ -134,6 +137,29 @@ export function MealSheet({ plan, entry, onClose }: { plan: MealPlan; entry: Mea
   )
 }
 
+/** What the planner says about this meal: why it's a good pick, and what it had to give up. */
+function Why({ entry }: { entry: MealPlanEntry }) {
+  const { t, i18n } = useTranslation()
+  const { good, warnings } = mealReasons(entry, t, i18n.language)
+  if (!good.length && !warnings.length) return null
+  return (
+    <div className="-mt-2 flex flex-col gap-2">
+      {good.length > 0 && (
+        <p className="flex items-start gap-1.5 text-sm text-muted-foreground">
+          <Sparkles className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
+          <span className="first-letter:uppercase">{good.join(' · ')}</span>
+        </p>
+      )}
+      {warnings.map((warning) => (
+        <p key={warning} className="flex items-start gap-1.5 rounded-md bg-accent px-2.5 py-2 text-sm font-semibold text-accent-foreground">
+          <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
+          <span>{warning}</span>
+        </p>
+      ))}
+    </div>
+  )
+}
+
 function tileClass(variant?: 'primary' | 'on') {
   return cn(
     'flex flex-col items-center justify-center gap-1.5 rounded-md sticker-sm px-1 py-3 text-xs font-bold [&>svg]:size-5 disabled:opacity-50',
@@ -142,7 +168,7 @@ function tileClass(variant?: 'primary' | 'on') {
 }
 
 function Suggestions({ plan, entry, disabled, onChoose }: { plan: MealPlan; entry: MealPlanEntry; disabled: boolean; onChoose: (id: string) => void }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { data: library = [] } = useRecipes({ q: '', tags: [], favorite: false })
   const [round, setRound] = useState(0)
   const [seen, setSeen] = useState<string[]>([])
@@ -182,7 +208,11 @@ function Suggestions({ plan, entry, disabled, onChoose }: { plan: MealPlan; entr
               <Thumbnail src={recipe.source?.thumbnail} className="aspect-[2/1] w-full border-b-2 border-outline" />
               <span className="flex flex-1 flex-col gap-1.5 px-2.5 pt-2 pb-2.5">
                 <span className="line-clamp-2 text-sm leading-snug font-bold">{recipe.title}</span>
-                <ReasonPill reason={reason} />
+                {recipe.tasteConflicts?.length ? (
+                  <span className="mt-auto text-[11px] font-semibold text-muted-foreground">{conflictText(recipe.tasteConflicts[0], t, i18n.language)}</span>
+                ) : (
+                  <ReasonPill reason={reason} />
+                )}
               </span>
             </button>
           </li>

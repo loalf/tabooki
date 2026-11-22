@@ -1,10 +1,11 @@
-import { Clock, CornerDownRight, Lock, Plus, Star } from 'lucide-react'
+import { Clock, CornerDownRight, Lock, Plus, Star, TriangleAlert } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { type MealPlan, type MealPlanEntry, type Slot, useAddMeal } from '@/api/plan'
 import { Thumbnail } from '@/components/library/Thumbnail'
 import { formatWeekday } from '@/components/plan/format'
 import { MealSheet } from '@/components/plan/MealSheet'
+import { hasWarning } from '@/components/plan/reasons'
 import { cn } from '@/lib/utils'
 
 /** One lunch or dinner of the week: planned (tap it for everything you can do) or not (a button to plan it). */
@@ -76,6 +77,7 @@ export function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: Meal
             )
           )}
         </span>
+        {hasWarning(entry) && <TriangleAlert className="size-4 shrink-0 text-destructive" aria-label={t('plan.why.warning')} />}
         {entry.locked && (
           <span className="grid size-7 shrink-0 place-items-center rounded-full bg-card" aria-label={t('plan.sheet.locked')}>
             <Lock className="size-3.5" aria-hidden />

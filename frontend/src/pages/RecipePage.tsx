@@ -1,4 +1,4 @@
-import { CalendarCheck, CalendarPlus, Check, ChefHat, ChevronLeft, Clock, Ellipsis, ExternalLink, Flame, Heart, Languages, Leaf, LoaderCircle, Minus, Pencil, Plus, RefreshCw, Scale, Sparkles, Star, Sun, Trash2 } from 'lucide-react'
+import { CalendarCheck, CalendarPlus, Check, ChefHat, ChevronLeft, Clock, Ellipsis, ExternalLink, Flame, Heart, ShieldAlert, Languages, Leaf, LoaderCircle, Minus, Pencil, Plus, RefreshCw, Scale, Sparkles, Star, Sun, Trash2 } from 'lucide-react'
 import { type ReactNode, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
@@ -22,6 +22,7 @@ import { StarRating } from '@/components/StarRating'
 import { Button, linkButtonClass } from '@/components/ui'
 import { scaleLine } from '@/lib/cook'
 import { sortGroups } from '@/lib/facts'
+import { conflictText } from '@/lib/taste'
 import { cn } from '@/lib/utils'
 import { groupIngredients } from '@/lib/recipeText'
 import { useGoBack } from '@/lib/useGoBack'
@@ -233,6 +234,15 @@ function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) 
           <span className="font-semibold">{t('recipe.facts.contains')}:</span> {foodGroups.map((g) => t(`recipe.facts.group.${g}`)).join(' · ')}
           {optionalGroups.length > 0 && <> ({t('recipe.facts.optional', { groups: optionalGroups.map((g) => t(`recipe.facts.group.${g}`)).join(' · ') })})</>}
         </p>
+      )}
+
+      {(recipe.tasteConflicts?.length ?? 0) > 0 && (
+        <Link to="/settings/taste" className="-mt-1 flex items-start gap-2 rounded-md bg-accent px-3 py-2 text-sm font-semibold text-accent-foreground">
+          <ShieldAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
+          <span>
+            {t('taste.misfit')}: {recipe.tasteConflicts!.map((c) => conflictText(c, t, i18n.language)).join(' · ')}
+          </span>
+        </Link>
       )}
 
       {recipe.needsReview && (

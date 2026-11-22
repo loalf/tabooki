@@ -6,6 +6,8 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiProperty;
 use App\Enum\MealType;
+use App\Taste\Conflict;
+use App\Taste\Names;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -42,6 +44,30 @@ class MealPlanEntry
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     #[Groups(['meal_plan:read'])]
     private ?int $rating = null;
+
+    /**
+     * Why the planner chose this recipe, or which of the household's likings it had to give up
+     * on (Planner). Codes: asked, heaviness {value}, shares {names}, overTime, repeat,
+     * relaxedWeekly, relaxedAvoid {conflicts}, nothingAllowed, breaks {conflicts} (chosen by hand).
+     *
+     * @var list<array<string, mixed>>
+     */
+    #[ORM\Column(type: Types::JSON, options: ['jsonb' => true, 'default' => '[]'])]
+    #[Groups(['meal_plan:read'])]
+    #[ApiProperty(schema: [
+        'type' => 'array',
+        'items' => [
+            'type' => 'object',
+            'required' => ['code'],
+            'properties' => [
+                'code' => ['type' => 'string', 'enum' => ['asked', 'heaviness', 'shares', 'overTime', 'repeat', 'relaxedWeekly', 'relaxedAvoid', 'nothingAllowed', 'breaks']],
+                'value' => ['type' => 'string'],
+                'names' => ['type' => 'array', 'items' => Names::API_SCHEMA],
+                'conflicts' => ['type' => 'array', 'items' => Conflict::API_SCHEMA],
+            ],
+        ],
+    ])]
+    private array $reasons = [];
 
     /** This meal is what was left of another one (cook once, eat twice). */
     #[ORM\ManyToOne]
@@ -161,6 +187,18 @@ class MealPlanEntry
         $this->rating = $rating;
         $this->locked = true;
         $this->recipe?->setRating($rating);
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function getReasons(): array
+    {
+        return $this->reasons;
+    }
+
+    /** @param list<array<string, mixed>> $reasons */
+    public function setReasons(array $reasons): void
+    {
+        $this->reasons = $reasons;
     }
 
     public function getLeftoverOf(): ?self

@@ -14,6 +14,7 @@ use App\Message\TranslateRecipe;
 use App\MessageHandler\ClassifyIngredientsHandler;
 use App\MessageHandler\TranslateRecipeHandler;
 use App\Planning\RecipeAnnotator;
+use App\Taste\TasteCompiler;
 use App\Translation\RecipeTranslator;
 use App\Translation\TranslationException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -229,7 +230,7 @@ final class TranslationTest extends ApiTestCase
 
     public function testToolSchemasSuitStrictToolUse(): void
     {
-        foreach ([ExtractionSchema::schema(), ExtractionSchema::schema(estimates: true), ClassifyIngredientsHandler::schema(), RecipeTranslator::schema(), RecipeAnnotator::schema()] as $schema) {
+        foreach ([ExtractionSchema::schema(), ExtractionSchema::schema(estimates: true), ClassifyIngredientsHandler::schema(), RecipeTranslator::schema(), RecipeAnnotator::schema(), TasteCompiler::schema()] as $schema) {
             $this->assertStrict($schema);
         }
     }

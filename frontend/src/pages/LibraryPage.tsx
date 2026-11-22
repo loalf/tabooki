@@ -1,4 +1,4 @@
-import { ChevronDown, Feather, Heart, Leaf, ListChecks, Plus, Search, Soup, X } from 'lucide-react'
+import { ChevronDown, Feather, Heart, Leaf, ListChecks, Plus, Salad, Search, Soup, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
@@ -40,6 +40,7 @@ export function LibraryPage() {
   // Filtered here rather than by the API: the whole library is already loaded.
   const heavy: HeavyFilter | null = HEAVY_FILTERS.find((h) => h === params.get('heavy')) ?? null
   const vegetarian = params.get('veg') === '1'
+  const fitting = params.get('fits') === '1'
   const [query, setQuery] = useState(params.get('q') ?? '')
   const debouncedQuery = useDebounced(query)
 
@@ -76,10 +77,15 @@ export function LibraryPage() {
   const recipes = useRecipes(filters)
   const allTags = useTagNames()
   const reviewCount = useReviewCount()
-  const filtering = Boolean(filters.q.trim() || tags.length || favorite || needsReview || heavy || vegetarian)
+  const filtering = Boolean(filters.q.trim() || tags.length || favorite || needsReview || heavy || vegetarian || fitting)
   const shown = (recipes.data ?? []).filter(
-    (r) => (!heavy || r.heaviness === heavy) && (!vegetarian || r.diet === 'vegetarian' || r.diet === 'vegan'),
+    (r) =>
+      (!heavy || r.heaviness === heavy) &&
+      (!vegetarian || r.diet === 'vegetarian' || r.diet === 'vegan') &&
+      (!fitting || !r.tasteConflicts?.length),
   )
+  // Only once the household has said what it likes (recipes then say what they have against it).
+  const hasTaste = (recipes.data ?? []).some((r) => r.tasteConflicts != null)
 
   const toggleTag = (tag: string) =>
     setParams((current) => {
@@ -109,7 +115,7 @@ export function LibraryPage() {
       return next
     })
 
-  const toggleFlag = (key: 'fav' | 'review' | 'veg') =>
+  const toggleFlag = (key: 'fav' | 'review' | 'veg' | 'fits') =>
     setParams((current) => {
       const next = new URLSearchParams(current)
       if (next.get(key) === '1') next.delete(key)
@@ -181,6 +187,12 @@ export function LibraryPage() {
             <Heart className={cn('size-4', favorite && 'fill-current')} aria-hidden />
             {t('library.favorites')}
           </Chip>
+          {(hasTaste || fitting) && (
+            <Chip active={fitting} onClick={() => toggleFlag('fits')}>
+              <Salad className="size-4" aria-hidden />
+              {t('library.fits')}
+            </Chip>
+          )}
           <Chip active={heavy === 'light'} onClick={() => toggleHeavy('light')}>
             <Feather className="size-4" aria-hidden />
             {t('library.light')}

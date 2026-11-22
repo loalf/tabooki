@@ -27,6 +27,7 @@ use App\Repository\RecipeRepository;
 use App\State\RecipeProcessor;
 use App\State\RecipeProvider;
 use App\State\ReextractRecipeProcessor;
+use App\Taste\Conflict;
 use App\Translation\RecipeText;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -191,6 +192,16 @@ class Recipe implements HouseholdOwned
     #[ORM\Column(options: ['default' => false])]
     #[Groups(['recipe:read', 'recipe:list', 'recipe:write'])]
     private bool $planNext = false;
+
+    /**
+     * What it has against the household's likings (App\Taste\Taste::conflicts()), firmest first.
+     * Not stored: RecipeProvider fills it in when the household has said what it likes.
+     *
+     * @var list<array<string, mixed>>|null
+     */
+    #[Groups(['recipe:read', 'recipe:list'])]
+    #[ApiProperty(schema: ['type' => ['array', 'null'], 'items' => Conflict::API_SCHEMA])]
+    private ?array $tasteConflicts = null;
 
     /** Last day it was on the menu, up to today; null if never. Not stored: RecipeProvider fills it in. */
     private ?\DateTimeImmutable $lastCookedOn = null;
@@ -513,6 +524,18 @@ class Recipe implements HouseholdOwned
     public function setLastCookedOn(?\DateTimeImmutable $lastCookedOn): void
     {
         $this->lastCookedOn = $lastCookedOn;
+    }
+
+    /** @return list<array<string, mixed>>|null */
+    public function getTasteConflicts(): ?array
+    {
+        return $this->tasteConflicts;
+    }
+
+    /** @param list<array<string, mixed>>|null $conflicts */
+    public function setTasteConflicts(?array $conflicts): void
+    {
+        $this->tasteConflicts = $conflicts;
     }
 
     public function getNeedsReview(): bool

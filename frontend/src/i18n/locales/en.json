@@ -113,7 +113,8 @@
     },
     "light": "Light",
     "hearty": "Hearty",
-    "vegetarian": "Vegetarian"
+    "vegetarian": "Vegetarian",
+    "fits": "Fit you"
   },
   "recipe": {
     "favorite": "Favorite",
@@ -275,7 +276,8 @@
       "title": "Recipe for {{meal}}",
       "search": "Search your library",
       "empty": "No matching recipes.",
-      "otherMeal": "Meant for {{meal}}"
+      "otherMeal": "Meant for {{meal}}",
+      "confirmFirm": "Tap again to choose it anyway."
     },
     "howWasIt": "How was it?",
     "rated_one": "Rated {{count}} star",
@@ -307,6 +309,18 @@
       "quick_one": "Quick · {{count}} min",
       "quick_other": "Quick · {{count}} min",
       "idea": "An idea"
+    },
+    "why": {
+      "asked": "you asked for it for this menu",
+      "heaviness": "a {{heaviness}} {{meal}}, as you like it",
+      "shares": "uses up {{names}} from other meals",
+      "overTime": "Longer than the weekday limit: there was nothing quicker.",
+      "repeat": "A repeat: there were no other recipes for this {{meal}}.",
+      "relaxedWeekly": "Goes over the weekly limit: there was no other option.",
+      "relaxedAvoid": "There was no other option. {{conflicts}}.",
+      "nothingAllowed": "Nothing in the library fits your tastes for this {{meal}}.",
+      "breaks": "Chosen by hand. {{conflicts}}.",
+      "warning": "Doesn't quite fit your tastes"
     }
   },
   "shopping": {
@@ -477,7 +491,8 @@
       "images": "Reading the pictures",
       "classify": "Sorting ingredients",
       "translate": "Translating the recipe",
-      "annotate": "Reading what it's like"
+      "annotate": "Reading what it's like",
+      "taste_profile": "Understanding your tastes"
     },
     "classifyWhat": "New ingredients on the list",
     "translateWhat": "A recipe typed in",
@@ -485,7 +500,8 @@
     "unpriced_one": "{{count}} call uses a model with no price configured and is not in the totals.",
     "unpriced_other": "{{count}} calls use a model with no price configured and are not in the totals.",
     "footnote": "Amazon Bedrock list prices in US dollars, before tax. Months in UTC.",
-    "annotateWhat": "A recipe typed in"
+    "annotateWhat": "A recipe typed in",
+    "tasteWhat": "Household tastes"
   },
   "password": {
     "current": "Current password",
@@ -560,5 +576,168 @@
     "seeMenu": "See the menu",
     "ok": "Done",
     "already": "Already on this meal"
+  },
+  "taste": {
+    "title": "Household tastes",
+    "loadError": "Your tastes couldn't be loaded. Check the connection and try again.",
+    "settingsHint": "Tell us what you like and the menu will follow.",
+    "settingsSaved": "The menu follows your tastes.",
+    "nudge": {
+      "title": "Tell us what you like",
+      "text": "Two minutes of questions and every menu fits better."
+    },
+    "intro": {
+      "title": "A menu to your taste",
+      "text": "A few questions: what you don't eat, how much meat or fish, how you like lunches and dinners… Tabooki turns them into rules the menu always follows. Change them whenever you like.",
+      "start": "Start"
+    },
+    "q": {
+      "progress": "Question {{step}} of {{total}}",
+      "next": "Next",
+      "finish": "Done",
+      "diet": {
+        "title": "Do you follow a diet?",
+        "hint": "What the whole household eats.",
+        "omnivore": "We eat everything",
+        "pescatarian": "Pescatarian (fish yes, meat no)",
+        "vegetarian": "Vegetarian",
+        "vegan": "Vegan"
+      },
+      "avoid": {
+        "title": "Is there anything you don't eat?",
+        "hint": "Tap what you don't want on the menu, and say whether you don't like it or can't eat it.",
+        "add": "Something else (e.g. peppers)",
+        "addButton": "Add",
+        "avoid": "Don't like it",
+        "never": "Allergy / can't",
+        "others": {
+          "mushrooms": "mushrooms",
+          "coriander": "coriander",
+          "olives": "olives",
+          "onion": "onion",
+          "eggplant": "eggplant"
+        }
+      },
+      "protein": {
+        "title": "How many times a week meat or fish?",
+        "hint": "Lunches and dinners, leftovers too.",
+        "noLimit": "No limit",
+        "atMost_one": "At most {{count}} time",
+        "atMost_other": "At most {{count}} times",
+        "eggsAndDairy": "Eggs and dairy count too",
+        "fishMin": "Fish, at least:",
+        "fishAny": "Don't mind",
+        "times_one": "{{count}} time",
+        "times_other": "{{count}} times"
+      },
+      "meals": {
+        "title": "How do you like lunches and dinners?",
+        "hint": "To spread hearty and light dishes.",
+        "heavyLunch": "Hearty lunch, light dinner",
+        "same": "Doesn't matter",
+        "heavyDinner": "Light lunch, heartier dinner"
+      },
+      "more": {
+        "title": "What would you like more of?",
+        "hint": "It'll come up more often. Pick any, or none.",
+        "legumes": "Legumes",
+        "vegetables": "Vegetables",
+        "salads": "Salads",
+        "soups": "Soups",
+        "rice": "Rice",
+        "pasta": "Pasta",
+        "fish": "Fish",
+        "asian": "Asian",
+        "mexican": "Mexican",
+        "italian": "Italian"
+      },
+      "spice": {
+        "title": "And spicy food?",
+        "hint": "How hot what goes on the menu is.",
+        "none": "Not at all",
+        "mild": "A little",
+        "any": "We love it"
+      },
+      "other": {
+        "title": "Anything else?",
+        "hint": "In your own words. Tabooki turns what it can into rules and keeps the rest as a note.",
+        "placeholder": "Nothing fiddly on weekdays. The kids don't eat saucy dishes…"
+      }
+    },
+    "thinking": "Thinking about your tastes…",
+    "thinkingHint": "It takes a few seconds.",
+    "draftError": "Couldn't go on. Try again.",
+    "saveError": "Couldn't save them. Try again.",
+    "followUps": {
+      "title": "A couple of questions",
+      "hint": "So we get it right.",
+      "skip": "Skip"
+    },
+    "review": {
+      "title": "This is what we understood",
+      "hint": "Remove what's wrong, or change your answers.",
+      "remove": "Remove",
+      "change": "Change answers",
+      "fallback": "We can't read the free text right now: it's kept as a note, word for word, and the rules come only from what you tapped.",
+      "unread_one": "{{count}} recipe is still being read: until then, we don't know if it fits.",
+      "unread_other": "{{count}} recipes are still being read: until then, we don't know if they fit.",
+      "fewFor_one": "Only {{count}} recipe left for {{meal}}: the menu will repeat often.",
+      "fewFor_other": "Only {{count}} recipes left for {{meal}}: the menu will repeat often.",
+      "fewMatching_one": "Only {{count}} recipe fits how you like {{meal}}: sometimes it won't be possible.",
+      "fewMatching_other": "Only {{count}} recipes fit how you like {{meal}}: sometimes it won't be possible."
+    },
+    "saved": {
+      "title": "Saved!",
+      "text": "This week's menu was made before. Redo it with your tastes? Locked meals stay.",
+      "redo": "Redo the menu",
+      "notNow": "Not now"
+    },
+    "edit": "Change answers",
+    "forget": {
+      "button": "Delete our tastes",
+      "confirm": "The menu will stop taking them into account. Menus already made don't change.",
+      "yes": "Delete"
+    },
+    "updatedBy": "Changed by {{name}} on {{date}}.",
+    "noRules": "No rules: the menu picks from the whole library.",
+    "notes": "Also",
+    "firm": "Allergy or can't eat",
+    "removes_one": "leaves out {{count}} of {{total}} recipes",
+    "removes_other": "leaves out {{count}} of {{total}} recipes",
+    "misfit": "Doesn't fit your tastes",
+    "rule": {
+      "diet": {
+        "vegan": "Vegan diet",
+        "vegetarian": "Vegetarian diet",
+        "pescatarian": "Pescatarian diet: no meat"
+      },
+      "never": "No {{what}} (allergy)",
+      "avoid": "Rather without {{what}}",
+      "atMost_one": "{{what}}: at most {{count}} time a week",
+      "atMost_other": "{{what}}: at most {{count}} times a week",
+      "atLeast_one": "{{what}}: at least {{count}} time a week",
+      "atLeast_other": "{{what}}: at least {{count}} times a week",
+      "between": "{{what}}: {{min}} to {{max}} times a week",
+      "meatOrFish": "Meat or fish",
+      "animalProtein": "Meat, fish, eggs or dairy",
+      "fishOrShellfish": "Fish or shellfish",
+      "mealIs": "{{heaviness}} {{meal}}",
+      "more": "More {{what}}",
+      "less": "Less {{what}}",
+      "spice": {
+        "0": "Nothing spicy",
+        "1": "Mild spice at most"
+      }
+    },
+    "conflict": {
+      "never": "Allergy: {{what}}",
+      "avoid": "Has {{what}}",
+      "unknown": "We don't know yet what's in it",
+      "diet": {
+        "vegan": "Not vegan",
+        "vegetarian": "Not vegetarian",
+        "pescatarian": "Has meat"
+      }
+    }
   }
 }

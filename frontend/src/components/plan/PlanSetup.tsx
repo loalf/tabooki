@@ -1,6 +1,8 @@
-import { Check, Minus, Plus } from 'lucide-react'
+import { Check, ChevronRight, Minus, Plus, Salad } from 'lucide-react'
 import { type FormEvent, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
+import { useTasteProfile } from '@/api/taste'
 import { useMe } from '@/auth/useAuth'
 import { type MealPlan, type Slot, type SlotChoice, useCreateMealPlan } from '@/api/plan'
 import { Button, CheckMark } from '@/components/ui'
@@ -52,6 +54,7 @@ export function PlanSetup({ week, previous }: { week: string; previous?: MealPla
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-5">
+      <TasteNudge />
       <section className="rounded-lg sticker bg-card p-4">
         <h2 className="text-[17px] font-extrabold">{t('plan.setup.title')}</h2>
         <p className="mt-1 mb-3 text-sm text-muted-foreground">{t('plan.setup.subtitle')}</p>
@@ -151,5 +154,22 @@ export function PlanSetup({ week, previous }: { week: string; previous?: MealPla
         {create.isPending ? t('plan.setup.creating') : t('plan.setup.create', { count: chosen.size })}
       </Button>
     </form>
+  )
+}
+
+/** Until the household has said what it likes: two minutes of questions make every menu fit better. */
+function TasteNudge() {
+  const { t } = useTranslation()
+  const { data: profile, isPending } = useTasteProfile()
+  if (isPending || profile) return null
+  return (
+    <Link to="/settings/taste" className="flex items-center gap-3 rounded-lg sticker bg-accent p-4 text-accent-foreground">
+      <Salad className="size-6 shrink-0" aria-hidden />
+      <span className="flex-1">
+        <span className="block font-extrabold">{t('taste.nudge.title')}</span>
+        <span className="block text-sm">{t('taste.nudge.text')}</span>
+      </span>
+      <ChevronRight className="size-5" aria-hidden />
+    </Link>
   )
 }

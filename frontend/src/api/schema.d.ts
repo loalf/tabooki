@@ -584,6 +584,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/taste-profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a TasteProfile resource.
+         * @description Retrieves a TasteProfile resource.
+         */
+        get: operations["api_taste-profile_get"];
+        /**
+         * Replaces the TasteProfile resource.
+         * @description Replaces the TasteProfile resource.
+         */
+        put: operations["taste_profile_save"];
+        post?: never;
+        /**
+         * Removes the TasteProfile resource.
+         * @description Removes the TasteProfile resource.
+         */
+        delete: operations["taste_profile_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/taste-profile/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a TasteProfile resource.
+         * @description Creates a TasteProfile resource.
+         */
+        post: operations["taste_profile_draft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/taste-profile/impact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a TasteProfile resource.
+         * @description Creates a TasteProfile resource.
+         */
+        post: operations["taste_profile_impact"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -639,7 +707,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate" | "taste_profile";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -661,7 +729,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate" | "taste_profile";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -1119,6 +1187,27 @@ export interface components {
             locked: boolean;
             /** @description How it turned out this time (1-5), given after eating it; also becomes the recipe's rating. */
             readonly rating?: number | null;
+            reasons?: {
+                /** @enum {string} */
+                code: "asked" | "heaviness" | "shares" | "overTime" | "repeat" | "relaxedWeekly" | "relaxedAvoid" | "nothingAllowed" | "breaks";
+                value?: string;
+                names?: {
+                    es: string;
+                    en: string;
+                }[];
+                conflicts?: {
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                    /** @enum {string} */
+                    kind: "diet" | "group" | "ingredient" | "unknown";
+                    /** @description The diet or the food group */
+                    value?: string;
+                    name?: {
+                        es: string;
+                        en: string;
+                    };
+                }[];
+            }[];
             /** Format: date */
             date?: string;
             /** @enum {string} */
@@ -1139,6 +1228,27 @@ export interface components {
             locked: boolean;
             /** @description How it turned out this time (1-5), given after eating it; also becomes the recipe's rating. */
             readonly rating?: number | null;
+            reasons?: {
+                /** @enum {string} */
+                code: "asked" | "heaviness" | "shares" | "overTime" | "repeat" | "relaxedWeekly" | "relaxedAvoid" | "nothingAllowed" | "breaks";
+                value?: string;
+                names?: {
+                    es: string;
+                    en: string;
+                }[];
+                conflicts?: {
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                    /** @enum {string} */
+                    kind: "diet" | "group" | "ingredient" | "unknown";
+                    /** @description The diet or the food group */
+                    value?: string;
+                    name?: {
+                        es: string;
+                        en: string;
+                    };
+                }[];
+            }[];
             /** Format: date */
             date?: string;
             /** @enum {string} */
@@ -1199,6 +1309,18 @@ export interface components {
              * @default false
              */
             planNext: boolean;
+            tasteConflicts?: {
+                /** @enum {string} */
+                strength: "never" | "avoid";
+                /** @enum {string} */
+                kind: "diet" | "group" | "ingredient" | "unknown";
+                /** @description The diet or the food group */
+                value?: string;
+                name?: {
+                    es: string;
+                    en: string;
+                };
+            }[] | null;
             /** Format: date */
             lastCookedOn?: string | null;
             /**
@@ -1248,6 +1370,18 @@ export interface components {
              * @default false
              */
             planNext: boolean;
+            tasteConflicts?: {
+                /** @enum {string} */
+                strength: "never" | "avoid";
+                /** @enum {string} */
+                kind: "diet" | "group" | "ingredient" | "unknown";
+                /** @description The diet or the food group */
+                value?: string;
+                name?: {
+                    es: string;
+                    en: string;
+                };
+            }[] | null;
             /** Format: date */
             lastCookedOn?: string | null;
             /**
@@ -1302,6 +1436,18 @@ export interface components {
              * @default false
              */
             planNext: boolean;
+            tasteConflicts?: {
+                /** @enum {string} */
+                strength: "never" | "avoid";
+                /** @enum {string} */
+                kind: "diet" | "group" | "ingredient" | "unknown";
+                /** @description The diet or the food group */
+                value?: string;
+                name?: {
+                    es: string;
+                    en: string;
+                };
+            }[] | null;
             /** Format: date */
             lastCookedOn?: string | null;
             /**
@@ -1468,6 +1614,18 @@ export interface components {
              * @default false
              */
             planNext: boolean;
+            tasteConflicts?: {
+                /** @enum {string} */
+                strength: "never" | "avoid";
+                /** @enum {string} */
+                kind: "diet" | "group" | "ingredient" | "unknown";
+                /** @description The diet or the food group */
+                value?: string;
+                name?: {
+                    es: string;
+                    en: string;
+                };
+            }[] | null;
             /** Format: date */
             lastCookedOn?: string | null;
             /**
@@ -1517,6 +1675,18 @@ export interface components {
              * @default false
              */
             planNext: boolean;
+            tasteConflicts?: {
+                /** @enum {string} */
+                strength: "never" | "avoid";
+                /** @enum {string} */
+                kind: "diet" | "group" | "ingredient" | "unknown";
+                /** @description The diet or the food group */
+                value?: string;
+                name?: {
+                    es: string;
+                    en: string;
+                };
+            }[] | null;
             /** Format: date */
             lastCookedOn?: string | null;
             /**
@@ -1571,6 +1741,18 @@ export interface components {
              * @default false
              */
             planNext: boolean;
+            tasteConflicts?: {
+                /** @enum {string} */
+                strength: "never" | "avoid";
+                /** @enum {string} */
+                kind: "diet" | "group" | "ingredient" | "unknown";
+                /** @description The diet or the food group */
+                value?: string;
+                name?: {
+                    es: string;
+                    en: string;
+                };
+            }[] | null;
             /** Format: date */
             lastCookedOn?: string | null;
             /**
@@ -2069,6 +2251,502 @@ export interface components {
             platform?: "web" | "youtube" | "instagram" | "tiktok" | "facebook";
             /** @description Image URL for the app: our cached copy when we have one, else the original. */
             readonly thumbnail?: string | null;
+        };
+        TasteImpactView: {
+            /**
+             * @description Recipes in the library.
+             * @default 0
+             */
+            library: number;
+            /**
+             * @description Whose facts haven't been read yet: they fit no rule that needs them.
+             * @default 0
+             */
+            unread: number;
+            /**
+             * @description Recipes no rule leaves out.
+             * @default 0
+             */
+            allowed: number;
+            /**
+             * @description Of those, the ones for lunch.
+             * @default 0
+             */
+            lunch: number;
+            /**
+             * @description Of those, the ones for dinner.
+             * @default 0
+             */
+            dinner: number;
+            /** @description Lunches as filling as the household wants them; null when it didn't say. */
+            lunchMatching?: number | null;
+            /** @description Dinners as filling as the household wants them; null when it didn't say. */
+            dinnerMatching?: number | null;
+            /** @description Recipes the diet leaves out; null without one. */
+            diet?: number | null;
+            /** @description recipes each excludeGroups rule leaves out, in order */
+            excludeGroups?: number[];
+            /** @description recipes each excludeIngredients rule leaves out, in order */
+            excludeIngredients?: number[];
+        };
+        "TasteImpactView.jsonld": {
+            /**
+             * @description Recipes in the library.
+             * @default 0
+             */
+            library: number;
+            /**
+             * @description Whose facts haven't been read yet: they fit no rule that needs them.
+             * @default 0
+             */
+            unread: number;
+            /**
+             * @description Recipes no rule leaves out.
+             * @default 0
+             */
+            allowed: number;
+            /**
+             * @description Of those, the ones for lunch.
+             * @default 0
+             */
+            lunch: number;
+            /**
+             * @description Of those, the ones for dinner.
+             * @default 0
+             */
+            dinner: number;
+            /** @description Lunches as filling as the household wants them; null when it didn't say. */
+            lunchMatching?: number | null;
+            /** @description Dinners as filling as the household wants them; null when it didn't say. */
+            dinnerMatching?: number | null;
+            /** @description Recipes the diet leaves out; null without one. */
+            diet?: number | null;
+            /** @description recipes each excludeGroups rule leaves out, in order */
+            excludeGroups?: number[];
+            /** @description recipes each excludeIngredients rule leaves out, in order */
+            excludeIngredients?: number[];
+        };
+        /**
+         * @description What the household likes (docs/PLAN.md §6.1): the questionnaire's answers, the rules the
+         *     planner follows, the notes and summary, and what the rules do to the library. 404 until the
+         *     household has said.
+         */
+        TasteProfile: {
+            /** @default  */
+            id: string;
+            answers?: {
+                [key: string]: unknown;
+            };
+            rules?: {
+                version: number;
+                /** @enum {string|null} */
+                diet: "vegan" | "vegetarian" | "pescatarian" | null;
+                excludeGroups: {
+                    /** @enum {string} */
+                    group: "red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol";
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                excludeIngredients: {
+                    keys: string[];
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                weekly: {
+                    groups: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+                    max: number | null;
+                    min: number | null;
+                }[];
+                mealHeaviness: {
+                    /** @enum {string|null} */
+                    lunch: "light" | "medium" | "hearty" | null;
+                    /** @enum {string|null} */
+                    dinner: "light" | "medium" | "hearty" | null;
+                };
+                prefer: {
+                    tags: string[];
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @enum {string} */
+                    weight: "more" | "less";
+                }[];
+                maxSpice: number | null;
+            };
+            notes?: string | null;
+            summary?: {
+                es: string;
+                en: string;
+            } | null;
+            /** @description Who last changed it (display name). */
+            updatedBy?: string | null;
+            /** Format: date-time */
+            updatedAt?: string | null;
+            impact?: components["schemas"]["TasteImpactView"];
+        };
+        /** @description Turn the questionnaire into rules, notes, a summary and maybe follow-up questions (the text model; nothing is saved). */
+        "TasteProfile.TasteDraftInput": {
+            answers?: {
+                [key: string]: unknown;
+            };
+        };
+        /** @description Turn the questionnaire into rules, notes, a summary and maybe follow-up questions (the text model; nothing is saved). */
+        "TasteProfile.TasteDraftView": {
+            rules?: {
+                version: number;
+                /** @enum {string|null} */
+                diet: "vegan" | "vegetarian" | "pescatarian" | null;
+                excludeGroups: {
+                    /** @enum {string} */
+                    group: "red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol";
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                excludeIngredients: {
+                    keys: string[];
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                weekly: {
+                    groups: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+                    max: number | null;
+                    min: number | null;
+                }[];
+                mealHeaviness: {
+                    /** @enum {string|null} */
+                    lunch: "light" | "medium" | "hearty" | null;
+                    /** @enum {string|null} */
+                    dinner: "light" | "medium" | "hearty" | null;
+                };
+                prefer: {
+                    tags: string[];
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @enum {string} */
+                    weight: "more" | "less";
+                }[];
+                maxSpice: number | null;
+            };
+            notes?: string | null;
+            summary?: {
+                es: string;
+                en: string;
+            } | null;
+            questions?: {
+                question: string;
+                options: string[];
+            }[];
+            /**
+             * @description The model couldn't be reached: the rules are only what the tapped answers say, and the free text is kept as notes.
+             * @default false
+             */
+            fallback: boolean;
+            impact?: components["schemas"]["TasteImpactView"];
+        };
+        /** @description Turn the questionnaire into rules, notes, a summary and maybe follow-up questions (the text model; nothing is saved). */
+        "TasteProfile.TasteDraftView.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            rules?: {
+                version: number;
+                /** @enum {string|null} */
+                diet: "vegan" | "vegetarian" | "pescatarian" | null;
+                excludeGroups: {
+                    /** @enum {string} */
+                    group: "red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol";
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                excludeIngredients: {
+                    keys: string[];
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                weekly: {
+                    groups: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+                    max: number | null;
+                    min: number | null;
+                }[];
+                mealHeaviness: {
+                    /** @enum {string|null} */
+                    lunch: "light" | "medium" | "hearty" | null;
+                    /** @enum {string|null} */
+                    dinner: "light" | "medium" | "hearty" | null;
+                };
+                prefer: {
+                    tags: string[];
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @enum {string} */
+                    weight: "more" | "less";
+                }[];
+                maxSpice: number | null;
+            };
+            notes?: string | null;
+            summary?: {
+                es: string;
+                en: string;
+            } | null;
+            questions?: {
+                question: string;
+                options: string[];
+            }[];
+            /**
+             * @description The model couldn't be reached: the rules are only what the tapped answers say, and the free text is kept as notes.
+             * @default false
+             */
+            fallback: boolean;
+            impact?: components["schemas"]["TasteImpactView.jsonld"];
+        };
+        /** @description What some rules would do to the library (after removing one on the review screen). */
+        "TasteProfile.TasteImpactView": {
+            /**
+             * @description Recipes in the library.
+             * @default 0
+             */
+            library: number;
+            /**
+             * @description Whose facts haven't been read yet: they fit no rule that needs them.
+             * @default 0
+             */
+            unread: number;
+            /**
+             * @description Recipes no rule leaves out.
+             * @default 0
+             */
+            allowed: number;
+            /**
+             * @description Of those, the ones for lunch.
+             * @default 0
+             */
+            lunch: number;
+            /**
+             * @description Of those, the ones for dinner.
+             * @default 0
+             */
+            dinner: number;
+            /** @description Lunches as filling as the household wants them; null when it didn't say. */
+            lunchMatching?: number | null;
+            /** @description Dinners as filling as the household wants them; null when it didn't say. */
+            dinnerMatching?: number | null;
+            /** @description Recipes the diet leaves out; null without one. */
+            diet?: number | null;
+            /** @description recipes each excludeGroups rule leaves out, in order */
+            excludeGroups?: number[];
+            /** @description recipes each excludeIngredients rule leaves out, in order */
+            excludeIngredients?: number[];
+        };
+        /** @description What some rules would do to the library (after removing one on the review screen). */
+        "TasteProfile.TasteImpactView.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            /**
+             * @description Recipes in the library.
+             * @default 0
+             */
+            library: number;
+            /**
+             * @description Whose facts haven't been read yet: they fit no rule that needs them.
+             * @default 0
+             */
+            unread: number;
+            /**
+             * @description Recipes no rule leaves out.
+             * @default 0
+             */
+            allowed: number;
+            /**
+             * @description Of those, the ones for lunch.
+             * @default 0
+             */
+            lunch: number;
+            /**
+             * @description Of those, the ones for dinner.
+             * @default 0
+             */
+            dinner: number;
+            /** @description Lunches as filling as the household wants them; null when it didn't say. */
+            lunchMatching?: number | null;
+            /** @description Dinners as filling as the household wants them; null when it didn't say. */
+            dinnerMatching?: number | null;
+            /** @description Recipes the diet leaves out; null without one. */
+            diet?: number | null;
+            /** @description recipes each excludeGroups rule leaves out, in order */
+            excludeGroups?: number[];
+            /** @description recipes each excludeIngredients rule leaves out, in order */
+            excludeIngredients?: number[];
+        };
+        /** @description Save the likings the household confirmed on the review screen. Plans already made stay as they are. */
+        "TasteProfile.TasteProfileInput": {
+            answers?: {
+                [key: string]: unknown;
+            };
+            rules?: {
+                version: number;
+                /** @enum {string|null} */
+                diet: "vegan" | "vegetarian" | "pescatarian" | null;
+                excludeGroups: {
+                    /** @enum {string} */
+                    group: "red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol";
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                excludeIngredients: {
+                    keys: string[];
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                weekly: {
+                    groups: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+                    max: number | null;
+                    min: number | null;
+                }[];
+                mealHeaviness: {
+                    /** @enum {string|null} */
+                    lunch: "light" | "medium" | "hearty" | null;
+                    /** @enum {string|null} */
+                    dinner: "light" | "medium" | "hearty" | null;
+                };
+                prefer: {
+                    tags: string[];
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @enum {string} */
+                    weight: "more" | "less";
+                }[];
+                maxSpice: number | null;
+            };
+            notes?: string | null;
+            summary?: {
+                es: string;
+                en: string;
+            } | null;
+        };
+        /** @description What some rules would do to the library (after removing one on the review screen). */
+        "TasteProfile.TasteRulesInput": {
+            rules?: {
+                version: number;
+                /** @enum {string|null} */
+                diet: "vegan" | "vegetarian" | "pescatarian" | null;
+                excludeGroups: {
+                    /** @enum {string} */
+                    group: "red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol";
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                excludeIngredients: {
+                    keys: string[];
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                weekly: {
+                    groups: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+                    max: number | null;
+                    min: number | null;
+                }[];
+                mealHeaviness: {
+                    /** @enum {string|null} */
+                    lunch: "light" | "medium" | "hearty" | null;
+                    /** @enum {string|null} */
+                    dinner: "light" | "medium" | "hearty" | null;
+                };
+                prefer: {
+                    tags: string[];
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @enum {string} */
+                    weight: "more" | "less";
+                }[];
+                maxSpice: number | null;
+            };
+        };
+        /**
+         * @description What the household likes (docs/PLAN.md §6.1): the questionnaire's answers, the rules the
+         *     planner follows, the notes and summary, and what the rules do to the library. 404 until the
+         *     household has said.
+         */
+        "TasteProfile.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            /** @default  */
+            id: string;
+            answers?: {
+                [key: string]: unknown;
+            };
+            rules?: {
+                version: number;
+                /** @enum {string|null} */
+                diet: "vegan" | "vegetarian" | "pescatarian" | null;
+                excludeGroups: {
+                    /** @enum {string} */
+                    group: "red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol";
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                excludeIngredients: {
+                    keys: string[];
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                weekly: {
+                    groups: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+                    max: number | null;
+                    min: number | null;
+                }[];
+                mealHeaviness: {
+                    /** @enum {string|null} */
+                    lunch: "light" | "medium" | "hearty" | null;
+                    /** @enum {string|null} */
+                    dinner: "light" | "medium" | "hearty" | null;
+                };
+                prefer: {
+                    tags: string[];
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @enum {string} */
+                    weight: "more" | "less";
+                }[];
+                maxSpice: number | null;
+            };
+            notes?: string | null;
+            summary?: {
+                es: string;
+                en: string;
+            } | null;
+            /** @description Who last changed it (display name). */
+            updatedBy?: string | null;
+            /** Format: date-time */
+            updatedAt?: string | null;
+            impact?: components["schemas"]["TasteImpactView.jsonld"];
         };
     };
     responses: never;
@@ -4001,6 +4679,280 @@ export interface operations {
                 content: {
                     "application/ld+json": components["schemas"]["Source.jsonld-source.read"];
                     "application/json": components["schemas"]["Source-source.read"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    "api_taste-profile_get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description TasteProfile resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["TasteProfile.jsonld"];
+                    "application/json": components["schemas"]["TasteProfile"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    taste_profile_save: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The updated TasteProfile resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["TasteProfile.TasteProfileInput"];
+                "application/json": components["schemas"]["TasteProfile.TasteProfileInput"];
+            };
+        };
+        responses: {
+            /** @description TasteProfile resource updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["TasteProfile.jsonld"];
+                    "application/json": components["schemas"]["TasteProfile"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    taste_profile_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description TasteProfile resource deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    taste_profile_draft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new TasteProfile resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["TasteProfile.TasteDraftInput"];
+                "application/json": components["schemas"]["TasteProfile.TasteDraftInput"];
+            };
+        };
+        responses: {
+            /** @description TasteProfile resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["TasteProfile.TasteDraftView.jsonld"];
+                    "application/json": components["schemas"]["TasteProfile.TasteDraftView"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    taste_profile_impact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The new TasteProfile resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["TasteProfile.TasteRulesInput"];
+                "application/json": components["schemas"]["TasteProfile.TasteRulesInput"];
+            };
+        };
+        responses: {
+            /** @description TasteProfile resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["TasteProfile.TasteImpactView.jsonld"];
+                    "application/json": components["schemas"]["TasteProfile.TasteImpactView"];
                 };
             };
             /** @description Invalid input */

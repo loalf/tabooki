@@ -113,7 +113,8 @@
     },
     "light": "Ligeras",
     "hearty": "Contundentes",
-    "vegetarian": "Vegetarianas"
+    "vegetarian": "Vegetarianas",
+    "fits": "Encajan"
   },
   "recipe": {
     "favorite": "Favorita",
@@ -275,7 +276,8 @@
       "title": "Receta para la {{meal}}",
       "search": "Buscar en tu biblioteca",
       "empty": "No hay recetas que coincidan.",
-      "otherMeal": "Pensada para la {{meal}}"
+      "otherMeal": "Pensada para la {{meal}}",
+      "confirmFirm": "Toca otra vez para elegirla igualmente."
     },
     "howWasIt": "¿Qué tal estuvo?",
     "rated_one": "Valorada con {{count}} estrella",
@@ -307,6 +309,18 @@
       "quick_one": "Rápida · {{count}} min",
       "quick_other": "Rápida · {{count}} min",
       "idea": "Una idea"
+    },
+    "why": {
+      "asked": "la pedisteis para este menú",
+      "heaviness": "{{meal}} {{heaviness}}, como os gusta",
+      "shares": "aprovecha {{names}} de otras comidas",
+      "overTime": "Pasa del tiempo de entre semana: no había nada más rápido.",
+      "repeat": "Se repite: no había otras recetas para esta {{meal}}.",
+      "relaxedWeekly": "Se pasa del límite semanal: no había otra opción.",
+      "relaxedAvoid": "No había otra opción. {{conflicts}}.",
+      "nothingAllowed": "Nada del recetario encaja con vuestros gustos para esta {{meal}}.",
+      "breaks": "Elegida a mano. {{conflicts}}.",
+      "warning": "No encaja del todo con vuestros gustos"
     }
   },
   "shopping": {
@@ -477,7 +491,8 @@
       "images": "Leer las imágenes",
       "classify": "Ordenar ingredientes",
       "translate": "Traducir la receta",
-      "annotate": "Leer cómo es"
+      "annotate": "Leer cómo es",
+      "taste_profile": "Entender vuestros gustos"
     },
     "classifyWhat": "Ingredientes nuevos de la lista",
     "translateWhat": "Receta escrita a mano",
@@ -485,7 +500,8 @@
     "unpriced_one": "{{count}} llamada usa un modelo sin precio configurado y no cuenta en los totales.",
     "unpriced_other": "{{count}} llamadas usan un modelo sin precio configurado y no cuentan en los totales.",
     "footnote": "Precios de lista de Amazon Bedrock en dólares, sin impuestos. Meses en hora UTC.",
-    "annotateWhat": "Receta escrita a mano"
+    "annotateWhat": "Receta escrita a mano",
+    "tasteWhat": "Gustos de la casa"
   },
   "password": {
     "current": "Contraseña actual",
@@ -560,5 +576,168 @@
     "seeMenu": "Ver el menú",
     "ok": "Hecho",
     "already": "Ya está en esta comida"
+  },
+  "taste": {
+    "title": "Gustos de la casa",
+    "loadError": "No se han podido cargar vuestros gustos. Revisa la conexión e inténtalo de nuevo.",
+    "settingsHint": "Contadnos qué os gusta y el menú se adaptará.",
+    "settingsSaved": "El menú sigue vuestros gustos.",
+    "nudge": {
+      "title": "Contadnos qué os gusta",
+      "text": "Dos minutos de preguntas y cada menú encajará mejor."
+    },
+    "intro": {
+      "title": "Un menú a vuestro gusto",
+      "text": "Unas pocas preguntas: qué no coméis, cuánta carne o pescado, cómo os gustan las comidas y las cenas… Tabooki lo convierte en reglas que el menú sigue siempre. Se cambian cuando queráis.",
+      "start": "Empezar"
+    },
+    "q": {
+      "progress": "Pregunta {{step}} de {{total}}",
+      "next": "Siguiente",
+      "finish": "Listo",
+      "diet": {
+        "title": "¿Seguís alguna dieta?",
+        "hint": "Lo que come toda la casa.",
+        "omnivore": "Comemos de todo",
+        "pescatarian": "Pescetariana (pescado sí, carne no)",
+        "vegetarian": "Vegetariana",
+        "vegan": "Vegana"
+      },
+      "avoid": {
+        "title": "¿Hay algo que no comáis?",
+        "hint": "Toca lo que no queráis en el menú y di si es que no os gusta o que no podéis comerlo.",
+        "add": "Otra cosa (p. ej. pimiento)",
+        "addButton": "Añadir",
+        "avoid": "No nos gusta",
+        "never": "Alergia / no podemos",
+        "others": {
+          "mushrooms": "setas",
+          "coriander": "cilantro",
+          "olives": "aceitunas",
+          "onion": "cebolla",
+          "eggplant": "berenjena"
+        }
+      },
+      "protein": {
+        "title": "¿Cuántas veces a la semana carne o pescado?",
+        "hint": "Comidas y cenas, también las sobras.",
+        "noLimit": "Sin límite",
+        "atMost_one": "Como mucho {{count}} vez",
+        "atMost_other": "Como mucho {{count}} veces",
+        "eggsAndDairy": "Los huevos y los lácteos también cuentan",
+        "fishMin": "Pescado, al menos:",
+        "fishAny": "Me da igual",
+        "times_one": "{{count}} vez",
+        "times_other": "{{count}} veces"
+      },
+      "meals": {
+        "title": "¿Cómo os gustan las comidas y las cenas?",
+        "hint": "Para repartir los platos contundentes y los ligeros.",
+        "heavyLunch": "Comida fuerte y cena ligera",
+        "same": "Da igual",
+        "heavyDinner": "Comida ligera y cena más fuerte"
+      },
+      "more": {
+        "title": "¿De qué queréis más?",
+        "hint": "Saldrá más a menudo. Elige lo que quieras, o nada.",
+        "legumes": "Legumbres",
+        "vegetables": "Verdura",
+        "salads": "Ensaladas",
+        "soups": "Sopas y cremas",
+        "rice": "Arroz",
+        "pasta": "Pasta",
+        "fish": "Pescado",
+        "asian": "Cocina asiática",
+        "mexican": "Mexicana",
+        "italian": "Italiana"
+      },
+      "spice": {
+        "title": "¿Y el picante?",
+        "hint": "Cuánto pica lo que entra en el menú.",
+        "none": "Nada",
+        "mild": "Un poco",
+        "any": "Nos encanta"
+      },
+      "other": {
+        "title": "¿Algo más?",
+        "hint": "Con vuestras palabras. Tabooki entiende lo que se pueda convertir en reglas y se queda con el resto como nota.",
+        "placeholder": "Entre semana, nada muy elaborado. Los niños no comen platos con mucha salsa…"
+      }
+    },
+    "thinking": "Pensando en vuestros gustos…",
+    "thinkingHint": "Tarda unos segundos.",
+    "draftError": "No se ha podido continuar. Inténtalo de nuevo.",
+    "saveError": "No se han podido guardar. Inténtalo de nuevo.",
+    "followUps": {
+      "title": "Un par de dudas",
+      "hint": "Para no equivocarnos.",
+      "skip": "Saltar"
+    },
+    "review": {
+      "title": "Esto es lo que hemos entendido",
+      "hint": "Quita lo que no esté bien, o cambia las respuestas.",
+      "remove": "Quitar",
+      "change": "Cambiar respuestas",
+      "fallback": "Ahora mismo no podemos leer el texto libre: lo guardamos como nota tal cual y las reglas salen solo de lo que has tocado.",
+      "unread_one": "{{count}} receta aún se está leyendo: hasta entonces, no sabemos si encaja.",
+      "unread_other": "{{count}} recetas aún se están leyendo: hasta entonces, no sabemos si encajan.",
+      "fewFor_one": "Solo queda {{count}} receta para la {{meal}}: el menú se repetirá a menudo.",
+      "fewFor_other": "Solo quedan {{count}} recetas para la {{meal}}: el menú se repetirá a menudo.",
+      "fewMatching_one": "Solo {{count}} receta encaja como os gusta la {{meal}}: algunas veces no se podrá.",
+      "fewMatching_other": "Solo {{count}} recetas encajan como os gusta la {{meal}}: algunas veces no se podrá."
+    },
+    "saved": {
+      "title": "¡Guardado!",
+      "text": "El menú de esta semana se hizo antes. ¿Lo rehacemos con vuestros gustos? Las comidas fijadas se quedan.",
+      "redo": "Rehacer el menú",
+      "notNow": "Ahora no"
+    },
+    "edit": "Cambiar respuestas",
+    "forget": {
+      "button": "Borrar nuestros gustos",
+      "confirm": "El menú dejará de tenerlos en cuenta. Los menús ya hechos no cambian.",
+      "yes": "Borrar"
+    },
+    "updatedBy": "Cambiado por {{name}} el {{date}}.",
+    "noRules": "Ninguna regla: el menú elige de todo el recetario.",
+    "notes": "También",
+    "firm": "Alergia o no se puede",
+    "removes_one": "deja fuera {{count}} de {{total}} recetas",
+    "removes_other": "deja fuera {{count}} de {{total}} recetas",
+    "misfit": "No encaja con vuestros gustos",
+    "rule": {
+      "diet": {
+        "vegan": "Dieta vegana",
+        "vegetarian": "Dieta vegetariana",
+        "pescatarian": "Dieta pescetariana: sin carne"
+      },
+      "never": "Nada de {{what}} (alergia)",
+      "avoid": "Mejor sin {{what}}",
+      "atMost_one": "{{what}}: como mucho {{count}} vez por semana",
+      "atMost_other": "{{what}}: como mucho {{count}} veces por semana",
+      "atLeast_one": "{{what}}: al menos {{count}} vez por semana",
+      "atLeast_other": "{{what}}: al menos {{count}} veces por semana",
+      "between": "{{what}}: entre {{min}} y {{max}} veces por semana",
+      "meatOrFish": "Carne o pescado",
+      "animalProtein": "Carne, pescado, huevos o lácteos",
+      "fishOrShellfish": "Pescado o marisco",
+      "mealIs": "{{meal}} {{heaviness}}",
+      "more": "Más {{what}}",
+      "less": "Menos {{what}}",
+      "spice": {
+        "0": "Nada picante",
+        "1": "Picante, como mucho suave"
+      }
+    },
+    "conflict": {
+      "never": "Alergia: {{what}}",
+      "avoid": "Lleva {{what}}",
+      "unknown": "Aún no sabemos qué lleva",
+      "diet": {
+        "vegan": "No es vegana",
+        "vegetarian": "No es vegetariana",
+        "pescatarian": "Lleva carne"
+      }
+    }
   }
 }
