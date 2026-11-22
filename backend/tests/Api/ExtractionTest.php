@@ -95,7 +95,8 @@ final class ExtractionTest extends ApiTestCase
     {
         $url = 'https://instagram.com/reel/C1a2B3c4D5e';
         $id = $this->saveLink($url);
-        $this->media()->infos[$url] = new MediaInfo(title: 'Video by chef', description: 'Pasta en 10 minutos 🍝 #pasta', uploader: 'chef', durationSeconds: 3);
+        // No duration, as anonymous Instagram answers have it: the video formats are enough.
+        $this->media()->infos[$url] = new MediaInfo(title: 'Video by chef', description: 'Pasta en 10 minutos 🍝 #pasta', uploader: 'chef', hasVideo: true);
         $this->media()->videos[$url] = self::video();
         $this->mockOpenRouter([new JsonMockResponse([
             'text' => 'Hoy hacemos pasta al limón.', 'language' => 'es',

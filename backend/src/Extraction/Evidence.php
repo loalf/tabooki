@@ -29,6 +29,8 @@ final readonly class Evidence
         public ?string $linkedUrl = null,
         public ?string $userText = null,
         public ?int $durationSeconds = null,
+        /** A video to watch (yt-dlp saw video formats, or a duration). */
+        public bool $hasVideo = false,
     ) {
     }
 
@@ -67,6 +69,7 @@ final readonly class Evidence
             linkedUrl: $string($get('linked', 'url')),
             userText: $string($get('user_text')),
             durationSeconds: \is_int($duration) ? $duration : null,
+            hasVideo: true === $get('media', 'video') || (\is_int($duration) && $duration > 0),
         );
     }
 

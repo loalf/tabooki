@@ -57,6 +57,8 @@ final readonly class YtDlp implements MediaFetcher
             durationSeconds: is_numeric($data['duration'] ?? null) ? (int) $data['duration'] : null,
             language: $language,
             transcript: $this->transcript($data, $language),
+            // Anonymous Instagram answers leave the duration out: the formats still tell a reel from a photo.
+            hasVideo: self::hasVideo($data),
         );
     }
 
@@ -89,6 +91,21 @@ final readonly class YtDlp implements MediaFetcher
         }
 
         return $file;
+    }
+
+    /** @param array<mixed> $data */
+    private static function hasVideo(array $data): bool
+    {
+        foreach (\is_array($data['formats'] ?? null) ? $data['formats'] : [] as $format) {
+            if (\is_array($format) && \is_string($format['vcodec'] ?? null) && 'none' !== $format['vcodec']) {
+                return true;
+            }
+            if (\is_array($format) && is_numeric($format['height'] ?? null) && $format['height'] > 0) {
+                return true;
+            }
+        }
+
+        return is_numeric($data['duration'] ?? null) && $data['duration'] > 0;
     }
 
     /** @param list<string> $arguments */

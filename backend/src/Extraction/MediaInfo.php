@@ -17,19 +17,22 @@ final readonly class MediaInfo
         public ?string $language = null,
         /** Spoken words, from subtitles or automatic captions (YouTube mostly). */
         public ?string $transcript = null,
+        /** Whether there is a video to watch: photo and carousel posts have none. */
+        public bool $hasVideo = false,
     ) {
     }
 
-    /** @return array<string, string|int> */
+    /** @return array<string, string|int|bool> */
     public function toEvidence(): array
     {
         return array_filter([
+            'video' => $this->hasVideo,
             'title' => $this->title,
             'description' => $this->description,
             'uploader' => $this->uploader,
             'thumbnail_url' => $this->thumbnailUrl,
             'duration' => $this->durationSeconds,
             'language' => $this->language,
-        ], static fn (string|int|null $value): bool => null !== $value && '' !== $value);
+        ], static fn (string|int|bool|null $value): bool => null !== $value && '' !== $value && false !== $value);
     }
 }

@@ -133,10 +133,13 @@ final readonly class ExtractSourceHandler
         $this->entityManager->flush();
     }
 
-    /** A video of known, reasonable length: photo and carousel posts have no duration. */
+    /**
+     * A video (not a photo or carousel post) of reasonable length. Instagram often leaves the
+     * length out: then the download cap and the stills limit keep it in check.
+     */
     public static function canWatch(Evidence $evidence): bool
     {
-        return $evidence->isVideo() && ($evidence->durationSeconds ?? 0) > 0 && $evidence->durationSeconds <= self::MAX_VIDEO_SECONDS;
+        return $evidence->isVideo() && $evidence->hasVideo && ($evidence->durationSeconds ?? 0) <= self::MAX_VIDEO_SECONDS;
     }
 
     private function watch(Source $source, Evidence $evidence, string $locale): ?ExtractionResult
