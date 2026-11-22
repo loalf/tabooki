@@ -79,7 +79,8 @@ final readonly class BedrockConverseClient implements LlmClient
                     'name' => $prompt->toolName,
                     'description' => $prompt->toolDescription,
                     'inputSchema' => ['json' => $prompt->toolSchema],
-                ]]],
+                    // Strict tool use: Claude's answer always matches the schema (Nova doesn't take it).
+                ] + (self::isClaude($prompt->model) ? ['strict' => true] : [])]],
                 'toolChoice' => ['auto' => new \stdClass()],
             ],
         ];

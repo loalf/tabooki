@@ -65,6 +65,18 @@ final class BedrockConverseClientTest extends TestCase
         self::assertSame(['thinking' => ['type' => 'disabled']], $send('eu.anthropic.claude-haiku-5-5', false)['additionalModelRequestFields'] ?? null);
         self::assertArrayNotHasKey('additionalModelRequestFields', $send('eu.anthropic.claude-haiku-5-5', true));
         self::assertArrayNotHasKey('additionalModelRequestFields', $send('eu.amazon.nova-pro-v1:0', false));
+
+        $toolSpec = static function (array $body): mixed {
+            $config = $body['toolConfig'] ?? null;
+
+            return \is_array($config) && \is_array($config['tools'] ?? null) && \is_array($config['tools'][0] ?? null) ? ($config['tools'][0]['toolSpec'] ?? null) : null;
+        };
+        $claude = $toolSpec($send('eu.anthropic.claude-haiku-5-5', true));
+        self::assertIsArray($claude);
+        self::assertTrue($claude['strict'] ?? null, 'strict tool use for Claude');
+        $nova = $toolSpec($send('eu.amazon.nova-pro-v1:0', true));
+        self::assertIsArray($nova);
+        self::assertArrayNotHasKey('strict', $nova);
     }
 
     public function testThrottlingIsRetryable(): void

@@ -17,13 +17,21 @@ final class ExtractionSchema
 
     public const array STATUSES = ['complete', 'partial', 'no_recipe', 'elsewhere'];
 
-    /** @return array<string, mixed> */
+    /**
+     * Written for strict tool use (BedrockConverseClient sends Claude "strict": the answer always
+     * matches it): every object closed with additionalProperties false, no numeric bounds, and
+     * nullable enums as anyOf. Without strict, Claude now and then sent "recipes" as a JSON string
+     * with a broken ending, which the app couldn't read.
+     *
+     * @return array<string, mixed>
+     */
     public static function schema(): array
     {
         $nullable = static fn (string $type, string $description): array => ['type' => [$type, 'null'], 'description' => $description];
 
         return [
             'type' => 'object',
+            'additionalProperties' => false,
             'required' => ['status', 'confidence', 'recipes'],
             'properties' => [
                 'status' => [
@@ -32,13 +40,14 @@ final class ExtractionSchema
                     'description' => 'complete: the recipe (ingredients with quantities, and steps) is in the material. partial: there is a recipe but quantities or steps are missing. no_recipe: there is no recipe in the material. elsewhere: the material says the recipe is somewhere you can\'t see (in the comments, sent by DM, behind a link, in the video only).',
                 ],
                 'message' => $nullable('string', 'When status is not "complete": one short sentence for the cook explaining what is missing or where the recipe is, written in the requested interface language.'),
-                'confidence' => ['type' => 'number', 'minimum' => 0, 'maximum' => 1, 'description' => 'How sure you are that the recipes below are faithful to the material.'],
+                'confidence' => ['type' => 'number', 'description' => 'From 0 to 1: how sure you are that the recipes below are faithful to the material.'],
                 'missing_fields' => ['type' => 'array', 'items' => ['type' => 'string'], 'description' => 'What the material doesn\'t say, e.g. "quantities", "servings", "steps", "times".'],
                 'recipes' => [
                     'type' => 'array',
                     'description' => 'Every distinct recipe in the material (usually one; a "3 dinners" post has three). Empty when there is none.',
                     'items' => [
                         'type' => 'object',
+                        'additionalProperties' => false,
                         'required' => ['title', 'language', 'ingredients', 'steps'],
                         'properties' => [
                             'title' => ['type' => 'string', 'description' => 'The dish name, short, in the recipe\'s language (not the post\'s clickbait headline).'],
@@ -60,12 +69,14 @@ final class ExtractionSchema
                                 'type' => 'array',
                                 'items' => [
                                     'type' => 'object',
+                                    'additionalProperties' => false,
                                     'required' => ['raw', 'name', 'canonical_key'],
                                     'properties' => [
                                         'raw' => ['type' => 'string', 'description' => 'The ingredient line exactly as the material has it, original units and language.'],
                                         'group' => $nullable('string', 'Sub-heading the ingredient belongs to ("Para la salsa"), if the recipe groups them.'),
                                         'quantity' => $nullable('number', 'Amount in the unit below, converted to metric. null when the material gives no amount ("salt to taste").'),
-                                        'unit' => ['type' => ['string', 'null'], 'enum' => [...self::UNITS, null], 'description' => 'Metric or kitchen unit; null for counted items ("2 eggs") or no amount.'],
+                                        // anyOf rather than a nullable type with an enum: strict tool use only takes this form.
+                                        'unit' => ['anyOf' => [['type' => 'string', 'enum' => self::UNITS], ['type' => 'null']], 'description' => 'Metric or kitchen unit; null for counted items ("2 eggs") or no amount.'],
                                         'name' => ['type' => 'string', 'description' => 'Ingredient name in the recipe\'s language, singular, without amount or preparation ("cebolla").'],
                                         'canonical_key' => ['type' => 'string', 'description' => 'Stable lowercase English snake_case key for the ingredient, the same whatever the recipe language ("onion", "chickpeas_canned", "olive_oil"), so shopping lists can merge "cebolla" and "onion".'],
                                         'prep' => $nullable('string', 'Preparation, in the recipe\'s language ("picada", "en dados").'),
