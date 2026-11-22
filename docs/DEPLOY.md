@@ -68,13 +68,21 @@ port lines from rootware's `.env`, and recreate its web container as in step 4.
 
 ## Update
 
-From the repo on the Mac, copy what git tracks (never `.env.local`, cookies or builds), then
-rebuild on the server:
+Deploy a commit, never the working folder: work in progress (changed or new files you haven't
+committed) stays on the Mac. From the repo on the Mac, unpack the commit over `/opt/tabooki`,
+note which one it is, then rebuild on the server:
 
 ```sh
-git ls-files -co --exclude-standard | rsync -az --files-from=- ./ demo.rootware.xyz:/opt/tabooki/
+git archive HEAD | ssh demo.rootware.xyz 'tar -x -C /opt/tabooki'
+git rev-parse --short HEAD | ssh demo.rootware.xyz 'cat > /opt/tabooki/REVISION'
 ssh demo.rootware.xyz 'cd /opt/tabooki && docker compose -f compose.yaml -f compose.prod.yaml up -d --build --wait'
 ```
+
+Replace `HEAD` with a commit id or tag to deploy another one (for example to go back to the
+previous one). `ssh demo.rootware.xyz cat /opt/tabooki/REVISION` says which commit is live.
+Only committed files travel, so `.env.local`, cookies and builds never do, and the server's own
+`/opt/tabooki/.env` is left alone. Unpacking doesn't delete anything: a file you deleted in git
+stays on the server until you remove it there too.
 
 That builds the image, runs migrations (php's entrypoint) and restarts php and worker. The
 server has no `make`, so the Makefile's `prod-*` targets are for a server that does. Logs:
