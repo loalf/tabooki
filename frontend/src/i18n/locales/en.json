@@ -7,7 +7,7 @@
     "library": "Recipes",
     "plan": "Plan",
     "shopping": "Shopping",
-    "settings": "Settings"
+    "today": "Today"
   },
   "common": {
     "back": "Back",
@@ -28,12 +28,10 @@
   },
   "library": {
     "title": "Recipes",
-    "empty": "Paste a link to a recipe from Instagram, TikTok, YouTube or a blog above. Tabooki pulls out the ingredients and the steps.",
+    "empty": "Tap + to save a recipe link from Instagram, TikTok, YouTube or a blog. Tabooki pulls out the ingredients and steps.",
     "emptyTitle": "Your recipe book is empty",
-    "writeOne": "Write a recipe",
     "noMatches": "No recipes match",
     "noMatchesHint": "Try another word or remove a filter.",
-    "newRecipe": "New recipe",
     "recipes": "Your recipes",
     "search": "Search recipes or ingredients",
     "clearSearch": "Clear search",
@@ -47,14 +45,15 @@
       "submit": "Save",
       "saving": "Saving…",
       "paste": "Paste",
-      "saved": "Saved. It's in your links below.",
+      "saved": "Saved. You'll see it being extracted below.",
       "duplicate": "That link is already in your library.",
       "invalid": "That doesn't look like a web link.",
-      "error": "Couldn't save the link. Please try again."
+      "error": "Couldn't save the link. Please try again.",
+      "pasteAndSave": "Paste the link and save",
+      "orPlaceholder": "Or type or paste a link"
     },
     "inbox": {
-      "title": "Saved links",
-      "subtitle": "Recipes are extracted automatically. If something can't be read, paste the text or write it up yourself.",
+      "title": "Recently saved",
       "loadingPreview": "Getting the preview…",
       "writeRecipe": "Write recipe",
       "delete": "Delete link",
@@ -69,10 +68,38 @@
       "pastePlaceholder": "Paste here the ingredients and steps, as they are",
       "extractText": "Extract from this text",
       "retry": "Retry",
-      "extract": "Extract"
+      "extract": "Extract",
+      "bannerWorking_one": "{{count}} being extracted",
+      "bannerWorking_other": "{{count}} being extracted",
+      "bannerStuck_one": "{{count}} needs your help",
+      "bannerStuck_other": "{{count}} need your help",
+      "bannerSaved_one": "{{count}} saved link",
+      "bannerSaved_other": "{{count}} saved links",
+      "bannerHint": "Tap to see them"
     },
     "toReview_one": "{{count}} to review",
-    "toReview_other": "{{count}} to review"
+    "toReview_other": "{{count}} to review",
+    "all": "All",
+    "allCount_one": "All · {{count}}",
+    "allCount_other": "All · {{count}}",
+    "results_one": "{{count}} recipe",
+    "results_other": "{{count}} recipes",
+    "rediscover": "Haven't made these in a while",
+    "lastTime": "Last made {{when}}",
+    "sort": {
+      "label": "Sort",
+      "recent": "Newest",
+      "quick": "Quickest",
+      "rating": "Best rated",
+      "az": "A–Z"
+    },
+    "add": {
+      "title": "Add a recipe",
+      "write": "Write it yourself",
+      "writeHint": "Title, ingredients and steps",
+      "share": "From Instagram, TikTok or YouTube",
+      "shareHint": "Share it to Tabooki without opening the app. Set it up here."
+    }
   },
   "recipe": {
     "favorite": "Favorite",
@@ -137,10 +164,17 @@
       "working": "Extracting again… this can take a minute.",
       "done": "Extracted again. Check everything looks right.",
       "error": "Couldn't extract it again. Try again later."
-    }
+    },
+    "more": "More options",
+    "byOn": "{{author}} on {{site}}",
+    "lastCooked": "last made {{date}}",
+    "planNext": "Waiting for the next menu",
+    "contents": "Recipe contents",
+    "for": "Serves",
+    "toMenu": "To menu"
   },
   "plan": {
-    "title": "Weekly menu",
+    "title": "Menu",
     "weeks": "Weeks",
     "previousWeek": "Previous week",
     "nextWeek": "Next week",
@@ -186,16 +220,42 @@
     },
     "howWasIt": "How was it?",
     "rated_one": "Rated {{count}} star",
-    "rated_other": "Rated {{count}} stars"
+    "rated_other": "Rated {{count}} stars",
+    "actions": "This week's menu",
+    "deleteHint": "Removes every meal of this week.",
+    "pastDays_one": "{{range}} · {{count}} meal",
+    "pastDays_other": "{{range}} · {{count}} meals",
+    "tapHint": "Tap a meal to change it, cook it or keep it",
+    "sheet": {
+      "title": "{{day}}, {{meal}}",
+      "view": "See recipe",
+      "lock": "Keep",
+      "locked": "Kept",
+      "lockedHint": "Kept: it stays when you regenerate the menu.",
+      "out": "Eating out",
+      "swapFor": "Swap for…",
+      "others": "3 more",
+      "pick": "Pick from my recipes",
+      "surprise": "Let Tabooki pick"
+    },
+    "reason": {
+      "queued": "You asked for it",
+      "favorite": "Favorite",
+      "rated_one": "{{count}} star · you liked it",
+      "rated_other": "{{count}} stars · you liked it",
+      "never": "You haven't made it yet",
+      "notSince": "Not made since {{month}}",
+      "quick_one": "Quick · {{count}} min",
+      "quick_other": "Quick · {{count}} min",
+      "idea": "An idea"
+    }
   },
   "shopping": {
-    "title": "Shopping list",
+    "title": "Shopping",
     "loadError": "Couldn't load the list. Please try again.",
     "noPlan": "The shopping list comes from the menu: plan the week and it will show up here.",
     "noPlanTitle": "This week has no menu",
     "toPlan": "Plan the week",
-    "summary_one": "{{count}} thing left · {{meals}} meals",
-    "summary_other": "{{count}} things left · {{meals}} meals",
     "fromToday": "From today only",
     "classifying": "Sorting the ingredients into aisles…",
     "offline": "Offline. What you tick off is kept and sent when you're back online.",
@@ -208,9 +268,9 @@
     "aisleLabel": "Aisle",
     "makeStaple": "Always at home",
     "notStaple": "Not always at home",
-    "staples_one": "Check you have ({{count}})",
-    "staples_other": "Check you have ({{count}})",
-    "staplesHint": "The basics most kitchens have.",
+    "staples_one": "Before you go: got this? ({{count}})",
+    "staples_other": "Before you go: got these? ({{count}})",
+    "staplesHint": "The basics that are usually at home. Check before heading out.",
     "aisle": {
       "produce": "Fruit and vegetables",
       "meat_fish": "Meat and fish",
@@ -243,7 +303,15 @@
       "piece_other": "{{n}} pieces",
       "pack_one": "{{n}} pack",
       "pack_other": "{{n}} packs"
-    }
+    },
+    "share": "Share the list",
+    "left_one": "{{count}} thing left",
+    "left_other": "{{count}} things left",
+    "allDone": "All in the cart!",
+    "forMeals_one": "For the week's menu · {{count}} meal",
+    "forMeals_other": "For the week's menu · {{count}} meals",
+    "inCart_one": "In the cart · {{count}}",
+    "inCart_other": "In the cart · {{count}}"
   },
   "settings": {
     "title": "Settings",
@@ -317,7 +385,9 @@
     "thanks": "Saved. The menu will take it into account.",
     "rateError": "Couldn't save the rating.",
     "backToRecipe": "Back to the recipe",
-    "again": "Start over"
+    "again": "Start over",
+    "after": "Next",
+    "inThisStep": "In this step"
   },
   "costs": {
     "title": "AI costs",
@@ -392,5 +462,39 @@
       "same": "The new password must be different from the current one.",
       "otherDevices": "Your other devices will be signed out; you stay signed in here."
     }
+  },
+  "today": {
+    "title": "Today we eat",
+    "out": "{{meal}}: eating out",
+    "change": "Change",
+    "noPlanThisWeek": "This week doesn't have a menu yet",
+    "noPlanNextWeek": "Next week doesn't have a menu yet",
+    "planHint": "{{week}}. Two minutes, and the shopping list writes itself.",
+    "pending": "To do",
+    "yesterday": "yesterday",
+    "shoppingLeft_one": "Shopping · {{count}} of {{total}} left",
+    "shoppingLeft_other": "Shopping · {{count}} of {{total}} left",
+    "shoppingDone": "Shopping · all in the cart"
+  },
+  "menu": {
+    "title": "Add to the menu",
+    "queue": "In the next menu",
+    "queueHint": "Tabooki will put it where it fits best when the week is planned.",
+    "queued": "Waiting for the next menu",
+    "queuedHint": "Tap to take it out of the queue.",
+    "orPickDay": "or pick a day",
+    "thisWeek": "This week",
+    "nextWeek": "Next week",
+    "noPlan": "This week doesn't have a menu yet. Leave it for the next menu, or plan the week first.",
+    "meal": "Lunch or dinner",
+    "replaces": "Now: {{title}} · will be replaced",
+    "emptyMeal": "Planned, no recipe",
+    "free": "Free",
+    "addTo": "Add to {{day}}, {{meal}}",
+    "added": "Added to the menu",
+    "addedTo": "On the menu for {{day}}, {{meal}}.",
+    "seeMenu": "See the menu",
+    "ok": "Done",
+    "already": "Already on this meal"
   }
 }

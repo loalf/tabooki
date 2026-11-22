@@ -105,6 +105,7 @@ function RecipeForm({ existing, source }: { existing?: Recipe; source?: Source }
       steps: textToSteps(stepsText),
       notes: notes.trim() || null,
       favorite: existing?.favorite ?? false,
+      planNext: existing?.planNext ?? false,
       // Saving the form means someone has looked at it.
       needsReview: false,
       // The link only needs sending when creating a recipe from it; edits keep it.

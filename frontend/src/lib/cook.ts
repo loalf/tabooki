@@ -66,3 +66,35 @@ export function scaleLine(rawText: string, quantity: number | null | undefined, 
   }
   return { text: rawText, scaled: false }
 }
+
+const STOP_WORDS = new Set([
+  'de', 'del', 'la', 'las', 'el', 'los', 'con', 'para', 'sin', 'una', 'unos', 'unas', 'y', 'o', 'al', 'a', 'en',
+  'of', 'the', 'and', 'or', 'with', 'for', 'fresh', 'fresco', 'fresca', 'frescos', 'frescas', 'grande', 'grandes',
+  'pequeño', 'pequeña', 'large', 'small', 'medium', 'mediano', 'mediana', 'picado', 'picada', 'chopped', 'gusto', 'taste',
+])
+
+function normalize(text: string): string {
+  return text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+}
+
+/** "zanahorias" → "zanahori", so it matches "zanahoria" too. */
+function stem(word: string): string {
+  return word.length > 4 ? word.replace(/(es|s|a|o)$/, '') : word
+}
+
+/**
+ * Which ingredients a step mentions ("Sofríe la cebolla y el pimiento" → cebolla, pimiento), by
+ * their name, so cook mode can show just those next to the step. Returns indexes into the list.
+ */
+export function ingredientsInStep(step: string, ingredients: { name?: string | null; rawText: string }[]): number[] {
+  const text = normalize(step)
+  const found: number[] = []
+  ingredients.forEach((ingredient, index) => {
+    const name = ingredient.name?.trim() || ingredient.rawText.replace(/^[\d\s.,/½¼¾⅓⅔-]+/, '')
+    const words = normalize(name)
+      .split(/[^a-zñ]+/)
+      .filter((w) => w.length >= 3 && !STOP_WORDS.has(w))
+    if (words.some((w) => new RegExp(`\\b${stem(w)}`).test(text))) found.push(index)
+  })
+  return found
+}

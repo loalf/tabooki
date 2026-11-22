@@ -7,7 +7,7 @@
     "library": "Recetas",
     "plan": "Menú",
     "shopping": "Compra",
-    "settings": "Ajustes"
+    "today": "Hoy"
   },
   "common": {
     "back": "Volver",
@@ -28,12 +28,10 @@
   },
   "library": {
     "title": "Recetas",
-    "empty": "Pega arriba el enlace de una receta de Instagram, TikTok, YouTube o un blog. Tabooki saca los ingredientes y los pasos.",
+    "empty": "Toca + para guardar el enlace de una receta de Instagram, TikTok, YouTube o un blog. Tabooki saca los ingredientes y los pasos.",
     "emptyTitle": "Tu recetario está vacío",
-    "writeOne": "Escribir una receta",
     "noMatches": "Ninguna receta coincide",
     "noMatchesHint": "Prueba con otra palabra o quita algún filtro.",
-    "newRecipe": "Nueva receta",
     "recipes": "Tus recetas",
     "search": "Busca recetas o ingredientes",
     "clearSearch": "Borrar búsqueda",
@@ -47,14 +45,15 @@
       "submit": "Guardar",
       "saving": "Guardando…",
       "paste": "Pegar",
-      "saved": "Guardado. Lo tienes en tus enlaces, aquí abajo.",
+      "saved": "Guardado. Aquí abajo lo verás extrayéndose.",
       "duplicate": "Ese enlace ya está en tu recetario.",
       "invalid": "Eso no parece un enlace web.",
-      "error": "No se ha podido guardar el enlace. Inténtalo de nuevo."
+      "error": "No se ha podido guardar el enlace. Inténtalo de nuevo.",
+      "pasteAndSave": "Pegar el enlace y guardar",
+      "orPlaceholder": "O escribe o pega un enlace"
     },
     "inbox": {
-      "title": "Enlaces guardados",
-      "subtitle": "Las recetas se extraen solas. Si algo no se puede leer, pega el texto o escríbela tú.",
+      "title": "Guardadas hace poco",
       "loadingPreview": "Cargando la vista previa…",
       "writeRecipe": "Escribir receta",
       "delete": "Borrar enlace",
@@ -69,10 +68,38 @@
       "pastePlaceholder": "Pega aquí los ingredientes y los pasos, tal cual",
       "extractText": "Extraer de este texto",
       "retry": "Reintentar",
-      "extract": "Extraer"
+      "extract": "Extraer",
+      "bannerWorking_one": "{{count}} extrayéndose",
+      "bannerWorking_other": "{{count}} extrayéndose",
+      "bannerStuck_one": "{{count}} necesita tu ayuda",
+      "bannerStuck_other": "{{count}} necesitan tu ayuda",
+      "bannerSaved_one": "{{count}} enlace guardado",
+      "bannerSaved_other": "{{count}} enlaces guardados",
+      "bannerHint": "Toca para verlos"
     },
     "toReview_one": "{{count}} por revisar",
-    "toReview_other": "{{count}} por revisar"
+    "toReview_other": "{{count}} por revisar",
+    "all": "Todas",
+    "allCount_one": "Todas · {{count}}",
+    "allCount_other": "Todas · {{count}}",
+    "results_one": "{{count}} receta",
+    "results_other": "{{count}} recetas",
+    "rediscover": "Hace tiempo que no las hacéis",
+    "lastTime": "Última vez {{when}}",
+    "sort": {
+      "label": "Ordenar",
+      "recent": "Recientes",
+      "quick": "Más rápidas",
+      "rating": "Mejor valoradas",
+      "az": "A–Z"
+    },
+    "add": {
+      "title": "Añadir receta",
+      "write": "Escribirla a mano",
+      "writeHint": "Título, ingredientes y pasos",
+      "share": "Desde Instagram, TikTok o YouTube",
+      "shareHint": "Compártela con Tabooki sin abrir la app. Así se configura."
+    }
   },
   "recipe": {
     "favorite": "Favorita",
@@ -137,10 +164,17 @@
       "working": "Extrayendo de nuevo… puede tardar un minuto.",
       "done": "Extraída de nuevo. Comprueba que todo esté bien.",
       "error": "No se ha podido volver a extraer. Inténtalo más tarde."
-    }
+    },
+    "more": "Más opciones",
+    "byOn": "{{author}} en {{site}}",
+    "lastCooked": "última vez el {{date}}",
+    "planNext": "En cola para el próximo menú",
+    "contents": "Contenido de la receta",
+    "for": "Para",
+    "toMenu": "Al menú"
   },
   "plan": {
-    "title": "Menú semanal",
+    "title": "Menú",
     "weeks": "Semanas",
     "previousWeek": "Semana anterior",
     "nextWeek": "Semana siguiente",
@@ -186,16 +220,42 @@
     },
     "howWasIt": "¿Qué tal estuvo?",
     "rated_one": "Valorada con {{count}} estrella",
-    "rated_other": "Valorada con {{count}} estrellas"
+    "rated_other": "Valorada con {{count}} estrellas",
+    "actions": "Menú de la semana",
+    "deleteHint": "Quita todas las comidas de esta semana.",
+    "pastDays_one": "{{range}} · {{count}} comida",
+    "pastDays_other": "{{range}} · {{count}} comidas",
+    "tapHint": "Toca una comida para cambiarla, cocinarla o fijarla",
+    "sheet": {
+      "title": "{{day}}, {{meal}}",
+      "view": "Ver receta",
+      "lock": "Fijar",
+      "locked": "Fijada",
+      "lockedHint": "Fijada: se queda aunque regeneres el menú.",
+      "out": "Fuera",
+      "swapFor": "Cambiar por…",
+      "others": "Otras 3",
+      "pick": "Elegir de mis recetas",
+      "surprise": "Que elija Tabooki"
+    },
+    "reason": {
+      "queued": "La pediste para el menú",
+      "favorite": "Favorita",
+      "rated_one": "{{count}} estrella · os gustó",
+      "rated_other": "{{count}} estrellas · os gustó",
+      "never": "Aún no la habéis hecho",
+      "notSince": "No la hacéis desde {{month}}",
+      "quick_one": "Rápida · {{count}} min",
+      "quick_other": "Rápida · {{count}} min",
+      "idea": "Una idea"
+    }
   },
   "shopping": {
-    "title": "Lista de la compra",
+    "title": "Compra",
     "loadError": "No se ha podido cargar la lista. Inténtalo de nuevo.",
     "noPlan": "La lista de la compra sale del menú: planifica la semana y aparecerá aquí.",
     "noPlanTitle": "Esta semana no tiene menú",
     "toPlan": "Planificar la semana",
-    "summary_one": "Queda {{count}} cosa · {{meals}} comidas",
-    "summary_other": "Quedan {{count}} cosas · {{meals}} comidas",
     "fromToday": "Solo desde hoy",
     "classifying": "Ordenando los ingredientes por secciones…",
     "offline": "Sin conexión. Lo que marques se guarda y se enviará al volver la conexión.",
@@ -208,9 +268,9 @@
     "aisleLabel": "Sección",
     "makeStaple": "Siempre lo tengo en casa",
     "notStaple": "No siempre lo tengo",
-    "staples_one": "Comprueba que tienes ({{count}})",
-    "staples_other": "Comprueba que tienes ({{count}})",
-    "staplesHint": "Lo básico que suele haber en casa.",
+    "staples_one": "Antes de salir: ¿tienes esto? ({{count}})",
+    "staples_other": "Antes de salir: ¿tienes esto? ({{count}})",
+    "staplesHint": "Lo básico que suele haber en casa. Compruébalo antes de ir a la tienda.",
     "aisle": {
       "produce": "Fruta y verdura",
       "meat_fish": "Carne y pescado",
@@ -243,7 +303,15 @@
       "piece_other": "{{n}} unidades",
       "pack_one": "{{n}} paquete",
       "pack_other": "{{n}} paquetes"
-    }
+    },
+    "share": "Compartir la lista",
+    "left_one": "Queda {{count}} cosa",
+    "left_other": "Quedan {{count}} cosas",
+    "allDone": "¡Todo en el carro!",
+    "forMeals_one": "Para el menú de la semana · {{count}} comida",
+    "forMeals_other": "Para el menú de la semana · {{count}} comidas",
+    "inCart_one": "En el carro · {{count}}",
+    "inCart_other": "En el carro · {{count}}"
   },
   "settings": {
     "title": "Ajustes",
@@ -317,7 +385,9 @@
     "thanks": "Guardado. El menú lo tendrá en cuenta.",
     "rateError": "No se ha podido guardar la valoración.",
     "backToRecipe": "Volver a la receta",
-    "again": "Empezar de nuevo"
+    "again": "Empezar de nuevo",
+    "after": "Después",
+    "inThisStep": "En este paso"
   },
   "costs": {
     "title": "Costes de IA",
@@ -392,5 +462,39 @@
       "same": "La nueva contraseña tiene que ser distinta de la actual.",
       "otherDevices": "Se cerrará la sesión en tus otros dispositivos; en este sigues dentro."
     }
+  },
+  "today": {
+    "title": "Hoy comemos",
+    "out": "{{meal}}: fuera de casa",
+    "change": "Cambiar",
+    "noPlanThisWeek": "Esta semana aún no tiene menú",
+    "noPlanNextWeek": "La semana que viene aún no tiene menú",
+    "planHint": "{{week}}. Dos minutos, y la lista de la compra sale sola.",
+    "pending": "Pendiente",
+    "yesterday": "ayer",
+    "shoppingLeft_one": "Compra · queda {{count}} de {{total}}",
+    "shoppingLeft_other": "Compra · quedan {{count}} de {{total}}",
+    "shoppingDone": "Compra · todo en el carro"
+  },
+  "menu": {
+    "title": "Añadir al menú",
+    "queue": "En el próximo menú",
+    "queueHint": "Tabooki la pondrá donde mejor encaje al planificar la semana.",
+    "queued": "En cola para el próximo menú",
+    "queuedHint": "Toca para sacarla de la cola.",
+    "orPickDay": "o elige un día",
+    "thisWeek": "Esta semana",
+    "nextWeek": "Semana que viene",
+    "noPlan": "Esta semana aún no tiene menú. Déjala para el próximo menú o planifica la semana primero.",
+    "meal": "Comida o cena",
+    "replaces": "Ahora: {{title}} · se cambiará",
+    "emptyMeal": "Planificada, sin receta",
+    "free": "Libre",
+    "addTo": "Añadir al {{day}}, {{meal}}",
+    "added": "Añadida al menú",
+    "addedTo": "En el menú del {{day}}, {{meal}}.",
+    "seeMenu": "Ver el menú",
+    "ok": "Hecho",
+    "already": "Ya está en esta comida"
   }
 }

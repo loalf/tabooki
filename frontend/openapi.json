@@ -5195,6 +5195,18 @@
                             "null"
                         ]
                     },
+                    "planNext": {
+                        "description": "Wanted in the next menu: the planner picks it before anything else, then sets this back to false.",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "lastCookedOn": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date"
+                    },
                     "needsReview": {
                         "description": "Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).",
                         "default": false,
@@ -5279,6 +5291,18 @@
                             "integer",
                             "null"
                         ]
+                    },
+                    "planNext": {
+                        "description": "Wanted in the next menu: the planner picks it before anything else, then sets this back to false.",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "lastCookedOn": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date"
                     },
                     "needsReview": {
                         "description": "Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).",
@@ -5401,6 +5425,18 @@
                             "integer",
                             "null"
                         ]
+                    },
+                    "planNext": {
+                        "description": "Wanted in the next menu: the planner picks it before anything else, then sets this back to false.",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "lastCookedOn": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date"
                     },
                     "needsReview": {
                         "description": "Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).",
@@ -5552,6 +5588,11 @@
                             "null"
                         ]
                     },
+                    "planNext": {
+                        "description": "Wanted in the next menu: the planner picks it before anything else, then sets this back to false.",
+                        "default": false,
+                        "type": "boolean"
+                    },
                     "needsReview": {
                         "description": "Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).",
                         "default": false,
@@ -5660,6 +5701,11 @@
                             "null"
                         ]
                     },
+                    "planNext": {
+                        "description": "Wanted in the next menu: the planner picks it before anything else, then sets this back to false.",
+                        "default": false,
+                        "type": "boolean"
+                    },
                     "needsReview": {
                         "description": "Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).",
                         "default": false,
@@ -5739,6 +5785,18 @@
                                     "integer",
                                     "null"
                                 ]
+                            },
+                            "planNext": {
+                                "description": "Wanted in the next menu: the planner picks it before anything else, then sets this back to false.",
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "lastCookedOn": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date"
                             },
                             "needsReview": {
                                 "description": "Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).",
@@ -5831,6 +5889,18 @@
                                     "integer",
                                     "null"
                                 ]
+                            },
+                            "planNext": {
+                                "description": "Wanted in the next menu: the planner picks it before anything else, then sets this back to false.",
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "lastCookedOn": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date"
                             },
                             "needsReview": {
                                 "description": "Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).",
@@ -5960,6 +6030,18 @@
                                     "integer",
                                     "null"
                                 ]
+                            },
+                            "planNext": {
+                                "description": "Wanted in the next menu: the planner picks it before anything else, then sets this back to false.",
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "lastCookedOn": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date"
                             },
                             "needsReview": {
                                 "description": "Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).",

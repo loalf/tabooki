@@ -25,6 +25,7 @@ final readonly class Candidate
         public bool $favorite,
         public ?int $rating,
         public bool $needsReview,
+        public bool $planNext = false,
     ) {
     }
 
@@ -48,6 +49,7 @@ final readonly class Candidate
             favorite: $recipe->isFavorite(),
             rating: $recipe->getRating(),
             needsReview: $recipe->getNeedsReview(),
+            planNext: $recipe->isPlanNext(),
         );
     }
 

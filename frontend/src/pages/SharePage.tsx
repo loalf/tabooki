@@ -20,7 +20,7 @@ export function SharePage() {
   useEffect(() => {
     if (!url || started.current) return
     started.current = true
-    save.mutate(url, { onSuccess: () => navigate('/', { replace: true }) })
+    save.mutate(url, { onSuccess: () => navigate('/recipes', { replace: true }) })
   }, [url, save, navigate])
 
   const duplicate = save.error instanceof ValidationError && save.error.violations.some((v) => v.code === DUPLICATE_LINK)
@@ -49,7 +49,7 @@ function Result({ icon, title, children }: { icon: React.ReactNode; title: strin
       {icon}
       <h1 className="text-lg font-extrabold">{title}</h1>
       <div className="w-full max-w-sm">{children}</div>
-      <Link to="/" replace className="mt-2 text-sm font-bold text-primary underline-offset-4 hover:underline">
+      <Link to="/recipes" replace className="mt-2 text-sm font-bold text-primary underline-offset-4 hover:underline">
         {t('share.toLibrary')}
       </Link>
     </div>

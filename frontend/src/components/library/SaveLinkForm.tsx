@@ -1,4 +1,4 @@
-import { ClipboardPaste, Link2 } from 'lucide-react'
+import { Link2, Sparkles } from 'lucide-react'
 import { type FormEvent, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DUPLICATE_LINK, INVALID_LINK, useSaveLink, ValidationError } from '@/api/library'
@@ -7,7 +7,10 @@ import { cn } from '@/lib/utils'
 
 const canReadClipboard = typeof navigator !== 'undefined' && typeof navigator.clipboard?.readText === 'function'
 
-/** Paste a link from anywhere: it lands in the inbox right away and its preview fills in shortly after. */
+/**
+ * Save a link: one tap pastes what you just copied in Instagram or TikTok and saves it (reading the
+ * clipboard needs that tap). Typing or pasting by hand works too. It lands in the inbox right away.
+ */
 export function SaveLinkForm() {
   const { t } = useTranslation()
   const save = useSaveLink()
@@ -44,7 +47,13 @@ export function SaveLinkForm() {
     : null
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-2">
+    <form onSubmit={onSubmit} className="flex flex-col gap-2.5">
+      {canReadClipboard && (
+        <Button className="h-13 w-full text-[17px]" onClick={() => void pasteAndSave()} disabled={save.isPending}>
+          <Sparkles className="size-5" aria-hidden />
+          {save.isPending ? t('library.save.saving') : t('library.save.pasteAndSave')}
+        </Button>
+      )}
       <div className="flex gap-2">
         <label className="relative flex-1">
           <span className="sr-only">{t('library.save.label')}</span>
@@ -56,7 +65,7 @@ export function SaveLinkForm() {
             autoCapitalize="off"
             spellCheck={false}
             enterKeyHint="go"
-            placeholder={t('library.save.placeholder')}
+            placeholder={canReadClipboard ? t('library.save.orPlaceholder') : t('library.save.placeholder')}
             value={url}
             onChange={(e) => {
               setUrl(e.target.value)
@@ -66,16 +75,9 @@ export function SaveLinkForm() {
             className={cn(inputClass, 'pl-10')}
           />
         </label>
-        {url.trim() || !canReadClipboard ? (
-          <Button type="submit" disabled={save.isPending || !url.trim()}>
-            {save.isPending ? t('library.save.saving') : t('library.save.submit')}
-          </Button>
-        ) : (
-          <Button variant="secondary" onClick={() => void pasteAndSave()} disabled={save.isPending}>
-            <ClipboardPaste className="size-5" aria-hidden />
-            {t('library.save.paste')}
-          </Button>
-        )}
+        <Button type="submit" variant={canReadClipboard ? 'secondary' : 'primary'} disabled={save.isPending || !url.trim()}>
+          {t('library.save.submit')}
+        </Button>
       </div>
       <p className={cn('min-h-5 text-sm', error ? 'text-destructive' : 'text-muted-foreground')} role="status" aria-live="polite">
         {error ?? (save.isSuccess ? t('library.save.saved') : '')}

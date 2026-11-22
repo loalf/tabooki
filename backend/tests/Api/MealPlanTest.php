@@ -182,6 +182,48 @@ final class MealPlanTest extends ApiTestCase
         }
     }
 
+    public function testRecipesAskedForComeFirstInTheNextMenu(): void
+    {
+        $this->recipes(8, 'Plato', []);
+        $wanted = $this->recipe('Lentejas de la abuela', [MealType::Dinner]);
+        $this->client->request('PATCH', '/api/recipes/'.$wanted->getId(), [
+            'json' => ['planNext' => true],
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+        ]);
+        self::assertResponseIsSuccessful();
+
+        // Only where it fits: not a lunch, as it's a dinner.
+        $plan = $this->createPlan([['date' => '2026-11-23', 'slot' => 'lunch'], ['date' => '2026-11-24', 'slot' => 'dinner']]);
+        self::assertNotSame('Lentejas de la abuela', $plan['entries'][0]['recipe']['title']);
+        self::assertSame('Lentejas de la abuela', $plan['entries'][1]['recipe']['title']);
+
+        /** @var array{planNext: bool} $recipe */
+        $recipe = $this->client->request('GET', '/api/recipes/'.$wanted->getId())->toArray();
+        self::assertFalse($recipe['planNext'], 'planned: no longer waiting');
+    }
+
+    public function testRecipesKnowWhenTheyWereLastOnTheMenu(): void
+    {
+        $lentejas = $this->recipe('Lentejas');
+        $this->recipe('Nunca');
+        $past = $this->createPlan([['date' => '2026-11-02', 'slot' => 'lunch'], ['date' => '2026-11-04', 'slot' => 'lunch']], week: '2026-11-02');
+        $this->action($past, 'update', ['entry' => $past['entries'][0]['id'], 'recipe' => $lentejas->getId()->toRfc4122()]);
+        $this->action($past, 'update', ['entry' => $past['entries'][1]['id'], 'recipe' => $lentejas->getId()->toRfc4122()]);
+        // Planned for later doesn't count yet.
+        $future = $this->createPlan([['date' => '2099-01-05', 'slot' => 'lunch']], week: '2099-01-05');
+        $this->action($future, 'update', ['entry' => $future['entries'][0]['id'], 'recipe' => $lentejas->getId()->toRfc4122()]);
+
+        /** @var list<array{title: string, lastCookedOn?: string|null}> $list */
+        $list = $this->client->request('GET', '/api/recipes')->toArray();
+        $byTitle = array_column($list, 'lastCookedOn', 'title');
+        self::assertSame('2026-11-04', $byTitle['Lentejas'] ?? null);
+        self::assertNull($byTitle['Nunca'] ?? null);
+
+        /** @var array{lastCookedOn?: string|null} $one */
+        $one = $this->client->request('GET', '/api/recipes/'.$lentejas->getId())->toArray();
+        self::assertSame('2026-11-04', $one['lastCookedOn'] ?? null);
+    }
+
     public function testAnEmptyLibraryLeavesMealsEmpty(): void
     {
         $plan = $this->createPlan([['date' => '2026-11-23', 'slot' => 'dinner']]);

@@ -1195,6 +1195,13 @@ export interface components {
             favorite: boolean;
             rating?: number | null;
             /**
+             * @description Wanted in the next menu: the planner picks it before anything else, then sets this back to false.
+             * @default false
+             */
+            planNext: boolean;
+            /** Format: date */
+            lastCookedOn?: string | null;
+            /**
              * @description Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).
              * @default false
              */
@@ -1221,6 +1228,13 @@ export interface components {
             /** @default false */
             favorite: boolean;
             rating?: number | null;
+            /**
+             * @description Wanted in the next menu: the planner picks it before anything else, then sets this back to false.
+             * @default false
+             */
+            planNext: boolean;
+            /** Format: date */
+            lastCookedOn?: string | null;
             /**
              * @description Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).
              * @default false
@@ -1253,6 +1267,13 @@ export interface components {
             /** @default false */
             favorite: boolean;
             rating?: number | null;
+            /**
+             * @description Wanted in the next menu: the planner picks it before anything else, then sets this back to false.
+             * @default false
+             */
+            planNext: boolean;
+            /** Format: date */
+            lastCookedOn?: string | null;
             /**
              * @description Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).
              * @default false
@@ -1301,6 +1322,11 @@ export interface components {
             favorite: boolean;
             rating?: number | null;
             /**
+             * @description Wanted in the next menu: the planner picks it before anything else, then sets this back to false.
+             * @default false
+             */
+            planNext: boolean;
+            /**
              * @description Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).
              * @default false
              */
@@ -1334,6 +1360,11 @@ export interface components {
             favorite: boolean;
             rating?: number | null;
             /**
+             * @description Wanted in the next menu: the planner picks it before anything else, then sets this back to false.
+             * @default false
+             */
+            planNext: boolean;
+            /**
              * @description Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).
              * @default false
              */
@@ -1359,6 +1390,13 @@ export interface components {
             /** @default false */
             favorite: boolean;
             rating?: number | null;
+            /**
+             * @description Wanted in the next menu: the planner picks it before anything else, then sets this back to false.
+             * @default false
+             */
+            planNext: boolean;
+            /** Format: date */
+            lastCookedOn?: string | null;
             /**
              * @description Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).
              * @default false
@@ -1386,6 +1424,13 @@ export interface components {
             /** @default false */
             favorite: boolean;
             rating?: number | null;
+            /**
+             * @description Wanted in the next menu: the planner picks it before anything else, then sets this back to false.
+             * @default false
+             */
+            planNext: boolean;
+            /** Format: date */
+            lastCookedOn?: string | null;
             /**
              * @description Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).
              * @default false
@@ -1418,6 +1463,13 @@ export interface components {
             /** @default false */
             favorite: boolean;
             rating?: number | null;
+            /**
+             * @description Wanted in the next menu: the planner picks it before anything else, then sets this back to false.
+             * @default false
+             */
+            planNext: boolean;
+            /** Format: date */
+            lastCookedOn?: string | null;
             /**
              * @description Extracted automatically and not checked by anyone yet (some quantities or steps may be missing).
              * @default false

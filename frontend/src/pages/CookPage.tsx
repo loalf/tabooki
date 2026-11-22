@@ -11,7 +11,7 @@ import { EmptyState } from '@/components/PageHeader'
 import { Splash } from '@/components/Splash'
 import { StarRating } from '@/components/StarRating'
 import { Button, CheckMark } from '@/components/ui'
-import { findTimers, formatClock, scaleLine } from '@/lib/cook'
+import { findTimers, formatClock, ingredientsInStep, scaleLine } from '@/lib/cook'
 import { groupIngredients } from '@/lib/recipeText'
 import { cn } from '@/lib/utils'
 
@@ -31,7 +31,7 @@ export function CookPage() {
     return (
       <div className="mx-auto flex min-h-dvh max-w-2xl flex-col justify-center gap-4 px-4">
         <EmptyState>{t('recipe.notFound')}</EmptyState>
-        <Button variant="secondary" onClick={() => void navigate('/', { replace: true })}>
+        <Button variant="secondary" onClick={() => void navigate('/recipes', { replace: true })}>
           {t('library.title')}
         </Button>
       </div>
@@ -146,6 +146,7 @@ function CookView({ recipe }: { recipe: Recipe }) {
               {t('cook.stepOf', { n: page, total: steps.length })}
             </p>
             <p className="text-[1.75rem] leading-[1.4] text-pretty sm:text-3xl">{steps[page - 1]}</p>
+            <StepIngredients step={steps[page - 1]} ingredients={ingredients} factor={factor} locale={i18n.language} />
             {findTimers(steps[page - 1]).length > 0 && (
               <div className="mt-6 flex flex-wrap gap-2">
                 {findTimers(steps[page - 1]).map((timer) => (
@@ -154,6 +155,12 @@ function CookView({ recipe }: { recipe: Recipe }) {
                     {t('cook.startTimer', { time: timer.label })}
                   </Button>
                 ))}
+              </div>
+            )}
+            {page < steps.length && (
+              <div className="mt-8 rounded-md bg-muted px-3.5 py-3">
+                <p className="text-[11px] font-extrabold tracking-wider text-muted-foreground uppercase">{t('cook.after')}</p>
+                <p className="mt-0.5 line-clamp-3 text-[15px] leading-snug">{steps[page]}</p>
               </div>
             )}
           </section>
@@ -194,6 +201,25 @@ function CookView({ recipe }: { recipe: Recipe }) {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+/** Only what this step uses, scaled, so there's no need to open the full list mid-step. */
+function StepIngredients({ step, ingredients, factor, locale }: { step: string; ingredients: Ingredient[]; factor: number; locale: string }) {
+  const { t } = useTranslation()
+  const used = ingredientsInStep(step, ingredients)
+  if (!used.length) return null
+  return (
+    <div className="mt-6">
+      <p className="mb-2 text-[11px] font-extrabold tracking-wider text-muted-foreground uppercase">{t('cook.inThisStep')}</p>
+      <ul className="flex flex-wrap gap-1.5">
+        {used.map((i) => (
+          <li key={i} className="rounded-full border-2 border-outline bg-card px-3 py-1 text-sm font-bold">
+            {scaleLine(ingredients[i].rawText, ingredients[i].quantity, factor, locale).text}
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

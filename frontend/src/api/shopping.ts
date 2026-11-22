@@ -18,8 +18,9 @@ export const shoppingKey = ({ week, from }: ListScope) => ['shopping', week, fro
 /**
  * A week's list. While it's open it refreshes every few seconds, so whoever else is shopping
  * sees what's been ticked off; not while changes are waiting to be sent, so they don't flicker back.
+ * Summaries elsewhere (Hoy) pass `live: false`.
  */
-export function useShoppingList(scope: ListScope) {
+export function useShoppingList(scope: ListScope, { live = true }: { live?: boolean } = {}) {
   const queryClient = useQueryClient()
   return useQuery({
     queryKey: shoppingKey(scope),
@@ -31,7 +32,7 @@ export function useShoppingList(scope: ListScope) {
       return data
     },
     refetchInterval: (query) =>
-      queryClient.isMutating({ mutationKey: ['shopping'] }) > 0 ? false : query.state.data?.classifying ? 2000 : 5000,
+      !live ? false : queryClient.isMutating({ mutationKey: ['shopping'] }) > 0 ? false : query.state.data?.classifying ? 2000 : 5000,
   })
 }
 

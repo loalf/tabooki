@@ -6,6 +6,6 @@ export function useGoBack() {
   return () => {
     const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0
     if (idx > 0) void navigate(-1)
-    else void navigate('/', { replace: true })
+    else void navigate('/recipes', { replace: true })
   }
 }

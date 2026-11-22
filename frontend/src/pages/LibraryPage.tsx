@@ -1,20 +1,35 @@
-import { Heart, ListChecks, PenLine, Plus, Search, X } from 'lucide-react'
+import { ChevronDown, Heart, ListChecks, Plus, Search, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
-import { type RecipeFilters, useRecipes, useReviewCount, useTagNames } from '@/api/library'
-import { Inbox } from '@/components/library/Inbox'
+import { type RecipeFilters, type RecipeListItem, useRecipes, useReviewCount, useTagNames } from '@/api/library'
+import { AddRecipeSheet } from '@/components/library/AddRecipeSheet'
+import { InboxBanner } from '@/components/library/Inbox'
 import { RecipeCard } from '@/components/library/RecipeCard'
-import { SaveLinkForm } from '@/components/library/SaveLinkForm'
-import { Wordmark } from '@/components/brand'
+import { Thumbnail } from '@/components/library/Thumbnail'
 import { EmptyState, pageTitleClass } from '@/components/PageHeader'
-import { Button, Chip, inputClass, linkButtonClass } from '@/components/ui'
+import { Button, Chip, inputClass } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { useDebounced } from '@/lib/useDebounced'
+import { parseIsoDate, today } from '@/lib/week'
+
+const SORTS = ['recent', 'quick', 'rating', 'az'] as const
+type Sort = (typeof SORTS)[number]
+
+function sortRecipes(recipes: RecipeListItem[], sort: Sort, locale: string): RecipeListItem[] {
+  if (sort === 'recent') return recipes
+  const sorted = [...recipes]
+  if (sort === 'quick') sorted.sort((a, b) => (a.totalMinutes ?? Infinity) - (b.totalMinutes ?? Infinity))
+  if (sort === 'rating') sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0) || Number(b.favorite) - Number(a.favorite))
+  if (sort === 'az') sorted.sort((a, b) => a.title.localeCompare(b.title, locale))
+  return sorted
+}
 
 export function LibraryPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [params, setParams] = useSearchParams()
+  const [adding, setAdding] = useState(false)
+  const sort: Sort = SORTS.find((s) => s === params.get('sort')) ?? 'recent'
 
   // Filters live in the URL so going back from a recipe keeps them.
   const tags = params.getAll('tag')
@@ -51,6 +66,17 @@ export function LibraryPage() {
       return next
     })
 
+  const setSort = (next: Sort) =>
+    setParams(
+      (current) => {
+        const params = new URLSearchParams(current)
+        if (next === 'recent') params.delete('sort')
+        else params.set('sort', next)
+        return params
+      },
+      { replace: true },
+    )
+
   const toggleFlag = (key: 'fav' | 'review') =>
     setParams((current) => {
       const next = new URLSearchParams(current)
@@ -61,7 +87,7 @@ export function LibraryPage() {
 
   const clearFilters = () => {
     setQuery('')
-    setParams(new URLSearchParams(), { replace: true })
+    setParams(sort === 'recent' ? new URLSearchParams() : new URLSearchParams({ sort }), { replace: true })
   }
 
   // Selected tags first (even if no recipe has them any more), then the rest by use.
@@ -69,18 +95,22 @@ export function LibraryPage() {
 
   return (
     <>
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <Wordmark className="text-[1.875rem]" />
-        <Link to="/recipes/new" className={linkButtonClass}>
-          <Plus className="size-4" aria-hidden />
-          {t('library.newRecipe')}
-        </Link>
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <h1 className={pageTitleClass}>{t('library.title')}</h1>
+        <button
+          type="button"
+          onClick={() => setAdding(true)}
+          aria-label={t('library.add.title')}
+          aria-haspopup="dialog"
+          className="grid size-12 place-items-center rounded-full sticker bg-primary text-primary-foreground"
+        >
+          <Plus className="size-6" aria-hidden />
+        </button>
       </div>
-      <h1 className={cn('mb-4', pageTitleClass)}>{t('library.title')}</h1>
 
-      <SaveLinkForm />
-      <Inbox />
-
+      <div className="mb-4 empty:hidden">
+        <InboxBanner onOpen={() => setAdding(true)} />
+      </div>
       <section aria-label={t('library.recipes')} className="flex flex-col gap-3">
         <label className="relative">
           <span className="sr-only">{t('library.search')}</span>
@@ -105,7 +135,10 @@ export function LibraryPage() {
           )}
         </label>
 
-        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+        <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+          <Chip active={!filtering} onClick={clearFilters} className={cn(!filtering && 'bg-foreground text-background')}>
+            {t('library.all')}
+          </Chip>
           {(reviewCount > 0 || needsReview) && (
             <Chip active={needsReview} onClick={() => toggleFlag('review')}>
               <ListChecks className="size-4" aria-hidden />
@@ -143,26 +176,87 @@ export function LibraryPage() {
             <EmptyState
               title={t('library.emptyTitle')}
               action={
-                <Link to="/recipes/new" className={linkButtonClass}>
-                  <PenLine className="size-4" aria-hidden />
-                  {t('library.writeOne')}
-                </Link>
+                <Button size="sm" onClick={() => setAdding(true)}>
+                  <Plus className="size-4" aria-hidden />
+                  {t('library.add.title')}
+                </Button>
               }
             >
               {t('library.empty')}
             </EmptyState>
           )
         ) : (
-          <ul className={cn('grid grid-cols-2 gap-3 sm:grid-cols-3', recipes.isPlaceholderData && 'opacity-60')}>
-            {recipes.data.map((recipe) => (
-              <li key={recipe.id} className="flex">
-                <RecipeCard recipe={recipe} />
-              </li>
-            ))}
-          </ul>
+          <>
+            {!filtering && <Rediscover recipes={recipes.data} />}
+            <div className="mt-1 flex items-center justify-between gap-2">
+              <h2 className="text-[17px] font-extrabold">
+                {filtering ? t('library.results', { count: recipes.data.length }) : t('library.allCount', { count: recipes.data.length })}
+              </h2>
+              <label className="relative inline-flex items-center text-sm font-semibold text-muted-foreground">
+                <span className="sr-only">{t('library.sort.label')}</span>
+                <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="h-9 appearance-none bg-transparent pr-5 text-right outline-none">
+                  {SORTS.map((s) => (
+                    <option key={s} value={s}>
+                      {t(`library.sort.${s}`)}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-0 size-4" aria-hidden />
+              </label>
+            </div>
+            <ul className={cn('grid grid-cols-2 gap-3 sm:grid-cols-3', recipes.isPlaceholderData && 'opacity-60')}>
+              {sortRecipes(recipes.data, sort, i18n.language).map((recipe) => (
+                <li key={recipe.id} className="flex">
+                  <RecipeCard recipe={recipe} />
+                </li>
+              ))}
+            </ul>
+          </>
         )}
       </section>
+
+      {adding && <AddRecipeSheet onClose={() => setAdding(false)} />}
     </>
+  )
+}
+
+const FORGOTTEN_AFTER_DAYS = 28
+
+/** Recipes the household liked enough to cook but hasn't for a while, longest ago first. */
+function Rediscover({ recipes }: { recipes: RecipeListItem[] }) {
+  const { t, i18n } = useTranslation()
+  const now = parseIsoDate(today()).getTime()
+  const days = (date: string) => Math.round((now - parseIsoDate(date).getTime()) / 86_400_000)
+  const forgotten = recipes
+    .filter((r) => r.lastCookedOn && days(r.lastCookedOn) >= FORGOTTEN_AFTER_DAYS)
+    .sort((a, b) => a.lastCookedOn!.localeCompare(b.lastCookedOn!))
+    .slice(0, 10)
+  if (!forgotten.length) return null
+  const relative = new Intl.RelativeTimeFormat(i18n.language, { numeric: 'auto' })
+  const ago = (date: string) => {
+    const d = days(date)
+    return d < 60 ? relative.format(-Math.round(d / 7), 'week') : relative.format(-Math.round(d / 30), 'month')
+  }
+
+  return (
+    <section aria-labelledby="rediscover-title" className="mt-1 flex flex-col gap-2.5">
+      <h2 id="rediscover-title" className="text-[17px] font-extrabold">
+        {t('library.rediscover')}
+      </h2>
+      <ul className="no-scrollbar -mx-4 flex snap-x scroll-px-4 gap-3 overflow-x-auto px-4 pt-0.5 pb-2">
+        {forgotten.map((recipe) => (
+          <li key={recipe.id} className="flex w-[14.5rem] shrink-0 snap-start">
+            <Link to={`/recipes/${recipe.id}`} className="flex w-full flex-col overflow-hidden rounded-lg sticker bg-card">
+              <Thumbnail src={recipe.source?.thumbnail} className="aspect-[9/4] w-full border-b-2 border-outline" />
+              <span className="px-2.5 pt-2 pb-2.5">
+                <span className="block truncate text-sm font-bold">{recipe.title}</span>
+                <span className="block text-xs text-muted-foreground first-letter:uppercase">{t('library.lastTime', { when: ago(recipe.lastCookedOn!) })}</span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }
 

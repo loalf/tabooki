@@ -22,7 +22,9 @@ use Random\Randomizer;
  * - favorites and well-rated recipes come up more, unchecked extractions a little less;
  * - recipes sharing a main tag with the week's others come up less (variety), recipes sharing
  *   fresh ingredients more (half a bunch of coriander gets used twice);
- * - with leftovers on, a lunch is the previous dinner, cooked once for both.
+ * - with leftovers on, a lunch is the previous dinner, cooked once for both;
+ * - recipes the cook asked for ("en el próximo menú") come first, wherever they fit, and stop
+ *   being asked for once planned.
  */
 final readonly class Planner
 {
@@ -67,6 +69,7 @@ final readonly class Planner
     {
         $entry->setRecipe($recipe);
         $entry->setLeftoverOf(null);
+        $recipe?->setPlanNext(false);
         $this->syncLeftovers($plan);
     }
 
@@ -95,7 +98,9 @@ final readonly class Planner
                 continue;
             }
 
-            $entry->setRecipe($this->pick($plan, $entry, $library, $lastPlanned, $avoid)?->recipe);
+            $recipe = $this->pick($plan, $entry, $library, $lastPlanned, $avoid)?->recipe;
+            $entry->setRecipe($recipe);
+            $recipe?->setPlanNext(false);
         }
 
         $this->syncLeftovers($plan);
@@ -136,6 +141,11 @@ final readonly class Planner
         $limit = $entry->isWeekday() ? $plan->getWeekdayMaxMinutes() : null;
         $inTime = array_values(array_filter($suits, static fn (Candidate $c): bool => null === $limit || null === $c->minutes || $c->minutes <= $limit));
         $fits = [] !== $inTime ? $inTime : $suits;
+
+        $wanted = array_values(array_filter($fits, static fn (Candidate $c): bool => $c->planNext && !\in_array($c->id, $inWeek, true)));
+        if ([] !== $wanted) {
+            return $this->weightedPick($wanted, static fn (Candidate $c): float => $c->score($weekTags, $weekFresh));
+        }
 
         $recentSince = $entry->getDateValue()->modify(\sprintf('-%d days', self::RELAXED_NO_REPEAT_DAYS));
         $tiers = [

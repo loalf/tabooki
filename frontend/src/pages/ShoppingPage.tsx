@@ -1,12 +1,16 @@
-import { ChevronDown, CloudOff, LoaderCircle } from 'lucide-react'
+import { ChevronDown, CloudOff, House, LoaderCircle, Plus, Share, ShoppingBasket } from 'lucide-react'
 import { type FormEvent, useState, useSyncExternalStore } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { AISLES, type ListScope, type ShoppingItem, useAddItem, usePendingShoppingChanges, useShoppingList } from '@/api/shopping'
-import { EmptyState, PageHeader } from '@/components/PageHeader'
+import { EmptyState, pageTitleClass } from '@/components/PageHeader'
+import { formatAmount } from '@/components/shopping/format'
 import { ItemRow } from '@/components/shopping/ItemRow'
-import { Button, Chip, inputClass, linkButtonClass } from '@/components/ui'
+import { Chip, inputClass, linkButtonClass } from '@/components/ui'
 import { WeekNav } from '@/components/WeekNav'
+import { useAboveTabBar } from '@/lib/layout'
+import { cn } from '@/lib/utils'
 import { useWeekParam } from '@/lib/useWeekParam'
 import { today } from '@/lib/week'
 
@@ -24,9 +28,13 @@ function useOnline() {
   )
 }
 
-/** The week's shopping list, from its menu: by aisle, staples apart, ticked off live and offline. */
+/**
+ * The week's shopping list, from its menu, laid out for the shop: what to check at home first,
+ * then what's left by aisle (ticked things drop into the cart), and a quick add at thumb height.
+ * Ticked off live with whoever else is shopping, and offline.
+ */
 export function ShoppingPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const nav = useWeekParam()
   const now = today()
   // "From today" only makes sense in the current week, after Monday.
@@ -38,15 +46,39 @@ export function ShoppingPage() {
   const pending = usePendingShoppingChanges()
 
   const items = list?.items ?? []
-  const toBuy = items.filter((i) => !i.staple && !i.manual)
-  const manual = items.filter((i) => i.manual)
   const staples = items.filter((i) => i.staple && !i.manual)
-  const left = [...toBuy, ...manual].filter((i) => !i.checked).length
-  const byAisle = AISLES.map((aisle) => [aisle, toBuy.filter((i) => i.aisle === aisle)] as const).filter(([, list]) => list.length)
+  const toBuy = items.filter((i) => !i.staple || i.manual)
+  const open = toBuy.filter((i) => !i.checked)
+  const inCart = toBuy.filter((i) => i.checked)
+  const byAisle = AISLES.map((aisle) => [aisle, open.filter((i) => !i.manual && i.aisle === aisle)] as const).filter(([, list]) => list.length)
+  const manual = open.filter((i) => i.manual)
+  const planned = Boolean(list?.planned)
+
+  const share = async () => {
+    const text = open
+      .map((i) => {
+        const amounts = (i.amounts ?? []).map((a) => formatAmount(a, t, i18n.language)).join(' + ')
+        return `• ${i.name}${amounts ? ` (${amounts})` : ''}`
+      })
+      .join('\n')
+    try {
+      if (navigator.share) await navigator.share({ title: t('shopping.title'), text })
+      else await navigator.clipboard.writeText(text)
+    } catch {
+      // Cancelled.
+    }
+  }
 
   return (
     <>
-      <PageHeader title={t('shopping.title')} />
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <h1 className={pageTitleClass}>{t('shopping.title')}</h1>
+        {open.length > 0 && (
+          <button type="button" onClick={() => void share()} aria-label={t('shopping.share')} className="grid size-11 place-items-center rounded-full sticker-sm bg-card">
+            <Share className="size-[18px]" aria-hidden />
+          </button>
+        )}
+      </div>
       <WeekNav {...nav} />
 
       {(!online || pending > 0) && (
@@ -58,29 +90,42 @@ export function ShoppingPage() {
 
       {isPending ? null : isError && !list ? (
         <EmptyState>{t('shopping.loadError')}</EmptyState>
+      ) : !planned && !items.length ? (
+        <EmptyState
+          title={t('shopping.noPlanTitle')}
+          action={
+            <Link to={`/plan${nav.week === nav.thisWeek ? '' : `?week=${nav.week}`}`} className={linkButtonClass}>
+              {t('shopping.toPlan')}
+            </Link>
+          }
+        >
+          {t('shopping.noPlan')}
+        </EmptyState>
       ) : (
         <div className="flex flex-col gap-5">
-          {list && !list.planned ? (
-            <EmptyState
-              title={t('shopping.noPlanTitle')}
-              action={
-                <Link to={`/plan${nav.week === nav.thisWeek ? '' : `?week=${nav.week}`}`} className={linkButtonClass}>
-                  {t('shopping.toPlan')}
-                </Link>
-              }
-            >
-              {t('shopping.noPlan')}
-            </EmptyState>
-          ) : (
-            <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-muted-foreground">
-              <span className="flex-1">{t('shopping.summary', { count: left, meals: list?.meals ?? 0 })}</span>
-              {canNarrow && (
-                <Chip active={fromToday} onClick={() => setFromToday(!fromToday)}>
-                  {t('shopping.fromToday')}
-                </Chip>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="text-[17px] font-extrabold">{open.length ? t('shopping.left', { count: open.length }) : t('shopping.allDone')}</p>
+                {planned && <p className="text-xs text-muted-foreground">{t('shopping.forMeals', { count: list?.meals ?? 0 })}</p>}
+              </div>
+              {toBuy.length > 0 && (
+                <span className="text-sm font-bold text-primary tabular-nums">
+                  {inCart.length} / {toBuy.length}
+                </span>
               )}
             </div>
-          )}
+            {toBuy.length > 0 && (
+              <div className="h-2.5 overflow-hidden rounded-full border-2 border-outline bg-muted" role="progressbar" aria-valuemin={0} aria-valuemax={toBuy.length} aria-valuenow={inCart.length}>
+                <div className="h-full bg-primary transition-[width]" style={{ width: `${(inCart.length / toBuy.length) * 100}%` }} />
+              </div>
+            )}
+            {canNarrow && (
+              <Chip active={fromToday} onClick={() => setFromToday(!fromToday)} className="mt-1 self-start">
+                {t('shopping.fromToday')}
+              </Chip>
+            )}
+          </div>
           {list?.classifying && (
             <p className="-mt-2 flex items-center gap-2 text-xs text-muted-foreground">
               <LoaderCircle className="size-3.5 animate-spin" aria-hidden />
@@ -88,53 +133,62 @@ export function ShoppingPage() {
             </p>
           )}
 
-          {byAisle.map(([aisle, aisleItems]) => (
-            <Section key={aisle} title={t(`shopping.aisle.${aisle}`)} items={aisleItems} scope={scope} />
-          ))}
-
-          <section aria-labelledby="manual-title">
-            <h2 id="manual-title" className="mb-2 text-lg font-extrabold">
-              {t('shopping.extra')}
-            </h2>
-            {manual.length > 0 && (
-              <ul className="mb-2 rounded-lg sticker bg-card px-3">
-                {manual.map((item) => (
-                  <ItemRow key={item.key} item={item} scope={scope} />
-                ))}
-              </ul>
-            )}
-            <AddItem scope={scope} />
-          </section>
-
           {staples.length > 0 && (
-            <details className="group rounded-lg sticker bg-card px-3.5 py-2.5">
+            <details className="group rounded-lg border-2 border-outline bg-accent px-3.5 py-2.5 text-accent-foreground">
               <summary className="flex cursor-pointer list-none items-center gap-3 py-1 [&::-webkit-details-marker]:hidden">
+                <House className="size-5 shrink-0 text-brand" aria-hidden />
                 <span className="flex-1">
                   <span className="block font-extrabold">{t('shopping.staples', { count: staples.length })}</span>
-                  <span className="block text-sm text-muted-foreground">{t('shopping.staplesHint')}</span>
+                  <span className="block text-sm opacity-80">{t('shopping.staplesHint')}</span>
                 </span>
                 <ChevronDown className="size-5 transition-transform group-open:rotate-180" aria-hidden />
               </summary>
-              <ul className="mt-1">
+              <ul className="mt-2 mb-1 rounded-md bg-card px-3 text-foreground">
                 {staples.map((item) => (
                   <ItemRow key={item.key} item={item} scope={scope} />
                 ))}
               </ul>
             </details>
           )}
+
+          {byAisle.map(([aisle, aisleItems]) => (
+            <Section key={aisle} title={t(`shopping.aisle.${aisle}`)} items={aisleItems} scope={scope} />
+          ))}
+          {manual.length > 0 && <Section title={t('shopping.extra')} items={manual} scope={scope} />}
+
+          {inCart.length > 0 && (
+            <details className="group rounded-md bg-muted px-3.5 py-2.5">
+              <summary className="flex cursor-pointer list-none items-center gap-3 py-1 [&::-webkit-details-marker]:hidden">
+                <ShoppingBasket className="size-5 shrink-0 text-primary" aria-hidden />
+                <span className="min-w-0 flex-1">
+                  <span className="block font-extrabold">{t('shopping.inCart', { count: inCart.length })}</span>
+                  <span className="block truncate text-xs text-muted-foreground line-through group-open:hidden">{inCart.map((i) => i.name).join(', ')}</span>
+                </span>
+                <ChevronDown className="size-5 shrink-0 transition-transform group-open:rotate-180" aria-hidden />
+              </summary>
+              <ul className="mt-2 mb-1 rounded-md bg-card px-3">
+                {inCart.map((item) => (
+                  <ItemRow key={item.key} item={item} scope={scope} />
+                ))}
+              </ul>
+            </details>
+          )}
+          {/* Room for the quick add over the tab bar. */}
+          <div className="h-14" aria-hidden />
         </div>
       )}
+
+      <QuickAdd scope={scope} />
     </>
   )
 }
 
 function Section({ title, items, scope }: { title: string; items: ShoppingItem[]; scope: ListScope }) {
-  const left = items.filter((i) => !i.checked).length
   return (
     <section>
-      <h2 className="mb-2 flex items-baseline justify-between text-lg font-extrabold">
+      <h2 className="mb-2 flex items-baseline gap-2 text-[15px] font-extrabold">
         {title}
-        <span className="text-sm font-bold text-muted-foreground tabular-nums">{left || '✓'}</span>
+        <span className="text-sm font-bold text-muted-foreground tabular-nums">{items.length}</span>
       </h2>
       <ul className="rounded-lg sticker bg-card px-3">
         {items.map((item) => (
@@ -147,10 +201,12 @@ function Section({ title, items, scope }: { title: string; items: ShoppingItem[]
 
 let pendingCounter = 0
 
-function AddItem({ scope }: { scope: ListScope }) {
+/** Add anything, from thumb height, like a chat box; it goes under "Además". */
+function QuickAdd({ scope }: { scope: ListScope }) {
   const { t } = useTranslation()
   const add = useAddItem()
   const [text, setText] = useState('')
+  const slot = useAboveTabBar()
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
@@ -159,19 +215,24 @@ function AddItem({ scope }: { scope: ListScope }) {
     setText('')
   }
 
-  return (
-    <form onSubmit={submit} className="flex gap-2">
+  if (!slot) return null
+  return createPortal(
+    <form onSubmit={submit} className="border-t-2 border-outline bg-background">
+      <div className="mx-auto flex max-w-2xl gap-2 px-4 py-2.5">
       <input
         value={text}
         onChange={(e) => setText(e.target.value)}
         maxLength={200}
+        enterKeyHint="done"
         placeholder={t('shopping.addPlaceholder')}
         aria-label={t('shopping.addPlaceholder')}
-        className={inputClass}
+        className={cn(inputClass, 'h-11 rounded-full')}
       />
-      <Button type="submit" disabled={!text.trim()}>
-        {t('shopping.add')}
-      </Button>
-    </form>
+      <button type="submit" disabled={!text.trim()} aria-label={t('shopping.add')} className="grid size-11 shrink-0 place-items-center rounded-full sticker-sm bg-primary text-primary-foreground disabled:opacity-50">
+        <Plus className="size-5" aria-hidden />
+      </button>
+      </div>
+    </form>,
+    slot,
   )
 }

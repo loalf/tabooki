@@ -24,6 +24,7 @@ import { ResetPasswordPage } from '@/pages/ResetPasswordPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { SharePage } from '@/pages/SharePage'
 import { ShoppingPage } from '@/pages/ShoppingPage'
+import { TodayPage } from '@/pages/TodayPage'
 
 const queryClient = new QueryClient()
 registerShoppingMutations(queryClient)
@@ -73,7 +74,8 @@ const router = createBrowserRouter([
   {
     element: <AppShell />,
     children: [
-      { index: true, element: <LibraryPage /> },
+      { index: true, element: <TodayPage /> },
+      { path: 'recipes', element: <LibraryPage /> },
       { path: 'recipes/new', element: <RecipeEditPage /> },
       { path: 'recipes/:id', element: <RecipePage /> },
       { path: 'recipes/:id/edit', element: <RecipeEditPage /> },

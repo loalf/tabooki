@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { AlertCircle, ClipboardPaste, ExternalLink, LoaderCircle, PenLine, RotateCw, Trash2 } from 'lucide-react'
+import { AlertCircle, ChevronRight, ClipboardPaste, ExternalLink, LoaderCircle, PenLine, RotateCw, Trash2 } from 'lucide-react'
 import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
@@ -12,21 +12,17 @@ import { cn } from '@/lib/utils'
 const COLLAPSED = 3
 
 /** Saved links that aren't recipes yet: being extracted, or waiting for the cook. */
-export function Inbox() {
+export function InboxList({ sources }: { sources: Source[] }) {
   const { t } = useTranslation()
-  const { data: sources = [] } = useInbox()
   const [expanded, setExpanded] = useState(false)
-  useRefreshRecipesWhenExtracted(sources)
-
   if (!sources.length) return null
   const visible = expanded ? sources : sources.slice(0, COLLAPSED)
 
   return (
-    <section aria-labelledby="inbox-title" className="mb-8">
-      <h2 id="inbox-title" className="mb-1 text-lg font-extrabold">
+    <section aria-labelledby="inbox-title">
+      <h3 id="inbox-title" className="mb-2 text-[15px] font-extrabold">
         {t('library.inbox.title')} <span className="font-normal text-muted-foreground">{sources.length}</span>
-      </h2>
-      <p className="mb-3 text-sm text-muted-foreground">{t('library.inbox.subtitle')}</p>
+      </h3>
       <ul className="flex flex-col divide-y rounded-lg sticker bg-card">
         {visible.map((source) => (
           <SourceRow key={source.id} source={source} />
@@ -38,6 +34,47 @@ export function Inbox() {
         </Button>
       )}
     </section>
+  )
+}
+
+/**
+ * The inbox folded into one line on the library: what's being extracted and what needs a hand.
+ * Tapping it opens the "add recipe" sheet, where the links are.
+ */
+export function InboxBanner({ onOpen }: { onOpen: () => void }) {
+  const { t } = useTranslation()
+  const { data: sources = [] } = useInbox()
+  useRefreshRecipesWhenExtracted(sources)
+  if (!sources.length) return null
+
+  const working = sources.filter(isWorking).length
+  const stuck = sources.filter((s) => s.status === 'needs_input' || s.status === 'failed').length
+  const parts = [
+    working ? t('library.inbox.bannerWorking', { count: working }) : null,
+    stuck ? t('library.inbox.bannerStuck', { count: stuck }) : null,
+  ].filter(Boolean)
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-haspopup="dialog"
+      className="flex w-full items-center gap-2.5 rounded-md border-2 border-outline bg-accent px-3 py-2.5 text-left text-accent-foreground"
+    >
+      <span className="flex shrink-0 -space-x-2.5" aria-hidden>
+        {sources.slice(0, 2).map((s) => (
+          <Thumbnail key={s.id} src={s.thumbnail} className="size-8 rounded-full border-2 border-outline" />
+        ))}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[13px] font-bold">
+          {parts.length ? parts.join(' · ') : t('library.inbox.bannerSaved', { count: sources.length })}
+        </span>
+        <span className="block text-xs opacity-80">{t('library.inbox.bannerHint')}</span>
+      </span>
+      {working > 0 && <LoaderCircle className="size-4 shrink-0 animate-spin text-primary" aria-hidden />}
+      <ChevronRight className="size-5 shrink-0" aria-hidden />
+    </button>
   )
 }
 

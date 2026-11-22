@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use ApiPlatform\Doctrine\Orm\Filter\ExactFilter;
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -20,6 +21,7 @@ use App\Filter\RecipeTagsFilter;
 use App\Library\SearchText;
 use App\Repository\RecipeRepository;
 use App\State\HouseholdOwnedProcessor;
+use App\State\RecipeProvider;
 use App\State\ReextractRecipeProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -40,6 +42,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         // The whole library in one response (household scale), in a light shape for the grid.
         new GetCollection(
             normalizationContext: ['groups' => ['recipe:list']],
+            provider: RecipeProvider::class,
             order: ['createdAt' => 'DESC', 'id' => 'DESC'],
             paginationEnabled: false,
             parameters: [
@@ -75,9 +78,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                 ),
             ],
         ),
-        new Get(),
+        new Get(provider: RecipeProvider::class),
         new Post(processor: HouseholdOwnedProcessor::class),
-        new Patch(processor: HouseholdOwnedProcessor::class),
+        new Patch(provider: RecipeProvider::class, processor: HouseholdOwnedProcessor::class),
         new Post(
             uriTemplate: '/recipes/{id}/extract',
             status: 202,
@@ -175,6 +178,14 @@ class Recipe implements HouseholdOwned
     #[Groups(['recipe:read', 'recipe:list', 'recipe:write'])]
     #[Assert\Range(min: 1, max: 5)]
     private ?int $rating = null;
+
+    /** Wanted in the next menu: the planner picks it before anything else, then sets this back to false. */
+    #[ORM\Column(options: ['default' => false])]
+    #[Groups(['recipe:read', 'recipe:list', 'recipe:write'])]
+    private bool $planNext = false;
+
+    /** Last day it was on the menu, up to today; null if never. Not stored: RecipeProvider fills it in. */
+    private ?\DateTimeImmutable $lastCookedOn = null;
 
     /** Extracted automatically and not checked by anyone yet (some quantities or steps may be missing). */
     #[ORM\Column(options: ['default' => false])]
@@ -402,6 +413,29 @@ class Recipe implements HouseholdOwned
     public function setRating(?int $rating): void
     {
         $this->rating = $rating;
+    }
+
+    public function isPlanNext(): bool
+    {
+        return $this->planNext;
+    }
+
+    public function setPlanNext(bool $planNext): void
+    {
+        $this->planNext = $planNext;
+    }
+
+    /** Last day it was on the menu, up to today (YYYY-MM-DD); null if never. */
+    #[Groups(['recipe:read', 'recipe:list'])]
+    #[ApiProperty(schema: ['type' => ['string', 'null'], 'format' => 'date'])]
+    public function getLastCookedOn(): ?string
+    {
+        return $this->lastCookedOn?->format('Y-m-d');
+    }
+
+    public function setLastCookedOn(?\DateTimeImmutable $lastCookedOn): void
+    {
+        $this->lastCookedOn = $lastCookedOn;
     }
 
     public function getNeedsReview(): bool
