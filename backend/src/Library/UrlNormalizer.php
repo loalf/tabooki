@@ -45,6 +45,17 @@ final class UrlNormalizer
             case SourcePlatform::TikTok:
                 $query = [];
                 break;
+            case SourcePlatform::Facebook:
+                // Reels, watch links and page videos share one ID space.
+                $videoId = \is_string($query['v'] ?? null) && 1 === preg_match('#^/watch/?$#', $path) ? $query['v']
+                    : (1 === preg_match('#^/(?:reel|(?:[^/]+/)?videos(?:/[^/]+)?)/(\d+)#', $path, $m) ? $m[1] : null);
+                if (null !== $videoId && 1 === preg_match('/^\d{6,25}$/', $videoId)) {
+                    return 'https://facebook.com/reel/'.$videoId;
+                }
+                // Share links (/share/r/…, fb.watch/…) only resolve by asking Facebook. Of the
+                // query, only what names a post (permalink.php?story_fbid=…&id=…) matters.
+                $query = array_intersect_key($query, array_flip(['story_fbid', 'fbid', 'id', 'v']));
+                break;
             case SourcePlatform::Web:
                 break;
         }
@@ -114,6 +125,7 @@ final class UrlNormalizer
             $matches('youtube.com'), $matches('youtu.be'), $matches('youtube-nocookie.com') => SourcePlatform::YouTube,
             $matches('instagram.com'), $matches('instagr.am') => SourcePlatform::Instagram,
             $matches('tiktok.com') => SourcePlatform::TikTok,
+            $matches('facebook.com'), $matches('fb.watch'), $matches('fb.com') => SourcePlatform::Facebook,
             default => SourcePlatform::Web,
         };
     }

@@ -291,7 +291,7 @@ export function useDeleteRecipe() {
 
 // —— Helpers ———————————————————————————————————————————————————
 
-const platformNames = { youtube: 'YouTube', instagram: 'Instagram', tiktok: 'TikTok' } as const
+const platformNames = { youtube: 'YouTube', instagram: 'Instagram', tiktok: 'TikTok', facebook: 'Facebook' } as const
 
 /** "YouTube", "Instagram"… or the site's host name for other links. */
 export function platformLabel(platform: Platform | undefined, url?: string): string {

@@ -9,7 +9,7 @@ final readonly class MediaInfo
 {
     public function __construct(
         public ?string $title = null,
-        /** The caption (Instagram, TikTok) or description (YouTube): often the whole recipe. */
+        /** The caption (Instagram, TikTok, Facebook) or description (YouTube): often the whole recipe. */
         public ?string $description = null,
         public ?string $uploader = null,
         public ?string $thumbnailUrl = null,

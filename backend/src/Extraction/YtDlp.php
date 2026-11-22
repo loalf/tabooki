@@ -12,7 +12,7 @@ use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * yt-dlp (installed in the Docker image) for YouTube, Instagram and TikTok.
+ * yt-dlp (installed in the Docker image) for YouTube, Instagram, TikTok and Facebook.
  *
  * Instagram sometimes answers "login required": yt-dlp can then use a cookies.txt exported
  * from a logged-in browser (YTDLP_COOKIES_FILE). That goes against Instagram's terms, so it's

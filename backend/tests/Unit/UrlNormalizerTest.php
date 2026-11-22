@@ -25,6 +25,11 @@ final class UrlNormalizerTest extends TestCase
         yield 'instagram reel' => ['https://www.instagram.com/reel/C1a2B3c4D5e/?igsh=MWQ1ZGUxMzBkMA==', 'https://instagram.com/p/C1a2B3c4D5e'];
         yield 'instagram post with username' => ['https://www.instagram.com/cookingwithana/p/C1a2B3c4D5e/', 'https://instagram.com/p/C1a2B3c4D5e'];
         yield 'tiktok' => ['https://www.tiktok.com/@chef/video/7301234567890123456?is_from_webapp=1&sender_device=pc', 'https://tiktok.com/@chef/video/7301234567890123456'];
+        yield 'facebook share link' => ['https://www.facebook.com/share/r/14mvBkUSBrr/?mibextid=wwXIfr', 'https://facebook.com/share/r/14mvBkUSBrr'];
+        yield 'facebook reel' => ['https://www.facebook.com/reel/1655497516579165/?s=fb_shorts_tab&rdid=abc', 'https://facebook.com/reel/1655497516579165'];
+        yield 'facebook watch' => ['https://m.facebook.com/watch/?v=1655497516579165&_rdr', 'https://facebook.com/reel/1655497516579165'];
+        yield 'facebook page video' => ['https://www.facebook.com/cocinaconana/videos/1655497516579165/', 'https://facebook.com/reel/1655497516579165'];
+        yield 'facebook permalink' => ['https://www.facebook.com/permalink.php?story_fbid=123&id=456&mibextid=x', 'https://facebook.com/permalink.php?id=456&story_fbid=123'];
     }
 
     #[DataProvider('urls')]
@@ -40,6 +45,8 @@ final class UrlNormalizerTest extends TestCase
         self::assertSame(SourcePlatform::YouTube, $normalizer->detectPlatform('https://youtu.be/dQw4w9WgXcQ'));
         self::assertSame(SourcePlatform::Instagram, $normalizer->detectPlatform('instagram.com/p/abc'));
         self::assertSame(SourcePlatform::TikTok, $normalizer->detectPlatform('https://vm.tiktok.com/ZMabc/'));
+        self::assertSame(SourcePlatform::Facebook, $normalizer->detectPlatform('https://fb.watch/abc123/'));
+        self::assertSame(SourcePlatform::Facebook, $normalizer->detectPlatform('https://web.facebook.com/reel/1'));
         self::assertSame(SourcePlatform::Web, $normalizer->detectPlatform('https://notyoutube.com/watch?v=1'));
     }
 

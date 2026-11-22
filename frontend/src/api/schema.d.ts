@@ -1775,7 +1775,7 @@ export interface components {
             title?: string | null;
             url?: string;
             /** @enum {string} */
-            platform?: "web" | "youtube" | "instagram" | "tiktok";
+            platform?: "web" | "youtube" | "instagram" | "tiktok" | "facebook";
             /** @description Image URL for the app: our cached copy when we have one, else the original. */
             readonly thumbnail?: string | null;
         };
@@ -1790,7 +1790,7 @@ export interface components {
             title?: string | null;
             url?: string;
             /** @enum {string} */
-            platform?: "web" | "youtube" | "instagram" | "tiktok";
+            platform?: "web" | "youtube" | "instagram" | "tiktok" | "facebook";
             /** @description Image URL for the app: our cached copy when we have one, else the original. */
             readonly thumbnail?: string | null;
         };
@@ -1813,7 +1813,7 @@ export interface components {
             readonly statusMessage?: string | null;
             url?: string;
             /** @enum {string} */
-            platform?: "web" | "youtube" | "instagram" | "tiktok";
+            platform?: "web" | "youtube" | "instagram" | "tiktok" | "facebook";
             /** @description Image URL for the app: our cached copy when we have one, else the original. */
             readonly thumbnail?: string | null;
             /** @description The caption or transcript the recipe came from, for checking it side by side. */
@@ -1845,7 +1845,7 @@ export interface components {
             readonly createdAt?: string;
             url?: string;
             /** @enum {string} */
-            platform?: "web" | "youtube" | "instagram" | "tiktok";
+            platform?: "web" | "youtube" | "instagram" | "tiktok" | "facebook";
             /** @description Image URL for the app: our cached copy when we have one, else the original. */
             readonly thumbnail?: string | null;
         };
@@ -1882,7 +1882,7 @@ export interface components {
             title?: string | null;
             url?: string;
             /** @enum {string} */
-            platform?: "web" | "youtube" | "instagram" | "tiktok";
+            platform?: "web" | "youtube" | "instagram" | "tiktok" | "facebook";
             /** @description Image URL for the app: our cached copy when we have one, else the original. */
             readonly thumbnail?: string | null;
         };
@@ -1897,7 +1897,7 @@ export interface components {
             title?: string | null;
             url?: string;
             /** @enum {string} */
-            platform?: "web" | "youtube" | "instagram" | "tiktok";
+            platform?: "web" | "youtube" | "instagram" | "tiktok" | "facebook";
             /** @description Image URL for the app: our cached copy when we have one, else the original. */
             readonly thumbnail?: string | null;
         };
@@ -1920,7 +1920,7 @@ export interface components {
             readonly statusMessage?: string | null;
             url?: string;
             /** @enum {string} */
-            platform?: "web" | "youtube" | "instagram" | "tiktok";
+            platform?: "web" | "youtube" | "instagram" | "tiktok" | "facebook";
             /** @description Image URL for the app: our cached copy when we have one, else the original. */
             readonly thumbnail?: string | null;
             /** @description The caption or transcript the recipe came from, for checking it side by side. */
@@ -1952,7 +1952,7 @@ export interface components {
             readonly createdAt?: string;
             url?: string;
             /** @enum {string} */
-            platform?: "web" | "youtube" | "instagram" | "tiktok";
+            platform?: "web" | "youtube" | "instagram" | "tiktok" | "facebook";
             /** @description Image URL for the app: our cached copy when we have one, else the original. */
             readonly thumbnail?: string | null;
         };

@@ -118,7 +118,7 @@ final class ExtractionSchema
             : 'Never invent. Use only what the material says or shows. If quantities, servings or steps aren\'t there, leave them null or empty, say so in missing_fields, and use status "partial". Don\'t guess amounts from experience.';
 
         return <<<TXT
-            You turn cooking content (a recipe blog page, a YouTube video's description and transcript, an Instagram or TikTok caption, the pictures of a photo or carousel post, or a video) into structured recipes for a household meal planner.
+            You turn cooking content (a recipe blog page, a YouTube video's description and transcript, an Instagram, TikTok or Facebook caption, the pictures of a photo or carousel post, or a video) into structured recipes for a household meal planner.
 
             Always answer by calling the `save_recipes` tool exactly once. Do not answer in plain text.
 

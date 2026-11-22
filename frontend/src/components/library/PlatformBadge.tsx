@@ -1,8 +1,8 @@
-import { Camera, Globe, Music2, Play } from 'lucide-react'
+import { Camera, Globe, Music2, Play, ThumbsUp } from 'lucide-react'
 import { platformLabel, type Platform } from '@/api/library'
 import { cn } from '@/lib/utils'
 
-const icons = { youtube: Play, instagram: Camera, tiktok: Music2, web: Globe } as const
+const icons = { youtube: Play, instagram: Camera, tiktok: Music2, facebook: ThumbsUp, web: Globe } as const
 
 export function PlatformBadge({ platform, url, className }: { platform?: Platform; url?: string; className?: string }) {
   const Icon = icons[platform ?? 'web']
