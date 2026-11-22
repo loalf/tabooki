@@ -8,8 +8,11 @@ use ApiPlatform\Test\ApiTestCase;
 use ApiPlatform\Test\Client;
 use App\Entity\PasswordResetToken;
 use App\Entity\User;
+use App\Message\SendPasswordResetLink;
+use App\MessageHandler\SendPasswordResetLinkHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\MailerAssertionsTrait;
+use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
 use Symfony\Component\Mime\Email;
 
 final class PasswordTest extends ApiTestCase
@@ -71,8 +74,7 @@ final class PasswordTest extends ApiTestCase
 
     public function testAForgottenPasswordIsResetWithTheEmailedLink(): void
     {
-        $this->client->request('POST', '/api/password/forgot', ['json' => ['email' => ' Ana@Example.com ']]);
-        self::assertResponseStatusCodeSame(202);
+        $this->requestLink(' Ana@Example.com ');
 
         $email = $this->lastEmail();
         self::assertSame('Cambia tu contraseña de Tabooki', $email->getSubject());
@@ -94,17 +96,18 @@ final class PasswordTest extends ApiTestCase
 
     public function testUnknownAddressesGetTheSameAnswerAndNoEmail(): void
     {
-        $this->client->request('POST', '/api/password/forgot', ['json' => ['email' => 'nobody@example.com']]);
-        self::assertResponseStatusCodeSame(202);
+        // The same answer and the same work in the request (a queued job), so the timing doesn't
+        // tell either; the worker then finds nobody to write to.
+        $this->requestLink('nobody@example.com');
         self::assertEmailCount(0);
         self::assertQueuedEmailCount(0);
     }
 
     public function testOnlyTheLatestLinkWorksAndLinksExpire(): void
     {
-        $this->client->request('POST', '/api/password/forgot', ['json' => ['email' => 'ana@example.com']]);
+        $this->requestLink('ana@example.com');
         $first = $this->tokenFrom($this->lastEmail());
-        $this->client->request('POST', '/api/password/forgot', ['json' => ['email' => 'ana@example.com']]);
+        $this->requestLink('ana@example.com');
         $second = $this->tokenFrom($this->lastEmail());
 
         $this->client->request('POST', '/api/password/reset', ['json' => ['token' => $first, 'password' => 'brand-new-password']]);
@@ -128,6 +131,28 @@ final class PasswordTest extends ApiTestCase
         }
         $this->client->request('POST', '/api/password/forgot', ['json' => ['email' => 'ana@example.com']]);
         self::assertResponseStatusCodeSame(429);
+    }
+
+    /**
+     * Asks for a link, checks the request only queued the job (whatever the address), then runs
+     * that job as the worker would.
+     */
+    private function requestLink(string $email): void
+    {
+        $this->client->request('POST', '/api/password/forgot', ['json' => ['email' => $email]]);
+        self::assertResponseStatusCodeSame(202);
+        self::assertEmailCount(0, null, 'nothing is emailed during the request');
+        self::assertQueuedEmailCount(0);
+
+        $transport = self::getContainer()->get('messenger.transport.async');
+        self::assertInstanceOf(InMemoryTransport::class, $transport);
+        $messages = array_map(static fn ($envelope): object => $envelope->getMessage(), $transport->getSent());
+        self::assertEquals([new SendPasswordResetLink(mb_strtolower(trim($email)))], $messages);
+        self::assertInstanceOf(SendPasswordResetLink::class, $messages[0]);
+
+        $handler = self::getContainer()->get(SendPasswordResetLinkHandler::class);
+        self::assertInstanceOf(SendPasswordResetLinkHandler::class, $handler);
+        $handler($messages[0]);
     }
 
     /** With its own client, keeping $this->client the one the assertion helpers read. */

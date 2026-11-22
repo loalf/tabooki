@@ -6,12 +6,14 @@ namespace App\Security;
 
 use App\Entity\PasswordResetToken;
 use App\Entity\User;
+use App\Message\SendPasswordResetLink;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -34,14 +36,16 @@ final readonly class PasswordReset
         private MailerInterface $mailer,
         private LoggerInterface $logger,
         private RateLimiterFactoryInterface $passwordForgotLimiter,
+        private MessageBusInterface $bus,
         #[Autowire('%env(DEFAULT_URI)%')]
         private string $appUrl,
     ) {
     }
 
     /**
-     * Emails a reset link if the address belongs to someone. Says nothing either way (the caller
-     * answers the same), so the form can't be used to find out who has an account.
+     * Queues a reset link for the address (see sendLink). Does the same work whether or not the
+     * address belongs to someone, and the caller answers the same, so neither the answer nor its
+     * timing tells who has an account.
      *
      * @return bool false when rate limited (per address and per IP)
      */
@@ -53,10 +57,17 @@ final readonly class PasswordReset
                 return false;
             }
         }
+        $this->bus->dispatch(new SendPasswordResetLink($email));
 
+        return true;
+    }
+
+    /** In the worker: emails a new reset link if the address belongs to someone. */
+    public function sendLink(string $email): void
+    {
         $user = $this->users->findOneByEmail($email);
         if (null === $user) {
-            return true;
+            return;
         }
 
         $this->forget($user);
@@ -68,8 +79,6 @@ final readonly class PasswordReset
         $link = $this->url('/reset-password?token='.$selector.'.'.$verifier);
         $text = self::TEXT[$this->locale($user)];
         $this->send($user, $text['reset_subject'], \sprintf($text['reset_body'], $user->getDisplayName(), $link));
-
-        return true;
     }
 
     /** The user a link is for, or null if it's wrong, used or expired. */
