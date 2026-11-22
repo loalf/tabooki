@@ -90,6 +90,35 @@ final readonly class TasteRules
         return $this->toArray() === self::none()->toArray();
     }
 
+    /**
+     * The household's rules with a week's on top (docs/PLAN.md §6.3, the tweak box): the stricter
+     * diet, every exclusion and limit of both, the week's lunch and dinner heaviness when it says,
+     * the lower spice.
+     */
+    public function with(self $week): self
+    {
+        $order = [Diet::Vegan, Diet::Vegetarian, Diet::Pescatarian];
+        $diet = null === $this->diet || null === $week->diet
+            ? $this->diet ?? $week->diet
+            : $order[min(array_search($this->diet, $order, true), array_search($week->diet, $order, true))];
+        $spice = null === $this->maxSpice || null === $week->maxSpice ? $this->maxSpice ?? $week->maxSpice : min($this->maxSpice, $week->maxSpice);
+        $mine = $this->toArray();
+        $theirs = $week->toArray();
+
+        return self::fromArray([
+            'diet' => $diet?->value,
+            'excludeGroups' => [...$mine['excludeGroups'], ...$theirs['excludeGroups']],
+            'excludeIngredients' => [...$mine['excludeIngredients'], ...$theirs['excludeIngredients']],
+            'weekly' => [...$mine['weekly'], ...$theirs['weekly']],
+            'mealHeaviness' => [
+                'lunch' => $theirs['mealHeaviness']['lunch'] ?? $mine['mealHeaviness']['lunch'],
+                'dinner' => $theirs['mealHeaviness']['dinner'] ?? $mine['mealHeaviness']['dinner'],
+            ],
+            'prefer' => [...$mine['prefer'], ...$theirs['prefer']],
+            'maxSpice' => $spice,
+        ]);
+    }
+
     public function heavinessFor(MealType $slot): ?Heaviness
     {
         return MealType::Lunch === $slot ? $this->lunch : $this->dinner;

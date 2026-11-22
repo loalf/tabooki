@@ -16,7 +16,7 @@ final readonly class Taste
     /** Identifies the notes the recipes were judged against (NotesJudge); null without notes. */
     public ?string $notesHash;
 
-    public function __construct(public TasteRules $rules, ?string $notes = null)
+    public function __construct(public TasteRules $rules, public ?string $notes = null)
     {
         $this->notesHash = self::notesHash($notes);
     }

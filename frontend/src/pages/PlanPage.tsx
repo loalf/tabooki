@@ -1,4 +1,4 @@
-import { Ellipsis, RefreshCw, Trash2 } from 'lucide-react'
+import { Ellipsis, RefreshCw, Sparkles, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
@@ -7,6 +7,7 @@ import { type MealPlan, useDeleteMealPlan, useMealPlan, useRegenerateMealPlan } 
 import { EmptyState, pageTitleClass } from '@/components/PageHeader'
 import { PlanSetup } from '@/components/plan/PlanSetup'
 import { PlanWeek } from '@/components/plan/PlanWeek'
+import { WeekTweakSheet } from '@/components/plan/WeekTweak'
 import { SheetRowContent, Sheet, sheetRowClass } from '@/components/Sheet'
 import { linkButtonClass } from '@/components/ui'
 import { WeekNav } from '@/components/WeekNav'
@@ -73,6 +74,7 @@ function PlanActions({ plan, onClose }: { plan: MealPlan; onClose: () => void })
   const regenerate = useRegenerateMealPlan()
   const remove = useDeleteMealPlan()
   const [confirming, setConfirming] = useState(false)
+  const [tweaking, setTweaking] = useState(false)
   const unlocked = plan.entries?.filter((e) => !e.locked).length ?? 0
 
   useEffect(() => {
@@ -81,9 +83,14 @@ function PlanActions({ plan, onClose }: { plan: MealPlan; onClose: () => void })
     return () => clearTimeout(timer)
   }, [confirming])
 
+  if (tweaking) return <WeekTweakSheet plan={plan} onClose={onClose} />
+
   return (
     <Sheet title={t('plan.actions')} onClose={onClose}>
       <div className="flex flex-col divide-y">
+        <button type="button" className={sheetRowClass} onClick={() => setTweaking(true)}>
+          <SheetRowContent icon={<Sparkles />} title={plan.tweak ? t('plan.tweak.change') : t('plan.tweak.title')} hint={t('plan.tweak.actionHint')} />
+        </button>
         <button type="button" className={sheetRowClass} disabled={regenerate.isPending || unlocked === 0} onClick={() => regenerate.mutate(plan.id!, { onSuccess: onClose })}>
           <SheetRowContent icon={<RefreshCw className={cn(regenerate.isPending && 'animate-spin')} />} title={t('plan.regenerate')} hint={t('plan.regenerateHint')} />
         </button>

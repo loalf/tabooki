@@ -14,10 +14,8 @@ use App\Dto\TasteRulesInput;
 use App\Entity\ExtractionRun;
 use App\Entity\Household;
 use App\Entity\TasteProfile;
-use App\Enum\Language;
 use App\Llm\LlmException;
 use App\Llm\Pricing;
-use App\Repository\RecipeRepository;
 use App\Repository\TasteProfileRepository;
 use App\Security\CurrentHousehold;
 use App\Taste\NotesQueue;
@@ -25,6 +23,7 @@ use App\Taste\TasteCompiler;
 use App\Taste\TasteImpact;
 use App\Taste\TasteImpactView;
 use App\Taste\TasteRules;
+use App\Taste\TasteVocabulary;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -42,7 +41,7 @@ final readonly class TasteProfileProcessor implements ProcessorInterface
     public function __construct(
         private CurrentHousehold $current,
         private TasteProfileRepository $profiles,
-        private RecipeRepository $recipes,
+        private TasteVocabulary $vocabulary,
         private TasteProfileProvider $provider,
         private TasteCompiler $compiler,
         private TasteImpact $impact,
@@ -99,7 +98,7 @@ final readonly class TasteProfileProcessor implements ProcessorInterface
     /** @param array<string, mixed> $answers */
     private function draft(Household $household, array $answers): TasteDraftView
     {
-        [$ingredients, $tags] = $this->vocabulary($household);
+        [$ingredients, $tags] = $this->vocabulary->of($household);
         $view = new TasteDraftView();
         $started = hrtime(true);
         try {
@@ -125,33 +124,6 @@ final readonly class TasteProfileProcessor implements ProcessorInterface
         $view->impact = $this->impact->of($household, TasteRules::fromArray($view->rules));
 
         return $view;
-    }
-
-    /**
-     * The words the household's recipes use, so the model maps "cilantro" or "more legumes" onto
-     * keys and tags that exist.
-     *
-     * @return array{array<string, string>, array<string, int>} ingredient keys with a name, English tags with counts
-     */
-    private function vocabulary(Household $household): array
-    {
-        $ingredients = [];
-        $tags = [];
-        foreach ($this->recipes->libraryOf($household) as $recipe) {
-            foreach ($recipe->getIngredients() as $ingredient) {
-                $key = $ingredient->getCanonicalKey();
-                if (null !== $key && '' !== $key && !isset($ingredients[$key])) {
-                    $ingredients[$key] = $ingredient->getName() ?? $ingredient->getRawText();
-                }
-            }
-            foreach ($recipe->tagsIn(Language::En) as $tag) {
-                $tags[$tag] = ($tags[$tag] ?? 0) + 1;
-            }
-        }
-        ksort($ingredients);
-        arsort($tags);
-
-        return [\array_slice($ingredients, 0, 600, true), \array_slice($tags, 0, 150, true)];
     }
 
     private static function elapsedMs(int|float $started): int

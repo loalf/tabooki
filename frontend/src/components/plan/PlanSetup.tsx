@@ -5,7 +5,7 @@ import { Link } from 'react-router'
 import { useTasteProfile } from '@/api/taste'
 import { useMe } from '@/auth/useAuth'
 import { type MealPlan, type Slot, type SlotChoice, useCreateMealPlan } from '@/api/plan'
-import { Button, CheckMark } from '@/components/ui'
+import { Button, CheckMark, textareaClass } from '@/components/ui'
 import { formatDay } from '@/components/plan/format'
 import { cn } from '@/lib/utils'
 import { addDays, parseIsoDate, weekDays } from '@/lib/week'
@@ -34,6 +34,8 @@ export function PlanSetup({ week, previous }: { week: string; previous?: MealPla
   const [servings, setServings] = useState(previous?.entries?.[0]?.servings ?? me?.defaultServings ?? 4)
   const [leftovers, setLeftovers] = useState(previous?.leftovers ?? false)
   const [maxMinutes, setMaxMinutes] = useState<number | null>(previous?.weekdayMaxMinutes ?? null)
+  // Not carried over from last week: a wish is for one week.
+  const [tweak, setTweak] = useState('')
 
   const toggle = (key: string) =>
     setChosen((current) => {
@@ -49,7 +51,7 @@ export function PlanSetup({ week, previous }: { week: string; previous?: MealPla
       const [slot, day] = key.split('@')
       return { date: addDays(week, Number(day)), slot: slot as Slot, servings }
     })
-    create.mutate({ weekStart: week, slots, leftovers, weekdayMaxMinutes: maxMinutes })
+    create.mutate({ weekStart: week, slots, leftovers, weekdayMaxMinutes: maxMinutes, tweak: tweak.trim() || null })
   }
 
   return (
@@ -149,9 +151,25 @@ export function PlanSetup({ week, previous }: { week: string; previous?: MealPla
         </fieldset>
       </section>
 
+      <section className="flex flex-col gap-2 rounded-lg sticker bg-card p-4">
+        <label htmlFor="week-tweak" className="text-[15px] font-bold">
+          {t('plan.tweak.title')}
+        </label>
+        <p className="-mt-1 text-sm text-muted-foreground">{t('plan.tweak.hint')}</p>
+        <textarea
+          id="week-tweak"
+          rows={2}
+          value={tweak}
+          onChange={(e) => setTweak(e.target.value)}
+          placeholder={t('plan.tweak.placeholder')}
+          maxLength={500}
+          className={textareaClass}
+        />
+      </section>
+
       {create.isError && <p className="text-sm text-destructive">{t('plan.error')}</p>}
       <Button type="submit" disabled={chosen.size === 0 || create.isPending}>
-        {create.isPending ? t('plan.setup.creating') : t('plan.setup.create', { count: chosen.size })}
+        {create.isPending ? (tweak.trim() ? t('plan.tweak.applying') : t('plan.setup.creating')) : t('plan.setup.create', { count: chosen.size })}
       </Button>
     </form>
   )

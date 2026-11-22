@@ -14,11 +14,13 @@ use ApiPlatform\Metadata\QueryParameter;
 use App\Dto\MealPlanEntryAction;
 use App\Dto\MealPlanInput;
 use App\Dto\MealPlanSlotInput;
+use App\Dto\MealPlanTweakInput;
 use App\Enum\MealType;
 use App\Filter\MealPlanWeekFilter;
 use App\Repository\MealPlanRepository;
 use App\State\CreateMealPlanProcessor;
 use App\State\MealPlanActionProcessor;
+use App\Taste\TasteRules;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -64,6 +66,15 @@ use Symfony\Component\Uid\Uuid;
             read: false,
             processor: MealPlanActionProcessor::class,
             name: 'meal_plan_regenerate',
+        ),
+        new Post(
+            uriTemplate: '/meal-plans/{id}/tweak',
+            status: 200,
+            description: 'Set (or clear, with null) a wish for this week only, then pick again every meal that isn\'t locked.',
+            input: MealPlanTweakInput::class,
+            read: false,
+            processor: MealPlanActionProcessor::class,
+            name: 'meal_plan_tweak',
         ),
         new Post(
             uriTemplate: '/meal-plans/{id}/entries',
@@ -129,6 +140,38 @@ class MealPlan implements HouseholdOwned
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     #[Groups(['meal_plan:read'])]
     private ?int $weekdayMaxMinutes = null;
+
+    /** A wish for this week only ("my mother comes: no pork"), as the household wrote it; null without one. */
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['meal_plan:read'])]
+    private ?string $tweak = null;
+
+    /**
+     * The wish as rules on top of the household's (TasteRules::toArray()); null without a wish, or
+     * when the text model couldn't read it (the week is then planned without it).
+     *
+     * @var array<string, mixed>|null
+     */
+    #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
+    #[Groups(['meal_plan:read'])]
+    #[ApiProperty(schema: ['type' => ['object', 'null'], 'properties' => TasteRules::API_SCHEMA['properties']])]
+    private ?array $tweakRules = null;
+
+    /** @var array{es: string, en: string}|null what the week's rules do, in a few words ("Sin cerdo, más ligera") */
+    #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
+    #[Groups(['meal_plan:read'])]
+    #[ApiProperty(schema: ['type' => ['object', 'null'], 'required' => ['es', 'en'], 'properties' => ['es' => ['type' => 'string'], 'en' => ['type' => 'string']]])]
+    private ?array $tweakLabel = null;
+
+    /**
+     * Recipes the week's rules have something against, when the wish was read: the app leaves
+     * them out of its swap suggestions this week.
+     *
+     * @var list<string>
+     */
+    #[ORM\Column(type: Types::JSON, options: ['jsonb' => true, 'default' => '[]'])]
+    #[Groups(['meal_plan:read'])]
+    private array $tweakAvoids = [];
 
     /** @var Collection<int, MealPlanEntry> */
     #[ORM\OneToMany(targetEntity: MealPlanEntry::class, mappedBy: 'plan', cascade: ['persist', 'remove'], orphanRemoval: true)]
@@ -205,6 +248,48 @@ class MealPlan implements HouseholdOwned
     public function setWeekdayMaxMinutes(?int $minutes): void
     {
         $this->weekdayMaxMinutes = $minutes;
+    }
+
+    public function getTweak(): ?string
+    {
+        return $this->tweak;
+    }
+
+    /** @return array<string, mixed>|null */
+    public function getTweakRules(): ?array
+    {
+        return $this->tweakRules;
+    }
+
+    /** @return array{es: string, en: string}|null */
+    public function getTweakLabel(): ?array
+    {
+        return $this->tweakLabel;
+    }
+
+    /** @return list<string> */
+    public function getTweakAvoids(): array
+    {
+        return $this->tweakAvoids;
+    }
+
+    /** The week's rules, applied on top of the household's (none without a wish, or when it couldn't be read). */
+    public function weekRules(): TasteRules
+    {
+        return null === $this->tweakRules ? TasteRules::none() : TasteRules::fromArray($this->tweakRules);
+    }
+
+    /**
+     * @param array{es: string, en: string}|null $label
+     * @param list<string>                       $avoids
+     */
+    public function setTweak(?string $wish, ?TasteRules $rules, ?array $label = null, array $avoids = []): void
+    {
+        $wish = null === $wish ? '' : trim($wish);
+        $this->tweak = '' === $wish ? null : mb_substr($wish, 0, 500);
+        $this->tweakRules = null === $this->tweak ? null : $rules?->toArray();
+        $this->tweakLabel = null === $this->tweakRules ? null : $label;
+        $this->tweakAvoids = null === $this->tweakRules ? [] : $avoids;
     }
 
     /** @return list<MealPlanEntry> in order: by day, lunch before dinner */

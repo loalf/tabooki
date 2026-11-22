@@ -63,6 +63,75 @@ final readonly class TasteCompiler
         return [$this->read($completion->toolInput ?? [], $draft, $final), $completion];
     }
 
+    /**
+     * A wish for one week ("my mother comes, she doesn't eat pork", "a lighter week"), as rules on
+     * top of the household's usual ones, and a few words to show on the week.
+     *
+     * @param array<string, string> $ingredients see compile()
+     * @param array<string, int>    $tags
+     *
+     * @return array{TasteRules, array{es: string, en: string}|null, Completion}
+     *
+     * @throws LlmException
+     */
+    public function compileWeek(string $wish, TasteRules $usual, array $ingredients, array $tags): array
+    {
+        $input = [
+            'this_week' => trim($wish),
+            'usual_rules' => $usual->toArray(),
+            'household_ingredients' => array_map(static fn (string $key, string $name): string => "{$key} ({$name})", array_keys($ingredients), $ingredients),
+            'household_tags' => $tags,
+        ];
+        $completion = $this->llm->complete(new Prompt(
+            model: $this->model,
+            system: self::WEEK_INSTRUCTIONS,
+            content: [Content::text(json_encode($input, \JSON_THROW_ON_ERROR | \JSON_UNESCAPED_UNICODE | \JSON_PRETTY_PRINT))],
+            toolName: self::WEEK_TOOL,
+            toolDescription: 'Save the rules for this week and a few words saying what they are.',
+            toolSchema: self::weekSchema(),
+            maxTokens: 3000,
+            thinking: false,
+        ));
+
+        $output = $completion->toolInput ?? [];
+        $rules = TasteRules::fromArray(\is_array($output['rules'] ?? null) ? $output['rules'] : []);
+        $label = $output['label'] ?? null;
+        $label = \is_array($label) && \is_string($label['es'] ?? null) && \is_string($label['en'] ?? null) && '' !== trim($label['es'])
+            ? ['es' => mb_substr(trim($label['es']), 0, 120), 'en' => mb_substr(trim($label['en']), 0, 120)]
+            : null;
+
+        return [$rules, $label, $completion];
+    }
+
+    public const string WEEK_TOOL = 'save_week_rules';
+
+    private const string WEEK_INSTRUCTIONS = <<<'TXT'
+        A household in Spain plans its weekly meals from its own recipes, following its usual rules. For this week only it wrote a wish (this_week). Turn it into rules that apply on top of the usual ones, for this week only:
+        - Only what the wish says; everything else empty or null. Don't repeat the usual rules.
+        - A guest or someone at home who doesn't eat something this week: leave it out with strength "never" (they can't be served it). Something they'd rather not have: "avoid".
+        - "A lighter week": mealHeaviness light for lunch and dinner. "More fish this week": a weekly minimum or a prefer rule. "Nothing spicy": maxSpice 0.
+        - Ingredients that aren't food groups go in excludeIngredients, with keys from household_ingredients plus the usual canonical English snake_case keys; prefer tags from household_tags.
+        - What no rule can say ("something special on Saturday") is left out.
+        - label: a few words in Spanish (es) and English (en) saying what the rules do, to show on the week ("Sin cerdo, más ligera" / "No pork, lighter"). Empty strings when no rule came out of it.
+        Answer by calling the save_week_rules tool once.
+        TXT;
+
+    /** @return array<string, mixed> JSON Schema for strict tool use */
+    public static function weekSchema(): array
+    {
+        $text = ['type' => 'string'];
+
+        return [
+            'type' => 'object',
+            'additionalProperties' => false,
+            'required' => ['rules', 'label'],
+            'properties' => [
+                'rules' => TasteRules::schema(),
+                'label' => ['type' => 'object', 'additionalProperties' => false, 'required' => ['es', 'en'], 'properties' => ['es' => $text, 'en' => $text]],
+            ],
+        ];
+    }
+
     /** @param array<mixed> $output */
     private function read(array $output, TasteRules $draft, bool $final): TasteDraft
     {

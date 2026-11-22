@@ -79,6 +79,13 @@ export function useRemoveMeal() {
   )
 }
 
+/** A wish for this week only (null clears it); the week is planned again. Takes a few seconds (the text model). */
+export function useTweakWeek() {
+  return useWeekMutation(({ planId, tweak }: { planId: string; tweak: string | null }) =>
+    api.POST('/api/meal-plans/{id}/tweak', { params: { path: { id: planId } }, body: { tweak } }).then(unwrap),
+  )
+}
+
 export function useDeleteMealPlan() {
   const queryClient = useQueryClient()
   return useMutation({

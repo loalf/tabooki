@@ -70,6 +70,8 @@ export function suggestFor({
       r.id &&
       !exclude.includes(r.id) &&
       !forbidden(r) &&
+      // This week's wish (a guest who doesn't eat pork) counts too.
+      !(plan.tweakAvoids ?? []).includes(r.id) &&
       (!r.mealTypes?.length || r.mealTypes.includes(slot)) &&
       (limit == null || r.totalMinutes == null || r.totalMinutes <= limit),
   )

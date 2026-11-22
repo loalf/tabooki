@@ -323,6 +323,19 @@
       "warning": "No encaja del todo con vuestros gustos",
       "notesFit": "{{reason}}, como pedís en las notas",
       "notesMisfit": "Va contra vuestras notas ({{reason}}): no había otra opción."
+    },
+    "tweak": {
+      "title": "¿Algo especial esta semana?",
+      "hint": "Solo para esta semana, con vuestras palabras. Por ejemplo, si viene alguien o queréis comer más ligero.",
+      "placeholder": "Viene mi madre el jueves y no come cerdo. Una semana más ligera…",
+      "actionHint": "Un deseo solo para esta semana; el menú se rehace (lo fijado se queda).",
+      "apply": "Aplicar y rehacer el menú",
+      "applying": "Pensando en esta semana…",
+      "clear": "Quitar y rehacer el menú",
+      "change": "Cambiar lo especial de esta semana",
+      "thisWeek": "Esta semana:",
+      "unread": "No hemos podido aplicar",
+      "retry": "Reintentar"
     }
   },
   "shopping": {
@@ -495,7 +508,8 @@
       "translate": "Traducir la receta",
       "annotate": "Leer cómo es",
       "taste_profile": "Entender vuestros gustos",
-      "notes_fit": "Revisar recetas con vuestras notas"
+      "notes_fit": "Revisar recetas con vuestras notas",
+      "tweak": "Entender lo especial de la semana"
     },
     "classifyWhat": "Ingredientes nuevos de la lista",
     "translateWhat": "Receta escrita a mano",

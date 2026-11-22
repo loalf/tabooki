@@ -25,4 +25,8 @@ final class MealPlanInput
     /** Longest recipe (prep + cook) for Monday to Friday; null for no limit. */
     #[Assert\Range(min: 5, max: 600)]
     public ?int $weekdayMaxMinutes = null;
+
+    /** A wish for this week only ("my mother comes: no pork"), in the household's words. */
+    #[Assert\Length(max: 500)]
+    public ?string $tweak = null;
 }

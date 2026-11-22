@@ -69,4 +69,27 @@ final class TasteRulesTest extends TestCase
         $groups = TasteRules::API_SCHEMA['properties']['excludeGroups']['items']['properties']['group']['enum'];
         self::assertSame(FoodGroup::values(), $groups);
     }
+
+    public function testAWeeksRulesGoOnTopOfTheHouseholds(): void
+    {
+        $usual = TasteRules::fromArray([
+            'diet' => 'pescatarian',
+            'excludeGroups' => [['group' => 'cheese', 'strength' => 'avoid']],
+            'mealHeaviness' => ['lunch' => 'hearty', 'dinner' => 'light'],
+            'maxSpice' => 1,
+        ]);
+        $week = TasteRules::fromArray([
+            'diet' => 'vegetarian',
+            'excludeGroups' => [['group' => 'cheese', 'strength' => 'never'], ['group' => 'gluten', 'strength' => 'never']],
+            'mealHeaviness' => ['lunch' => 'light', 'dinner' => null],
+            'maxSpice' => 0,
+        ]);
+
+        $both = $usual->with($week)->toArray();
+        self::assertSame('vegetarian', $both['diet'], 'the stricter diet');
+        self::assertSame([['group' => 'cheese', 'strength' => 'never'], ['group' => 'gluten', 'strength' => 'never']], $both['excludeGroups']);
+        self::assertSame(['lunch' => 'light', 'dinner' => 'light'], $both['mealHeaviness'], 'the week says lunch; dinner stays');
+        self::assertSame(0, $both['maxSpice']);
+        self::assertSame($usual->toArray(), $usual->with(TasteRules::none())->toArray());
+    }
 }

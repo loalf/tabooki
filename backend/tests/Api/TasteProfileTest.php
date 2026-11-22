@@ -318,6 +318,59 @@ final class TasteProfileTest extends ApiTestCase
         }
     }
 
+    public function testAWishForOneWeek(): void
+    {
+        foreach (range(1, 6) as $i) {
+            $this->recipe("Lomo $i", [FoodGroup::Pork], keys: ['pork_loin', "veg_$i"]);
+            $this->recipe("Verdura $i", [], keys: ['zucchini', "veg_$i"]);
+        }
+        $this->save(['maxSpice' => 1]);
+
+        $this->mockBedrock([new JsonMockResponse([
+            'output' => ['message' => ['role' => 'assistant', 'content' => [['toolUse' => ['toolUseId' => 't1', 'name' => TasteCompiler::WEEK_TOOL, 'input' => [
+                'rules' => ['diet' => null, 'excludeGroups' => [['group' => 'pork', 'strength' => 'never']], 'excludeIngredients' => [], 'weekly' => [], 'mealHeaviness' => ['lunch' => null, 'dinner' => null], 'prefer' => [], 'maxSpice' => null],
+                'label' => ['es' => 'Sin cerdo', 'en' => 'No pork'],
+            ]]]]]],
+            'stopReason' => 'tool_use',
+            'usage' => ['inputTokens' => 900, 'outputTokens' => 150],
+        ])]);
+        $response = $this->client->request('POST', '/api/meal-plans', ['json' => ['weekStart' => self::WEEK, 'slots' => \array_slice($this->slots(), 0, 6), 'tweak' => '  Viene mi madre, no come cerdo.  ']]);
+        self::assertResponseStatusCodeSame(201);
+        /** @var array{id: string, tweak: string, tweakLabel: array{es: string}, tweakRules: array{excludeGroups: list<array<string, string>>}, tweakAvoids: list<string>, entries: list<array{recipe?: array{title: string}}>} $plan */
+        $plan = $response->toArray();
+
+        /** @var array{this_week: string, usual_rules: array{maxSpice: ?int}} $sent */
+        $sent = json_decode($this->userText($this->bedrockRequests[0]), true);
+        self::assertSame('Viene mi madre, no come cerdo.', $sent['this_week']);
+        self::assertSame(1, $sent['usual_rules']['maxSpice'], 'the model sees the usual rules, not to repeat them');
+
+        self::assertSame('Viene mi madre, no come cerdo.', $plan['tweak']);
+        self::assertSame('Sin cerdo', $plan['tweakLabel']['es']);
+        self::assertSame([['group' => 'pork', 'strength' => 'never']], $plan['tweakRules']['excludeGroups']);
+        self::assertCount(6, $plan['tweakAvoids'], 'the swap suggestions leave the pork out this week');
+        foreach ($plan['entries'] as $entry) {
+            self::assertStringStartsWith('Verdura', $entry['recipe']['title'] ?? '', 'no pork this week');
+        }
+        self::assertCount(1, self::getContainer()->get(EntityManagerInterface::class)->getRepository(ExtractionRun::class)->findBy(['step' => 'tweak']));
+
+        // Cleared: no model, the week planned as usual.
+        $this->bedrockRequests = [];
+        /** @var array<string, mixed> $cleared */
+        $cleared = $this->client->request('POST', '/api/meal-plans/'.$plan['id'].'/tweak', ['json' => ['tweak' => null]])->toArray();
+        self::assertSame([], $this->bedrockRequests);
+        self::assertArrayNotHasKey('tweak', $cleared);
+        self::assertArrayNotHasKey('tweakRules', $cleared);
+        self::assertSame([], $cleared['tweakAvoids']);
+
+        // The model unreachable: the wish is kept, without rules, to try again.
+        $this->mockBedrock([new MockResponse('', ['http_code' => 500])]);
+        /** @var array<string, mixed> $failed */
+        $failed = $this->client->request('POST', '/api/meal-plans/'.$plan['id'].'/tweak', ['json' => ['tweak' => 'Más ligera']])->toArray();
+        self::assertResponseIsSuccessful();
+        self::assertSame('Más ligera', $failed['tweak']);
+        self::assertArrayNotHasKey('tweakRules', $failed);
+    }
+
     // —— Helpers ————————————————————————————————————————————————
 
     /**
@@ -440,8 +493,8 @@ final class TasteProfileTest extends ApiTestCase
         return $draft;
     }
 
-    /** @return Plan */
-    private function createPlan(int $meals = 14): array
+    /** @return list<array{date: string, slot: string}> every meal of the week, in order */
+    private function slots(): array
     {
         $slots = [];
         foreach (range(0, 6) as $day) {
@@ -449,7 +502,14 @@ final class TasteProfileTest extends ApiTestCase
                 $slots[] = ['date' => (new \DateTimeImmutable(self::WEEK))->modify("+$day days")->format('Y-m-d'), 'slot' => $slot];
             }
         }
-        $response = $this->client->request('POST', '/api/meal-plans', ['json' => ['weekStart' => self::WEEK, 'slots' => \array_slice($slots, 0, $meals)]]);
+
+        return $slots;
+    }
+
+    /** @return Plan */
+    private function createPlan(int $meals = 14): array
+    {
+        $response = $this->client->request('POST', '/api/meal-plans', ['json' => ['weekStart' => self::WEEK, 'slots' => \array_slice($this->slots(), 0, $meals)]]);
         self::assertResponseStatusCodeSame(201);
 
         return self::plan($response->toArray());

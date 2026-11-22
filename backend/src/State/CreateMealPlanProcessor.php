@@ -13,12 +13,14 @@ use App\Enum\MealType;
 use App\Planning\Planner;
 use App\Repository\MealPlanRepository;
 use App\Security\CurrentHousehold;
+use App\Taste\WeekTweak;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
- * Plans a week: creates its meals and fills them from the library.
+ * Plans a week: creates its meals, reads the week's wish if there is one, and fills them from
+ * the library.
  *
  * @implements ProcessorInterface<MealPlanInput, MealPlan>
  */
@@ -28,6 +30,7 @@ final readonly class CreateMealPlanProcessor implements ProcessorInterface
         private CurrentHousehold $current,
         private MealPlanRepository $plans,
         private Planner $planner,
+        private WeekTweak $tweak,
         private EntityManagerInterface $entityManager,
     ) {
     }
@@ -55,6 +58,7 @@ final readonly class CreateMealPlanProcessor implements ProcessorInterface
             }
         }
 
+        $this->tweak->apply($plan, $data->tweak);
         $this->planner->fill($plan);
         $this->entityManager->persist($plan);
         $this->entityManager->flush();

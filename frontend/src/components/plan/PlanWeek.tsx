@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { MealPlan, Slot } from '@/api/plan'
 import { formatDay } from '@/components/plan/format'
 import { MealRow } from '@/components/plan/MealRow'
+import { WeekTweakBanner } from '@/components/plan/WeekTweak'
 import { cn } from '@/lib/utils'
 import { parseIsoDate, today, weekDays } from '@/lib/week'
 
@@ -24,6 +25,7 @@ export function PlanWeek({ plan }: { plan: MealPlan }) {
 
   return (
     <div className="flex flex-col gap-5">
+      <WeekTweakBanner plan={plan} />
       <DayStrip plan={plan} onPick={(date) => {
         if (date < now) setShowPast(true)
         // After the folded days open up.

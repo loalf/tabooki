@@ -129,9 +129,13 @@ final readonly class Planner
         $this->syncLeftovers($plan);
     }
 
+    /** The household's likings, with this week's wish on top. */
     private function taste(MealPlan $plan): Taste
     {
-        return $this->tastes->tasteFor($plan->getHousehold());
+        $household = $this->tastes->tasteFor($plan->getHousehold());
+
+        // A wish for this week only goes on top of the household's likings.
+        return new Taste($household->rules->with($plan->weekRules()), $household->notes);
     }
 
     /** Leftovers are the same dish: they follow their meal, or stop being leftovers if locked. */

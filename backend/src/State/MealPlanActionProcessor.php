@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Dto\MealPlanEntryAction;
 use App\Dto\MealPlanSlotInput;
+use App\Dto\MealPlanTweakInput;
 use App\Entity\MealPlan;
 use App\Entity\MealPlanEntry;
 use App\Entity\Recipe;
@@ -15,6 +16,7 @@ use App\Enum\MealType;
 use App\Planning\Planner;
 use App\Repository\MealPlanRepository;
 use App\Security\CurrentHousehold;
+use App\Taste\WeekTweak;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -25,7 +27,7 @@ use Symfony\Component\Uid\Uuid;
  * Everything done to a planned week after creating it (see the operations on MealPlan). Each
  * answers with the whole plan.
  *
- * @implements ProcessorInterface<MealPlanSlotInput|MealPlanEntryAction|null, MealPlan>
+ * @implements ProcessorInterface<MealPlanSlotInput|MealPlanEntryAction|MealPlanTweakInput|null, MealPlan>
  */
 final readonly class MealPlanActionProcessor implements ProcessorInterface
 {
@@ -33,6 +35,7 @@ final readonly class MealPlanActionProcessor implements ProcessorInterface
         private CurrentHousehold $current,
         private MealPlanRepository $plans,
         private Planner $planner,
+        private WeekTweak $tweak,
         private EntityManagerInterface $entityManager,
     ) {
     }
@@ -43,6 +46,7 @@ final readonly class MealPlanActionProcessor implements ProcessorInterface
 
         match ($operation->getName()) {
             'meal_plan_regenerate' => $this->planner->fill($plan),
+            'meal_plan_tweak' => $data instanceof MealPlanTweakInput ? $this->tweak($plan, $data) : null,
             'meal_plan_add_entry' => $data instanceof MealPlanSlotInput ? $this->add($plan, $data) : null,
             'meal_plan_swap_entry' => $data instanceof MealPlanEntryAction ? $this->planner->fillOne($plan, $this->entry($plan, $data), swap: true) : null,
             'meal_plan_update_entry' => $data instanceof MealPlanEntryAction ? $this->update($plan, $data) : null,
@@ -52,6 +56,12 @@ final readonly class MealPlanActionProcessor implements ProcessorInterface
         $this->entityManager->flush();
 
         return $plan;
+    }
+
+    private function tweak(MealPlan $plan, MealPlanTweakInput $input): void
+    {
+        $this->tweak->apply($plan, $input->tweak);
+        $this->planner->fill($plan);
     }
 
     private function add(MealPlan $plan, MealPlanSlotInput $input): void

@@ -236,6 +236,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/meal-plans/{id}/tweak": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a MealPlan resource.
+         * @description Creates a MealPlan resource.
+         */
+        post: operations["meal_plan_tweak"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/password/forgot": {
         parameters: {
             query?: never;
@@ -707,7 +727,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate" | "taste_profile" | "notes_fit";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -729,7 +749,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate" | "taste_profile" | "notes_fit";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -1104,6 +1124,58 @@ export interface components {
             leftovers: boolean;
             /** @description Longest recipe (prep + cook) for Monday to Friday; null for no limit. */
             weekdayMaxMinutes?: number | null;
+            /** @description A wish for this week only ("my mother comes: no pork"), as the household wrote it; null without one. */
+            readonly tweak?: string | null;
+            tweakRules?: {
+                version?: number;
+                /** @enum {string|null} */
+                diet?: "vegan" | "vegetarian" | "pescatarian" | null;
+                excludeGroups?: {
+                    /** @enum {string} */
+                    group: "red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol";
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                excludeIngredients?: {
+                    keys: string[];
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                weekly?: {
+                    groups: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+                    max: number | null;
+                    min: number | null;
+                }[];
+                mealHeaviness?: {
+                    /** @enum {string|null} */
+                    lunch: "light" | "medium" | "hearty" | null;
+                    /** @enum {string|null} */
+                    dinner: "light" | "medium" | "hearty" | null;
+                };
+                prefer?: {
+                    tags: string[];
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @enum {string} */
+                    weight: "more" | "less";
+                }[];
+                maxSpice?: number | null;
+            } | null;
+            tweakLabel?: {
+                es: string;
+                en: string;
+            } | null;
+            /**
+             * @description Recipes the week's rules have something against, when the wish was read: the app leaves
+             *     them out of its swap suggestions this week.
+             */
+            readonly tweakAvoids?: string[];
             entries?: components["schemas"]["MealPlanEntry-meal_plan.read_recipe.list"][];
             /** Format: date-time */
             readonly createdAt?: string;
@@ -1140,6 +1212,8 @@ export interface components {
             leftovers: boolean;
             /** @description Longest recipe (prep + cook) for Monday to Friday; null for no limit. */
             weekdayMaxMinutes?: number | null;
+            /** @description A wish for this week only ("my mother comes: no pork"), in the household's words. */
+            tweak?: string | null;
         };
         /** @description Plan one more meal (and fill it). */
         "MealPlan.MealPlanSlotInput": {
@@ -1152,6 +1226,10 @@ export interface components {
             slot: "lunch" | "dinner";
             /** @description null: the household's default. */
             servings?: number | null;
+        };
+        /** @description Set (or clear, with null) a wish for this week only, then pick again every meal that isn't locked. */
+        "MealPlan.MealPlanTweakInput": {
+            tweak?: string | null;
         };
         /**
          * @description A week's lunches and dinners (docs/PLAN.md §6). Weeks start on Monday. Each planned meal is an
@@ -1170,6 +1248,58 @@ export interface components {
             leftovers: boolean;
             /** @description Longest recipe (prep + cook) for Monday to Friday; null for no limit. */
             weekdayMaxMinutes?: number | null;
+            /** @description A wish for this week only ("my mother comes: no pork"), as the household wrote it; null without one. */
+            readonly tweak?: string | null;
+            tweakRules?: {
+                version?: number;
+                /** @enum {string|null} */
+                diet?: "vegan" | "vegetarian" | "pescatarian" | null;
+                excludeGroups?: {
+                    /** @enum {string} */
+                    group: "red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol";
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                excludeIngredients?: {
+                    keys: string[];
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                weekly?: {
+                    groups: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+                    max: number | null;
+                    min: number | null;
+                }[];
+                mealHeaviness?: {
+                    /** @enum {string|null} */
+                    lunch: "light" | "medium" | "hearty" | null;
+                    /** @enum {string|null} */
+                    dinner: "light" | "medium" | "hearty" | null;
+                };
+                prefer?: {
+                    tags: string[];
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @enum {string} */
+                    weight: "more" | "less";
+                }[];
+                maxSpice?: number | null;
+            } | null;
+            tweakLabel?: {
+                es: string;
+                en: string;
+            } | null;
+            /**
+             * @description Recipes the week's rules have something against, when the wish was read: the app leaves
+             *     them out of its swap suggestions this week.
+             */
+            readonly tweakAvoids?: string[];
             entries?: components["schemas"]["MealPlanEntry.jsonld-meal_plan.read_recipe.list"][];
             /** Format: date-time */
             readonly createdAt?: string;
@@ -3576,6 +3706,69 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description MealPlan resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["MealPlan.jsonld-meal_plan.read_recipe.list"];
+                    "application/json": components["schemas"]["MealPlan-meal_plan.read_recipe.list"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    meal_plan_tweak: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description MealPlan identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new MealPlan resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["MealPlan.MealPlanTweakInput"];
+                "application/json": components["schemas"]["MealPlan.MealPlanTweakInput"];
+            };
+        };
         responses: {
             /** @description MealPlan resource created */
             200: {

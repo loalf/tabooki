@@ -323,6 +323,19 @@
       "warning": "Doesn't quite fit your tastes",
       "notesFit": "{{reason}}, as your notes ask",
       "notesMisfit": "Goes against your notes ({{reason}}): there was no other option."
+    },
+    "tweak": {
+      "title": "Anything special this week?",
+      "hint": "For this week only, in your own words. For example, a guest is coming or you want to eat lighter.",
+      "placeholder": "My mother comes on Thursday and doesn't eat pork. A lighter week…",
+      "actionHint": "A wish for this week only; the menu is redone (locked meals stay).",
+      "apply": "Apply and redo the menu",
+      "applying": "Thinking about this week…",
+      "clear": "Remove and redo the menu",
+      "change": "Change what's special this week",
+      "thisWeek": "This week:",
+      "unread": "We couldn't apply",
+      "retry": "Try again"
     }
   },
   "shopping": {
@@ -495,7 +508,8 @@
       "translate": "Translating the recipe",
       "annotate": "Reading what it's like",
       "taste_profile": "Understanding your tastes",
-      "notes_fit": "Checking recipes against your notes"
+      "notes_fit": "Checking recipes against your notes",
+      "tweak": "Understanding this week's wish"
     },
     "classifyWhat": "New ingredients on the list",
     "translateWhat": "A recipe typed in",

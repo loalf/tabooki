@@ -231,7 +231,7 @@ final class TranslationTest extends ApiTestCase
 
     public function testToolSchemasSuitStrictToolUse(): void
     {
-        foreach ([ExtractionSchema::schema(), ExtractionSchema::schema(estimates: true), ClassifyIngredientsHandler::schema(), RecipeTranslator::schema(), RecipeAnnotator::schema(), TasteCompiler::schema(), NotesJudge::schema()] as $schema) {
+        foreach ([ExtractionSchema::schema(), ExtractionSchema::schema(estimates: true), ClassifyIngredientsHandler::schema(), RecipeTranslator::schema(), RecipeAnnotator::schema(), TasteCompiler::schema(), TasteCompiler::weekSchema(), NotesJudge::schema()] as $schema) {
             $this->assertStrict($schema);
         }
     }

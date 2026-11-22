@@ -1440,6 +1440,127 @@
                 ]
             }
         },
+        "/api/meal-plans/{id}/tweak": {
+            "post": {
+                "operationId": "meal_plan_tweak",
+                "tags": [
+                    "MealPlan"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MealPlan resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan.jsonld-meal_plan.read_recipe.list"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan-meal_plan.read_recipe.list"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a MealPlan resource.",
+                "description": "Creates a MealPlan resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "MealPlan identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The new MealPlan resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MealPlan.MealPlanTweakInput"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MealPlan.MealPlanTweakInput"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
         "/api/password/forgot": {
             "post": {
                 "operationId": "password_forgot",
@@ -4303,7 +4424,8 @@
                             "translate",
                             "annotate",
                             "taste_profile",
-                            "notes_fit"
+                            "notes_fit",
+                            "tweak"
                         ]
                     },
                     "model": {
@@ -4375,7 +4497,8 @@
                             "translate",
                             "annotate",
                             "taste_profile",
-                            "notes_fit"
+                            "notes_fit",
+                            "tweak"
                         ]
                     },
                     "model": {
@@ -5253,6 +5376,273 @@
                             "null"
                         ]
                     },
+                    "tweak": {
+                        "readOnly": true,
+                        "description": "A wish for this week only (\"my mother comes: no pork\"), as the household wrote it; null without one.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "tweakRules": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "properties": {
+                            "version": {
+                                "type": "integer"
+                            },
+                            "diet": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "vegan",
+                                    "vegetarian",
+                                    "pescatarian",
+                                    null
+                                ]
+                            },
+                            "excludeGroups": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": [
+                                        "group",
+                                        "strength"
+                                    ],
+                                    "properties": {
+                                        "group": {
+                                            "type": "string",
+                                            "enum": [
+                                                "red_meat",
+                                                "pork",
+                                                "poultry",
+                                                "processed_meat",
+                                                "fish",
+                                                "shellfish",
+                                                "animal_stock",
+                                                "egg",
+                                                "dairy",
+                                                "cheese",
+                                                "gluten",
+                                                "tree_nuts",
+                                                "peanuts",
+                                                "soy",
+                                                "sesame",
+                                                "alcohol"
+                                            ]
+                                        },
+                                        "strength": {
+                                            "type": "string",
+                                            "enum": [
+                                                "never",
+                                                "avoid"
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            "excludeIngredients": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": [
+                                        "keys",
+                                        "name",
+                                        "strength"
+                                    ],
+                                    "properties": {
+                                        "keys": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "name": {
+                                            "type": "object",
+                                            "required": [
+                                                "es",
+                                                "en"
+                                            ],
+                                            "properties": {
+                                                "es": {
+                                                    "type": "string"
+                                                },
+                                                "en": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "strength": {
+                                            "type": "string",
+                                            "enum": [
+                                                "never",
+                                                "avoid"
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            "weekly": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": [
+                                        "groups",
+                                        "max",
+                                        "min"
+                                    ],
+                                    "properties": {
+                                        "groups": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "red_meat",
+                                                    "pork",
+                                                    "poultry",
+                                                    "processed_meat",
+                                                    "fish",
+                                                    "shellfish",
+                                                    "animal_stock",
+                                                    "egg",
+                                                    "dairy",
+                                                    "cheese",
+                                                    "gluten",
+                                                    "tree_nuts",
+                                                    "peanuts",
+                                                    "soy",
+                                                    "sesame",
+                                                    "alcohol"
+                                                ]
+                                            }
+                                        },
+                                        "max": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ]
+                                        },
+                                        "min": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            "mealHeaviness": {
+                                "type": "object",
+                                "required": [
+                                    "lunch",
+                                    "dinner"
+                                ],
+                                "properties": {
+                                    "lunch": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "enum": [
+                                            "light",
+                                            "medium",
+                                            "hearty",
+                                            null
+                                        ]
+                                    },
+                                    "dinner": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "enum": [
+                                            "light",
+                                            "medium",
+                                            "hearty",
+                                            null
+                                        ]
+                                    }
+                                }
+                            },
+                            "prefer": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": [
+                                        "tags",
+                                        "name",
+                                        "weight"
+                                    ],
+                                    "properties": {
+                                        "tags": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "name": {
+                                            "type": "object",
+                                            "required": [
+                                                "es",
+                                                "en"
+                                            ],
+                                            "properties": {
+                                                "es": {
+                                                    "type": "string"
+                                                },
+                                                "en": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "weight": {
+                                            "type": "string",
+                                            "enum": [
+                                                "more",
+                                                "less"
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            "maxSpice": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            }
+                        }
+                    },
+                    "tweakLabel": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "required": [
+                            "es",
+                            "en"
+                        ],
+                        "properties": {
+                            "es": {
+                                "type": "string"
+                            },
+                            "en": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "tweakAvoids": {
+                        "readOnly": true,
+                        "description": "Recipes the week's rules have something against, when the wish was read: the app leaves\nthem out of its swap suggestions this week.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
                     "entries": {
                         "type": "array",
                         "items": {
@@ -5353,6 +5743,14 @@
                             "integer",
                             "null"
                         ]
+                    },
+                    "tweak": {
+                        "maxLength": 500,
+                        "description": "A wish for this week only (\"my mother comes: no pork\"), in the household's words.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     }
                 }
             },
@@ -5389,6 +5787,19 @@
                     }
                 }
             },
+            "MealPlan.MealPlanTweakInput": {
+                "type": "object",
+                "description": "Set (or clear, with null) a wish for this week only, then pick again every meal that isn't locked.",
+                "properties": {
+                    "tweak": {
+                        "maxLength": 500,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
             "MealPlan.jsonld-meal_plan.read_recipe.list": {
                 "allOf": [
                     {
@@ -5417,6 +5828,273 @@
                                     "integer",
                                     "null"
                                 ]
+                            },
+                            "tweak": {
+                                "readOnly": true,
+                                "description": "A wish for this week only (\"my mother comes: no pork\"), as the household wrote it; null without one.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "tweakRules": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "properties": {
+                                    "version": {
+                                        "type": "integer"
+                                    },
+                                    "diet": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "enum": [
+                                            "vegan",
+                                            "vegetarian",
+                                            "pescatarian",
+                                            null
+                                        ]
+                                    },
+                                    "excludeGroups": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "required": [
+                                                "group",
+                                                "strength"
+                                            ],
+                                            "properties": {
+                                                "group": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "red_meat",
+                                                        "pork",
+                                                        "poultry",
+                                                        "processed_meat",
+                                                        "fish",
+                                                        "shellfish",
+                                                        "animal_stock",
+                                                        "egg",
+                                                        "dairy",
+                                                        "cheese",
+                                                        "gluten",
+                                                        "tree_nuts",
+                                                        "peanuts",
+                                                        "soy",
+                                                        "sesame",
+                                                        "alcohol"
+                                                    ]
+                                                },
+                                                "strength": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "never",
+                                                        "avoid"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "excludeIngredients": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "required": [
+                                                "keys",
+                                                "name",
+                                                "strength"
+                                            ],
+                                            "properties": {
+                                                "keys": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "name": {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "es",
+                                                        "en"
+                                                    ],
+                                                    "properties": {
+                                                        "es": {
+                                                            "type": "string"
+                                                        },
+                                                        "en": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "strength": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "never",
+                                                        "avoid"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "weekly": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "required": [
+                                                "groups",
+                                                "max",
+                                                "min"
+                                            ],
+                                            "properties": {
+                                                "groups": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "red_meat",
+                                                            "pork",
+                                                            "poultry",
+                                                            "processed_meat",
+                                                            "fish",
+                                                            "shellfish",
+                                                            "animal_stock",
+                                                            "egg",
+                                                            "dairy",
+                                                            "cheese",
+                                                            "gluten",
+                                                            "tree_nuts",
+                                                            "peanuts",
+                                                            "soy",
+                                                            "sesame",
+                                                            "alcohol"
+                                                        ]
+                                                    }
+                                                },
+                                                "max": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "min": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "mealHeaviness": {
+                                        "type": "object",
+                                        "required": [
+                                            "lunch",
+                                            "dinner"
+                                        ],
+                                        "properties": {
+                                            "lunch": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ],
+                                                "enum": [
+                                                    "light",
+                                                    "medium",
+                                                    "hearty",
+                                                    null
+                                                ]
+                                            },
+                                            "dinner": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ],
+                                                "enum": [
+                                                    "light",
+                                                    "medium",
+                                                    "hearty",
+                                                    null
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "prefer": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "required": [
+                                                "tags",
+                                                "name",
+                                                "weight"
+                                            ],
+                                            "properties": {
+                                                "tags": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "name": {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "es",
+                                                        "en"
+                                                    ],
+                                                    "properties": {
+                                                        "es": {
+                                                            "type": "string"
+                                                        },
+                                                        "en": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "weight": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "more",
+                                                        "less"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "maxSpice": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    }
+                                }
+                            },
+                            "tweakLabel": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "required": [
+                                    "es",
+                                    "en"
+                                ],
+                                "properties": {
+                                    "es": {
+                                        "type": "string"
+                                    },
+                                    "en": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "tweakAvoids": {
+                                "readOnly": true,
+                                "description": "Recipes the week's rules have something against, when the wish was read: the app leaves\nthem out of its swap suggestions this week.",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
                             },
                             "entries": {
                                 "type": "array",
