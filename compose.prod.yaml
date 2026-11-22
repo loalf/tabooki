@@ -14,6 +14,10 @@ services:
       BEDROCK_TEXT_MODEL: ${BEDROCK_TEXT_MODEL:-eu.anthropic.claude-haiku-5-5}
       BEDROCK_VIDEO_MODEL: ${BEDROCK_VIDEO_MODEL:-eu.amazon.nova-pro-v1:0}
       EXTRACTION_THINKING: ${EXTRACTION_THINKING:-1}
+      # Speech to text for videos (Whisper through OpenRouter). Optional until the app transcribes
+      # videos; then make it required like the Bedrock key.
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_TRANSCRIPTION_MODEL: ${OPENROUTER_TRANSCRIPTION_MODEL:-openai/whisper-large-v3}
       # Password emails (docs/DEPLOY.md). Without MAILER_DSN they are discarded.
       MAILER_DSN: ${MAILER_DSN:-null://null}
       MAILER_FROM: ${MAILER_FROM:-Tabooki <no-reply@tabooki.xyz>}
@@ -50,6 +54,10 @@ services:
       BEDROCK_TEXT_MODEL: ${BEDROCK_TEXT_MODEL:-eu.anthropic.claude-haiku-5-5}
       BEDROCK_VIDEO_MODEL: ${BEDROCK_VIDEO_MODEL:-eu.amazon.nova-pro-v1:0}
       EXTRACTION_THINKING: ${EXTRACTION_THINKING:-1}
+      # Speech to text for videos (Whisper through OpenRouter). Optional until the app transcribes
+      # videos; then make it required like the Bedrock key.
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_TRANSCRIPTION_MODEL: ${OPENROUTER_TRANSCRIPTION_MODEL:-openai/whisper-large-v3}
       # Password emails (docs/DEPLOY.md). Without MAILER_DSN they are discarded.
       MAILER_DSN: ${MAILER_DSN:-null://null}
       MAILER_FROM: ${MAILER_FROM:-Tabooki <no-reply@tabooki.xyz>}

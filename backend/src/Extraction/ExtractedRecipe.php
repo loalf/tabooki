@@ -10,10 +10,10 @@ use App\Enum\MealType;
 final readonly class ExtractedRecipe
 {
     /**
-     * @param list<MealType>                                                                                                                                 $mealTypes
-     * @param list<string>                                                                                                                                   $tags
-     * @param list<array{raw: string, group: ?string, quantity: ?float, unit: ?string, name: ?string, canonicalKey: ?string, prep: ?string, optional: bool}> $ingredients
-     * @param list<string>                                                                                                                                   $steps
+     * @param list<MealType>                                                                                                                                                  $mealTypes
+     * @param list<string>                                                                                                                                                    $tags
+     * @param list<array{raw: string, group: ?string, quantity: ?float, unit: ?string, name: ?string, canonicalKey: ?string, prep: ?string, optional: bool, estimated: bool}> $ingredients
+     * @param list<string>                                                                                                                                                    $steps
      */
     public function __construct(
         public string $title,
@@ -26,6 +26,8 @@ final readonly class ExtractedRecipe
         public array $ingredients,
         public array $steps,
         public ?string $notes,
+        /** Servings guessed by the model rather than stated (only when estimates are allowed). */
+        public bool $servingsEstimated = false,
     ) {
     }
 }

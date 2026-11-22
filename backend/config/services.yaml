@@ -40,6 +40,7 @@ services:
         autoconfigure: false # the wrapped client already logs
 
     bedrock.http_client: '@http_client'
+    openrouter.http_client: '@http_client'
 
 when@test:
     parameters:
@@ -51,6 +52,9 @@ when@test:
             class: Symfony\Component\HttpClient\MockHttpClient
             public: true
         bedrock.http_client:
+            class: Symfony\Component\HttpClient\MockHttpClient
+            public: true
+        openrouter.http_client:
             class: Symfony\Component\HttpClient\MockHttpClient
             public: true
         # No yt-dlp in tests: canned answers, see App\Tests\FakeMediaFetcher.

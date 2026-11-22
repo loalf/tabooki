@@ -49,7 +49,7 @@ final class ExtractionResultTest extends TestCase
         self::assertSame(['legumbres'], $recipe->tags);
         self::assertSame(['Remojar.', 'Cocer 40 minutos.'], $recipe->steps);
         self::assertCount(2, $recipe->ingredients);
-        self::assertSame(['raw' => '300 g de lentejas', 'group' => null, 'quantity' => 300.0, 'unit' => 'g', 'name' => 'lentejas', 'canonicalKey' => 'lentils_dried', 'prep' => null, 'optional' => false], $recipe->ingredients[0]);
+        self::assertSame(['raw' => '300 g de lentejas', 'group' => null, 'quantity' => 300.0, 'unit' => 'g', 'name' => 'lentejas', 'canonicalKey' => 'lentils_dried', 'prep' => null, 'optional' => false, 'estimated' => false], $recipe->ingredients[0]);
         self::assertNull($recipe->ingredients[1]['unit']);
     }
 

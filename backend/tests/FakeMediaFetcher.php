@@ -42,4 +42,9 @@ final class FakeMediaFetcher implements MediaFetcher
 
         return $directory.'/video.mp4';
     }
+
+    public function downloadForAnalysis(string $url, int $maxBytes): ?string
+    {
+        return $this->downloadVideo($url, $maxBytes);
+    }
 }

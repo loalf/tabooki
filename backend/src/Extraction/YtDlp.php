@@ -94,6 +94,37 @@ final readonly class YtDlp implements MediaFetcher
         return $file;
     }
 
+    public function downloadForAnalysis(string $url, int $maxBytes): ?string
+    {
+        $directory = sys_get_temp_dir().'/tabooki-video-'.bin2hex(random_bytes(6));
+        mkdir($directory, 0700, true);
+
+        // Unlike downloadVideo, the codec doesn't matter (ffmpeg reads them all), so the small VP9
+        // streams Instagram offers next to H.264 files of unknown size are fine. Picture and sound
+        // come as separate streams more often than not: ffmpeg merges them. 720p keeps on-screen
+        // text legible; ~1.2 Mbit/s is plenty for stills without fetching the biggest stream.
+        $output = $this->run([
+            '--no-playlist',
+            '-f', 'bv*+ba/b',
+            '-S', 'res:720,vbr~1200',
+            '--merge-output-format', 'mkv',
+            '--max-filesize', (string) $maxBytes,
+            '--print', 'after_move:filepath', '--no-simulate',
+            '-o', $directory.'/video.%(ext)s',
+            $url,
+        ], timeout: 300);
+
+        $file = trim($output);
+        if ('' === $file || !str_starts_with($file, $directory.'/') || !is_file($file) || 0 === filesize($file) || filesize($file) > $maxBytes) {
+            array_map(unlink(...), glob($directory.'/*') ?: []);
+            @rmdir($directory);
+
+            return null;
+        }
+
+        return $file;
+    }
+
     /** @param list<string> $arguments */
     private function run(array $arguments, int $timeout): string
     {

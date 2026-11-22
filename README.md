@@ -46,10 +46,12 @@ Saved links are turned into recipes by an LLM on Amazon Bedrock. Create `backend
 ```sh
 AWS_BEARER_TOKEN_BEDROCK=ABSK...
 AWS_REGION=eu-west-1          # the region your key works in
+OPENROUTER_API_KEY=sk-or-...  # OpenRouter key: Whisper transcribes what is said in videos
 # Optional, defaults in backend/.env:
 # BEDROCK_TEXT_MODEL=...       # reads captions, transcripts and pages
 # BEDROCK_VIDEO_MODEL=...      # watches reels when the caption isn't enough (Amazon Nova)
 # EXTRACTION_THINKING=0        # Claude answers without thinking first: faster, fewer tokens
+# OPENROUTER_TRANSCRIPTION_MODEL=...  # the Whisper model (openai/whisper-large-v3)
 ```
 
 ```sh

@@ -98,6 +98,8 @@ final readonly class ExtractionResult
                 'canonicalKey' => null === $key ? null : trim((string) preg_replace('/[^a-z0-9]+/', '_', strtolower($key)), '_'),
                 'prep' => self::string($item['prep'] ?? null, 150),
                 'optional' => true === ($item['optional'] ?? false),
+                // Only asked for when estimates are allowed (ExtractionSchema::schema(estimates: true)).
+                'estimated' => true === ($item['estimated'] ?? false) && is_numeric($item['quantity'] ?? null),
             ];
         }
 
@@ -109,7 +111,7 @@ final readonly class ExtractionResult
         return new ExtractedRecipe(
             title: $title,
             language: Language::tryFrom(\is_string($data['language'] ?? null) ? $data['language'] : '') ?? Language::Es,
-            servings: self::int($data['servings'] ?? null, 1, 50),
+            servings: $servings = self::int($data['servings'] ?? null, 1, 50),
             prepMinutes: self::int($data['prep_minutes'] ?? null, 0, 1440),
             cookMinutes: self::int($data['cook_minutes'] ?? null, 0, 1440),
             mealTypes: $mealTypes,
@@ -117,6 +119,7 @@ final readonly class ExtractionResult
             ingredients: $ingredients,
             steps: \array_slice(array_values(array_filter(array_map(static fn (mixed $s): ?string => self::string($s, 4000), self::list($data['steps'] ?? null)))), 0, 100),
             notes: self::string($data['notes'] ?? null, 10000),
+            servingsEstimated: null !== $servings && true === ($data['servings_estimated'] ?? false),
         );
     }
 

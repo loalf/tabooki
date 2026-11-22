@@ -91,8 +91,15 @@ ENV APP_ENV=dev
 ENV XDEBUG_MODE=off
 ENV FRANKENPHP_WORKER_CONFIG=watch
 
+# ffmpeg, dev only for now (the app:extract:spike command): it cuts the sound (transcribed by
+# Whisper on OpenRouter) and stills out of downloaded videos. When the app itself uses it, the
+# prod image needs it too.
 # dev dependencies
+# hadolint ignore=DL3008
 RUN <<-EOF
+	apt-get update
+	apt-get install -y --no-install-recommends ffmpeg
+	rm -rf /var/lib/apt/lists/*
 	mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 	install-php-extensions xdebug
 	useradd -m -s /bin/bash nonroot

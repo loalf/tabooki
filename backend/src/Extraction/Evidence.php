@@ -70,6 +70,18 @@ final readonly class Evidence
         );
     }
 
+    /** The same material with a transcript made here (speech recognition) instead of the platform's. */
+    public function withTranscript(?string $transcript): self
+    {
+        return clone ($this, ['transcript' => $transcript]);
+    }
+
+    /** The same material without the caption and what it links to: to test what a video alone gives. */
+    public function withoutCaption(): self
+    {
+        return clone ($this, ['description' => null, 'linkedJsonLd' => null, 'linkedUrl' => null]);
+    }
+
     public function hasText(): bool
     {
         return null !== $this->jsonLd || null !== $this->linkedJsonLd || null !== $this->description
