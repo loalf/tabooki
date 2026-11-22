@@ -33,24 +33,24 @@ final class ExtractionSchema
         $nullable = static fn (string $type, string $description): array => ['type' => [$type, 'null'], 'description' => $description];
 
         $ingredient = [
-            'raw' => ['type' => 'string', 'description' => 'The ingredient line exactly as the material has it, original units and language.'],
+            'raw' => ['type' => 'string', 'description' => 'The ingredient line as the cook will read it, in the cook\'s language, with the amount stored in quantity and unit ("450 g de salchicha"); see the rules.'],
             'group' => $nullable('string', 'Sub-heading the ingredient belongs to ("Para la salsa"), if the recipe groups them.'),
             'quantity' => $nullable('number', $estimates
                 ? 'Amount in the unit below, converted to metric: as shown, written or said, or else your estimate (then set estimated). null for "to taste" amounts.'
                 : 'Amount in the unit below, converted to metric. null when the material gives no amount ("salt to taste").'),
             // anyOf rather than a nullable type with an enum: strict tool use only takes this form.
             'unit' => ['anyOf' => [['type' => 'string', 'enum' => self::UNITS], ['type' => 'null']], 'description' => 'Metric or kitchen unit; null for counted items ("2 eggs") or no amount.'],
-            'name' => ['type' => 'string', 'description' => 'Ingredient name in the recipe\'s language, singular, without amount or preparation ("cebolla").'],
+            'name' => ['type' => 'string', 'description' => 'Ingredient name in the cook\'s language, singular, without amount or preparation ("cebolla").'],
             'canonical_key' => ['type' => 'string', 'description' => 'Stable lowercase English snake_case key for the ingredient, the same whatever the recipe language ("onion", "chickpeas_canned", "olive_oil"), so shopping lists can merge "cebolla" and "onion".'],
-            'prep' => $nullable('string', 'Preparation, in the recipe\'s language ("picada", "en dados").'),
+            'prep' => $nullable('string', 'Preparation, in the cook\'s language ("picada", "en dados").'),
             'optional' => ['type' => 'boolean'],
         ];
         if ($estimates) {
             $ingredient['estimated'] = ['type' => 'boolean', 'description' => 'true when the quantity is your estimate, not shown, written or said in the material.'];
         }
         $recipe = [
-            'title' => ['type' => 'string', 'description' => 'The dish name, short, in the recipe\'s language (not the post\'s clickbait headline).'],
-            'language' => ['type' => 'string', 'enum' => ['es', 'en'], 'description' => 'Language the recipe is written or spoken in.'],
+            'title' => ['type' => 'string', 'description' => 'The dish name, short, in the cook\'s language (not the post\'s clickbait headline).'],
+            'language' => ['type' => 'string', 'enum' => ['es', 'en'], 'description' => 'The language you wrote the recipe in: the cook\'s.'],
             'servings' => $nullable('integer', $estimates ? 'Servings stated by the material, or else your estimate from the amounts (then set servings_estimated).' : 'Servings stated by the material; null if not stated.'),
         ];
         if ($estimates) {
@@ -89,7 +89,7 @@ final class ExtractionSchema
                             'tags' => [
                                 'type' => 'array',
                                 'items' => ['type' => 'string'],
-                                'description' => 'Up to 6 short lowercase tags in the recipe\'s language: main ingredient or type (pasta, legumbres, pescado), diet (vegetariana, vegana, sin gluten) only when certain, and "rápida"/"quick" if under 30 minutes.',
+                                'description' => 'Up to 6 short lowercase tags in the cook\'s language: main ingredient or type (pasta, legumbres, pescado), diet (vegetariana, vegana, sin gluten) only when certain, and "rápida"/"quick" if under 30 minutes.',
                             ],
                             'ingredients' => [
                                 'type' => 'array',
@@ -100,7 +100,7 @@ final class ExtractionSchema
                                     'properties' => $ingredient,
                                 ],
                             ],
-                            'steps' => ['type' => 'array', 'items' => ['type' => 'string'], 'description' => 'The method, one step per item, in the recipe\'s language, temperatures in °C.'],
+                            'steps' => ['type' => 'array', 'items' => ['type' => 'string'], 'description' => 'The method, one step per item, in the cook\'s language, temperatures in °C.'],
                             'notes' => $nullable('string', 'Useful tips or variations from the material, if any.'),
                         ],
                     ],
@@ -112,6 +112,7 @@ final class ExtractionSchema
     public static function instructions(string $interfaceLanguage, bool $estimates = false): string
     {
         $language = 'en' === $interfaceLanguage ? 'English' : 'Spanish';
+        $code = 'en' === $interfaceLanguage ? 'en' : 'es';
         $faithfulness = $estimates
             ? 'Use what the material says, writes or shows first. When an amount isn\'t given, estimate it from what is shown (how big the spoonful or the pour is, how full the pan or bowl gets, package and can sizes, how many pieces) and from usual proportions for the dish and its servings, and set estimated: true on that ingredient. Estimate servings the same way when they aren\'t stated. Don\'t estimate "to taste" amounts (salt, pepper): leave them null. Steps describe what is done, even when nobody says it. Never invent ingredients or steps that aren\'t in the material. A recipe with estimated amounts can be "complete"; list "quantities (estimated)" in missing_fields.'
             : 'Never invent. Use only what the material says or shows. If quantities, servings or steps aren\'t there, leave them null or empty, say so in missing_fields, and use status "partial". Don\'t guess amounts from experience.';
@@ -123,8 +124,8 @@ final class ExtractionSchema
 
             Rules:
             - {$faithfulness}
-            - Keep each recipe in its own language (Spanish or English). Don't translate.
-            - Units: store metric. Convert ounces, pounds, cups, fluid ounces, sticks of butter and °F to g, ml and °C (cups of flour ≈ 120 g, sugar ≈ 200 g, rice ≈ 185 g; other cups become ml; 1 stick of butter = 113 g). Keep teaspoons (tsp), tablespoons (tbsp), pinches, cloves, cans and counted items as they are. Spanish "cucharada" = tbsp, "cucharadita" = tsp, "pizca" = pinch, "diente" = clove. The raw line always keeps the original wording.
+            - The cook reads {$language}. Write every recipe in {$language}: title, ingredient lines, names, preparations and groups, steps, notes and tags. When the material is in another language, translate it the way a cook writing in {$language} would (natural ingredient names, not word for word), and set language to "{$code}".
+            - Units: store metric. Convert ounces, pounds, cups, fluid ounces, sticks of butter and °F to g, ml and °C (cups of flour ≈ 120 g, sugar ≈ 200 g, rice ≈ 185 g; other cups become ml; 1 stick of butter = 113 g). Keep teaspoons (tsp), tablespoons (tbsp), pinches, cloves, cans and counted items as they are. Spanish "cucharada" = tbsp, "cucharadita" = tsp, "pizca" = pinch, "diente" = clove. Write each raw line in {$language} with the amount you stored, so it reads "450 g de salchicha" and not "1 lb sausage"; keep the material's own wording when it's already in {$language} and in those units.
             - Ingredients that aren't measured ("sal", "aceite para freír", "salt and pepper to taste") have quantity null: that's normal and doesn't make a recipe partial.
             - Ignore everything that isn't the recipe: life stories, ads, hashtags, calls to follow or comment, sponsor codes.
             - If the post only says the recipe is in the comments, a link, a DM or the video, use status "elsewhere" with no recipes.
