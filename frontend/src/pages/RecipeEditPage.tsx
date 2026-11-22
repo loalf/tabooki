@@ -17,7 +17,7 @@ import {
 import { useMe } from '@/auth/useAuth'
 import { PlatformBadge } from '@/components/library/PlatformBadge'
 import { Thumbnail } from '@/components/library/Thumbnail'
-import { EmptyState } from '@/components/PageHeader'
+import { EmptyState, pageTitleClass } from '@/components/PageHeader'
 import { TagInput } from '@/components/TagInput'
 import { Button, Chip, Field, inputClass, textareaClass } from '@/components/ui'
 import { LOCALES } from '@/i18n'
@@ -47,7 +47,7 @@ export function RecipeEditPage() {
         <button type="button" onClick={goBack} className="-ml-2 grid size-10 place-items-center" aria-label={t('common.back')}>
           <ArrowLeft className="size-5" />
         </button>
-        <h1 className="text-2xl font-semibold tracking-tight">{id ? t('recipe.form.editTitle') : t('recipe.form.newTitle')}</h1>
+        <h1 className={pageTitleClass}>{id ? t('recipe.form.editTitle') : t('recipe.form.newTitle')}</h1>
       </div>
       {loading ? (
         <div className="h-40 animate-pulse rounded-lg bg-muted" aria-hidden />
@@ -121,14 +121,14 @@ function RecipeForm({ existing, source }: { existing?: Recipe; source?: Source }
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
       {linkedSource?.url && (
-        <a href={linkedSource.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-lg border bg-card p-2.5">
-          <Thumbnail src={linkedSource.thumbnail} className="size-12 shrink-0 rounded-md" />
+        <a href={linkedSource.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-lg sticker bg-card p-2.5">
+          <Thumbnail src={linkedSource.thumbnail} className="size-12 shrink-0 rounded-sm border-2 border-outline" />
           <span className="flex min-w-0 flex-col">
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
               <Link2 className="size-3.5" aria-hidden />
               {t('recipe.form.fromLink')}
             </span>
-            <span className="truncate text-sm font-medium">{linkedSource.title ?? hostOf(linkedSource.url)}</span>
+            <span className="truncate text-sm font-bold">{linkedSource.title ?? hostOf(linkedSource.url)}</span>
             <PlatformBadge platform={linkedSource.platform} url={linkedSource.url} />
           </span>
         </a>
@@ -148,7 +148,7 @@ function RecipeForm({ existing, source }: { existing?: Recipe; source?: Source }
 
       <div className="grid grid-cols-2 gap-4">
         <fieldset className="flex flex-col gap-1.5">
-          <legend className="mb-1.5 text-sm font-medium">{t('recipe.form.language')}</legend>
+          <legend className="mb-1.5 text-sm font-semibold">{t('recipe.form.language')}</legend>
           <div className="flex gap-2">
             {LOCALES.map((locale) => (
               <Chip key={locale} active={language === locale} onClick={() => setLanguage(locale)}>
@@ -158,12 +158,12 @@ function RecipeForm({ existing, source }: { existing?: Recipe; source?: Source }
           </div>
         </fieldset>
         <fieldset className="flex flex-col gap-1.5">
-          <legend className="mb-1.5 text-sm font-medium">{t('recipe.servings')}</legend>
+          <legend className="mb-1.5 text-sm font-semibold">{t('recipe.servings')}</legend>
           <div className="flex items-center gap-1">
             <Button variant="secondary" size="icon" className="size-9" onClick={() => setServings(Math.max(1, servings - 1))} aria-label={t('recipe.form.fewer')}>
               <Minus className="size-4" />
             </Button>
-            <output className="w-8 text-center text-lg font-semibold" aria-live="polite">
+            <output className="w-8 text-center text-lg font-extrabold" aria-live="polite">
               {servings}
             </output>
             <Button variant="secondary" size="icon" className="size-9" onClick={() => setServings(Math.min(50, servings + 1))} aria-label={t('recipe.form.more')}>
@@ -183,7 +183,7 @@ function RecipeForm({ existing, source }: { existing?: Recipe; source?: Source }
       </div>
 
       <fieldset>
-        <legend className="mb-1.5 text-sm font-medium">{t('recipe.mealTypes')}</legend>
+        <legend className="mb-1.5 text-sm font-semibold">{t('recipe.mealTypes')}</legend>
         <div className="flex gap-2">
           {MEAL_TYPES.map((type) => (
             <Chip key={type} active={mealTypes.includes(type)} onClick={() => toggleMealType(type)}>
@@ -193,7 +193,7 @@ function RecipeForm({ existing, source }: { existing?: Recipe; source?: Source }
         </div>
       </fieldset>
 
-      <div className="flex flex-col gap-1.5 text-sm font-medium">
+      <div className="flex flex-col gap-1.5 text-sm font-semibold">
         <span>{t('recipe.tags')}</span>
         <TagInput value={tags} onChange={setTags} suggestions={allTags} />
         <FieldError message={errorFor('tags')} />
@@ -238,7 +238,7 @@ function RecipeForm({ existing, source }: { existing?: Recipe; source?: Source }
 
       <div
         className={cn(
-          'sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] -mx-4 flex gap-2 border-t bg-background/95 px-4 py-3 backdrop-blur',
+          'sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] -mx-4 flex gap-2 border-t-2 border-outline bg-background px-4 py-3',
         )}
       >
         <Button variant="secondary" className="flex-1" onClick={goBack}>

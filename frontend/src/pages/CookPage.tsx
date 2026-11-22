@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Check, ChefHat, ListChecks, Minus, MoonStar, Plus, Sun, Timer as TimerIcon, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, ListChecks, Minus, MoonStar, Plus, Sun, Timer as TimerIcon, X } from 'lucide-react'
 import { type TouchEvent, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
@@ -6,10 +6,11 @@ import { type Ingredient, type Recipe, useRecipe, useUpdateRecipe } from '@/api/
 import { useUpdateMeal } from '@/api/plan'
 import { type Timer, useTimers } from '@/components/cook/useTimers'
 import { useWakeLock } from '@/components/cook/useWakeLock'
+import { Eggs } from '@/components/brand'
 import { EmptyState } from '@/components/PageHeader'
 import { Splash } from '@/components/Splash'
 import { StarRating } from '@/components/StarRating'
-import { Button } from '@/components/ui'
+import { Button, CheckMark } from '@/components/ui'
 import { findTimers, formatClock, scaleLine } from '@/lib/cook'
 import { groupIngredients } from '@/lib/recipeText'
 import { cn } from '@/lib/utils'
@@ -101,7 +102,7 @@ function CookView({ recipe }: { recipe: Recipe }) {
           <X className="size-5" aria-hidden />
         </Button>
         <div className="min-w-0 flex-1">
-          <p className="truncate font-medium">{recipe.title}</p>
+          <p className="truncate font-bold">{recipe.title}</p>
           <p className="flex items-center gap-1 text-xs text-muted-foreground">
             {wake === 'on' ? <Sun className="size-3.5" aria-hidden /> : <MoonStar className="size-3.5" aria-hidden />}
             {t(`cook.wake.${wake}`)}
@@ -120,14 +121,14 @@ function CookView({ recipe }: { recipe: Recipe }) {
       <main className="flex-1 py-6" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} aria-live="polite">
         {page === 0 ? (
           <section aria-labelledby="cook-ingredients">
-            <h1 id="cook-ingredients" className="text-2xl font-semibold">
+            <h1 id="cook-ingredients" className="font-display text-[1.875rem] leading-tight font-normal text-brand">
               {t('cook.prepare')}
             </h1>
             <div className="mt-3 mb-4 flex items-center gap-2" role="group" aria-label={t('recipe.servings')}>
               <Button variant="secondary" size="icon" disabled={servings <= 1} onClick={() => setServings(clampServings(servings - 1))} aria-label={t('recipe.form.fewer')}>
                 <Minus className="size-4" aria-hidden />
               </Button>
-              <span className="min-w-24 text-center font-medium whitespace-nowrap tabular-nums">{t('recipe.servingsCount', { count: servings })}</span>
+              <span className="min-w-24 text-center text-[17px] font-extrabold whitespace-nowrap tabular-nums">{t('recipe.servingsCount', { count: servings })}</span>
               <Button variant="secondary" size="icon" disabled={servings >= 50} onClick={() => setServings(clampServings(servings + 1))} aria-label={t('recipe.form.more')}>
                 <Plus className="size-4" aria-hidden />
               </Button>
@@ -141,10 +142,10 @@ function CookView({ recipe }: { recipe: Recipe }) {
           </section>
         ) : page < last ? (
           <section aria-labelledby="cook-step">
-            <p id="cook-step" className="mb-3 text-sm font-medium text-primary">
+            <p id="cook-step" className="mb-4 text-[15px] font-extrabold text-primary">
               {t('cook.stepOf', { n: page, total: steps.length })}
             </p>
-            <p className="text-2xl leading-relaxed text-pretty sm:text-3xl">{steps[page - 1]}</p>
+            <p className="text-[1.75rem] leading-[1.4] text-pretty sm:text-3xl">{steps[page - 1]}</p>
             {findTimers(steps[page - 1]).length > 0 && (
               <div className="mt-6 flex flex-wrap gap-2">
                 {findTimers(steps[page - 1]).map((timer) => (
@@ -166,7 +167,7 @@ function CookView({ recipe }: { recipe: Recipe }) {
           <Button variant="secondary" size="icon" className="size-14" disabled={page === 0} onClick={() => go(page - 1)} aria-label={t('cook.previous')}>
             <ArrowLeft className="size-6" aria-hidden />
           </Button>
-          <Button className="h-14 text-lg" onClick={() => go(page + 1)}>
+          <Button className="h-14 text-lg font-bold" onClick={() => go(page + 1)}>
             {page === 0 ? t('cook.start') : page === last - 1 ? t('cook.finish') : t('cook.next')}
             {page === last - 1 ? <Check className="size-5" aria-hidden /> : <ArrowRight className="size-5" aria-hidden />}
           </Button>
@@ -225,9 +226,12 @@ function useStoredPage(id: string, last: number): [number, (page: number) => voi
 
 function Progress({ page, last }: { page: number; last: number }) {
   return (
-    <div className="mt-2 flex gap-1" aria-hidden>
+    <div className="mt-3 flex gap-1" aria-hidden>
       {Array.from({ length: last }, (_, i) => (
-        <span key={i} className={cn('h-1 flex-1 rounded-full', i < page ? 'bg-primary' : i === page ? 'bg-primary/50' : 'bg-muted')} />
+        <span
+          key={i}
+          className={cn('h-2 flex-1 rounded-full border-[1.5px]', i < page ? 'border-outline bg-primary' : i === page ? 'border-outline bg-highlight' : 'border-transparent bg-muted')}
+        />
       ))}
     </div>
   )
@@ -257,7 +261,7 @@ function IngredientChecklist({
       {groups.map((group, g) => (
         <div key={g}>
           {group.name && <h3 className="mb-1 text-sm font-semibold text-muted-foreground">{group.name}</h3>}
-          <ul className="flex flex-col divide-y rounded-lg border bg-card">
+          <ul className="flex flex-col divide-y rounded-lg sticker bg-card">
             {group.items.map((ingredient, n) => {
               const i = starts[g] + n
               const line = scaleLine(ingredient.rawText, ingredient.quantity, factor, locale)
@@ -271,15 +275,10 @@ function IngredientChecklist({
                     onClick={() => onToggle(i)}
                     className={cn('flex w-full items-center gap-3 px-3 text-left', large ? 'min-h-14 py-3 text-lg' : 'min-h-12 py-2')}
                   >
-                    <span
-                      className={cn('grid size-6 shrink-0 place-items-center rounded-md border-2', done ? 'border-primary bg-primary text-primary-foreground' : 'border-input bg-card')}
-                      aria-hidden
-                    >
-                      {done && <Check className="size-4" strokeWidth={3} />}
-                    </span>
-                    <span className={cn('flex-1', done && 'text-muted-foreground line-through', ingredient.optional && 'text-muted-foreground')}>{line.text}</span>
+                    <CheckMark checked={done} className={large ? 'size-[1.625rem]' : undefined} />
+                    <span className={cn('flex-1', done && 'text-muted-foreground line-through opacity-60', ingredient.optional && 'text-muted-foreground')}>{line.text}</span>
                     {!line.scaled && (
-                      <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground tabular-nums" title={t('cook.notScaled')}>
+                      <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-xs font-semibold text-muted-foreground tabular-nums" title={t('cook.notScaled')}>
                         ×{new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(factor)}
                       </span>
                     )}
@@ -305,8 +304,8 @@ function TimerBar({ timers, now, onStop }: { timers: Timer[]; now: number; onSto
             onClick={() => onStop(timer.id)}
             aria-label={timer.endsAt <= now ? t('cook.dismissTimer', { time: timer.label }) : t('cook.stopTimer', { time: timer.label })}
             className={cn(
-              'inline-flex h-10 items-center gap-2 rounded-full border px-3 font-medium tabular-nums',
-              timer.endsAt <= now ? 'animate-pulse border-primary bg-primary text-primary-foreground' : 'bg-card',
+              'inline-flex h-10 items-center gap-2 rounded-full border-2 border-outline px-3 font-extrabold tabular-nums shadow-[2px_2px_0_var(--shadow)]',
+              timer.endsAt <= now ? 'animate-pulse bg-highlight text-highlight-foreground' : 'bg-card',
             )}
           >
             <TimerIcon className="size-4" aria-hidden />
@@ -341,17 +340,19 @@ function Done({ recipe, onAgain, onClose }: { recipe: Recipe; onAgain: () => voi
 
   return (
     <section className="flex flex-col items-center gap-4 pt-8 text-center" aria-labelledby="cook-done">
-      <ChefHat className="size-14 text-primary" aria-hidden />
-      <h1 id="cook-done" className="text-2xl font-semibold">
+      <Eggs eggClassName="size-[5.5rem]" className="mb-2 gap-1.5" />
+      <h1 id="cook-done" className="font-display text-5xl leading-tight font-normal text-brand">
         {t('cook.done')}
       </h1>
-      <p className="text-muted-foreground">{t('cook.howWasIt')}</p>
+      <p className="text-[17px] text-muted-foreground">{t('cook.howWasIt')}</p>
       <StarRating value={rating ?? recipe.rating ?? null} onChange={rate} size="lg" clearable={false} label={t('cook.howWasIt')} />
       <p className="h-5 text-sm text-muted-foreground" role="status">
         {failed ? t('cook.rateError') : rating !== null && !saving ? t('cook.thanks') : ''}
       </p>
       <div className="mt-4 flex w-full flex-col gap-2">
-        <Button onClick={onClose}>{t('cook.backToRecipe')}</Button>
+        <Button className="h-14 text-lg" onClick={onClose}>
+          {t('cook.backToRecipe')}
+        </Button>
         <Button variant="ghost" onClick={onAgain}>
           {t('cook.again')}
         </Button>

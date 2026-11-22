@@ -17,7 +17,7 @@ import { useMe } from '@/auth/useAuth'
 import { Thumbnail } from '@/components/library/Thumbnail'
 import { EmptyState } from '@/components/PageHeader'
 import { StarRating } from '@/components/StarRating'
-import { Button } from '@/components/ui'
+import { Button, linkButtonClass } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { groupIngredients } from '@/lib/recipeText'
 import { useGoBack } from '@/lib/useGoBack'
@@ -76,10 +76,10 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
 
   return (
     <article className="flex flex-col gap-5">
-      {source?.thumbnail && <Thumbnail src={source.thumbnail} className="aspect-video w-full rounded-lg" />}
+      {source?.thumbnail && <Thumbnail src={source.thumbnail} className="aspect-video w-full rounded-lg sticker" />}
 
       <header className="flex flex-col gap-2">
-        <h1 className="text-2xl leading-tight font-semibold tracking-tight">{recipe.title}</h1>
+        <h1 className="text-[1.75rem] leading-tight font-extrabold text-balance">{recipe.title}</h1>
         <dl className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
           <div className="inline-flex items-center gap-1">
             <dt>
@@ -115,7 +115,7 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
       {(steps.length > 0 || ingredients.length > 0) && (
         <Link
           to={`/recipes/${id}/cook${params.size ? `?${params}` : ''}`}
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-primary px-4 text-base font-medium text-primary-foreground"
+          className="inline-flex h-14 items-center justify-center gap-2 rounded-md sticker-sm bg-primary px-4 text-lg font-bold text-primary-foreground"
         >
           <ChefHat className="size-5" aria-hidden />
           {params.get('servings') && Number(params.get('servings')) !== recipe.servings
@@ -131,15 +131,12 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
           aria-pressed={recipe.favorite}
           onClick={() => update.mutate({ favorite: !recipe.favorite })}
         >
-          <Heart className={cn('size-4', recipe.favorite && 'fill-current text-primary')} aria-hidden />
+          <Heart className={cn('size-4', recipe.favorite && 'fill-current text-brand')} aria-hidden />
           {t('recipe.favorite')}
         </Button>
         <StarRating value={recipe.rating ?? null} onChange={(rating) => update.mutate({ rating })} />
         <div className="ml-auto flex gap-2">
-          <Link
-            to={`/recipes/${id}/edit`}
-            className="inline-flex h-9 items-center gap-1.5 rounded-md border bg-card px-3 text-sm font-medium"
-          >
+          <Link to={`/recipes/${id}/edit`} className={linkButtonClass}>
             <Pencil className="size-4" aria-hidden />
             {t('recipe.edit')}
           </Link>
@@ -157,9 +154,9 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
       </div>
 
       {recipe.needsReview && (
-        <div className="flex flex-col gap-3 rounded-lg border border-destructive/30 bg-card p-3">
+        <div className="flex flex-col gap-3 rounded-lg sticker bg-accent p-3">
           <p className="flex gap-2 text-sm">
-            <Sparkles className="mt-0.5 size-4 shrink-0 text-destructive" aria-hidden />
+            <Sparkles className="mt-0.5 size-4 shrink-0" aria-hidden />
             {t('recipe.review.message')}
           </p>
           <div className="flex gap-2">
@@ -167,7 +164,7 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
               <Check className="size-4" aria-hidden />
               {t('recipe.review.looksGood')}
             </Button>
-            <Link to={`/recipes/${id}/edit`} className="inline-flex h-9 items-center rounded-md border bg-card px-3 text-sm font-medium">
+            <Link to={`/recipes/${id}/edit`} className={linkButtonClass}>
               {t('recipe.review.fix')}
             </Link>
           </div>
@@ -179,7 +176,7 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
           href={source.url}
           target="_blank"
           rel="noreferrer"
-          className="flex items-center gap-2 rounded-lg border bg-card p-3 text-sm font-medium"
+          className="flex items-center gap-2 rounded-lg sticker bg-card p-3.5 text-[15px] font-bold"
         >
           <ExternalLink className="size-4 shrink-0 text-primary" aria-hidden />
           <span className="min-w-0 truncate">
@@ -193,7 +190,7 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
         <ul className="flex flex-wrap gap-2" aria-label={t('recipe.tags')}>
           {tags.map((tag) => (
             <li key={tag}>
-              <Link to={`/?tag=${encodeURIComponent(tag)}`} className="inline-flex h-8 items-center rounded-full bg-accent px-3 text-sm text-accent-foreground">
+              <Link to={`/?tag=${encodeURIComponent(tag)}`} className="inline-flex h-8 items-center rounded-full bg-accent px-3 text-sm font-semibold text-accent-foreground">
                 {tag}
               </Link>
             </li>
@@ -202,7 +199,7 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
       )}
 
       <section aria-labelledby="ingredients-title">
-        <h2 id="ingredients-title" className="mb-2 text-lg font-semibold">
+        <h2 id="ingredients-title" className="mb-2 text-lg font-extrabold">
           {t('recipe.ingredients')}
         </h2>
         {ingredients.length === 0 ? (
@@ -211,7 +208,7 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
           groupIngredients(ingredients).map((group, index) => (
             <div key={index} className="mb-3">
               {group.name && <h3 className="mb-1 text-sm font-semibold text-muted-foreground">{group.name}</h3>}
-              <ul className="flex flex-col divide-y rounded-lg border bg-card">
+              <ul className="flex flex-col divide-y rounded-lg sticker bg-card">
                 {group.items.map((ingredient, i) => (
                   <li key={i} className={cn('px-3 py-2.5', ingredient.optional && 'text-muted-foreground')}>
                     {ingredient.rawText}
@@ -224,7 +221,7 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
       </section>
 
       <section aria-labelledby="steps-title">
-        <h2 id="steps-title" className="mb-2 text-lg font-semibold">
+        <h2 id="steps-title" className="mb-2 text-lg font-extrabold">
           {t('recipe.steps')}
         </h2>
         {steps.length === 0 ? (
@@ -233,10 +230,10 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
           <ol className="flex flex-col gap-4">
             {steps.map((step, i) => (
               <li key={i} className="flex gap-3">
-                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                <span className="grid size-[1.875rem] shrink-0 place-items-center rounded-full border-2 border-outline bg-highlight text-sm font-extrabold text-highlight-foreground">
                   {i + 1}
                 </span>
-                <p className="pt-0.5 leading-relaxed">{step}</p>
+                <p className="pt-0.5 text-base leading-relaxed">{step}</p>
               </li>
             ))}
           </ol>
@@ -244,7 +241,7 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
       </section>
 
       {source?.originalText && (
-        <details className="group rounded-lg border bg-card" open={recipe.needsReview}>
+        <details className="group rounded-lg sticker bg-card" open={recipe.needsReview}>
           <summary className="cursor-pointer px-3 py-2.5 text-sm font-medium">{t('recipe.originalText')}</summary>
           <p className="border-t px-3 py-2.5 text-sm leading-relaxed whitespace-pre-line text-muted-foreground">
             {source.originalText}
@@ -256,10 +253,10 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
 
       {recipe.notes && (
         <section aria-labelledby="notes-title">
-          <h2 id="notes-title" className="mb-2 text-lg font-semibold">
+          <h2 id="notes-title" className="mb-2 text-lg font-extrabold">
             {t('recipe.notes')}
           </h2>
-          <p className="rounded-lg border bg-card p-3 leading-relaxed whitespace-pre-line">{recipe.notes}</p>
+          <p className="rounded-lg sticker bg-card p-3 leading-relaxed whitespace-pre-line">{recipe.notes}</p>
         </section>
       )}
     </article>
@@ -302,7 +299,7 @@ function Reextract({ recipe }: { recipe: Recipe }) {
   }
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border bg-card p-3 text-sm">
+    <div className="flex flex-col gap-2 rounded-lg sticker bg-card p-3 text-sm">
       <p className="text-muted-foreground">
         {recipe.extractedBy ? t('recipe.extractedBy', { model: recipe.extractedBy }) : t('recipe.reextract.typed')}
         {outdated && <span className="font-medium text-foreground"> · {t('recipe.reextract.newer')}</span>}

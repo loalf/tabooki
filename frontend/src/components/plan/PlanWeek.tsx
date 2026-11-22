@@ -33,7 +33,9 @@ export function PlanWeek({ plan }: { plan: MealPlan }) {
           {t('plan.regenerate')}
         </Button>
         <Button
-          variant={confirming ? 'danger' : 'ghost'}
+          variant={confirming ? 'danger' : 'secondary'}
+          size={confirming ? 'md' : 'icon'}
+          className={cn(!confirming && 'size-12')}
           disabled={remove.isPending}
           onClick={() => (confirming ? remove.mutate(plan) : setConfirming(true))}
           aria-label={confirming ? undefined : t('plan.delete')}
@@ -46,9 +48,13 @@ export function PlanWeek({ plan }: { plan: MealPlan }) {
 
       {weekDays(plan.weekStart!).map((date) => (
         <section key={date} aria-labelledby={`day-${date}`} className={cn(date < now && 'opacity-70')}>
-          <h2 id={`day-${date}`} className="mb-2 flex items-center gap-2 font-semibold capitalize">
+          <h2 id={`day-${date}`} className="mb-2 flex items-center gap-2.5 text-lg font-extrabold capitalize">
             {formatDay(date, i18n.language)}
-            {date === now && <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground normal-case">{t('plan.today')}</span>}
+            {date === now && (
+              <span className="-rotate-[5deg] rounded-full border-2 border-outline bg-highlight px-2.5 py-0.5 text-[13px] font-extrabold text-highlight-foreground shadow-[2px_2px_0_var(--shadow)]">
+                {t('plan.today')}
+              </span>
+            )}
           </h2>
           <ul className="flex flex-col gap-2">
             {SLOTS.map((slot) => (

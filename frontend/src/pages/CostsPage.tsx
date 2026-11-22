@@ -14,7 +14,7 @@ export function CostsPage() {
 
   return (
     <>
-      <button type="button" onClick={() => void navigate('/settings')} className="mb-3 inline-flex h-9 items-center gap-1 text-sm font-medium text-muted-foreground">
+      <button type="button" onClick={() => void navigate('/settings')} className="mb-3 inline-flex h-9 items-center gap-1 text-[15px] font-bold">
         <ArrowLeft className="size-4" aria-hidden />
         {t('settings.title')}
       </button>
@@ -40,9 +40,9 @@ function CostsView({ costs }: { costs: Costs }) {
   return (
     <div className="flex flex-col gap-5">
       <section className="grid grid-cols-2 gap-3" aria-label={t('costs.summary')}>
-        <div className="col-span-2 rounded-lg border bg-card p-4">
+        <div className="col-span-2 rounded-lg sticker bg-card p-4">
           <p className="text-sm text-muted-foreground">{t('costs.thisMonth')}</p>
-          <p className="text-3xl font-semibold tabular-nums">{usd(costs.thisMonth!.usd!)}</p>
+          <p className="text-3xl font-extrabold tabular-nums">{usd(costs.thisMonth!.usd!)}</p>
           <p className="text-xs text-muted-foreground">{t('costs.calls', { count: costs.thisMonth!.calls })}</p>
         </div>
         <Tile label={t('costs.lastMonth')} value={usd(costs.lastMonth!.usd!)} />
@@ -56,7 +56,7 @@ function CostsView({ costs }: { costs: Costs }) {
       </section>
 
       {!!costs.unpricedCalls && (
-        <p className="flex gap-2 rounded-md bg-muted px-3 py-2 text-sm">
+        <p className="flex gap-2 rounded-md border-2 border-dashed border-muted-foreground/60 bg-muted px-3 py-2 text-sm">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
           {t('costs.unpriced', { count: costs.unpricedCalls })}
         </p>
@@ -68,10 +68,10 @@ function CostsView({ costs }: { costs: Costs }) {
       <Breakdown title={t('costs.byModel')} groups={(costs.byModel ?? []).map((g) => ({ ...g, label: g.name ?? '' }))} mono />
 
       <section aria-labelledby="costs-recent">
-        <h2 id="costs-recent" className="mb-1 font-semibold">
+        <h2 id="costs-recent" className="mb-2 text-lg font-extrabold">
           {t('costs.recent')}
         </h2>
-        <ul className="divide-y rounded-lg border bg-card">
+        <ul className="divide-y rounded-lg sticker bg-card">
           {(costs.recent ?? []).map((call, i) => (
             <RecentCall key={i} call={call} />
           ))}
@@ -85,9 +85,9 @@ function CostsView({ costs }: { costs: Costs }) {
 
 function Tile({ label, value, hint, className }: { label: string; value: string; hint?: string; className?: string }) {
   return (
-    <div className={cn('rounded-lg border bg-card p-3', className)}>
+    <div className={cn('rounded-lg sticker bg-card p-3', className)}>
       <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="text-xl font-semibold tabular-nums">{value}</p>
+      <p className="text-xl font-extrabold tabular-nums">{value}</p>
       {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   )
@@ -108,10 +108,10 @@ function MonthChart({ months }: { months: NonNullable<Costs['months']> }) {
 
   return (
     <section aria-labelledby="costs-months">
-      <h2 id="costs-months" className="mb-1 font-semibold">
+      <h2 id="costs-months" className="mb-2 text-lg font-extrabold">
         {t('costs.months')}
       </h2>
-      <div className="rounded-lg border bg-card p-3">
+      <div className="rounded-lg sticker bg-card p-3">
         <p className="mb-2 h-5 text-sm tabular-nums" aria-hidden>
           <span className="font-medium capitalize">{monthName(months[shown]?.month ?? '')}</span>{' '}
           <span className="text-muted-foreground">
@@ -130,7 +130,7 @@ function MonthChart({ months }: { months: NonNullable<Costs['months']> }) {
               className="flex h-full flex-1 items-end justify-center px-1.5"
             >
               <span
-                className={cn('w-full rounded-t-[4px] bg-primary transition-opacity', shown !== i && 'opacity-60')}
+                className={cn('w-full rounded-t-[5px] border-2 border-b-0 border-outline bg-primary transition-opacity', shown !== i && 'opacity-60')}
                 style={{ height: max > 0 ? `${Math.max(((m.usd ?? 0) / max) * 100, (m.usd ?? 0) > 0 ? 2 : 0)}%` : 0 }}
               />
             </button>
@@ -167,8 +167,8 @@ function Breakdown({ title, groups, mono = false }: { title: string; groups: Gro
   if (!groups.length) return null
   return (
     <section>
-      <h2 className="mb-1 font-semibold">{title}</h2>
-      <ul className="divide-y rounded-lg border bg-card">
+      <h2 className="mb-2 text-lg font-extrabold">{title}</h2>
+      <ul className="divide-y rounded-lg sticker bg-card">
         {groups.map((g) => (
           <li key={g.name} className="flex items-baseline gap-3 px-3 py-2.5">
             <div className="min-w-0 flex-1">

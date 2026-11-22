@@ -25,17 +25,17 @@ export function SettingsPage() {
     <>
       <PageHeader title={t('settings.title')} />
       <section className="flex flex-col gap-6">
-        <div className="rounded-lg border bg-card p-4">
-          <p className="font-medium">{me.displayName}</p>
+        <div className="rounded-lg sticker bg-card p-4">
+          <p className="font-extrabold">{me.displayName}</p>
           <p className="text-sm text-muted-foreground">{t('settings.signedInAs', { email: me.email })}</p>
           <p className="mt-2 text-sm text-muted-foreground">
             {t('settings.household')}: {me.householdName}
           </p>
         </div>
 
-        <fieldset className="rounded-lg border bg-card p-4">
-          <legend className="px-1 text-sm font-medium">{t('settings.language')}</legend>
-          <div className="mt-1 grid grid-cols-2 gap-2">
+        <fieldset className="rounded-lg sticker bg-card p-4">
+          <legend className="float-left mb-2.5 w-full font-extrabold">{t('settings.language')}</legend>
+          <div className="clear-both grid grid-cols-2 gap-2">
             {LOCALES.map((locale) => (
               <button
                 key={locale}
@@ -43,8 +43,8 @@ export function SettingsPage() {
                 onClick={() => changeLocale(locale)}
                 aria-pressed={me.locale === locale}
                 className={cn(
-                  'h-11 rounded-md border font-medium',
-                  me.locale === locale ? 'border-primary bg-accent text-accent-foreground' : 'bg-background',
+                  'h-11 rounded-sm border-2 border-outline',
+                  me.locale === locale ? 'bg-highlight font-extrabold text-highlight-foreground' : 'bg-card font-semibold',
                 )}
               >
                 {t(`languages.${locale}`)}
@@ -57,10 +57,10 @@ export function SettingsPage() {
 
         <ChangePassword />
 
-        <Link to="/settings/costs" className="flex items-center gap-3 rounded-lg border bg-card p-4">
+        <Link to="/settings/costs" className="flex items-center gap-3 rounded-lg sticker bg-card p-4">
           <Receipt className="size-5 shrink-0 text-primary" aria-hidden />
           <span className="flex-1">
-            <span className="block font-medium">{t('costs.title')}</span>
+            <span className="block font-extrabold">{t('costs.title')}</span>
             <span className="block text-sm text-muted-foreground">{t('costs.settingsHint')}</span>
           </span>
           <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
@@ -69,7 +69,7 @@ export function SettingsPage() {
         <button
           type="button"
           onClick={() => logout.mutate()}
-          className="flex h-11 items-center justify-center gap-2 rounded-md border bg-card font-medium text-destructive"
+          className="flex h-12 items-center justify-center gap-2 rounded-md border-2 border-destructive bg-card font-bold text-destructive"
         >
           <LogOut className="size-5" aria-hidden />
           {t('settings.logout')}

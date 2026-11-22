@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { type Location, Link, Navigate, useLocation } from 'react-router'
 import { ApiError } from '@/api/client'
 import { useLogin, useMe } from '@/auth/useAuth'
+import { AuthLayout } from '@/components/auth/AuthLayout'
+import { authButtonClass, authInputClass, authLinkClass, authNoticeClass } from '@/components/auth/styles'
 import { Splash } from '@/components/Splash'
 
 export function LoginPage() {
@@ -29,28 +31,18 @@ export function LoginPage() {
     : null
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-4">
-      <img src="/logo.svg" alt="" className="mb-6 size-16" />
-      <h1 className="text-2xl font-semibold tracking-tight">{t('login.title')}</h1>
-      <p className="mt-1 mb-6 text-sm text-muted-foreground">{t('login.subtitle')}</p>
+    <AuthLayout title={t('login.title')} subtitle={t('login.subtitle')}>
       {state?.notice === 'passwordReset' && (
-        <p className="mb-4 rounded-lg border bg-card p-3 text-sm" role="status">
+        <p className={`mb-4 ${authNoticeClass}`} role="status">
           {t('password.reset.done')}
         </p>
       )}
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1.5 text-sm font-medium">
+        <label className="flex flex-col gap-1.5 text-sm font-bold">
           {t('login.email')}
-          <input
-            type="email"
-            autoComplete="username"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="h-11 rounded-md border border-input bg-card px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          />
+          <input type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} className={authInputClass} />
         </label>
-        <label className="flex flex-col gap-1.5 text-sm font-medium">
+        <label className="flex flex-col gap-1.5 text-sm font-bold">
           {t('login.password')}
           <input
             type="password"
@@ -58,7 +50,7 @@ export function LoginPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="h-11 rounded-md border border-input bg-card px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className={authInputClass}
           />
         </label>
         {error && (
@@ -66,17 +58,13 @@ export function LoginPage() {
             {error}
           </p>
         )}
-        <button
-          type="submit"
-          disabled={login.isPending}
-          className="h-11 rounded-md bg-primary font-medium text-primary-foreground transition-opacity disabled:opacity-60"
-        >
+        <button type="submit" disabled={login.isPending} className={`mt-1 ${authButtonClass}`}>
           {login.isPending ? t('login.submitting') : t('login.submit')}
         </button>
-        <Link to="/forgot-password" className="text-center text-sm font-medium text-primary">
+        <Link to="/forgot-password" className={authLinkClass}>
           {t('password.forgot.link')}
         </Link>
       </form>
-    </div>
+    </AuthLayout>
   )
 }

@@ -1,10 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#1f6f4a"/>
-  <!-- bowl -->
-  <path d="M96 248h320c0 92-72 164-160 164S96 340 96 248z" fill="#f6efe2"/>
-  <!-- leaf -->
-  <path d="M268 220c-6-70 40-118 112-124 4 72-42 122-112 124z" fill="#9fd36b"/>
-  <path d="M276 212c22-34 50-62 84-86" stroke="#1f6f4a" stroke-width="10" stroke-linecap="round" fill="none"/>
-  <!-- steam -->
-  <path d="M176 196c-18-22 18-38 0-62M224 196c-18-22 18-38 0-62" stroke="#f6efe2" stroke-width="14" stroke-linecap="round" fill="none"/>
+  <!-- Tabooki: the "oo" as two fried eggs (comida y cena) on pimentón. -->
+  <rect width="512" height="512" rx="112" fill="#d2531a"/>
+  <defs>
+    <g id="egg">
+      <path d="M10 1.2c3.4 0 4.6 2.2 6.6 3.1 2.2 1 2.6 3.6 1.6 5.8-.9 2-.2 4.4-2.3 6.3-1.9 1.7-4.3 1.5-6.4 1.9-2.4.4-4.6-.6-5.8-2.6C2.6 13.9.9 12.4 1.3 9.6 1.7 6.9 3.4 6 4.6 4.1 5.9 2.1 7.5 1.2 10 1.2z" fill="#fffdf6" stroke="#3a2213" stroke-width="1.3"/>
+      <circle cx="9.6" cy="10" r="4" fill="#f3a81c" stroke="#3a2213" stroke-width="1.1"/>
+    </g>
+  </defs>
+  <use href="#egg" transform="translate(52 160) scale(9.8)"/>
+  <use href="#egg" transform="translate(264 160) scale(9.8)"/>
 </svg>

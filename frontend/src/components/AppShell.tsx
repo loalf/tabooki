@@ -42,28 +42,42 @@ export function AppShell() {
         <Outlet />
       </main>
       <nav
-        className="fixed inset-x-0 bottom-0 border-t bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
+        className="fixed inset-x-0 bottom-0 border-t-2 border-outline bg-card pb-[env(safe-area-inset-bottom)]"
         aria-label="Main"
       >
-        <ul className="mx-auto grid max-w-2xl grid-cols-4">
-          {tabs.map(({ to, key, icon: Icon, end }) => (
-            <li key={key}>
-              <NavLink
-                to={to}
-                end={end}
-                className={({ isActive }) =>
-                  cn(
-                    'flex flex-col items-center gap-1 py-2.5 text-xs font-medium text-muted-foreground transition-colors',
-                    // Recipe pages belong to the library tab.
-                    (isActive || (key === 'library' && pathname.startsWith('/recipes'))) && 'text-primary',
-                  )
-                }
-              >
-                <Icon className="size-6" aria-hidden />
-                {t(`nav.${key}`)}
-              </NavLink>
-            </li>
-          ))}
+        <ul className="mx-auto grid max-w-2xl grid-cols-4 px-1.5">
+          {tabs.map(({ to, key, icon: Icon, end }) => {
+            // Recipe pages belong to the library tab.
+            const current = (active: boolean) => active || (key === 'library' && pathname.startsWith('/recipes'))
+            return (
+              <li key={key}>
+                <NavLink
+                  to={to}
+                  end={end}
+                  className={({ isActive }) =>
+                    cn(
+                      'group flex flex-col items-center gap-1 pt-2 pb-2.5 text-[11px] font-bold text-muted-foreground transition-colors',
+                      current(isActive) && 'text-foreground',
+                    )
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <span
+                        className={cn(
+                          'rounded-full border-2 border-transparent px-4 py-0.5 transition-colors',
+                          current(isActive) && 'border-outline bg-highlight text-highlight-foreground',
+                        )}
+                      >
+                        <Icon className="size-[22px]" aria-hidden />
+                      </span>
+                      {t(`nav.${key}`)}
+                    </>
+                  )}
+                </NavLink>
+              </li>
+            )
+          })}
         </ul>
       </nav>
     </div>

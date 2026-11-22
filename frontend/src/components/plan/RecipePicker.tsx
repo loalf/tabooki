@@ -38,10 +38,10 @@ export function RecipePicker({ slot, onPick, onClose }: { slot: Slot; onPick: (i
         aria-modal="true"
         aria-labelledby="picker-title"
         onClick={(event) => event.stopPropagation()}
-        className="flex h-dvh w-full flex-col bg-background sm:h-[80dvh] sm:max-w-lg sm:rounded-lg sm:shadow-lg"
+        className="flex h-dvh w-full flex-col bg-background sm:h-[80dvh] sm:max-w-lg sm:rounded-lg sm:sticker"
       >
-        <header className="flex items-center gap-2 border-b p-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
-          <h2 id="picker-title" className="flex-1 font-semibold">
+        <header className="flex items-center gap-2 border-b-2 border-outline p-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+          <h2 id="picker-title" className="flex-1 text-lg font-extrabold">
             {t('plan.picker.title', { meal: t(`recipe.meal.${slot}`).toLowerCase() })}
           </h2>
           <Button variant="ghost" size="icon" onClick={onClose} aria-label={t('common.cancel')}>
@@ -70,9 +70,9 @@ export function RecipePicker({ slot, onPick, onClose }: { slot: Slot; onPick: (i
                 onClick={() => onPick(recipe.id!)}
                 className="flex w-full items-center gap-3 rounded-md p-2 text-left hover:bg-muted"
               >
-                <Thumbnail src={recipe.source?.thumbnail} className="size-12 shrink-0 rounded-md" />
+                <Thumbnail src={recipe.source?.thumbnail} className="size-12 shrink-0 rounded-sm border-2 border-outline" />
                 <span className="min-w-0 flex-1">
-                  <span className="line-clamp-2 font-medium">{recipe.title}</span>
+                  <span className="line-clamp-2 font-bold">{recipe.title}</span>
                   {!suits(recipe.mealTypes) && (
                     <span className="text-xs text-muted-foreground">
                       {t('plan.picker.otherMeal', { meal: t(`recipe.meal.${recipe.mealTypes?.[0] ?? 'lunch'}`).toLowerCase() })}

@@ -22,8 +22,8 @@ export default defineConfig({
         start_url: '/',
         scope: '/',
         display: 'standalone',
-        background_color: '#f6efe2',
-        theme_color: '#1f6f4a',
+        background_color: '#fcefd2',
+        theme_color: '#fcefd2',
         // Android lists the installed app in the share sheet; shared links open /share (SharePage).
         // iOS doesn't support this: an Apple Shortcut posts to /api/share instead (Settings).
         share_target: {
@@ -39,6 +39,8 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // The fonts are part of the app shell, so the shopping list looks right offline too.
+        globPatterns: ['**/*.{js,css,html,woff2}'],
         // API calls and the Mercure hub must never be answered with the SPA shell.
         navigateFallbackDenylist: [/^\/api/, /^\/\.well-known\//, /^\/_profiler/, /^\/_wdt/, /^\/bundles\//],
       },

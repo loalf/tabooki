@@ -26,9 +26,12 @@ export function StarRating({
           onClick={() => onChange(clearable && value === star ? null : star)}
           aria-label={t('recipe.stars', { count: star })}
           aria-pressed={value !== null && star <= value}
-          className={cn('grid place-items-center text-primary', size === 'lg' ? 'size-12' : 'size-9')}
+          className={cn('grid place-items-center text-outline', size === 'lg' ? 'size-14' : 'size-9')}
         >
-          <Star className={cn(size === 'lg' ? 'size-8' : 'size-5', value !== null && star <= value ? 'fill-current' : 'text-muted-foreground/50')} />
+          <Star
+            strokeWidth={size === 'lg' ? 1.75 : 2}
+            className={cn(size === 'lg' ? 'size-11' : 'size-6', value !== null && star <= value ? 'fill-highlight' : 'text-muted-foreground/60')}
+          />
         </button>
       ))}
     </div>

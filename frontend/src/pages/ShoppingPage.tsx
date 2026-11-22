@@ -1,11 +1,11 @@
-import { CloudOff, LoaderCircle } from 'lucide-react'
+import { ChevronDown, CloudOff, LoaderCircle } from 'lucide-react'
 import { type FormEvent, useState, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { AISLES, type ListScope, type ShoppingItem, useAddItem, usePendingShoppingChanges, useShoppingList } from '@/api/shopping'
 import { EmptyState, PageHeader } from '@/components/PageHeader'
 import { ItemRow } from '@/components/shopping/ItemRow'
-import { Button, Chip, inputClass } from '@/components/ui'
+import { Button, Chip, inputClass, linkButtonClass } from '@/components/ui'
 import { WeekNav } from '@/components/WeekNav'
 import { useWeekParam } from '@/lib/useWeekParam'
 import { today } from '@/lib/week'
@@ -50,7 +50,7 @@ export function ShoppingPage() {
       <WeekNav {...nav} />
 
       {(!online || pending > 0) && (
-        <p className="mb-4 flex items-center gap-2 rounded-md bg-muted px-3 py-2 text-sm" role="status">
+        <p className="mb-4 flex items-center gap-2 rounded-md border-2 border-dashed border-muted-foreground/60 bg-muted px-3 py-2 text-sm font-semibold" role="status">
           {online ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : <CloudOff className="size-4" aria-hidden />}
           {online ? t('shopping.sending') : t('shopping.offline')}
         </p>
@@ -61,14 +61,18 @@ export function ShoppingPage() {
       ) : (
         <div className="flex flex-col gap-5">
           {list && !list.planned ? (
-            <EmptyState>
-              {t('shopping.noPlan')}{' '}
-              <Link to={`/plan${nav.week === nav.thisWeek ? '' : `?week=${nav.week}`}`} className="font-medium text-primary underline-offset-4 hover:underline">
-                {t('shopping.toPlan')}
-              </Link>
+            <EmptyState
+              title={t('shopping.noPlanTitle')}
+              action={
+                <Link to={`/plan${nav.week === nav.thisWeek ? '' : `?week=${nav.week}`}`} className={linkButtonClass}>
+                  {t('shopping.toPlan')}
+                </Link>
+              }
+            >
+              {t('shopping.noPlan')}
             </EmptyState>
           ) : (
-            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-muted-foreground">
               <span className="flex-1">{t('shopping.summary', { count: left, meals: list?.meals ?? 0 })}</span>
               {canNarrow && (
                 <Chip active={fromToday} onClick={() => setFromToday(!fromToday)}>
@@ -89,11 +93,11 @@ export function ShoppingPage() {
           ))}
 
           <section aria-labelledby="manual-title">
-            <h2 id="manual-title" className="mb-1 font-semibold">
+            <h2 id="manual-title" className="mb-2 text-lg font-extrabold">
               {t('shopping.extra')}
             </h2>
             {manual.length > 0 && (
-              <ul className="mb-2 rounded-lg border bg-card px-3">
+              <ul className="mb-2 rounded-lg sticker bg-card px-3">
                 {manual.map((item) => (
                   <ItemRow key={item.key} item={item} scope={scope} />
                 ))}
@@ -103,10 +107,13 @@ export function ShoppingPage() {
           </section>
 
           {staples.length > 0 && (
-            <details className="rounded-lg border bg-card px-3 py-2">
-              <summary className="cursor-pointer py-1 font-semibold">
-                {t('shopping.staples', { count: staples.length })}
-                <span className="block text-xs font-normal text-muted-foreground">{t('shopping.staplesHint')}</span>
+            <details className="group rounded-lg sticker bg-card px-3.5 py-2.5">
+              <summary className="flex cursor-pointer list-none items-center gap-3 py-1 [&::-webkit-details-marker]:hidden">
+                <span className="flex-1">
+                  <span className="block font-extrabold">{t('shopping.staples', { count: staples.length })}</span>
+                  <span className="block text-sm text-muted-foreground">{t('shopping.staplesHint')}</span>
+                </span>
+                <ChevronDown className="size-5 transition-transform group-open:rotate-180" aria-hidden />
               </summary>
               <ul className="mt-1">
                 {staples.map((item) => (
@@ -125,11 +132,11 @@ function Section({ title, items, scope }: { title: string; items: ShoppingItem[]
   const left = items.filter((i) => !i.checked).length
   return (
     <section>
-      <h2 className="mb-1 flex items-baseline justify-between font-semibold">
+      <h2 className="mb-2 flex items-baseline justify-between text-lg font-extrabold">
         {title}
-        <span className="text-sm font-normal text-muted-foreground tabular-nums">{left || '✓'}</span>
+        <span className="text-sm font-bold text-muted-foreground tabular-nums">{left || '✓'}</span>
       </h2>
-      <ul className="rounded-lg border bg-card px-3">
+      <ul className="rounded-lg sticker bg-card px-3">
         {items.map((item) => (
           <ItemRow key={item.key} item={item} scope={scope} />
         ))}

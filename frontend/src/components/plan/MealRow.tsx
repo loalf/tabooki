@@ -7,7 +7,7 @@ import { Thumbnail } from '@/components/library/Thumbnail'
 import { formatWeekday } from '@/components/plan/format'
 import { RecipePicker } from '@/components/plan/RecipePicker'
 import { StarRating } from '@/components/StarRating'
-import { Button } from '@/components/ui'
+import { Button, linkButtonClass } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { addDays, today } from '@/lib/week'
 
@@ -23,7 +23,7 @@ export function MealRow({ plan, date, slot, entry }: { plan: MealPlan; date: str
           type="button"
           disabled={add.isPending}
           onClick={() => add.mutate({ planId: plan.id!, date, slot })}
-          className="flex h-11 w-full items-center gap-2 rounded-md border border-dashed px-3 text-sm text-muted-foreground hover:bg-muted disabled:opacity-60"
+          className="flex h-12 w-full items-center gap-2 rounded-md border-2 border-dashed border-muted-foreground/60 px-3.5 text-sm font-semibold text-muted-foreground hover:bg-muted disabled:opacity-60"
         >
           <Plus className="size-4" aria-hidden />
           {t('plan.add', { meal: t(`recipe.meal.${slot}`).toLowerCase() })}
@@ -53,22 +53,22 @@ function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: MealPlanEnt
   const askRating = Boolean(recipe) && !leftoverOf && entry.rating == null && entry.date! <= now && entry.date! >= addDays(now, -2)
 
   return (
-    <li className={cn('rounded-md border bg-card', entry.locked && 'border-primary/50', busy && 'opacity-60')}>
+    <li className={cn('rounded-lg sticker', entry.locked ? 'bg-accent' : 'bg-card', busy && 'opacity-60')}>
       <div className="flex items-center gap-3 p-2">
-        <Thumbnail src={recipe?.source?.thumbnail} className="size-14 shrink-0 rounded-md" />
+        <Thumbnail src={recipe?.source?.thumbnail} className="size-14 shrink-0 rounded-[11px] border-2 border-outline" />
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium text-muted-foreground">
+          <p className="text-xs font-semibold text-muted-foreground">
             {t(`recipe.meal.${slot}`)} · {t('recipe.servingsCount', { count: entry.servings })}
           </p>
           {recipe ? (
-            <Link to={`/recipes/${recipe.id}${meal}`} className="line-clamp-2 leading-snug font-medium hover:underline">
+            <Link to={`/recipes/${recipe.id}${meal}`} className="line-clamp-2 text-[15px] leading-snug font-bold hover:underline">
               {recipe.title}
             </Link>
           ) : (
             <p className="text-sm text-muted-foreground">{t('plan.noRecipe')}</p>
           )}
           {leftoverOf ? (
-            <p className="text-xs text-primary">{t('plan.leftoversOf', { day: formatWeekday(leftoverOf.date!, i18n.language) })}</p>
+            <p className="text-xs font-bold text-primary">{t('plan.leftoversOf', { day: formatWeekday(leftoverOf.date!, i18n.language) })}</p>
           ) : (
             (recipe?.totalMinutes != null || entry.rating != null) && (
               <p className="inline-flex items-center gap-3 text-xs text-muted-foreground">
@@ -80,7 +80,7 @@ function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: MealPlanEnt
                 )}
                 {entry.rating != null && (
                   <span className="inline-flex items-center gap-1" aria-label={t('plan.rated', { count: entry.rating })}>
-                    <Star className="size-3 fill-current text-primary" aria-hidden />
+                    <Star className="size-3 fill-highlight text-outline" aria-hidden />
                     {entry.rating}
                   </span>
                 )}
@@ -96,7 +96,7 @@ function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: MealPlanEnt
             aria-pressed={entry.locked}
             aria-label={entry.locked ? t('plan.unlock') : t('plan.lock')}
             onClick={() => update.mutate({ ...ids, locked: !entry.locked })}
-            className={cn(entry.locked && 'text-primary')}
+            className={cn(entry.locked && 'text-foreground')}
           >
             {entry.locked ? <Lock className="size-4" aria-hidden /> : <LockOpen className="size-4 text-muted-foreground" aria-hidden />}
           </Button>
@@ -110,8 +110,8 @@ function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: MealPlanEnt
       </div>
 
       {askRating && (
-        <div className="flex flex-wrap items-center justify-between gap-x-2 border-t py-1 pr-1 pl-3">
-          <span className="text-sm text-muted-foreground">{t('plan.howWasIt')}</span>
+        <div className="flex flex-wrap items-center justify-between gap-x-2 border-t-2 border-dashed border-muted-foreground/40 py-1 pr-1 pl-3">
+          <span className="text-sm font-bold">{t('plan.howWasIt')}</span>
           <StarRating value={null} clearable={false} label={t('plan.howWasIt')} onChange={(rating) => rating && update.mutate({ ...ids, rating })} />
         </div>
       )}
@@ -140,7 +140,7 @@ function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: MealPlanEnt
             </Button>
           </div>
           {recipe && (
-            <Link to={`/recipes/${recipe.id}/cook${meal}`} className="inline-flex h-9 items-center gap-1.5 rounded-md border bg-card px-3 text-sm font-medium">
+            <Link to={`/recipes/${recipe.id}/cook${meal}`} className={linkButtonClass}>
               <ChefHat className="size-4" aria-hidden />
               {t('cook.open')}
             </Link>

@@ -1,4 +1,4 @@
-import { Heart, ListChecks, Plus, Search, X } from 'lucide-react'
+import { Heart, ListChecks, PenLine, Plus, Search, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
@@ -6,8 +6,9 @@ import { type RecipeFilters, useRecipes, useReviewCount, useTagNames } from '@/a
 import { Inbox } from '@/components/library/Inbox'
 import { RecipeCard } from '@/components/library/RecipeCard'
 import { SaveLinkForm } from '@/components/library/SaveLinkForm'
-import { EmptyState } from '@/components/PageHeader'
-import { Button, Chip, inputClass } from '@/components/ui'
+import { Wordmark } from '@/components/brand'
+import { EmptyState, pageTitleClass } from '@/components/PageHeader'
+import { Button, Chip, inputClass, linkButtonClass } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { useDebounced } from '@/lib/useDebounced'
 
@@ -68,16 +69,14 @@ export function LibraryPage() {
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">{t('library.title')}</h1>
-        <Link
-          to="/recipes/new"
-          className="inline-flex h-10 items-center gap-1.5 rounded-md border bg-card px-3 text-sm font-medium"
-        >
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <Wordmark className="text-[1.875rem]" />
+        <Link to="/recipes/new" className={linkButtonClass}>
           <Plus className="size-4" aria-hidden />
           {t('library.newRecipe')}
         </Link>
       </div>
+      <h1 className={cn('mb-4', pageTitleClass)}>{t('library.title')}</h1>
 
       <SaveLinkForm />
       <Inbox />
@@ -130,14 +129,28 @@ export function LibraryPage() {
           <EmptyState>{t('library.loadError')}</EmptyState>
         ) : recipes.data.length === 0 ? (
           filtering ? (
-            <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed bg-card p-6 text-center text-sm text-muted-foreground">
-              {t('library.noMatches')}
-              <Button variant="secondary" size="sm" onClick={clearFilters}>
-                {t('library.clearFilters')}
-              </Button>
-            </div>
+            <EmptyState
+              title={t('library.noMatches')}
+              action={
+                <Button variant="secondary" size="sm" onClick={clearFilters}>
+                  {t('library.clearFilters')}
+                </Button>
+              }
+            >
+              {t('library.noMatchesHint')}
+            </EmptyState>
           ) : (
-            <EmptyState>{t('library.empty')}</EmptyState>
+            <EmptyState
+              title={t('library.emptyTitle')}
+              action={
+                <Link to="/recipes/new" className={linkButtonClass}>
+                  <PenLine className="size-4" aria-hidden />
+                  {t('library.writeOne')}
+                </Link>
+              }
+            >
+              {t('library.empty')}
+            </EmptyState>
           )
         ) : (
           <ul className={cn('grid grid-cols-2 gap-3 sm:grid-cols-3', recipes.isPlaceholderData && 'opacity-60')}>
@@ -157,8 +170,8 @@ function RecipeGridSkeleton() {
   return (
     <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3" aria-hidden>
       {Array.from({ length: 4 }, (_, i) => (
-        <li key={i} className="overflow-hidden rounded-lg border bg-card">
-          <div className="aspect-[4/3] animate-pulse bg-muted" />
+        <li key={i} className="overflow-hidden rounded-lg sticker bg-card">
+          <div className="aspect-[4/3] animate-pulse border-b-2 border-outline bg-muted" />
           <div className="m-2.5 h-4 w-3/4 animate-pulse rounded bg-muted" />
         </li>
       ))}

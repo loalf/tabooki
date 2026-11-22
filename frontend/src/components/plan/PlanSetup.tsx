@@ -1,9 +1,9 @@
-import { Minus, Plus } from 'lucide-react'
+import { Check, Minus, Plus } from 'lucide-react'
 import { type FormEvent, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMe } from '@/auth/useAuth'
 import { type MealPlan, type Slot, type SlotChoice, useCreateMealPlan } from '@/api/plan'
-import { Button } from '@/components/ui'
+import { Button, CheckMark } from '@/components/ui'
 import { formatDay } from '@/components/plan/format'
 import { cn } from '@/lib/utils'
 import { addDays, parseIsoDate, weekDays } from '@/lib/week'
@@ -52,8 +52,8 @@ export function PlanSetup({ week, previous }: { week: string; previous?: MealPla
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-5">
-      <section className="rounded-lg border bg-card p-4">
-        <h2 className="font-medium">{t('plan.setup.title')}</h2>
+      <section className="rounded-lg sticker bg-card p-4">
+        <h2 className="text-[17px] font-extrabold">{t('plan.setup.title')}</h2>
         <p className="mt-1 mb-3 text-sm text-muted-foreground">{t('plan.setup.subtitle')}</p>
         <table className="w-full table-fixed text-sm">
           <thead>
@@ -83,11 +83,11 @@ export function PlanSetup({ week, previous }: { week: string; previous?: MealPla
                         aria-pressed={on}
                         aria-label={`${formatDay(date, i18n.language)}, ${t(`recipe.meal.${slot}`)}`}
                         className={cn(
-                          'h-10 w-full rounded-md border text-sm font-medium transition-colors',
-                          on ? 'border-primary bg-accent text-accent-foreground' : 'border-dashed bg-background text-muted-foreground',
+                          'grid h-10 w-full place-items-center rounded-sm border-2 text-sm font-semibold transition-colors',
+                          on ? 'border-outline bg-accent text-accent-foreground' : 'border-dashed border-muted-foreground/60 text-muted-foreground',
                         )}
                       >
-                        {on ? '✓' : t('plan.setup.out')}
+                        {on ? <Check className="size-[18px]" strokeWidth={2.5} aria-hidden /> : t('plan.setup.out')}
                       </button>
                     </td>
                   )
@@ -98,16 +98,16 @@ export function PlanSetup({ week, previous }: { week: string; previous?: MealPla
         </table>
       </section>
 
-      <section className="flex flex-col gap-4 rounded-lg border bg-card p-4">
+      <section className="flex flex-col gap-4 rounded-lg sticker bg-card p-4">
         <div className="flex items-center justify-between gap-3">
-          <span className="text-sm font-medium" id="servings-label">
+          <span className="text-[15px] font-bold" id="servings-label">
             {t('plan.setup.servings')}
           </span>
           <div className="flex items-center gap-2" role="group" aria-labelledby="servings-label">
             <Button variant="secondary" size="icon" onClick={() => setServings(Math.max(1, servings - 1))} aria-label={t('plan.fewer')}>
               <Minus className="size-4" aria-hidden />
             </Button>
-            <span className="w-8 text-center text-lg font-semibold tabular-nums" aria-live="polite">
+            <span className="w-8 text-center text-lg font-extrabold tabular-nums" aria-live="polite">
               {servings}
             </span>
             <Button variant="secondary" size="icon" onClick={() => setServings(Math.min(50, servings + 1))} aria-label={t('plan.more')}>
@@ -117,15 +117,16 @@ export function PlanSetup({ week, previous }: { week: string; previous?: MealPla
         </div>
 
         <label className="flex items-start gap-3 text-sm">
-          <input type="checkbox" checked={leftovers} onChange={(e) => setLeftovers(e.target.checked)} className="mt-0.5 size-5 accent-primary" />
+          <input type="checkbox" checked={leftovers} onChange={(e) => setLeftovers(e.target.checked)} className="peer sr-only" />
+          <CheckMark checked={leftovers} className="mt-0.5 peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2" />
           <span>
-            <span className="font-medium">{t('plan.setup.leftovers')}</span>
+            <span className="text-[15px] font-bold">{t('plan.setup.leftovers')}</span>
             <span className="block text-muted-foreground">{t('plan.setup.leftoversHint')}</span>
           </span>
         </label>
 
         <fieldset>
-          <legend className="mb-2 text-sm font-medium">{t('plan.setup.weekdayTime')}</legend>
+          <legend className="mb-2 text-[15px] font-bold">{t('plan.setup.weekdayTime')}</legend>
           <div className="grid grid-cols-4 gap-2">
             {TIME_LIMITS.map((limit) => (
               <button
@@ -134,8 +135,8 @@ export function PlanSetup({ week, previous }: { week: string; previous?: MealPla
                 onClick={() => setMaxMinutes(limit)}
                 aria-pressed={maxMinutes === limit}
                 className={cn(
-                  'h-10 rounded-md border text-sm font-medium',
-                  maxMinutes === limit ? 'border-primary bg-accent text-accent-foreground' : 'bg-background',
+                  'h-10 rounded-sm border-2 border-outline text-sm',
+                  maxMinutes === limit ? 'bg-highlight font-extrabold text-highlight-foreground' : 'bg-card font-semibold',
                 )}
               >
                 {limit === null ? t('plan.setup.noLimit') : t('recipe.minutes', { count: limit })}

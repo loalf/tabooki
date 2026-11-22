@@ -47,9 +47,9 @@ function Result({ icon, title, children }: { icon: React.ReactNode; title: strin
   return (
     <div className="flex flex-col items-center gap-3 pt-24 text-center" role="status">
       {icon}
-      <h1 className="text-lg font-semibold">{title}</h1>
+      <h1 className="text-lg font-extrabold">{title}</h1>
       <div className="w-full max-w-sm">{children}</div>
-      <Link to="/" replace className="mt-2 text-sm font-medium text-primary underline-offset-4 hover:underline">
+      <Link to="/" replace className="mt-2 text-sm font-bold text-primary underline-offset-4 hover:underline">
         {t('share.toLibrary')}
       </Link>
     </div>

@@ -21,18 +21,18 @@ export function ShareSettings() {
   }
 
   return (
-    <section className="rounded-lg border bg-card p-4" aria-labelledby="share-title">
-      <h2 id="share-title" className="flex items-center gap-2 font-medium">
-        <Smartphone className="size-5" aria-hidden />
+    <section className="rounded-lg sticker bg-card p-4" aria-labelledby="share-title">
+      <h2 id="share-title" className="flex items-center gap-2 font-extrabold">
+        <Smartphone className="size-5 text-primary" aria-hidden />
         {t('settings.share.title')}
       </h2>
       <p className="mt-2 text-sm text-muted-foreground">{t('settings.share.android')}</p>
 
-      <h3 className="mt-4 text-sm font-medium">{t('settings.share.iphone')}</h3>
+      <h3 className="mt-4 text-sm font-extrabold">{t('settings.share.iphone')}</h3>
       <p className="mt-1 text-sm text-muted-foreground">{t('settings.share.iphoneIntro')}</p>
 
       {tokens.length > 0 && (
-        <ul className="mt-3 flex flex-col divide-y rounded-md border">
+        <ul className="mt-3 flex flex-col divide-y rounded-md border-2 border-outline">
           {tokens.map((token) => (
             <li key={token.id} className="flex items-center gap-2 px-3 py-2 text-sm">
               <div className="min-w-0 flex-1">

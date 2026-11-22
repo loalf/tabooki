@@ -2,7 +2,8 @@ import { type FormEvent, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { MIN_PASSWORD_LENGTH, useResetPassword } from '@/api/password'
-import { AuthLayout, authButtonClass, authInputClass } from '@/components/auth/AuthLayout'
+import { AuthLayout } from '@/components/auth/AuthLayout'
+import { authButtonClass, authInputClass } from '@/components/auth/styles'
 import { useLogout, useMe } from '@/auth/useAuth'
 
 /** /reset-password?token=…, from the emailed link. */
@@ -56,7 +57,7 @@ export function ResetPasswordPage() {
   return (
     <AuthLayout title={t('password.reset.title')} subtitle={t('password.reset.subtitle')}>
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1.5 text-sm font-medium">
+        <label className="flex flex-col gap-1.5 text-sm font-bold">
           {t('password.new')}
           <input
             type="password"
@@ -69,7 +70,7 @@ export function ResetPasswordPage() {
           />
           <span className="text-xs font-normal text-muted-foreground">{t('password.hint', { count: MIN_PASSWORD_LENGTH })}</span>
         </label>
-        <label className="flex flex-col gap-1.5 text-sm font-medium">
+        <label className="flex flex-col gap-1.5 text-sm font-bold">
           {t('password.repeat')}
           <input type="password" autoComplete="new-password" required value={repeat} onChange={(e) => setRepeat(e.target.value)} className={authInputClass} />
         </label>

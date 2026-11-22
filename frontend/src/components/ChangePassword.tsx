@@ -49,11 +49,11 @@ export function ChangePassword() {
       : null
 
   return (
-    <section className="rounded-lg border bg-card p-4" aria-labelledby="password-title">
+    <section className="rounded-lg sticker bg-card p-4" aria-labelledby="password-title">
       <div className="flex items-center gap-3">
         <KeyRound className="size-5 shrink-0 text-primary" aria-hidden />
         <div className="flex-1">
-          <h2 id="password-title" className="font-medium">
+          <h2 id="password-title" className="font-extrabold">
             {t('password.change.title')}
           </h2>
           {change.isSuccess && !open && (

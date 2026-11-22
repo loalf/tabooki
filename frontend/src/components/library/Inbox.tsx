@@ -23,11 +23,11 @@ export function Inbox() {
 
   return (
     <section aria-labelledby="inbox-title" className="mb-8">
-      <h2 id="inbox-title" className="mb-1 text-lg font-semibold">
+      <h2 id="inbox-title" className="mb-1 text-lg font-extrabold">
         {t('library.inbox.title')} <span className="font-normal text-muted-foreground">{sources.length}</span>
       </h2>
       <p className="mb-3 text-sm text-muted-foreground">{t('library.inbox.subtitle')}</p>
-      <ul className="flex flex-col divide-y rounded-lg border bg-card">
+      <ul className="flex flex-col divide-y rounded-lg sticker bg-card">
         {visible.map((source) => (
           <SourceRow key={source.id} source={source} />
         ))}
@@ -83,11 +83,11 @@ function SourceRow({ source }: { source: Source }) {
     <li className={cn('flex flex-col gap-2 p-3', remove.isPending && 'opacity-50')}>
       <div className="flex gap-3">
         <a href={source.url} target="_blank" rel="noreferrer" className="shrink-0" tabIndex={-1} aria-hidden>
-          <Thumbnail src={source.thumbnail} className={cn('size-16 rounded-md', loadingPreview && 'animate-pulse')} />
+          <Thumbnail src={source.thumbnail} className={cn('size-14 rounded-sm border-2 border-outline', loadingPreview && 'animate-pulse')} />
         </a>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <a href={source.url} target="_blank" rel="noreferrer" className="group flex min-w-0 items-start gap-1">
-            <span className={cn('line-clamp-2 font-medium group-hover:underline', !source.title && 'text-muted-foreground')}>
+            <span className={cn('line-clamp-2 font-bold group-hover:underline', !source.title && 'text-muted-foreground')}>
               {source.title ?? (loadingPreview ? t('library.inbox.loadingPreview') : hostOf(source.url))}
             </span>
             <ExternalLink className="mt-1 size-3.5 shrink-0 text-muted-foreground" aria-label={t('library.openOriginal')} />
@@ -128,7 +128,7 @@ function SourceRow({ source }: { source: Source }) {
         </form>
       )}
 
-      <div className="flex flex-wrap gap-2 pl-[4.75rem]">
+      <div className="flex flex-wrap gap-2 pl-[4.25rem]">
         {stuck && !pasting && (
           <Button variant="secondary" size="sm" onClick={() => setPasting(true)}>
             <ClipboardPaste className="size-4" aria-hidden />
@@ -170,17 +170,17 @@ function StatusLine({ source, working }: { source: Source; working: boolean }) {
   const { t } = useTranslation()
   if (working) {
     return (
-      <span className="inline-flex items-center gap-1.5 text-sm text-primary" role="status">
+      <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary" role="status">
         <LoaderCircle className="size-4 animate-spin" aria-hidden />
         {source.status === 'extracting' ? t('library.inbox.extracting') : t('library.inbox.queued')}
       </span>
     )
   }
   if (source.status === 'needs_input') {
-    return <span className="text-sm font-medium text-destructive">{t('library.inbox.needsInput')}</span>
+    return <span className="text-sm font-bold text-destructive">{t('library.inbox.needsInput')}</span>
   }
   if (source.status === 'failed') {
-    return <span className="text-sm font-medium text-destructive">{t('library.inbox.failed')}</span>
+    return <span className="text-sm font-bold text-destructive">{t('library.inbox.failed')}</span>
   }
   return null
 }

@@ -5,6 +5,7 @@ import { useMealPlan } from '@/api/plan'
 import { EmptyState, PageHeader } from '@/components/PageHeader'
 import { PlanSetup } from '@/components/plan/PlanSetup'
 import { PlanWeek } from '@/components/plan/PlanWeek'
+import { linkButtonClass } from '@/components/ui'
 import { WeekNav } from '@/components/WeekNav'
 import { useWeekParam } from '@/lib/useWeekParam'
 import { addDays } from '@/lib/week'
@@ -28,11 +29,15 @@ export function PlanPage() {
       ) : plan.data ? (
         <PlanWeek plan={plan.data} />
       ) : library.data?.length === 0 ? (
-        <EmptyState>
-          {t('plan.emptyLibrary')}{' '}
-          <Link to="/" className="font-medium text-primary underline-offset-4 hover:underline">
-            {t('plan.toLibrary')}
-          </Link>
+        <EmptyState
+          title={t('plan.emptyLibraryTitle')}
+          action={
+            <Link to="/" className={linkButtonClass}>
+              {t('plan.toLibrary')}
+            </Link>
+          }
+        >
+          {t('plan.emptyLibrary')}
         </EmptyState>
       ) : (
         // Keyed by week: the choices start over for each week.

@@ -2,41 +2,58 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Design tokens (shadcn/ui-compatible names so components can be added with `npx shadcn add`). */
+/*
+ * Brand: "Huevos fritos", a 70s family cookbook. The "oo" in tabooki is two fried eggs (comida
+ * and cena). Things you can touch or that stand alone (cards, buttons, fields) get a chunky ink
+ * outline and a hard sticker shadow; dividers inside them stay soft. Design file:
+ * docs/design/tabooki.pen.
+ *
+ * Token names stay shadcn/ui-compatible so components can be added with `npx shadcn add`.
+ */
 :root {
-  --background: #fbf8f2;
-  --foreground: #1d2420;
-  --card: #ffffff;
-  --card-foreground: #1d2420;
-  --muted: #efe9dd;
-  --muted-foreground: #66706a;
-  --primary: #1f6f4a;
-  --primary-foreground: #ffffff;
-  --accent: #e7f3dc;
-  --accent-foreground: #1f4d35;
-  --destructive: #c2410c;
-  --border: #e3dccd;
-  --input: #d9d1c0;
-  --ring: #1f6f4a;
-  --radius: 0.75rem;
+  --background: #fcefd2; /* mantequilla */
+  --foreground: #3a2213; /* chocolate */
+  --card: #fff9ec; /* nata */
+  --card-foreground: #3a2213;
+  --muted: #f5e2bb;
+  --muted-foreground: #7a5e4a;
+  --primary: #5a7a1c; /* aguacate */
+  --primary-foreground: #fff9ec;
+  --accent: #fde4a8; /* a wash of yolk: selected options, tags, locked meals */
+  --accent-foreground: #3a2213;
+  --highlight: #f3a81c; /* yema: today, active filters and tabs */
+  --highlight-foreground: #3a2213;
+  --brand: #d2531a; /* pimentón: wordmark and page titles */
+  --destructive: #b3261e;
+  --border: #e8d2a8; /* soft dividers */
+  --input: #3a2213;
+  --outline: #3a2213; /* sticker outlines */
+  --shadow: #3a2213; /* sticker shadows */
+  --ring: #5a7a1c;
+  --radius: 1rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #121614;
-    --foreground: #e9ede9;
-    --card: #1a201d;
-    --card-foreground: #e9ede9;
-    --muted: #232a26;
-    --muted-foreground: #9aa59f;
-    --primary: #5cbf8a;
-    --primary-foreground: #0d1a13;
-    --accent: #23362b;
-    --accent-foreground: #cdeccf;
-    --destructive: #f97316;
-    --border: #2c3530;
-    --input: #36413b;
-    --ring: #5cbf8a;
+    --background: #1f140c;
+    --foreground: #f6e7cc;
+    --card: #2b1c12;
+    --card-foreground: #f6e7cc;
+    --muted: #382519;
+    --muted-foreground: #c3a88c;
+    --primary: #a6c45a;
+    --primary-foreground: #1f140c;
+    --accent: #4a3412;
+    --accent-foreground: #fbd78a;
+    --highlight: #f3a81c;
+    --highlight-foreground: #2b1c12;
+    --brand: #f07a43;
+    --destructive: #ff6b5a;
+    --border: #4a3424;
+    --input: #d8bf98;
+    --outline: #d8bf98;
+    --shadow: #0c0704;
+    --ring: #a6c45a;
   }
 }
 
@@ -51,13 +68,38 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-brand: var(--brand);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--input);
+  --color-outline: var(--outline);
+  --color-shadow: var(--shadow);
   --color-ring: var(--ring);
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+  --font-sans: 'Rethink Sans Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Only for the wordmark and page titles. */
+  --font-display: 'Shrikhand', Georgia, serif;
+}
+
+/* A thing that stands alone: card, list, panel. */
+@utility sticker {
+  border: 2px solid var(--outline);
+  box-shadow: 3px 3px 0 var(--shadow);
+}
+
+/* Buttons and small controls: a smaller shadow that disappears when pressed. */
+@utility sticker-sm {
+  border: 2px solid var(--outline);
+  box-shadow: 2px 2px 0 var(--shadow);
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+  &:active:not(:disabled) {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--shadow);
+  }
 }
 
 @layer base {
@@ -70,8 +112,27 @@
     @apply min-h-dvh;
   }
   body {
-    @apply bg-background text-foreground antialiased;
-    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    @apply bg-background font-sans text-foreground antialiased;
     -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* The splash eggs rock in turn: the app's one bit of ambient motion. */
+@keyframes egg-wobble {
+  0%,
+  100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .egg-wobble > * {
+    animation: egg-wobble 1.2s ease-in-out infinite;
+  }
+  .egg-wobble > :nth-child(2) {
+    animation-delay: -0.6s;
   }
 }
