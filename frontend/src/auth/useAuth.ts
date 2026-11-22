@@ -64,6 +64,10 @@ export function useUpdateMe() {
       if (!data) throw new ApiError(response.status)
       return data
     },
-    onSuccess: (me) => queryClient.setQueryData(meQueryKey, me),
+    onSuccess: (me, changes) => {
+      queryClient.setQueryData(meQueryKey, me)
+      // Recipes, the menu and the shopping list come in the reader's language.
+      if (changes.locale) void queryClient.invalidateQueries({ predicate: (query) => query.queryKey[0] !== meQueryKey[0] })
+    },
   })
 }

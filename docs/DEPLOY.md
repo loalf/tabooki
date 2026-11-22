@@ -90,6 +90,13 @@ That builds the image, runs migrations (php's entrypoint) and restarts php and w
 server has no `make`, so the Makefile's `prod-*` targets are for a server that does. Logs:
 `docker compose -f compose.yaml -f compose.prod.yaml logs -f worker`.
 
+Recipes are translated into the other language as they are added or edited. After the deploy
+that introduced translations (or if some failed), translate the rest:
+
+```sh
+ssh demo.rootware.xyz 'cd /opt/tabooki && docker compose -f compose.yaml -f compose.prod.yaml exec php bin/console app:translate'
+```
+
 ## Email (password resets)
 
 "Forgot your password?" emails a link, and everyone gets a note when their password changes.

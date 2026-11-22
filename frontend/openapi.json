@@ -3829,7 +3829,8 @@
                             "text",
                             "transcript",
                             "video",
-                            "classify"
+                            "classify",
+                            "translate"
                         ]
                     },
                     "model": {
@@ -3896,7 +3897,8 @@
                             "text",
                             "transcript",
                             "video",
-                            "classify"
+                            "classify",
+                            "translate"
                         ]
                     },
                     "model": {
@@ -5494,6 +5496,19 @@
                                 "dinner"
                             ]
                         }
+                    },
+                    "translatedFrom": {
+                        "readOnly": true,
+                        "description": "The language the text was originally written in, when the text shown is a translation. Filled in by RecipeNormalizer.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "es",
+                            "en",
+                            null
+                        ]
                     }
                 },
                 "required": [
@@ -6099,6 +6114,19 @@
                                         "dinner"
                                     ]
                                 }
+                            },
+                            "translatedFrom": {
+                                "readOnly": true,
+                                "description": "The language the text was originally written in, when the text shown is a translation. Filled in by RecipeNormalizer.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "es",
+                                    "en",
+                                    null
+                                ]
                             }
                         },
                         "required": [

@@ -155,6 +155,10 @@
     },
     "originalText": "Texto original",
     "extractedBy": "Extraída con {{model}}",
+    "translatedFrom": {
+      "es": "Traducida del español",
+      "en": "Traducida del inglés"
+    },
     "reextract": {
       "typed": "Escrita a mano a partir del enlace",
       "newer": "hay un modelo más nuevo",
@@ -415,9 +419,11 @@
       "text": "Leer el texto",
       "transcript": "Transcribir el vídeo",
       "video": "Ver el vídeo",
-      "classify": "Ordenar ingredientes"
+      "classify": "Ordenar ingredientes",
+      "translate": "Traducir la receta"
     },
     "classifyWhat": "Ingredientes nuevos de la lista",
+    "translateWhat": "Receta escrita a mano",
     "deletedLink": "Enlace borrado",
     "unpriced_one": "{{count}} llamada usa un modelo sin precio configurado y no cuenta en los totales.",
     "unpriced_other": "{{count}} llamadas usan un modelo sin precio configurado y no cuentan en los totales.",

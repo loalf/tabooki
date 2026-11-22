@@ -10,6 +10,7 @@ use App\Entity\Household;
 use App\Entity\MealPlan;
 use App\Entity\ShoppingList;
 use App\Enum\Aisle;
+use App\Enum\Language;
 use App\Repository\MealPlanRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -61,7 +62,7 @@ final readonly class ShoppingListBuilder
                 ];
                 $quantity = $ingredient->getQuantity();
                 $lines[$key]['quantities']->add(null === $quantity ? null : $quantity * $factor, $ingredient->getUnit());
-                $lines[$key]['recipes'][$recipe->getId()->toRfc4122()] = $recipe->getTitle();
+                $lines[$key]['recipes'][$recipe->getId()->toRfc4122()] = $recipe->titleIn(Language::ofLocale($locale));
             }
         }
 

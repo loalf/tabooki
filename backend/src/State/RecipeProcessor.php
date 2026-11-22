@@ -1,0 +1,37 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\State;
+
+use ApiPlatform\Metadata\Operation;
+use ApiPlatform\State\ProcessorInterface;
+use App\Entity\Recipe;
+use App\Message\TranslateRecipe;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+/**
+ * Saves a recipe typed or edited by hand, then has it translated into the other language when
+ * its text changed (see Recipe::keepOriginalIfUntouched() for edits made to the translation).
+ *
+ * @implements ProcessorInterface<Recipe, mixed>
+ */
+final readonly class RecipeProcessor implements ProcessorInterface
+{
+    public function __construct(
+        private HouseholdOwnedProcessor $persist,
+        private MessageBusInterface $bus,
+    ) {
+    }
+
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
+    {
+        $data->keepOriginalIfUntouched();
+        $result = $this->persist->process($data, $operation, $uriVariables, $context);
+        if ($data->needsTranslation()) {
+            $this->bus->dispatch(new TranslateRecipe($data->getId()->toRfc4122()));
+        }
+
+        return $result;
+    }
+}

@@ -13,7 +13,10 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Parameter;
 use Doctrine\ORM\QueryBuilder;
 
-/** `?tags[]=vegetarian&tags[]=quick`: recipes having all the given tags (JSONB containment). */
+/**
+ * `?tags[]=vegetarian&tags[]=quick`: recipes having all the given tags (JSONB containment), in
+ * their own language or in their translation (whoever filters sees the tags in theirs).
+ */
 final class RecipeTagsFilter implements FilterInterface, OpenApiParameterFilterInterface
 {
     use BackwardCompatibleFilterDescriptionTrait;
@@ -37,7 +40,7 @@ final class RecipeTagsFilter implements FilterInterface, OpenApiParameterFilterI
         $alias = $queryBuilder->getRootAliases()[0];
         $parameter = $queryNameGenerator->generateParameterName('tags');
         $queryBuilder
-            ->andWhere(\sprintf('JSONB_CONTAINS(%s.tags, :%s) = true', $alias, $parameter))
+            ->andWhere(\sprintf("(JSONB_CONTAINS(%1\$s.tags, :%2\$s) = true OR JSONB_CONTAINS(JSONB_FIELD(%1\$s.translation, 'text', 'tags'), :%2\$s) = true)", $alias, $parameter))
             ->setParameter($parameter, json_encode($tags, \JSON_THROW_ON_ERROR | \JSON_UNESCAPED_UNICODE));
     }
 }

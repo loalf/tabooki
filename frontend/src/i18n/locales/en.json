@@ -155,6 +155,10 @@
     },
     "originalText": "Original text",
     "extractedBy": "Extracted with {{model}}",
+    "translatedFrom": {
+      "es": "Translated from Spanish",
+      "en": "Translated from English"
+    },
     "reextract": {
       "typed": "Written by hand from the link",
       "newer": "a newer model is available",
@@ -415,9 +419,11 @@
       "text": "Reading the text",
       "transcript": "Transcribing the video",
       "video": "Watching the video",
-      "classify": "Sorting ingredients"
+      "classify": "Sorting ingredients",
+      "translate": "Translating the recipe"
     },
     "classifyWhat": "New ingredients on the list",
+    "translateWhat": "A recipe typed in",
     "deletedLink": "Deleted link",
     "unpriced_one": "{{count}} call uses a model with no price configured and is not in the totals.",
     "unpriced_other": "{{count}} calls use a model with no price configured and are not in the totals.",

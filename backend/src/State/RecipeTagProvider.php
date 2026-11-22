@@ -7,6 +7,7 @@ namespace App\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\ApiResource\RecipeTag;
+use App\Enum\Language;
 use App\Repository\RecipeRepository;
 use App\Security\CurrentHousehold;
 
@@ -24,7 +25,7 @@ final readonly class RecipeTagProvider implements ProviderInterface
     {
         return array_map(
             static fn (array $row): RecipeTag => new RecipeTag($row['tag'], $row['count']),
-            $this->recipes->tagCounts($this->current->household()),
+            $this->recipes->tagCounts($this->current->household(), Language::ofLocale($this->current->user()->getLocale())),
         );
     }
 }

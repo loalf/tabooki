@@ -42,7 +42,9 @@ sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keyc
 
 Saved links are turned into recipes by an LLM on Amazon Bedrock. When a reel's caption isn't
 enough, the app watches the video: Whisper (through OpenRouter) transcribes what is said, ffmpeg
-takes stills, and the same model reads both, estimating amounts nobody gives ("~380 g").
+takes stills, and the same model reads both, estimating amounts nobody gives ("~380 g"). Recipes
+are written in the language of whoever adds them, and the same model translates each one into
+the other language in the background, so everyone reads them in theirs.
 Create `backend/.env.local` (git-ignored) with both API keys, then restart the worker:
 
 ```sh
@@ -60,6 +62,7 @@ docker compose restart worker
 make console c=app:bedrock:check          # lists the models your key can use, runs a test extraction
 make console c="app:extract --all"        # extract links saved before the key was set
 make console c="app:extract <id> --sync"  # extract one link here and print the result
+make console c=app:translate              # translate recipes not yet in both languages
 ```
 
 After switching `BEDROCK_TEXT_MODEL` to a newer model, extract the old

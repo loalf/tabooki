@@ -33,7 +33,7 @@ class ExtractionRun
         #[ORM\ManyToOne]
         #[ORM\JoinColumn(onDelete: 'SET NULL')]
         private ?Source $source,
-        /** "text", "transcript" (speech to text of a video), "video" (its stills) or "classify" */
+        /** "text", "transcript" (speech to text of a video), "video" (its stills), "classify" or "translate" (a recipe into the other language) */
         #[ORM\Column(length: 20)]
         private string $step,
         #[ORM\Column(length: 30)]

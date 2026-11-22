@@ -20,9 +20,10 @@ use App\Filter\RecipeSearchFilter;
 use App\Filter\RecipeTagsFilter;
 use App\Library\SearchText;
 use App\Repository\RecipeRepository;
-use App\State\HouseholdOwnedProcessor;
+use App\State\RecipeProcessor;
 use App\State\RecipeProvider;
 use App\State\ReextractRecipeProcessor;
+use App\Translation\RecipeText;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -79,8 +80,8 @@ use Symfony\Component\Validator\Constraints as Assert;
             ],
         ),
         new Get(provider: RecipeProvider::class),
-        new Post(processor: HouseholdOwnedProcessor::class),
-        new Patch(provider: RecipeProvider::class, processor: HouseholdOwnedProcessor::class),
+        new Post(processor: RecipeProcessor::class),
+        new Patch(provider: RecipeProvider::class, processor: RecipeProcessor::class),
         new Post(
             uriTemplate: '/recipes/{id}/extract',
             status: 202,
@@ -211,6 +212,21 @@ class Recipe implements HouseholdOwned
     #[ORM\Column(type: Types::TEXT, options: ['default' => ''])]
     private string $searchText = '';
 
+    /**
+     * The recipe's text in the other language (App\Translation\RecipeText::toArray()), and the hash
+     * of the text it was translated from. Dropped as soon as that text changes; the background
+     * translation writes it again.
+     *
+     * @var array{from: string, text: array<mixed>}|null
+     */
+    #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
+    private ?array $translation = null;
+
+    /** The text and its translation as they were before an edit (RecipeProvider remembers them). Not stored. */
+    private ?RecipeText $textBeforeEdit = null;
+
+    private ?RecipeText $translationBeforeEdit = null;
+
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     #[Groups(['recipe:read'])]
     private \DateTimeImmutable $createdAt;
@@ -340,6 +356,18 @@ class Recipe implements HouseholdOwned
     /** @param list<string> $tags */
     public function setTags(array $tags): void
     {
+        $this->tags = self::normalizeTags($tags);
+    }
+
+    /**
+     * Lowercase, single spaces, no blanks or repeats.
+     *
+     * @param list<string> $tags
+     *
+     * @return list<string>
+     */
+    public static function normalizeTags(array $tags): array
+    {
         $normalized = [];
         foreach ($tags as $tag) {
             $tag = mb_strtolower(trim((string) preg_replace('/\s+/u', ' ', $tag)));
@@ -347,7 +375,8 @@ class Recipe implements HouseholdOwned
                 $normalized[] = $tag;
             }
         }
-        $this->tags = $normalized;
+
+        return $normalized;
     }
 
     /** @return list<RecipeIngredient> */
@@ -381,7 +410,17 @@ class Recipe implements HouseholdOwned
     /** @param list<string> $steps */
     public function setSteps(array $steps): void
     {
-        $this->steps = array_values(array_filter(array_map(trim(...), $steps), static fn (string $step): bool => '' !== $step));
+        $this->steps = self::normalizeSteps($steps);
+    }
+
+    /**
+     * @param list<string> $steps
+     *
+     * @return list<string> trimmed, without blank ones
+     */
+    public static function normalizeSteps(array $steps): array
+    {
+        return array_values(array_filter(array_map(trim(...), $steps), static fn (string $step): bool => '' !== $step));
     }
 
     public function getNotes(): ?string
@@ -479,6 +518,91 @@ class Recipe implements HouseholdOwned
         $this->needsReview = $needsReview;
     }
 
+    /** The language the text was originally written in, when the text shown is a translation. Filled in by RecipeNormalizer. */
+    #[Groups(['recipe:read'])]
+    public function getTranslatedFrom(): ?Language
+    {
+        return null;
+    }
+
+    /**
+     * The text in the other language, if it has been translated. Every flush drops a translation
+     * whose text has changed since, so what is stored is current (reading it doesn't need the
+     * ingredients, which matters for the library list).
+     */
+    public function getTranslation(): ?RecipeText
+    {
+        $text = null === $this->translation ? null : RecipeText::fromArray($this->translation['text']);
+
+        return $text?->language === $this->language->other() ? $text : null;
+    }
+
+    /** Keeps a translation of the recipe as it is now; one made from an older text is ignored. */
+    public function translate(RecipeText $translation, string $from): bool
+    {
+        $text = RecipeText::of($this);
+        if ($from !== $text->hash() || $translation->language !== $this->language->other() || !$text->matches($translation)) {
+            return false;
+        }
+        $this->translation = ['from' => $from, 'text' => $translation->toArray()];
+
+        return true;
+    }
+
+    /** No translation yet, or it was made from a text that has changed since. */
+    public function needsTranslation(): bool
+    {
+        return null === $this->getTranslation() || ($this->translation['from'] ?? null) !== RecipeText::of($this)->hash();
+    }
+
+    /** The recipe's text in a language: the translation when there is one, the original otherwise. */
+    public function textIn(Language $language): RecipeText
+    {
+        $text = RecipeText::of($this);
+        if ($language === $this->language) {
+            return $text;
+        }
+
+        return $this->getTranslation() ?? $text;
+    }
+
+    public function titleIn(Language $language): string
+    {
+        return $language === $this->language ? $this->title : ($this->getTranslation()->title ?? $this->title);
+    }
+
+    /** @return list<string> */
+    public function tagsIn(Language $language): array
+    {
+        return $language === $this->language ? $this->tags : ($this->getTranslation()->tags ?? $this->tags);
+    }
+
+    /** Before an edit is applied: see keepOriginalIfUntouched(). */
+    public function rememberText(): void
+    {
+        $this->textBeforeEdit = RecipeText::of($this);
+        $this->translationBeforeEdit = $this->getTranslation();
+    }
+
+    /**
+     * Whoever reads the translation and saves the form sends the translated text back, in their
+     * language. When they didn't change it (they only marked it reviewed, or changed the
+     * servings), the recipe keeps its original text rather than becoming a translation of a
+     * translation. When they did, their text is the recipe now, and the other language is
+     * translated again from it.
+     */
+    public function keepOriginalIfUntouched(): void
+    {
+        $before = $this->textBeforeEdit;
+        $translation = $this->translationBeforeEdit;
+        if (null === $before || null === $translation || $this->language !== $translation->language) {
+            return;
+        }
+        if (RecipeText::of($this)->equals($translation)) {
+            $before->applyTo($this);
+        }
+    }
+
     public function getSearchText(): string
     {
         return $this->searchText;
@@ -496,15 +620,22 @@ class Recipe implements HouseholdOwned
 
     /**
      * Runs on every flush (also for changes made only to ingredients, which don't make the
-     * recipe itself dirty), so the search index can never go stale.
+     * recipe itself dirty), so neither the translation nor the search index can go stale.
      */
     #[ORM\PreFlush]
     public function refreshSearchText(): void
     {
+        if (null !== $this->translation && $this->needsTranslation()) {
+            $this->translation = null;
+        }
+        $translation = $this->getTranslation();
+
+        // Both languages: whoever searches finds the recipe in theirs.
         $searchText = SearchText::normalize(implode(' ', [
             $this->title,
             ...$this->tags,
             ...array_map(static fn (RecipeIngredient $i): string => $i->getRawText(), $this->ingredients->toArray()),
+            ...(null === $translation ? [] : [$translation->title, ...$translation->tags, ...array_column($translation->ingredients, 'rawText')]),
         ]));
 
         if ($searchText !== $this->searchText) {

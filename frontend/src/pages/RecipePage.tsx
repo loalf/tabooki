@@ -1,23 +1,4 @@
-import {
-  CalendarCheck,
-  CalendarPlus,
-  Check,
-  ChefHat,
-  ChevronLeft,
-  Clock,
-  Ellipsis,
-  ExternalLink,
-  Heart,
-  LoaderCircle,
-  Minus,
-  Pencil,
-  Plus,
-  RefreshCw,
-  Sparkles,
-  Star,
-  Sun,
-  Trash2,
-} from 'lucide-react'
+import { CalendarCheck, CalendarPlus, Check, ChefHat, ChevronLeft, Clock, Ellipsis, ExternalLink, Heart, Languages, LoaderCircle, Minus, Pencil, Plus, RefreshCw, Sparkles, Star, Sun, Trash2 } from 'lucide-react'
 import { type ReactNode, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
@@ -185,6 +166,12 @@ function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) 
             <li className="inline-flex items-center gap-1.5">
               <Sun className="size-4" aria-label={t('recipe.mealTypes')} />
               {(recipe.mealTypes ?? []).map((type) => t(`recipe.meal.${type}`)).join(' · ')}
+            </li>
+          )}
+          {recipe.translatedFrom && (
+            <li className="inline-flex items-center gap-1.5">
+              <Languages className="size-4" aria-hidden />
+              {t(`recipe.translatedFrom.${recipe.translatedFrom}`)}
             </li>
           )}
           {(recipe.rating != null || lastCooked) && (

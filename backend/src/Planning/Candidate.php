@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Planning;
 
 use App\Entity\Recipe;
+use App\Enum\Language;
 use App\Enum\MealType;
 
 /** A library recipe as the planner weighs it. */
@@ -44,7 +45,8 @@ final readonly class Candidate
             id: $recipe->getId()->toRfc4122(),
             mealTypes: $recipe->getMealTypes(),
             minutes: $recipe->getTotalMinutes(),
-            tags: array_values(array_filter($recipe->getTags(), Planner::isMainTag(...))),
+            // In one language for every recipe, so "pollo" and "chicken" count as the same dish.
+            tags: array_values(array_filter($recipe->tagsIn(Language::En), Planner::isMainTag(...))),
             fresh: array_values(array_unique($fresh)),
             favorite: $recipe->isFavorite(),
             rating: $recipe->getRating(),

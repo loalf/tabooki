@@ -639,7 +639,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "classify";
+            step?: "text" | "transcript" | "video" | "classify" | "translate";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -661,7 +661,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "classify";
+            step?: "text" | "transcript" | "video" | "classify" | "translate";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -1294,6 +1294,11 @@ export interface components {
             readonly updatedAt?: string;
             readonly totalMinutes?: number | null;
             mealTypes?: ("lunch" | "dinner")[];
+            /**
+             * @description The language the text was originally written in, when the text shown is a translation. Filled in by RecipeNormalizer.
+             * @enum {string|null}
+             */
+            readonly translatedFrom?: "es" | "en" | null;
         };
         "Recipe-recipe.write": {
             /**
@@ -1490,6 +1495,11 @@ export interface components {
             readonly updatedAt?: string;
             readonly totalMinutes?: number | null;
             mealTypes?: ("lunch" | "dinner")[];
+            /**
+             * @description The language the text was originally written in, when the text shown is a translation. Filled in by RecipeNormalizer.
+             * @enum {string|null}
+             */
+            readonly translatedFrom?: "es" | "en" | null;
         };
         "RecipeIngredient-recipe.read": {
             /** @description Sub-heading the line belongs to ("For the sauce"), if the recipe has groups. */

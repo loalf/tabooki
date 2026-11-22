@@ -17,7 +17,7 @@ A personal/household meal planner. The household keeps a **library** of recipe l
 | Frontend | **React** SPA (Vite + TypeScript) |
 | Extraction | LLM-based, provider-agnostic. **Amazon Bedrock** (API key) is the provider since M2 (2026-11-19): a text model for captions, transcripts and pages, and Amazon Nova for videos. Gemini could be added behind the same interface. The app is self-hosted, the models stay cloud APIs |
 | Phones | **iPhone and Android**: Web Share Target on Android, Apple Shortcut on iOS |
-| Languages | **Spanish and English**: bilingual UI, recipes in either language, one shared ingredient catalog |
+| Languages | **Spanish and English**: bilingual UI, every recipe in both languages (each reader sees theirs), one shared ingredient catalog |
 | Meals | **Lunch and dinner**, default **4 servings** (adjustable per meal) |
 | Units | **Metric everywhere** (g, ml, °C), with spoons, pinches and countable items kept as they are, original text preserved (see 4.3) |
 | Environments | **Local development** on macOS (Apple Silicon) with Docker Compose; **production on a Contabo VPS**, reached only through **Tailscale** |
@@ -124,6 +124,7 @@ Rule: **collect the cheapest good evidence first and only escalate when needed.*
 - **One extraction schema** (a PHP DTO turned into JSON Schema), used for every source: title, servings, times, cuisine, meal types, tags, diet flags, ingredient groups, steps, plus `confidence` and `missing_fields`.
 - Each ingredient comes out **already normalized**: `{ raw, quantity, unit, name, canonical_key, name_es, name_en, prep, optional }`, with units normalized as described in 4.3. `raw` and `name` are in the cook's language (see below), `raw` with the stored metric amount so cook mode can scale it. `canonical_key` is a stable English slug (`onion`, `chickpeas_canned`) used for matching, so *cebolla* and *onion* merge on the shopping list.
 - Recipes are **written in the language of whoever adds them** (their `locale`), translated in the same call when the material is in another language (changed 2026-11-22; until then they kept their original language). The recipe's **`language`** (`es` / `en`) is stored.
+- **Every recipe in both languages** (added 2026-11-22): after a recipe is added, extracted again or edited, a background text-only call (`TranslateRecipe`, ~$0.001) writes its title, tags, ingredient lines (name, prep, group), steps and notes in the other language, line for line. Amounts, units, servings and times are shared. The API serves each reader their locale's version (`language` says which, `translatedFrom` marks a translation); search matches both. Editing the translation makes it the original and the other language is translated again; saving it unchanged keeps the original. `app:translate` translates recipes saved before this.
 - **Model routing (config, not code):**
   - Text/JSON-LD normalization → **Gemini Flash-class** model (cheap, fast, good at JSON).
   - Images (screenshots, Instagram carousels) → Gemini (natively multimodal).
@@ -151,7 +152,8 @@ sources           id, household_id, url, normalized_url (unique per household), 
 
 recipes           id, household_id, source_id (nullable for manual), language (es|en), title, servings,
                   prep_min, cook_min, total_min, cuisine, meal_types[], tags[], diet_flags[],
-                  steps jsonb, notes, rating, is_favorite, confidence, extracted_by_model, reviewed_at
+                  steps jsonb, notes, rating, is_favorite, confidence, extracted_by_model, reviewed_at,
+                  translation jsonb (the text in the other language + hash of the text it came from)
 
 recipe_ingredients id, recipe_id, position, group_name, raw_text, quantity, unit,
                   ingredient_id, prep, optional

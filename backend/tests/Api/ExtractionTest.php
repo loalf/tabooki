@@ -59,6 +59,10 @@ final class ExtractionTest extends ApiTestCase
         $this->runPreview($id);
         $this->runExtraction($id);
 
+        // The recipe is then written in the other language too.
+        $queued = array_filter(array_map(static fn ($envelope): object => $envelope->getMessage(), $this->asyncTransport()->getSent()), static fn (object $m): bool => $m instanceof \App\Message\TranslateRecipe);
+        self::assertCount(1, $queued);
+
         // The text model read the page's structured data.
         self::assertCount(1, $this->bedrockRequests);
         self::assertSame('test.text-model', $this->bedrockRequests[0]['model']);

@@ -8,6 +8,7 @@ use App\Entity\ExtractionRun;
 use App\Entity\Recipe;
 use App\Entity\RecipeIngredient;
 use App\Entity\Source;
+use App\Enum\Language;
 use App\Enum\MealType;
 use App\Enum\SourceStatus;
 use App\Extraction\EstimatedAmount;
@@ -25,10 +26,12 @@ use App\Extraction\Transcript;
 use App\Llm\LlmException;
 use App\Llm\Pricing;
 use App\Message\ExtractSource;
+use App\Message\TranslateRecipe;
 use App\Repository\SourceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -80,6 +83,7 @@ final readonly class ExtractSourceHandler
         private EntityManagerInterface $entityManager,
         private LoggerInterface $logger,
         private Pricing $pricing,
+        private MessageBusInterface $bus,
     ) {
     }
 
@@ -131,6 +135,14 @@ final readonly class ExtractSourceHandler
         }
 
         $this->entityManager->flush();
+
+        // New or rewritten recipes: write them in the other language too. (Asked to the
+        // repository: the link's own list doesn't know the recipes this run created.)
+        foreach ($this->entityManager->getRepository(Recipe::class)->findBy(['source' => $source]) as $recipe) {
+            if ($recipe->needsTranslation()) {
+                $this->bus->dispatch(new TranslateRecipe($recipe->getId()->toRfc4122()));
+            }
+        }
     }
 
     /**
@@ -280,7 +292,7 @@ final readonly class ExtractSourceHandler
             $recipe->setSource($source);
             $recipe->setServings($source->getHousehold()->getDefaultServings());
             $recipe->setMealTypes(MealType::cases());
-            $this->fill($recipe, $extracted, $result);
+            $this->fill($recipe, $extracted, $result, $locale);
 
             $source->getRecipes()->add($recipe);
             $this->entityManager->persist($recipe);
@@ -302,7 +314,7 @@ final readonly class ExtractSourceHandler
 
         $extracted = self::closest($recipe->getTitle(), $result->recipes);
         $userTags = $recipe->getTags();
-        $this->fill($recipe, $extracted, $result);
+        $this->fill($recipe, $extracted, $result, $locale);
         // Tags the cook added are theirs: keep them after the new ones.
         $recipe->setTags(\array_slice([...$recipe->getTags(), ...$userTags], 0, Recipe::MAX_TAGS));
 
@@ -318,12 +330,14 @@ final readonly class ExtractSourceHandler
 
     /**
      * What the model found, written onto a recipe. Servings and meal types are only replaced when
-     * the evidence says.
+     * the evidence says. The model writes in the cook's language, so that's the recipe's language
+     * (whatever it answers in `language`: the translation goes from it to the other one).
      */
-    private function fill(Recipe $recipe, ExtractedRecipe $extracted, ExtractionResult $result): void
+    private function fill(Recipe $recipe, ExtractedRecipe $extracted, ExtractionResult $result, string $locale): void
     {
+        $language = Language::ofLocale($locale);
         $recipe->setTitle($extracted->title);
-        $recipe->setLanguage($extracted->language);
+        $recipe->setLanguage($language);
         if (null !== $extracted->servings) {
             $recipe->setServings($extracted->servings);
         }
@@ -339,7 +353,7 @@ final readonly class ExtractSourceHandler
         $ingredients = [];
         foreach ($extracted->ingredients as $line) {
             $ingredient = new RecipeIngredient();
-            $ingredient->setRawText($line['estimated'] && null !== $line['quantity'] ? EstimatedAmount::line($line['raw'], $line['quantity'], $line['unit'], $extracted->language) : $line['raw']);
+            $ingredient->setRawText($line['estimated'] && null !== $line['quantity'] ? EstimatedAmount::line($line['raw'], $line['quantity'], $line['unit'], $language) : $line['raw']);
             $ingredient->setGroupName($line['group']);
             $ingredient->setQuantity($line['quantity']);
             $ingredient->setUnit($line['unit']);

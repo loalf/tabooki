@@ -119,16 +119,19 @@ final readonly class ClassifyIngredientsHandler
         TXT;
 
     /** @return array<string, mixed> */
-    private static function schema(): array
+    public static function schema(): array
     {
+        // Ready for strict tool use (Claude): every object closed, every property required.
         return [
             'type' => 'object',
+            'additionalProperties' => false,
             'required' => ['ingredients'],
             'properties' => [
                 'ingredients' => [
                     'type' => 'array',
                     'items' => [
                         'type' => 'object',
+                        'additionalProperties' => false,
                         'required' => ['key', 'name_es', 'name_en', 'aisle', 'staple'],
                         'properties' => [
                             'key' => ['type' => 'string'],

@@ -22,6 +22,7 @@ doctrine:
         dql:
             string_functions:
                 JSONB_CONTAINS: App\Doctrine\Dql\JsonbContains
+                JSONB_FIELD: App\Doctrine\Dql\JsonbField
 
 when@test:
     doctrine:
