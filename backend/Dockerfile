@@ -29,11 +29,12 @@ SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
 WORKDIR /app
 
-# persistent deps
+# persistent deps (ffmpeg: the sound and stills of videos the app watches, see ExtractSourceHandler)
 # hadolint ignore=DL3008
 RUN <<-EOF
 	apt-get update
 	apt-get install -y --no-install-recommends \
+		ffmpeg \
 		file \
 		git
 	install-php-extensions \
@@ -91,15 +92,8 @@ ENV APP_ENV=dev
 ENV XDEBUG_MODE=off
 ENV FRANKENPHP_WORKER_CONFIG=watch
 
-# ffmpeg, dev only for now (the app:extract:spike command): it cuts the sound (transcribed by
-# Whisper on OpenRouter) and stills out of downloaded videos. When the app itself uses it, the
-# prod image needs it too.
 # dev dependencies
-# hadolint ignore=DL3008
 RUN <<-EOF
-	apt-get update
-	apt-get install -y --no-install-recommends ffmpeg
-	rm -rf /var/lib/apt/lists/*
 	mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 	install-php-extensions xdebug
 	useradd -m -s /bin/bash nonroot
@@ -163,7 +157,7 @@ RUN <<-'EOF'
 	apt-get update
 	apt-get install -y --no-install-recommends libtree
 	mkdir -p /tmp/libs
-	BINARIES=(frankenphp php file)
+	BINARIES=(frankenphp php file ffmpeg ffprobe)
 	for target in $(printf '%s\n' "${BINARIES[@]}" | xargs -I{} which {}) \
 		$(find "$(php -r 'echo ini_get("extension_dir");')" -maxdepth 2 -name "*.so"); do
 		libtree -pv "$target" 2>/dev/null | grep -oP '(?:── )\K/\S+(?= \[)' | while IFS= read -r lib; do
@@ -198,6 +192,8 @@ COPY --from=frankenphp_prod_builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/
 COPY --from=frankenphp_prod_builder /etc/ssl/openssl.cnf /etc/ssl/openssl.cnf
 COPY --from=frankenphp_prod_builder /usr/bin/file /usr/bin/file
 COPY --from=frankenphp_prod_builder /usr/local/bin/yt-dlp /usr/local/bin/yt-dlp
+# ffmpeg: the sound and stills of videos the app watches; yt-dlp also merges picture and sound with it
+COPY --from=frankenphp_prod_builder /usr/bin/ffmpeg /usr/bin/ffprobe /usr/bin/
 COPY --from=frankenphp_prod_builder /usr/lib/file/magic.mgc /usr/lib/file/magic.mgc
 
 ENV  OPENSSL_CONF=/etc/ssl/openssl.cnf XDG_CONFIG_HOME=/config XDG_DATA_HOME=/data SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt

@@ -15,8 +15,6 @@ parameters:
     app.llm_prices:
         # Claude Haiku 5.5, for prompts up to 100K tokens (ours are a few thousand).
         'eu.anthropic.claude-haiku-5-5': { input: 0.10, output: 0.50 }
-        # Amazon Nova Pro, US East list price.
-        'eu.amazon.nova-pro-v1:0': { input: 0.80, output: 3.20 }
 
 services:
     # default configuration for services in *this* file

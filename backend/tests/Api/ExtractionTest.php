@@ -35,6 +35,8 @@ final class ExtractionTest extends ApiTestCase
     /** @var list<array{model: string, body: array<mixed>}> */
     private array $bedrockRequests = [];
 
+    private static ?string $video = null;
+
     protected function setUp(): void
     {
         $this->client = self::createClient([], ['headers' => ['Accept' => 'application/json']]);
@@ -93,27 +95,44 @@ final class ExtractionTest extends ApiTestCase
     {
         $url = 'https://instagram.com/reel/C1a2B3c4D5e';
         $id = $this->saveLink($url);
-        $this->media()->infos[$url] = new MediaInfo(title: 'Video by chef', description: 'Pasta en 10 minutos 🍝 #pasta', uploader: 'chef', durationSeconds: 45);
-        $this->media()->videos[$url] = 'fake-mp4-bytes';
+        $this->media()->infos[$url] = new MediaInfo(title: 'Video by chef', description: 'Pasta en 10 minutos 🍝 #pasta', uploader: 'chef', durationSeconds: 3);
+        $this->media()->videos[$url] = self::video();
+        $this->mockOpenRouter([new JsonMockResponse([
+            'text' => 'Hoy hacemos pasta al limón.', 'language' => 'es',
+            'segments' => [['start' => 0, 'end' => 2, 'text' => ' Hoy hacemos pasta al limón.', 'avg_logprob' => -0.1]],
+            'usage' => ['seconds' => 3, 'cost' => 0.00002],
+        ])]);
+        $pasta = $this->recipe('Pasta al limón');
+        $pasta['ingredients'] = [
+            ['raw' => 'pasta', 'quantity' => 200, 'unit' => 'g', 'name' => 'pasta', 'canonical_key' => 'pasta', 'estimated' => true],
+            ['raw' => '1 limón', 'quantity' => 1, 'unit' => null, 'name' => 'limón', 'canonical_key' => 'lemon', 'estimated' => false],
+        ];
         $this->mockBedrock([
             $this->answer('elsewhere', 0.9, [], message: 'La receta solo aparece en el vídeo.'),
-            $this->answer('complete', 0.9, [$this->recipe('Pasta al limón')]),
+            $this->answer('complete', 0.9, [$pasta]),
         ]);
 
         $this->runExtraction($id);
 
-        self::assertSame(['test.text-model', 'test.video-model'], array_column($this->bedrockRequests, 'model'));
-        self::assertSame(['video' => ['format' => 'mp4', 'source' => ['bytes' => base64_encode('fake-mp4-bytes')]]], $this->contentBlocks(1)[0] ?? null);
+        self::assertSame(['test.text-model', 'test.text-model'], array_column($this->bedrockRequests, 'model'), 'the video goes to the text model as stills');
+        $images = array_filter($this->contentBlocks(1), static fn (mixed $block): bool => \is_array($block) && isset($block['image']));
+        self::assertNotEmpty($images, 'stills of the video');
         self::assertStringContainsString('Pasta en 10 minutos', $this->promptText(1));
+        self::assertStringContainsString('[0:00] Hoy hacemos pasta al limón.', $this->promptText(1));
+        self::assertStringContainsString('Estimate the amounts nobody gives', $this->promptText(1));
 
         $source = $this->findSource($id);
         self::assertSame('ready', $source->getStatus()->value);
         self::assertSame('chef', $source->getAuthor());
-        self::assertSame(['Pasta al limón'], array_map(static fn ($r) => $r->getTitle(), $source->getRecipes()->toArray()));
         $recipe = $source->getRecipes()->first();
         self::assertNotFalse($recipe);
-        self::assertSame('test.video-model', $recipe->getExtractedBy());
-        self::assertSame(['text', 'video'], array_map(static fn (ExtractionRun $r): string => $r->getStep(), $this->runs($id)));
+        self::assertSame('Pasta al limón', $recipe->getTitle());
+        self::assertSame('test.text-model', $recipe->getExtractedBy());
+        self::assertSame(['~200 g de pasta', '1 limón'], array_map(static fn (\App\Entity\RecipeIngredient $i): string => $i->getRawText(), $recipe->getIngredients()), 'estimated amounts are marked');
+        $runs = $this->runs($id);
+        self::assertSame(['text', 'transcript', 'video'], array_map(static fn (ExtractionRun $r): string => $r->getStep(), $runs));
+        self::assertSame(['bedrock', 'openrouter', 'bedrock'], array_map(static fn (ExtractionRun $r): string => $r->getProvider(), $runs));
+        self::assertSame(0.00002, $runs[1]->getCostUsd());
         self::assertSame([], glob(sys_get_temp_dir().'/tabooki-test-video-*/video.mp4'), 'the downloaded video is deleted');
     }
 
@@ -121,8 +140,12 @@ final class ExtractionTest extends ApiTestCase
     {
         $url = 'https://instagram.com/reel/V1d3oF4il';
         $id = $this->saveLink($url);
-        $this->media()->infos[$url] = new MediaInfo(title: 'Video by chef', description: 'Pasta: 200 g de pasta, 1 limón. Cocer y mezclar.', uploader: 'chef', durationSeconds: 45);
-        $this->media()->videos[$url] = 'fake-mp4-bytes';
+        $this->media()->infos[$url] = new MediaInfo(title: 'Video by chef', description: 'Pasta: 200 g de pasta, 1 limón. Cocer y mezclar.', uploader: 'chef', durationSeconds: 3);
+        $this->media()->videos[$url] = self::video();
+        // Transcription fails: the stills still go to the model, which fails too.
+        $this->mockOpenRouter([
+            new JsonMockResponse(['error' => ['code' => 401, 'message' => 'No auth credentials found']], ['http_code' => 401]),
+        ]);
         $this->mockBedrock([
             $this->answer('partial', 0.8, [$this->recipe('Pasta al limón')]),
             new JsonMockResponse(['message' => 'Invalid Input: The input does not adhere to the expected standards.'], ['http_code' => 400]),
@@ -133,7 +156,10 @@ final class ExtractionTest extends ApiTestCase
         $source = $this->findSource($id);
         self::assertSame('needs_review', $source->getStatus()->value);
         self::assertSame(['Pasta al limón'], array_map(static fn ($r) => $r->getTitle(), $source->getRecipes()->toArray()));
-        self::assertSame([true, false], array_map(static fn (ExtractionRun $r): bool => $r->isOk(), $this->runs($id)));
+        $runs = $this->runs($id);
+        self::assertSame(['text', 'transcript', 'video'], array_map(static fn (ExtractionRun $r): string => $r->getStep(), $runs));
+        self::assertSame([true, false, false], array_map(static fn (ExtractionRun $r): bool => $r->isOk(), $runs));
+        self::assertStringContainsString('No auth credentials found', (string) $runs[1]->getError());
     }
 
     public function testAnUnreadableAnswerIsAskedForAgain(): void
@@ -373,6 +399,31 @@ final class ExtractionTest extends ApiTestCase
 
             return array_shift($responses) ?? throw new \LogicException('Unexpected Bedrock call to '.$url);
         });
+    }
+
+    /** @param list<MockResponse> $responses */
+    private function mockOpenRouter(array $responses): void
+    {
+        $httpClient = self::getContainer()->get('openrouter.http_client');
+        self::assertInstanceOf(MockHttpClient::class, $httpClient);
+        $httpClient->setResponseFactory(static fn (string $method, string $url): MockResponse => array_shift($responses) ?? throw new \LogicException('Unexpected OpenRouter call to '.$url));
+    }
+
+    /** A real 3-second video with sound (ffmpeg reads it), made once. */
+    private static function video(): string
+    {
+        if (null === self::$video) {
+            $file = sys_get_temp_dir().'/tabooki-test-'.bin2hex(random_bytes(4)).'.mp4';
+            $make = new \Symfony\Component\Process\Process(['ffmpeg', '-nostdin', '-loglevel', 'error', '-f', 'lavfi', '-i', 'testsrc=duration=3:size=640x360:rate=10', '-f', 'lavfi', '-i', 'sine=duration=3', '-shortest', '-pix_fmt', 'yuv420p', $file]);
+            $make->run();
+            if (!$make->isSuccessful()) {
+                self::markTestSkipped('ffmpeg is not installed.');
+            }
+            self::$video = (string) file_get_contents($file);
+            unlink($file);
+        }
+
+        return self::$video;
     }
 
     /**

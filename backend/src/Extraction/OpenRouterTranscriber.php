@@ -83,6 +83,11 @@ final readonly class OpenRouterTranscriber implements Transcriber
         }
     }
 
+    public function model(): string
+    {
+        return $this->model;
+    }
+
     /** @throws MediaFetchException */
     private static function mp3(string $videoFile): string
     {

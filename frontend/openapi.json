@@ -3827,6 +3827,7 @@
                         "type": "string",
                         "enum": [
                             "text",
+                            "transcript",
                             "video",
                             "classify"
                         ]
@@ -3893,6 +3894,7 @@
                         "type": "string",
                         "enum": [
                             "text",
+                            "transcript",
                             "video",
                             "classify"
                         ]
@@ -4645,7 +4647,7 @@
                         "type": "integer"
                     },
                     "extractionModels": {
-                        "description": "The models extraction uses now (text, video): a recipe extracted with another one can be\nextracted again with them.",
+                        "description": "The models extraction uses now: a recipe extracted with another one (Amazon Nova, an older\nClaude) can be extracted again with them.",
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -4733,7 +4735,7 @@
                                 "type": "integer"
                             },
                             "extractionModels": {
-                                "description": "The models extraction uses now (text, video): a recipe extracted with another one can be\nextracted again with them.",
+                                "description": "The models extraction uses now: a recipe extracted with another one (Amazon Nova, an older\nClaude) can be extracted again with them.",
                                 "type": "array",
                                 "items": {
                                     "type": "string"

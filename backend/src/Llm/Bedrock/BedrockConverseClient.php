@@ -105,7 +105,6 @@ final readonly class BedrockConverseClient implements LlmClient
     {
         return match ($content->type) {
             'image' => ['image' => ['format' => $content->format, 'source' => ['bytes' => base64_encode($content->data)]]],
-            'video' => ['video' => ['format' => $content->format, 'source' => ['bytes' => base64_encode($content->data)]]],
             default => ['text' => $content->data],
         };
     }

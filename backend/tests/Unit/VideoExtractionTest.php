@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Unit;
 
 use App\Command\ExtractSpikeCommand;
+use App\Enum\Language;
+use App\Extraction\EstimatedAmount;
 use App\Extraction\ExtractionResult;
 use App\Extraction\ExtractionSchema;
 use App\Extraction\FrameSampler;
@@ -208,6 +210,19 @@ final class VideoExtractionTest extends TestCase
         self::assertStringContainsString('"servings_estimated"', $ingredient(true));
         self::assertStringContainsString('Never invent. Use only', ExtractionSchema::instructions('es'));
         self::assertStringContainsString('set estimated: true', ExtractionSchema::instructions('es', true));
+    }
+
+    public function testEstimatedAmountsAreMarkedInTheLine(): void
+    {
+        self::assertSame('~380 g de garbanzos', EstimatedAmount::line('garbanzos', 380, 'g', Language::Es));
+        self::assertSame('~0,5 l de caldo', EstimatedAmount::line('caldo', 0.5, 'l', Language::Es));
+        self::assertSame('~2 cucharadas de aceite de oliva', EstimatedAmount::line('aceite de oliva', 2, 'tbsp', Language::Es));
+        self::assertSame('~1 cucharada de miel', EstimatedAmount::line('miel', 1, 'tbsp', Language::Es));
+        self::assertSame('~2 berenjenas', EstimatedAmount::line('berenjenas', 2, null, Language::Es));
+        self::assertSame('~3 eggs', EstimatedAmount::line('eggs', 3, 'piece', Language::En));
+        self::assertSame('~1.5 tbsp olive oil', EstimatedAmount::line('olive oil', 1.5, 'tbsp', Language::En));
+        self::assertSame('~200 g pasta', EstimatedAmount::line('pasta', 200, 'g', Language::En));
+        self::assertSame('~1 lata de tomate', EstimatedAmount::line('1 lata de tomate', 1, 'can', Language::Es), 'a number already in the line is only marked');
     }
 
     public function testSchemaSuitsStrictToolUse(): void

@@ -49,7 +49,7 @@ To add another app later: give it localhost ports, add a `use_backend` line and 
    AWS_BEARER_TOKEN_BEDROCK=...   # Amazon Bedrock API key (recipe extraction)
    AWS_REGION=eu-west-1
    OPENROUTER_API_KEY=...         # OpenRouter API key (Whisper: what is said in videos)
-   # Optional (defaults in backend/.env): BEDROCK_TEXT_MODEL, BEDROCK_VIDEO_MODEL, EXTRACTION_THINKING=0,
+   # Optional (defaults in backend/.env): BEDROCK_TEXT_MODEL, EXTRACTION_THINKING=0,
    # OPENROUTER_TRANSCRIPTION_MODEL
    ```
 

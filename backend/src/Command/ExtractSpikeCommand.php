@@ -37,7 +37,6 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  *
  * Steps:
  * - text_thinking, text_no_thinking: the text model on the caption / description / page
- * - nova: the video model (Amazon Nova) watching the video, picture only
  * - whisper: the text model on the caption plus a Whisper transcript of the video (OpenRouter)
  * - frames: the text model (Claude) on the caption, the timed transcript and stills of the video
  * - frames_estimates: the same, allowed to estimate amounts nobody gives (flagged as estimated)
@@ -52,11 +51,8 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 #[AsCommand(name: 'app:extract:spike', description: 'Measure extraction on a list of links (saves nothing)')]
 final readonly class ExtractSpikeCommand
 {
-    private const array STEPS = ['text_thinking', 'text_no_thinking', 'nova', 'whisper', 'frames', 'frames_estimates'];
-    /** Videos are worked on here (sound, stills), not sent anywhere whole: the cap only guards disk and time. */
-    private const int MAX_LOCAL_VIDEO_BYTES = 300 * 1024 * 1024;
-
-    private const string DEFAULT_STEPS = 'text_thinking,nova,whisper,frames,frames_estimates';
+    private const array STEPS = ['text_thinking', 'text_no_thinking', 'whisper', 'frames', 'frames_estimates'];
+    private const string DEFAULT_STEPS = 'text_thinking,whisper,frames,frames_estimates';
 
     /** @param array<string, array{input: float, output: float}> $prices */
     public function __construct(
@@ -183,7 +179,7 @@ final readonly class ExtractSpikeCommand
             }
         }
 
-        $videoSteps = array_intersect(['nova', 'whisper', 'frames', 'frames_estimates'], $steps);
+        $videoSteps = array_intersect(['whisper', 'frames', 'frames_estimates'], $steps);
         if ([] === $videoSteps || !ExtractSourceHandler::canWatch($evidence)) {
             return $row;
         }
@@ -192,25 +188,12 @@ final readonly class ExtractSpikeCommand
             $evidence = $evidence->withoutCaption();
         }
 
-        if (\in_array('nova', $steps, true)) {
-            [$file, $row['nova_download']] = $this->download(fn (): ?string => $this->media->downloadVideo($url, ExtractSourceHandler::MAX_VIDEO_BYTES));
-            if (null !== $file) {
-                try {
-                    $row['nova'] = $this->attempt(fn (): ExtractionResult => $this->extractor->fromVideo($evidence, (string) file_get_contents($file), $locale));
-                } finally {
-                    self::delete($file);
-                }
-            }
-        }
-
-        if ([] !== array_intersect(['whisper', 'frames', 'frames_estimates'], $steps)) {
-            [$file, $row['download']] = $this->download(fn (): ?string => $this->media->downloadForAnalysis($url, self::MAX_LOCAL_VIDEO_BYTES));
-            if (null !== $file) {
-                try {
-                    $row = $this->watch($row, $file, $evidence, $steps, $locale, $maxFrames, $framesModel, $keep);
-                } finally {
-                    self::delete($file);
-                }
+        [$file, $row['download']] = $this->download(fn (): ?string => $this->media->downloadVideo($url, ExtractSourceHandler::MAX_VIDEO_BYTES));
+        if (null !== $file) {
+            try {
+                $row = $this->watch($row, $file, $evidence, $steps, $locale, $maxFrames, $framesModel, $keep);
+            } finally {
+                self::delete($file);
             }
         }
 

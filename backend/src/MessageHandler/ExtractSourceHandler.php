@@ -10,14 +10,18 @@ use App\Entity\RecipeIngredient;
 use App\Entity\Source;
 use App\Enum\MealType;
 use App\Enum\SourceStatus;
+use App\Extraction\EstimatedAmount;
 use App\Extraction\Evidence;
 use App\Extraction\EvidenceCollector;
 use App\Extraction\ExtractedRecipe;
 use App\Extraction\ExtractionException;
 use App\Extraction\ExtractionResult;
+use App\Extraction\FrameSampler;
 use App\Extraction\MediaFetcher;
 use App\Extraction\MediaFetchException;
 use App\Extraction\RecipeExtractor;
+use App\Extraction\Transcriber;
+use App\Extraction\Transcript;
 use App\Llm\LlmException;
 use App\Llm\Pricing;
 use App\Message\ExtractSource;
@@ -29,8 +33,10 @@ use Symfony\Component\Uid\Uuid;
 
 /**
  * The extraction pipeline for one link (docs/PLAN.md §4): gather material, read it with the
- * text model, and when that isn't enough on a video platform, watch the video. Always ends in
- * a status the cook can act on; failures never retry by themselves (the app has a Retry button).
+ * text model, and when that isn't enough on a video platform, watch the video: what is said
+ * (Whisper) and stills of it (ffmpeg) go to the same model, which may estimate the amounts nobody
+ * gives ("~380 g", see EstimatedAmount). Always ends in a status the cook can act on; failures
+ * never retry by themselves (the app has a Retry button).
  *
  * Re-extracting a recipe (newer model, better prompt) runs the same pipeline on the material
  * already stored and rewrites that recipe in place, so its rating, favorite and planned meals
@@ -39,8 +45,8 @@ use Symfony\Component\Uid\Uuid;
 #[AsMessageHandler]
 final readonly class ExtractSourceHandler
 {
-    /** Bedrock takes inline videos up to 25 MB once base64-encoded. */
-    public const int MAX_VIDEO_BYTES = 18 * 1024 * 1024;
+    /** Videos are worked on here (their sound and stills go out, never the file): the cap only guards disk and time. */
+    public const int MAX_VIDEO_BYTES = 300 * 1024 * 1024;
     private const int MAX_VIDEO_SECONDS = 600;
 
     private const array RANK = ['complete' => 3, 'partial' => 2, 'elsewhere' => 1, 'no_recipe' => 0];
@@ -69,6 +75,8 @@ final readonly class ExtractSourceHandler
         private EvidenceCollector $collector,
         private RecipeExtractor $extractor,
         private MediaFetcher $media,
+        private Transcriber $transcriber,
+        private FrameSampler $frames,
         private EntityManagerInterface $entityManager,
         private LoggerInterface $logger,
         private Pricing $pricing,
@@ -145,11 +153,13 @@ final readonly class ExtractSourceHandler
         }
 
         try {
-            $bytes = (string) file_get_contents($file);
+            // Platform subtitles (YouTube) say it already: no need to transcribe.
+            $transcript = null === $evidence->transcript ? $this->transcribe($source, $file) : null;
+            $frames = $this->frames->sample($file, $evidence->durationSeconds);
 
-            return $this->run($source, 'video', fn (): ExtractionResult => $this->extractor->fromVideo($evidence, $bytes, $locale));
-        } catch (LlmException|ExtractionException $e) {
-            // Logged as a failed run; whatever the text step found still counts.
+            return $this->run($source, 'video', fn (): ExtractionResult => $this->extractor->fromFrames($evidence, $transcript, $frames, $locale, estimates: true));
+        } catch (MediaFetchException|LlmException|ExtractionException $e) {
+            // Logged as a failed run when the model was asked; whatever the text step found still counts.
             $this->logger->warning('Video extraction failed for {url}: {error}', ['url' => $source->getUrl(), 'error' => $e->getMessage()]);
 
             return null;
@@ -157,6 +167,29 @@ final readonly class ExtractSourceHandler
             @unlink($file);
             @rmdir(\dirname($file));
         }
+    }
+
+    /** What is said in the video, logged in extraction_run; null if it couldn't be transcribed (the stills still help). */
+    private function transcribe(Source $source, string $file): ?Transcript
+    {
+        $started = hrtime(true);
+        try {
+            $transcript = $this->transcriber->transcribe($file);
+        } catch (MediaFetchException $e) {
+            $this->entityManager->persist(new ExtractionRun(
+                $source->getHousehold(), $source, 'transcript', 'openrouter', $this->transcriber->model(), 0, 0, null, false, $e->getMessage(), self::elapsedMs($started),
+            ));
+            $this->logger->warning('Transcription failed for {url}: {error}', ['url' => $source->getUrl(), 'error' => $e->getMessage()]);
+
+            return null;
+        }
+        if (null !== $transcript) {
+            $this->entityManager->persist(new ExtractionRun(
+                $source->getHousehold(), $source, 'transcript', 'openrouter', $this->transcriber->model(), 0, 0, $transcript->cost, true, null, self::elapsedMs($started),
+            ));
+        }
+
+        return $transcript;
     }
 
     /** The more useful of two answers: a fuller status wins; among equals, the one with more measured ingredients. */
@@ -193,7 +226,7 @@ final readonly class ExtractSourceHandler
      */
     private function run(Source $source, string $step, callable $extract): ExtractionResult
     {
-        $model = 'video' === $step ? $this->extractor->videoModel() : $this->extractor->textModel();
+        $model = $this->extractor->textModel();
         for ($attempt = 1;; ++$attempt) {
             $started = hrtime(true);
             try {
@@ -303,7 +336,7 @@ final readonly class ExtractSourceHandler
         $ingredients = [];
         foreach ($extracted->ingredients as $line) {
             $ingredient = new RecipeIngredient();
-            $ingredient->setRawText($line['raw']);
+            $ingredient->setRawText($line['estimated'] && null !== $line['quantity'] ? EstimatedAmount::line($line['raw'], $line['quantity'], $line['unit'], $extracted->language) : $line['raw']);
             $ingredient->setGroupName($line['group']);
             $ingredient->setQuantity($line['quantity']);
             $ingredient->setUnit($line['unit']);

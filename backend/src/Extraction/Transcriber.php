@@ -15,4 +15,7 @@ interface Transcriber
      * @throws MediaFetchException
      */
     public function transcribe(string $videoFile, ?string $language = null): ?Transcript;
+
+    /** The speech model, for the costs page ("openai/whisper-large-v3"). */
+    public function model(): string;
 }

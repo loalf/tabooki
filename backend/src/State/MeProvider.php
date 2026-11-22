@@ -26,6 +26,6 @@ final readonly class MeProvider implements ProviderInterface
             throw new AccessDeniedException();
         }
 
-        return Me::fromUser($user, [$this->extractor->textModel(), $this->extractor->videoModel()]);
+        return Me::fromUser($user, [$this->extractor->textModel()]);
     }
 }

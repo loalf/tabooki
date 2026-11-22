@@ -38,18 +38,19 @@ docker compose cp php:/data/caddy/pki/authorities/local/root.crt /tmp/caddy-root
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/caddy-root.crt
 ```
 
-### Recipe extraction (Amazon Bedrock)
+### Recipe extraction (Amazon Bedrock and OpenRouter)
 
-Saved links are turned into recipes by an LLM on Amazon Bedrock. Create `backend/.env.local`
-(git-ignored) with your Bedrock API key, then restart the worker:
+Saved links are turned into recipes by an LLM on Amazon Bedrock. When a reel's caption isn't
+enough, the app watches the video: Whisper (through OpenRouter) transcribes what is said, ffmpeg
+takes stills, and the same model reads both, estimating amounts nobody gives ("~380 g").
+Create `backend/.env.local` (git-ignored) with both API keys, then restart the worker:
 
 ```sh
 AWS_BEARER_TOKEN_BEDROCK=ABSK...
 AWS_REGION=eu-west-1          # the region your key works in
 OPENROUTER_API_KEY=sk-or-...  # OpenRouter key: Whisper transcribes what is said in videos
 # Optional, defaults in backend/.env:
-# BEDROCK_TEXT_MODEL=...       # reads captions, transcripts and pages
-# BEDROCK_VIDEO_MODEL=...      # watches reels when the caption isn't enough (Amazon Nova)
+# BEDROCK_TEXT_MODEL=...       # reads captions, transcripts, pages and video stills
 # EXTRACTION_THINKING=0        # Claude answers without thinking first: faster, fewer tokens
 # OPENROUTER_TRANSCRIPTION_MODEL=...  # the Whisper model (openai/whisper-large-v3)
 ```
@@ -61,7 +62,7 @@ make console c="app:extract --all"        # extract links saved before the key w
 make console c="app:extract <id> --sync"  # extract one link here and print the result
 ```
 
-After switching `BEDROCK_TEXT_MODEL` or `BEDROCK_VIDEO_MODEL` to a newer model, extract the old
+After switching `BEDROCK_TEXT_MODEL` to a newer model, extract the old
 recipes again (in place: ratings, favorites and planned meals stay). One recipe at a time from its
 page (**Extract again**), or all of them:
 

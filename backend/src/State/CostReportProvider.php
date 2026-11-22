@@ -67,7 +67,7 @@ final readonly class CostReportProvider implements ProviderInterface
             <<<'SQL'
                 SELECT COUNT(DISTINCT r.source_id) AS links, SUM(r.cost_usd) AS usd
                 FROM extraction_run r
-                WHERE r.household_id = :h AND r.step IN ('text', 'video')
+                WHERE r.household_id = :h AND r.step IN ('text', 'transcript', 'video')
                   AND EXISTS (SELECT 1 FROM recipe WHERE recipe.source_id = r.source_id AND recipe.extracted_by IS NOT NULL)
                 SQL,
             ['h' => $household],

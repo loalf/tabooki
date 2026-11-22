@@ -343,6 +343,7 @@
     "recent": "Latest calls",
     "step": {
       "text": "Reading the text",
+      "transcript": "Transcribing the video",
       "video": "Watching the video",
       "classify": "Sorting ingredients"
     },

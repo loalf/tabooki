@@ -639,7 +639,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "video" | "classify";
+            step?: "text" | "transcript" | "video" | "classify";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -661,7 +661,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "video" | "classify";
+            step?: "text" | "transcript" | "video" | "classify";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -974,8 +974,8 @@ export interface components {
             /** @default 4 */
             defaultServings: number;
             /**
-             * @description The models extraction uses now (text, video): a recipe extracted with another one can be
-             *     extracted again with them.
+             * @description The models extraction uses now: a recipe extracted with another one (Amazon Nova, an older
+             *     Claude) can be extracted again with them.
              */
             extractionModels?: string[];
         };
@@ -1014,8 +1014,8 @@ export interface components {
             /** @default 4 */
             defaultServings: number;
             /**
-             * @description The models extraction uses now (text, video): a recipe extracted with another one can be
-             *     extracted again with them.
+             * @description The models extraction uses now: a recipe extracted with another one (Amazon Nova, an older
+             *     Claude) can be extracted again with them.
              */
             extractionModels?: string[];
         };

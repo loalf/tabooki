@@ -68,8 +68,8 @@ final class Me
     public int $defaultServings = 4;
 
     /**
-     * The models extraction uses now (text, video): a recipe extracted with another one can be
-     * extracted again with them.
+     * The models extraction uses now: a recipe extracted with another one (Amazon Nova, an older
+     * Claude) can be extracted again with them.
      *
      * @var list<string>
      */

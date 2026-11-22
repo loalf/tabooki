@@ -36,7 +36,7 @@ final readonly class ReextractCommand
         #[Option(description: 'Also recipes already reviewed (their edits are replaced)')] bool $reviewed = false,
         #[Option(description: 'List them without queueing anything')] bool $dryRun = false,
     ): int {
-        $current = [$this->extractor->textModel(), $this->extractor->videoModel()];
+        $current = [$this->extractor->textModel()];
         $query = $this->entityManager->createQueryBuilder()
             ->select('r', 's')->from(Recipe::class, 'r')->join('r.source', 's')
             ->where('r.extractedBy IS NOT NULL')

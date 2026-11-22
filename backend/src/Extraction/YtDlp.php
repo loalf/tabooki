@@ -64,43 +64,9 @@ final readonly class YtDlp implements MediaFetcher
     {
         $directory = sys_get_temp_dir().'/tabooki-video-'.bin2hex(random_bytes(6));
         mkdir($directory, 0700, true);
-        $megabytes = intdiv($maxBytes, 1024 * 1024);
 
-        // One H.264 mp4 file, no ffmpeg merge: with audio when there is one (Instagram, TikTok), else
-        // the picture alone (YouTube mostly serves separate streams now). Nova only reads the
-        // picture (what is said comes from the transcript) and rejects AV1/VP9.
-        $this->run([
-            '--no-playlist',
-            '-f', \sprintf(
-                'b[ext=mp4][vcodec^=avc1][filesize<%1$dM]/b[ext=mp4][vcodec^=avc1][filesize_approx<%1$dM]/b[ext=mp4][vcodec^=avc1][height<=720]'
-                .'/bv[ext=mp4][vcodec^=avc1][height<=720][filesize<%1$dM]/bv[ext=mp4][vcodec^=avc1][height<=720][filesize_approx<%1$dM]'
-                .'/bv[ext=mp4][vcodec^=avc1][height<=480]/b[ext=mp4][height<=720]/w[ext=mp4]',
-                $megabytes,
-            ),
-            '--max-filesize', (string) $maxBytes,
-            '-o', $directory.'/video.%(ext)s',
-            $url,
-        ], timeout: 240);
-
-        $files = glob($directory.'/video.*') ?: [];
-        $file = $files[0] ?? null;
-        if (null === $file || filesize($file) > $maxBytes || 0 === filesize($file)) {
-            array_map(unlink(...), $files);
-            @rmdir($directory);
-
-            return null;
-        }
-
-        return $file;
-    }
-
-    public function downloadForAnalysis(string $url, int $maxBytes): ?string
-    {
-        $directory = sys_get_temp_dir().'/tabooki-video-'.bin2hex(random_bytes(6));
-        mkdir($directory, 0700, true);
-
-        // Unlike downloadVideo, the codec doesn't matter (ffmpeg reads them all), so the small VP9
-        // streams Instagram offers next to H.264 files of unknown size are fine. Picture and sound
+        // The codec doesn't matter (ffmpeg reads them all), so the small VP9 streams Instagram
+        // offers next to H.264 files of unknown size are fine. Picture and sound
         // come as separate streams more often than not: ffmpeg merges them. 720p keeps on-screen
         // text legible; ~1.2 Mbit/s is plenty for stills without fetching the biggest stream.
         $output = $this->run([

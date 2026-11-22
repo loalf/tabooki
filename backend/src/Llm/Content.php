@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Llm;
 
-/** One piece of a user message: text, an image or a video (raw bytes, not base64). */
+/** One piece of a user message: text or an image (raw bytes, not base64). */
 final readonly class Content
 {
     private function __construct(
@@ -23,11 +23,5 @@ final readonly class Content
     public static function image(string $bytes, string $format): self
     {
         return new self('image', $bytes, $format);
-    }
-
-    /** @param 'mp4'|'mov'|'webm'|'mkv' $format */
-    public static function video(string $bytes, string $format = 'mp4'): self
-    {
-        return new self('video', $bytes, $format);
     }
 }

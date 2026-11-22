@@ -44,19 +44,17 @@ final readonly class BedrockCheckCommand
         $io->definitionList(
             ['Region' => $this->region],
             ['Text model' => $this->extractor->textModel()],
-            ['Video model' => $this->extractor->videoModel()],
         );
 
         $available = $this->availableModels($io);
         if (null !== $available) {
-            foreach (['Text' => $this->extractor->textModel(), 'Video' => $this->extractor->videoModel()] as $kind => $model) {
-                if (!\in_array($model, $available, true)) {
-                    $io->warning(\sprintf('%s model "%s" is not in the list your key can see in %s.', $kind, $model, $this->region));
-                }
+            $model = $this->extractor->textModel();
+            if (!\in_array($model, $available, true)) {
+                $io->warning(\sprintf('Text model "%s" is not in the list your key can see in %s.', $model, $this->region));
             }
-            $candidates = array_values(array_filter($available, static fn (string $id): bool => 1 === preg_match('/claude|nova/i', $id)));
+            $candidates = array_values(array_filter($available, static fn (string $id): bool => 1 === preg_match('/claude/i', $id)));
             sort($candidates);
-            $io->section('Claude and Nova models available in '.$this->region);
+            $io->section('Claude models available in '.$this->region);
             $io->listing($candidates ?: ['(none)']);
         }
 

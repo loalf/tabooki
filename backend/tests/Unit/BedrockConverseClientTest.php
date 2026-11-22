@@ -26,10 +26,10 @@ final class BedrockConverseClientTest extends TestCase
         ]);
         $client = new BedrockConverseClient(new MockHttpClient($response), ' ABSK-secret ', 'eu-west-1');
 
-        $completion = $client->complete($this->prompt([Content::text('hello'), Content::video('VIDEO')]));
+        $completion = $client->complete($this->prompt([Content::text('hello'), Content::image('JPEG', 'jpeg')]));
 
         self::assertSame('POST', $response->getRequestMethod());
-        self::assertSame('https://bedrock-runtime.eu-west-1.amazonaws.com/model/eu.amazon.nova-pro-v1%3A0/converse', $response->getRequestUrl());
+        self::assertSame('https://bedrock-runtime.eu-west-1.amazonaws.com/model/eu.anthropic.claude-haiku-5-5/converse', $response->getRequestUrl());
         /** @var array{headers: list<string>, body: string} $options */
         $options = $response->getRequestOptions();
         self::assertContains('Authorization: Bearer ABSK-secret', $options['headers']);
@@ -37,7 +37,7 @@ final class BedrockConverseClientTest extends TestCase
         $body = json_decode($options['body'], true);
         self::assertSame([['text' => 'system prompt']], $body['system']);
         self::assertSame(['text' => 'hello'], $body['messages'][0]['content'][0]);
-        self::assertSame(['video' => ['format' => 'mp4', 'source' => ['bytes' => base64_encode('VIDEO')]]], $body['messages'][0]['content'][1]);
+        self::assertSame(['image' => ['format' => 'jpeg', 'source' => ['bytes' => base64_encode('JPEG')]]], $body['messages'][0]['content'][1]);
         self::assertSame('save', $body['toolConfig']['tools'][0]['toolSpec']['name']);
         self::assertSame(['auto' => []], $body['toolConfig']['toolChoice']);
 
@@ -112,6 +112,6 @@ final class BedrockConverseClientTest extends TestCase
     /** @param list<Content> $content */
     private function prompt(array $content): Prompt
     {
-        return new Prompt('eu.amazon.nova-pro-v1:0', 'system prompt', $content, 'save', 'Save it', ['type' => 'object']);
+        return new Prompt('eu.anthropic.claude-haiku-5-5', 'system prompt', $content, 'save', 'Save it', ['type' => 'object']);
     }
 }

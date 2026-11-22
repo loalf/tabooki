@@ -39,6 +39,6 @@ final readonly class MeProcessor implements ProcessorInterface
         $user->setLocale($data->locale);
         $this->entityManager->flush();
 
-        return Me::fromUser($user, [$this->extractor->textModel(), $this->extractor->videoModel()]);
+        return Me::fromUser($user, [$this->extractor->textModel()]);
     }
 }
