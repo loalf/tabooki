@@ -419,6 +419,7 @@
       "text": "Reading the text",
       "transcript": "Transcribing the video",
       "video": "Watching the video",
+      "images": "Reading the pictures",
       "classify": "Sorting ingredients",
       "translate": "Translating the recipe"
     },

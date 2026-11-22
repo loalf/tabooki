@@ -70,6 +70,30 @@ final readonly class RecipeExtractor
         return $this->extract($model ?? $this->textModel, $content, $interfaceLanguage, estimates: $estimates);
     }
 
+    /**
+     * Reads the pictures of a photo or carousel post with its caption: recipe cards, ingredient
+     * lists and steps are often written on the slides rather than in the caption.
+     *
+     * @param list<PostImage> $images in the order the post shows them
+     *
+     * @throws LlmException
+     * @throws ExtractionException
+     */
+    public function fromImages(Evidence $evidence, array $images, string $interfaceLanguage): ExtractionResult
+    {
+        $content = [
+            Content::text($evidence->toPrompt($interfaceLanguage)),
+            Content::text(\sprintf("## Pictures of the post\n%d %s in the order the post shows them. A recipe is often written across several of them.", \count($images), 1 === \count($images) ? 'picture' : 'pictures')),
+        ];
+        foreach ($images as $i => $image) {
+            $content[] = Content::text('['.($i + 1).']');
+            $content[] = Content::image($image->bytes, $image->format);
+        }
+        $content[] = Content::text('Read the ingredients, amounts and steps written on the pictures together with the caption. Only state amounts that are written or clearly shown.');
+
+        return $this->extract($this->textModel, $content, $interfaceLanguage);
+    }
+
     public function textModel(): string
     {
         return $this->textModel;

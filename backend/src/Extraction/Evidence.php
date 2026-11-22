@@ -31,6 +31,8 @@ final readonly class Evidence
         public ?int $durationSeconds = null,
         /** A video to watch (yt-dlp saw video formats, or a duration). */
         public bool $hasVideo = false,
+        /** @var list<string> Picture URLs of a photo or carousel post, in order. */
+        public array $images = [],
     ) {
     }
 
@@ -54,6 +56,7 @@ final readonly class Evidence
         /** @var array<string, mixed>|null $linked */
         $linked = \is_array($get('linked', 'json_ld')) ? $get('linked', 'json_ld') : null;
         $duration = $get('media', 'duration');
+        $images = \is_array($get('media', 'images')) ? array_values(array_filter($get('media', 'images'), \is_string(...))) : [];
 
         return new self(
             platform: $source->getPlatform(),
@@ -70,6 +73,7 @@ final readonly class Evidence
             userText: $string($get('user_text')),
             durationSeconds: \is_int($duration) ? $duration : null,
             hasVideo: true === $get('media', 'video') || (\is_int($duration) && $duration > 0),
+            images: $images,
         );
     }
 

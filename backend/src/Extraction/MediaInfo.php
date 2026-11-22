@@ -19,10 +19,12 @@ final readonly class MediaInfo
         public ?string $transcript = null,
         /** Whether there is a video to watch: photo and carousel posts have none. */
         public bool $hasVideo = false,
+        /** @var list<string> The pictures of a photo or carousel post, in order: recipe cards are often in them. */
+        public array $images = [],
     ) {
     }
 
-    /** @return array<string, string|int|bool> */
+    /** @return array<string, string|int|bool|list<string>> */
     public function toEvidence(): array
     {
         return array_filter([
@@ -33,6 +35,7 @@ final readonly class MediaInfo
             'thumbnail_url' => $this->thumbnailUrl,
             'duration' => $this->durationSeconds,
             'language' => $this->language,
-        ], static fn (string|int|bool|null $value): bool => null !== $value && '' !== $value && false !== $value);
+            'images' => $this->images,
+        ], static fn (string|int|bool|array|null $value): bool => null !== $value && '' !== $value && false !== $value && [] !== $value);
     }
 }

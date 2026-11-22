@@ -639,7 +639,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "classify" | "translate";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -661,7 +661,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "classify" | "translate";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate";
             /** @default  */
             model: string;
             /** @default 0 */

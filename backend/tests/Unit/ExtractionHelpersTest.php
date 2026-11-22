@@ -33,6 +33,23 @@ final class ExtractionHelpersTest extends TestCase
         self::assertNull(YtDlp::vttToText("WEBVTT\n\n"));
     }
 
+    public function testTheImagesOfAPostAreItsPicturesInOrder(): void
+    {
+        // A carousel, as anonymous Instagram answers have it: entries named "Video by …" without formats.
+        $carousel = ['_type' => 'playlist', 'title' => 'Post by chef', 'entries' => [
+            ['title' => 'Video by chef', 'formats' => [], 'thumbnail' => 'https://cdn.example/1.jpg'],
+            ['title' => 'Video by chef', 'formats' => [], 'thumbnails' => [['url' => 'https://cdn.example/2-small.jpg'], ['url' => 'https://cdn.example/2.jpg']]],
+            ['title' => 'Video by chef', 'formats' => [], 'thumbnail' => 'https://cdn.example/1.jpg'],
+            'not an entry',
+            ['title' => 'Video by chef'],
+        ]];
+        self::assertSame(['https://cdn.example/1.jpg', 'https://cdn.example/2.jpg'], YtDlp::images($carousel));
+
+        // A single photo: the post's own picture.
+        self::assertSame(['https://cdn.example/photo.jpg'], YtDlp::images(['title' => 'Post by chef', 'formats' => [], 'thumbnail' => 'https://cdn.example/photo.jpg']));
+        self::assertSame([], YtDlp::images(['title' => 'Post by chef']));
+    }
+
     public function testPageTextKeepsTheArticleAndDropsTheChrome(): void
     {
         $document = \Dom\HTMLDocument::createFromString(<<<'HTML'

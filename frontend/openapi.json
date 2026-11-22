@@ -3829,6 +3829,7 @@
                             "text",
                             "transcript",
                             "video",
+                            "images",
                             "classify",
                             "translate"
                         ]
@@ -3897,6 +3898,7 @@
                             "text",
                             "transcript",
                             "video",
+                            "images",
                             "classify",
                             "translate"
                         ]

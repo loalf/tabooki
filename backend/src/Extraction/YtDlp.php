@@ -48,18 +48,61 @@ final readonly class YtDlp implements MediaFetcher
 
         $string = static fn (string $key): ?string => \is_string($data[$key] ?? null) && '' !== trim($data[$key]) ? trim($data[$key]) : null;
         $language = $string('language');
+        // Anonymous Instagram answers leave the duration out: the formats still tell a reel from a photo.
+        $hasVideo = self::hasVideo($data);
+        $images = $hasVideo ? [] : self::images($data);
 
         return new MediaInfo(
             title: $string('title'),
             description: $string('description'),
             uploader: $string('uploader') ?? $string('channel'),
-            thumbnailUrl: $string('thumbnail'),
+            // A carousel has no thumbnail of its own: its first image is the cover.
+            thumbnailUrl: $string('thumbnail') ?? $images[0] ?? null,
             durationSeconds: is_numeric($data['duration'] ?? null) ? (int) $data['duration'] : null,
             language: $language,
             transcript: $this->transcript($data, $language),
-            // Anonymous Instagram answers leave the duration out: the formats still tell a reel from a photo.
-            hasVideo: self::hasVideo($data),
+            hasVideo: $hasVideo,
+            images: $images,
         );
+    }
+
+    /**
+     * The pictures of a photo post, or of each slide of a carousel (a "playlist" to yt-dlp, whose
+     * entries it calls "Video by …" even when they're photos), in order. A video slide gives its cover.
+     *
+     * @param array<mixed> $data
+     *
+     * @return list<string> image URLs (signed: they expire after a few days)
+     */
+    public static function images(array $data): array
+    {
+        $entries = \is_array($data['entries'] ?? null) ? array_values(array_filter($data['entries'], \is_array(...))) : [$data];
+        $images = [];
+        foreach ($entries as $entry) {
+            $url = self::bestImage($entry);
+            if (null !== $url && !\in_array($url, $images, true)) {
+                $images[] = $url;
+            }
+        }
+
+        return $images;
+    }
+
+    /** @param array<mixed> $entry */
+    private static function bestImage(array $entry): ?string
+    {
+        if (\is_string($entry['thumbnail'] ?? null) && str_starts_with($entry['thumbnail'], 'http')) {
+            return $entry['thumbnail'];
+        }
+        // yt-dlp lists thumbnails worst first.
+        $thumbnails = \is_array($entry['thumbnails'] ?? null) ? array_reverse($entry['thumbnails']) : [];
+        foreach ($thumbnails as $thumbnail) {
+            if (\is_array($thumbnail) && \is_string($thumbnail['url'] ?? null) && str_starts_with($thumbnail['url'], 'http')) {
+                return $thumbnail['url'];
+            }
+        }
+
+        return null;
     }
 
     public function downloadVideo(string $url, int $maxBytes): ?string

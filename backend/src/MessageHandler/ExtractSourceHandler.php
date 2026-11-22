@@ -20,9 +20,11 @@ use App\Extraction\ExtractionResult;
 use App\Extraction\FrameSampler;
 use App\Extraction\MediaFetcher;
 use App\Extraction\MediaFetchException;
+use App\Extraction\PostImage;
 use App\Extraction\RecipeExtractor;
 use App\Extraction\Transcriber;
 use App\Extraction\Transcript;
+use App\Library\Metadata\MetadataFetcher;
 use App\Llm\LlmException;
 use App\Llm\Pricing;
 use App\Message\ExtractSource;
@@ -38,7 +40,8 @@ use Symfony\Component\Uid\Uuid;
  * The extraction pipeline for one link (docs/PLAN.md §4): gather material, read it with the
  * text model, and when that isn't enough on a video platform, watch the video: what is said
  * (Whisper) and stills of it (ffmpeg) go to the same model, which may estimate the amounts nobody
- * gives ("~380 g", see EstimatedAmount). Always ends in a status the cook can act on; failures
+ * gives ("~380 g", see EstimatedAmount). A photo or carousel post has no video: its pictures go
+ * to the model instead, as recipe cards are often written on them. Always ends in a status the cook can act on; failures
  * never retry by themselves (the app has a Retry button).
  *
  * Re-extracting a recipe (newer model, better prompt) runs the same pipeline on the material
@@ -51,6 +54,10 @@ final readonly class ExtractSourceHandler
     /** Videos are worked on here (their sound and stills go out, never the file): the cap only guards disk and time. */
     public const int MAX_VIDEO_BYTES = 300 * 1024 * 1024;
     private const int MAX_VIDEO_SECONDS = 600;
+    /** Instagram carousels hold up to 20 slides, which is also all the images Bedrock takes in one call. */
+    public const int MAX_IMAGES = 20;
+    /** Bedrock refuses larger images. */
+    private const int MAX_IMAGE_BYTES = 3_750_000;
 
     private const array RANK = ['complete' => 3, 'partial' => 2, 'elsewhere' => 1, 'no_recipe' => 0];
 
@@ -78,6 +85,7 @@ final readonly class ExtractSourceHandler
         private EvidenceCollector $collector,
         private RecipeExtractor $extractor,
         private MediaFetcher $media,
+        private MetadataFetcher $images,
         private Transcriber $transcriber,
         private FrameSampler $frames,
         private EntityManagerInterface $entityManager,
@@ -119,6 +127,8 @@ final readonly class ExtractSourceHandler
             $result = $evidence->hasText() ? $this->run($source, 'text', fn (): ExtractionResult => $this->extractor->fromText($evidence, $locale)) : null;
             if ('complete' !== $result?->status && self::canWatch($evidence)) {
                 $result = $this->better($result, $this->watch($source, $evidence, $locale));
+            } elseif ('complete' !== $result?->status && self::canLook($evidence)) {
+                $result = $this->better($result, $this->look($source, $evidence, $locale));
             }
 
             null === $target ? $this->apply($source, $result, $locale) : $this->reapply($source, $target, $result, $locale);
@@ -152,6 +162,39 @@ final readonly class ExtractSourceHandler
     public static function canWatch(Evidence $evidence): bool
     {
         return $evidence->isVideo() && $evidence->hasVideo && ($evidence->durationSeconds ?? 0) <= self::MAX_VIDEO_SECONDS;
+    }
+
+    /** A photo or carousel post (no video) whose pictures we know. */
+    public static function canLook(Evidence $evidence): bool
+    {
+        return $evidence->isVideo() && !$evidence->hasVideo && [] !== $evidence->images;
+    }
+
+    /** The post's pictures, read by the text model with the caption; null if none could be fetched or read. */
+    private function look(Source $source, Evidence $evidence, string $locale): ?ExtractionResult
+    {
+        $images = [];
+        foreach (\array_slice($evidence->images, 0, self::MAX_IMAGES) as $url) {
+            $download = $this->images->downloadImage($url);
+            $image = null === $download ? null : PostImage::fromDownload($download['contents'], $download['extension']);
+            if (null !== $image && \strlen($image->bytes) <= self::MAX_IMAGE_BYTES) {
+                $images[] = $image;
+            }
+        }
+        if ([] === $images) {
+            $this->logger->info('No picture could be fetched for {url}', ['url' => $source->getUrl()]);
+
+            return null;
+        }
+
+        try {
+            return $this->run($source, 'images', fn (): ExtractionResult => $this->extractor->fromImages($evidence, $images, $locale));
+        } catch (LlmException|ExtractionException $e) {
+            // Logged as a failed run; whatever the text step found still counts.
+            $this->logger->warning('Reading the pictures failed for {url}: {error}', ['url' => $source->getUrl(), 'error' => $e->getMessage()]);
+
+            return null;
+        }
     }
 
     private function watch(Source $source, Evidence $evidence, string $locale): ?ExtractionResult

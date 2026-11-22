@@ -48,11 +48,18 @@ final readonly class EvidenceCollector
             return Evidence::fromSource($source);
         }
 
-        if (!isset($evidence['media'])) {
+        // Photo and carousel posts are asked again: their image links expire within days, and
+        // ones saved before images were read don't have them.
+        if (!isset($evidence['media']) || self::isPhotoPost($evidence['media'])) {
             $this->collectMedia($source);
         }
 
         return Evidence::fromSource($source);
+    }
+
+    private static function isPhotoPost(mixed $media): bool
+    {
+        return \is_array($media) && true !== ($media['video'] ?? false) && !\is_int($media['duration'] ?? null);
     }
 
     private function collectMedia(Source $source): void

@@ -203,6 +203,50 @@ final class ExtractionTest extends ApiTestCase
         self::assertSame('needs_input', $this->findSource($id)->getStatus()->value);
     }
 
+    public function testACarouselWhoseCaptionHasNoRecipeIsRead(): void
+    {
+        $url = 'https://instagram.com/p/C4rouSel01';
+        $id = $this->saveLink($url);
+        $slides = ['https://cdn.example/slide1.jpg', 'https://cdn.example/slide2.webp', 'https://cdn.example/slide3.avif', 'https://cdn.example/gone.jpg'];
+        $this->media()->infos[$url] = new MediaInfo(title: 'Post by chef', description: 'Comenta "Guiso" si quieres más recetas así', uploader: 'chef', images: $slides);
+        $this->mockImages([
+            'https://cdn.example/slide1.jpg' => ['image/jpeg', 'jpeg-bytes'],
+            'https://cdn.example/slide2.webp' => ['image/webp', 'webp-bytes'],
+            'https://cdn.example/slide3.avif' => ['image/avif', 'avif-bytes'],
+        ]);
+        $this->mockBedrock([
+            $this->answer('no_recipe', 0.8, []),
+            $this->answer('complete', 0.9, [$this->recipe('Garbanzos con langostinos')]),
+        ]);
+
+        $this->runExtraction($id);
+
+        self::assertSame(['test.text-model', 'test.text-model'], array_column($this->bedrockRequests, 'model'));
+        $images = array_values(array_filter($this->contentBlocks(1), static fn (mixed $block): bool => \is_array($block) && isset($block['image'])));
+        self::assertSame(['jpeg', 'webp'], array_column(array_column($images, 'image'), 'format'), 'the slides the model reads, in order; unreadable formats and dead links are skipped');
+        self::assertStringContainsString('Comenta "Guiso"', $this->promptText(1));
+        self::assertStringContainsString('2 pictures in the order the post shows them', $this->promptText(1));
+
+        $source = $this->findSource($id);
+        self::assertSame('ready', $source->getStatus()->value);
+        self::assertSame(['Garbanzos con langostinos'], array_map(static fn ($r) => $r->getTitle(), $source->getRecipes()->toArray()));
+        self::assertSame(['text', 'images'], array_map(static fn (ExtractionRun $r): string => $r->getStep(), $this->runs($id)));
+    }
+
+    public function testACarouselWithoutReadablePicturesKeepsWhatTheTextSaid(): void
+    {
+        $url = 'https://instagram.com/p/C4rouSel02';
+        $id = $this->saveLink($url);
+        $this->media()->infos[$url] = new MediaInfo(title: 'Post by chef', description: 'Receta en los comentarios', uploader: 'chef', images: ['https://cdn.example/gone.jpg']);
+        $this->mockImages([]);
+        $this->mockBedrock([$this->answer('elsewhere', 0.9, [], message: 'La receta está en los comentarios.')]);
+
+        $this->runExtraction($id);
+
+        self::assertCount(1, $this->bedrockRequests, 'no pictures, no second call');
+        self::assertSame('needs_input', $this->findSource($id)->getStatus()->value);
+    }
+
     public function testAnUnreadablePostAsksForTheText(): void
     {
         $url = 'https://instagram.com/p/PRIVATE1234';
@@ -389,6 +433,16 @@ final class ExtractionTest extends ApiTestCase
         $httpClient->setResponseFactory(static fn (string $method, string $requested): MockResponse => $requested === $url
             ? new MockResponse('<html><head><title>Page</title></head><body>'.$html.'</body></html>', ['response_headers' => ['content-type' => 'text/html']])
             : throw new \LogicException('Unexpected request to '.$requested));
+    }
+
+    /** @param array<string, array{string, string}> $images content type and bytes by URL; other URLs are gone (404) */
+    private function mockImages(array $images): void
+    {
+        $httpClient = self::getContainer()->get('link_preview.http_client');
+        self::assertInstanceOf(MockHttpClient::class, $httpClient);
+        $httpClient->setResponseFactory(static fn (string $method, string $url): MockResponse => isset($images[$url])
+            ? new MockResponse($images[$url][1], ['response_headers' => ['content-type' => $images[$url][0]]])
+            : new MockResponse('', ['http_code' => 404]));
     }
 
     /** @param list<MockResponse> $responses in call order */
