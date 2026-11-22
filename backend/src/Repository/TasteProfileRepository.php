@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\Household;
 use App\Entity\TasteProfile;
+use App\Taste\Taste;
 use App\Taste\TasteRules;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -21,6 +22,14 @@ class TasteProfileRepository extends ServiceEntityRepository
     public function forHousehold(Household $household): ?TasteProfile
     {
         return $this->findOneBy(['household' => $household]);
+    }
+
+    /** The household's rules and notes, applied (none, if it hasn't said what it likes). */
+    public function tasteFor(Household $household): Taste
+    {
+        $profile = $this->forHousehold($household);
+
+        return new Taste($profile?->getRules() ?? TasteRules::none(), $profile?->getNotes());
     }
 
     /** The household's rules, or none (every recipe fits) if it hasn't said what it likes. */

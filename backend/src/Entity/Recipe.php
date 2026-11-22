@@ -203,6 +203,30 @@ class Recipe implements HouseholdOwned
     #[ApiProperty(schema: ['type' => ['array', 'null'], 'items' => Conflict::API_SCHEMA])]
     private ?array $tasteConflicts = null;
 
+    /**
+     * What the text model made of the recipe against the household's free-text notes
+     * (App\Taste\NotesJudge), and what it read: the notes (hash) and the recipe
+     * (factsFingerprint()). Stale as soon as either changes; see notesJudgementFor().
+     *
+     * @var array{notes: string, recipe: string, fit: string, when: string, reason: array{es: string, en: string}|null}|null
+     */
+    #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
+    private ?array $notesJudgement = null;
+
+    /**
+     * The judgement for the household's notes as they are now, when it is good or poor.
+     * Not stored: RecipeProvider fills it in.
+     *
+     * @var array{fit: string, when: string, reason: array{es: string, en: string}|null}|null
+     */
+    #[Groups(['recipe:read', 'recipe:list'])]
+    #[ApiProperty(schema: ['type' => ['object', 'null'], 'required' => ['fit', 'when'], 'properties' => [
+        'fit' => ['type' => 'string', 'enum' => ['good', 'poor']],
+        'when' => ['type' => 'string', 'enum' => ['always', 'weekdays', 'weekends', 'lunch', 'dinner']],
+        'reason' => ['type' => ['object', 'null'], 'required' => ['es', 'en'], 'properties' => ['es' => ['type' => 'string'], 'en' => ['type' => 'string']]],
+    ]])]
+    private ?array $notesFit = null;
+
     /** Last day it was on the menu, up to today; null if never. Not stored: RecipeProvider fills it in. */
     private ?\DateTimeImmutable $lastCookedOn = null;
 
@@ -536,6 +560,53 @@ class Recipe implements HouseholdOwned
     public function setTasteConflicts(?array $conflicts): void
     {
         $this->tasteConflicts = $conflicts;
+    }
+
+    /** @return array{fit: string, when: string, reason: array{es: string, en: string}|null}|null */
+    public function getNotesFit(): ?array
+    {
+        return $this->notesFit;
+    }
+
+    /** @param array{fit: string, when: string, reason: array{es: string, en: string}|null}|null $fit */
+    public function setNotesFit(?array $fit): void
+    {
+        $this->notesFit = $fit;
+    }
+
+    /**
+     * The model's judgement against these notes, if it was made for them and for the recipe as it is now.
+     *
+     * @return array{fit: string, when: string, reason: array{es: string, en: string}|null}|null
+     */
+    public function notesJudgementFor(?string $notesHash): ?array
+    {
+        $judgement = $this->notesJudgement;
+        if (null === $notesHash || null === $judgement || $judgement['notes'] !== $notesHash || $judgement['recipe'] !== $this->factsFingerprint()) {
+            return null;
+        }
+
+        return ['fit' => $judgement['fit'], 'when' => $judgement['when'], 'reason' => $judgement['reason']];
+    }
+
+    public function needsNotesJudgement(string $notesHash): bool
+    {
+        return null === $this->notesJudgementFor($notesHash);
+    }
+
+    /**
+     * Keeps what the model said, if the recipe is still what it read ($from: its fingerprint then).
+     *
+     * @param array{es: string, en: string}|null $reason
+     */
+    public function judgeNotes(string $notesHash, string $from, string $fit, string $when, ?array $reason): bool
+    {
+        if ($from !== $this->factsFingerprint()) {
+            return false;
+        }
+        $this->notesJudgement = ['notes' => $notesHash, 'recipe' => $from, 'fit' => $fit, 'when' => $when, 'reason' => $reason];
+
+        return true;
     }
 
     public function getNeedsReview(): bool

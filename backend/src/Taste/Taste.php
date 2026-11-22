@@ -13,8 +13,48 @@ use App\Planning\Candidate;
 /** A household's rules applied to recipes: what they rule out, and how much each is wanted. */
 final readonly class Taste
 {
-    public function __construct(public TasteRules $rules)
+    /** Identifies the notes the recipes were judged against (NotesJudge); null without notes. */
+    public ?string $notesHash;
+
+    public function __construct(public TasteRules $rules, ?string $notes = null)
     {
+        $this->notesHash = self::notesHash($notes);
+    }
+
+    public static function notesHash(?string $notes): ?string
+    {
+        $notes = null === $notes ? '' : trim($notes);
+
+        return '' === $notes ? null : hash('xxh128', $notes);
+    }
+
+    /**
+     * What the model made of the recipe against the notes, when it was judged against these and
+     * isn't neutral.
+     *
+     * @return array{fit: string, when: string, reason: array{es: string, en: string}|null}|null
+     */
+    public function notesJudgement(Candidate $recipe): ?array
+    {
+        $judgement = $recipe->recipe->notesJudgementFor($this->notesHash);
+
+        return null === $judgement || 'neutral' === $judgement['fit'] ? null : $judgement;
+    }
+
+    /** "good" or "poor" when the notes have something to say about this recipe for this meal; null otherwise. */
+    public function notesFit(Candidate $recipe, MealType $slot, bool $weekday): ?string
+    {
+        $judgement = $this->notesJudgement($recipe);
+        $applies = match ($judgement['when'] ?? null) {
+            'always' => true,
+            'weekdays' => $weekday,
+            'weekends' => !$weekday,
+            'lunch' => MealType::Lunch === $slot,
+            'dinner' => MealType::Dinner === $slot,
+            default => false,
+        };
+
+        return $applies ? $judgement['fit'] : null;
     }
 
     /** @return list<Conflict> firmest first */
@@ -74,8 +114,8 @@ final readonly class Taste
         return [] !== $this->conflicts($recipe) && !$this->forbids($recipe);
     }
 
-    /** How much more (or less) likely to be picked for this meal: lunch and dinner heaviness, spice, more or less of something. */
-    public function weight(Candidate $recipe, MealType $slot): float
+    /** How much more (or less) likely to be picked for this meal: lunch and dinner heaviness, spice, more or less of something, the notes. */
+    public function weight(Candidate $recipe, MealType $slot, bool $weekday = true): float
     {
         $weight = match ($this->heavinessFit($recipe, $slot)) {
             1 => 1.6,
@@ -91,6 +131,11 @@ final readonly class Taste
                 $weight *= $preference->more ? 1.6 : 0.4;
             }
         }
+        $weight *= match ($this->notesFit($recipe, $slot, $weekday)) {
+            'good' => 1.4,
+            'poor' => 0.25,
+            default => 1.0,
+        };
 
         return $weight;
     }

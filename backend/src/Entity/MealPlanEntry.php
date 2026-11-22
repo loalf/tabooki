@@ -47,7 +47,8 @@ class MealPlanEntry
 
     /**
      * Why the planner chose this recipe, or which of the household's likings it had to give up
-     * on (Planner). Codes: asked, heaviness {value}, shares {names}, overTime, repeat,
+     * on (Planner). Codes: asked, heaviness {value}, shares {names}, notesFit {names},
+     * notesMisfit {names}, overTime, repeat,
      * relaxedWeekly, relaxedAvoid {conflicts}, nothingAllowed, breaks {conflicts} (chosen by hand).
      *
      * @var list<array<string, mixed>>
@@ -60,7 +61,7 @@ class MealPlanEntry
             'type' => 'object',
             'required' => ['code'],
             'properties' => [
-                'code' => ['type' => 'string', 'enum' => ['asked', 'heaviness', 'shares', 'overTime', 'repeat', 'relaxedWeekly', 'relaxedAvoid', 'nothingAllowed', 'breaks']],
+                'code' => ['type' => 'string', 'enum' => ['asked', 'heaviness', 'shares', 'notesFit', 'notesMisfit', 'overTime', 'repeat', 'relaxedWeekly', 'relaxedAvoid', 'nothingAllowed', 'breaks']],
                 'value' => ['type' => 'string'],
                 'names' => ['type' => 'array', 'items' => Names::API_SCHEMA],
                 'conflicts' => ['type' => 'array', 'items' => Conflict::API_SCHEMA],

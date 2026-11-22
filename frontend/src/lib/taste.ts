@@ -1,4 +1,5 @@
 import type { TFunction } from 'i18next'
+import type { RecipeListItem } from '@/api/library'
 import type { TasteConflict, TasteImpact, TasteRules } from '@/api/taste'
 import { FOOD_GROUPS, type FoodGroup } from '@/lib/facts'
 
@@ -119,4 +120,26 @@ export function impactWarnings(impact: TasteImpact | undefined, t: TFunction): s
   if (impact.dinnerMatching != null && few(impact.dinnerMatching))
     warnings.push(t('taste.review.fewMatching', { count: impact.dinnerMatching, meal: t('recipe.meal.dinner').toLowerCase() }))
   return warnings
+}
+
+export type NotesFit = NonNullable<RecipeListItem['notesFit']>
+
+/** Whether what the notes say about a recipe is about this meal ("nothing fiddly on weekdays" isn't about Saturday). */
+export function notesApply(fit: NotesFit, slot: 'lunch' | 'dinner', weekday: boolean): boolean {
+  switch (fit.when) {
+    case 'weekdays':
+      return weekday
+    case 'weekends':
+      return !weekday
+    case 'lunch':
+    case 'dinner':
+      return fit.when === slot
+    default:
+      return true
+  }
+}
+
+/** The notes' reason in the reader's language ("Laboriosa para entre semana"). */
+export function notesReason(fit: NotesFit | null | undefined, language: string): string | null {
+  return fit?.reason?.[lang(language)] ?? null
 }

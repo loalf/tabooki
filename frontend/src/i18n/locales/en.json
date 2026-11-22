@@ -320,7 +320,9 @@
       "relaxedAvoid": "There was no other option. {{conflicts}}.",
       "nothingAllowed": "Nothing in the library fits your tastes for this {{meal}}.",
       "breaks": "Chosen by hand. {{conflicts}}.",
-      "warning": "Doesn't quite fit your tastes"
+      "warning": "Doesn't quite fit your tastes",
+      "notesFit": "{{reason}}, as your notes ask",
+      "notesMisfit": "Goes against your notes ({{reason}}): there was no other option."
     }
   },
   "shopping": {
@@ -492,7 +494,8 @@
       "classify": "Sorting ingredients",
       "translate": "Translating the recipe",
       "annotate": "Reading what it's like",
-      "taste_profile": "Understanding your tastes"
+      "taste_profile": "Understanding your tastes",
+      "notes_fit": "Checking recipes against your notes"
     },
     "classifyWhat": "New ingredients on the list",
     "translateWhat": "A recipe typed in",
@@ -738,6 +741,13 @@
         "vegetarian": "Not vegetarian",
         "pescatarian": "Has meat"
       }
+    },
+    "notesPending_one": "Tabooki is checking {{count}} recipe against these notes…",
+    "notesPending_other": "Tabooki is checking {{count}} recipes against these notes…",
+    "notesJudged": "By these notes, {{good}} recipes fit better and {{poor}} worse: the menu takes it into account.",
+    "notesSay": {
+      "good": "By your notes, it fits",
+      "poor": "By your notes"
     }
   }
 }

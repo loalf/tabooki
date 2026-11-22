@@ -82,7 +82,7 @@ export function LibraryPage() {
     (r) =>
       (!heavy || r.heaviness === heavy) &&
       (!vegetarian || r.diet === 'vegetarian' || r.diet === 'vegan') &&
-      (!fitting || !r.tasteConflicts?.length),
+      (!fitting || (!r.tasteConflicts?.length && !(r.notesFit?.fit === 'poor' && r.notesFit.when === 'always'))),
   )
   // Only once the household has said what it likes (recipes then say what they have against it).
   const hasTaste = (recipes.data ?? []).some((r) => r.tasteConflicts != null)

@@ -20,7 +20,8 @@ final readonly class TasteImpact
     {
     }
 
-    public function of(Household $household, TasteRules $rules): TasteImpactView
+    /** @param ?string $notes the saved notes, to count how they judged the recipes (not for a draft: nothing is judged yet) */
+    public function of(Household $household, TasteRules $rules, ?string $notes = null): TasteImpactView
     {
         $library = array_map(Candidate::fromRecipe(...), $this->recipes->libraryOf($household));
         $taste = new Taste($rules);
@@ -42,6 +43,14 @@ final readonly class TasteImpact
         $view->diet = null === $rules->diet ? null : $removes(new TasteRules(diet: $rules->diet));
         $view->excludeGroups = array_map(static fn (ExcludedGroup $rule): int => $removes(new TasteRules(excludeGroups: [$rule])), $rules->excludeGroups);
         $view->excludeIngredients = array_map(static fn (ExcludedIngredient $rule): int => $removes(new TasteRules(excludeIngredients: [$rule])), $rules->excludeIngredients);
+
+        $notesHash = Taste::notesHash($notes);
+        if (null !== $notesHash) {
+            $judged = array_map(static fn (Candidate $c): ?array => $c->recipe->notesJudgementFor($notesHash), $library);
+            $view->notesGood = \count(array_filter($judged, static fn (?array $j): bool => 'good' === ($j['fit'] ?? null)));
+            $view->notesPoor = \count(array_filter($judged, static fn (?array $j): bool => 'poor' === ($j['fit'] ?? null)));
+            $view->notesPending = \count(array_filter($judged, static fn (?array $j): bool => null === $j));
+        }
 
         return $view;
     }

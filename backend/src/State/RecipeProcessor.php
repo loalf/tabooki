@@ -9,12 +9,14 @@ use ApiPlatform\State\ProcessorInterface;
 use App\Entity\Recipe;
 use App\Message\AnnotateRecipe;
 use App\Message\TranslateRecipe;
+use App\Taste\NotesQueue;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 /**
  * Saves a recipe typed or edited by hand, then has it translated into the other language when
  * its text changed (see Recipe::keepOriginalIfUntouched() for edits made to the translation),
- * and its facts read again when its title or ingredients did.
+ * and its facts read again, and judged against the household's notes, when its title or
+ * ingredients did.
  *
  * @implements ProcessorInterface<Recipe, mixed>
  */
@@ -23,6 +25,7 @@ final readonly class RecipeProcessor implements ProcessorInterface
     public function __construct(
         private HouseholdOwnedProcessor $persist,
         private MessageBusInterface $bus,
+        private NotesQueue $notes,
     ) {
     }
 
@@ -36,6 +39,7 @@ final readonly class RecipeProcessor implements ProcessorInterface
         if ($data->needsFacts()) {
             $this->bus->dispatch(new AnnotateRecipe($data->getId()->toRfc4122()));
         }
+        $this->notes->recipeChanged($data);
 
         return $result;
     }

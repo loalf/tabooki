@@ -36,4 +36,13 @@ final class TasteImpactView
 
     /** @var list<int> recipes each excludeIngredients rule leaves out, in order */
     public array $excludeIngredients = [];
+
+    /** Recipes the notes say fit well (for some meals at least); null without notes. */
+    public ?int $notesGood = null;
+
+    /** Recipes the notes say fit poorly (for some meals at least); null without notes. */
+    public ?int $notesPoor = null;
+
+    /** Recipes not judged against the notes yet; null without notes. */
+    public ?int $notesPending = null;
 }

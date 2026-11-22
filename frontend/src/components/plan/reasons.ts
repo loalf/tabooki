@@ -2,7 +2,7 @@ import type { TFunction } from 'i18next'
 import type { MealPlanEntry } from '@/api/plan'
 import { conflictText } from '@/lib/taste'
 
-const WARNINGS = new Set(['overTime', 'repeat', 'relaxedWeekly', 'relaxedAvoid', 'nothingAllowed', 'breaks'])
+const WARNINGS = new Set(['notesMisfit', 'overTime', 'repeat', 'relaxedWeekly', 'relaxedAvoid', 'nothingAllowed', 'breaks'])
 
 /**
  * Why the planner chose a meal's recipe (App\Planning\WeekSampler), in words: what's good about
@@ -24,6 +24,12 @@ export function mealReasons(entry: MealPlanEntry, t: TFunction, language: string
         break
       case 'shares':
         good.push(t('plan.why.shares', { names: (reason.names ?? []).map((n) => n[lang]).join(', ') }))
+        break
+      case 'notesFit':
+        good.push(t('plan.why.notesFit', { reason: (reason.names ?? []).map((n) => n[lang]).join(', ') }))
+        break
+      case 'notesMisfit':
+        warnings.push(t('plan.why.notesMisfit', { reason: (reason.names ?? []).map((n) => n[lang]).join(', ') }))
         break
       case 'relaxedAvoid':
         warnings.push(t('plan.why.relaxedAvoid', { conflicts }))

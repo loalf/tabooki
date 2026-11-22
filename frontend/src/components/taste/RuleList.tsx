@@ -23,6 +23,12 @@ export function RuleList({
 }) {
   const { t, i18n } = useTranslation()
   const lines = ruleLines(rules, impact, t, i18n.language)
+  // How the saved notes judged the library (not on a draft: nothing is judged until it's saved).
+  const notesDetail = impact?.notesPending
+    ? t('taste.notesPending', { count: impact.notesPending })
+    : impact?.notesGood != null && impact.notesPoor != null
+      ? t('taste.notesJudged', { good: impact.notesGood, poor: impact.notesPoor })
+      : undefined
 
   if (!lines.length && !notes) return <p className="text-sm text-muted-foreground">{t('taste.noRules')}</p>
 
@@ -39,7 +45,7 @@ export function RuleList({
         </Line>
       ))}
       {notes && (
-        <Line onRemove={onRemoveNotes}>
+        <Line onRemove={onRemoveNotes} detail={notesDetail}>
           <span className="font-semibold">{t('taste.notes')}:</span> {notes}
         </Line>
       )}

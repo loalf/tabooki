@@ -1,5 +1,6 @@
 import type { RecipeListItem } from '@/api/library'
 import type { MealPlan, MealPlanEntry } from '@/api/plan'
+import { notesApply } from '@/lib/taste'
 import { isWeekday, parseIsoDate, today } from '@/lib/week'
 
 /** Why a recipe is suggested, said in a few words on its card. */
@@ -60,7 +61,9 @@ export function suggestFor({
 
   // The household's likings: what it can't eat never comes up, what it doesn't like only when nothing else is left.
   const forbidden = (r: RecipeListItem) => (r.tasteConflicts ?? []).some((c) => c.strength === 'never')
-  const liked = (r: RecipeListItem) => !r.tasteConflicts?.length
+  const weekday = entry.date ? isWeekday(entry.date) : true
+  const liked = (r: RecipeListItem) =>
+    !r.tasteConflicts?.length && !(r.notesFit?.fit === 'poor' && notesApply(r.notesFit, slot, weekday))
 
   const fits = library.filter(
     (r) =>

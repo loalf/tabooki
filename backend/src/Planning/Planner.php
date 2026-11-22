@@ -131,7 +131,7 @@ final readonly class Planner
 
     private function taste(MealPlan $plan): Taste
     {
-        return new Taste($this->tastes->rulesFor($plan->getHousehold()));
+        return $this->tastes->tasteFor($plan->getHousehold());
     }
 
     /** Leftovers are the same dish: they follow their meal, or stop being leftovers if locked. */

@@ -51,6 +51,8 @@ export function useTasteProfile() {
       if (!data) throw new ApiError(response.status)
       return data
     },
+    // The recipes are being judged against new notes in the background: show it as it happens.
+    refetchInterval: (query) => ((query.state.data?.impact?.notesPending ?? 0) > 0 ? 4000 : false),
   })
 }
 

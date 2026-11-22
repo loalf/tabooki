@@ -20,6 +20,7 @@ use App\Llm\Pricing;
 use App\Repository\RecipeRepository;
 use App\Repository\TasteProfileRepository;
 use App\Security\CurrentHousehold;
+use App\Taste\NotesQueue;
 use App\Taste\TasteCompiler;
 use App\Taste\TasteImpact;
 use App\Taste\TasteImpactView;
@@ -29,7 +30,8 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
- * Saves or forgets the household's likings, turns the questionnaire into a draft with the text
+ * Saves or forgets the household's likings (then has the recipes judged against the notes),
+ * turns the questionnaire into a draft with the text
  * model (logged in extraction_run as step "taste_profile"), and works out what rules would do
  * to the library.
  *
@@ -44,6 +46,7 @@ final readonly class TasteProfileProcessor implements ProcessorInterface
         private TasteProfileProvider $provider,
         private TasteCompiler $compiler,
         private TasteImpact $impact,
+        private NotesQueue $notes,
         private EntityManagerInterface $entityManager,
         private Pricing $pricing,
         private LoggerInterface $logger,
@@ -77,6 +80,7 @@ final readonly class TasteProfileProcessor implements ProcessorInterface
             : null;
         $profile->update($input->answers, TasteRules::fromArray($input->rules), $input->notes, $summary, $this->current->user());
         $this->entityManager->flush();
+        $this->notes->notesSaved($household, $profile->getNotes());
 
         return $this->provider->view($profile);
     }

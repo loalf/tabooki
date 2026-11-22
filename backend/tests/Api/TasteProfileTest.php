@@ -13,12 +13,17 @@ use App\Entity\User;
 use App\Enum\FoodGroup;
 use App\Enum\Heaviness;
 use App\Enum\MealType;
+use App\Message\JudgeNotes;
+use App\MessageHandler\JudgeNotesHandler;
 use App\Planning\RecipeFacts;
+use App\Taste\NotesJudge;
+use App\Taste\Taste;
 use App\Taste\TasteCompiler;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\JsonMockResponse;
 use Symfony\Component\HttpClient\Response\MockResponse;
+use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
 
 /**
  * What the household likes (docs/PLAN.md §6.1, §6.3): the questionnaire becomes rules, and the
@@ -239,6 +244,80 @@ final class TasteProfileTest extends ApiTestCase
         }
     }
 
+    public function testRecipesAreJudgedAgainstTheNotes(): void
+    {
+        $this->recipe('Cocido completo', [FoodGroup::RedMeat], keys: ['chickpeas', 'beef'], minutes: 180);
+        $this->recipe('Tortilla francesa', [FoodGroup::Egg], keys: ['egg'], minutes: 10);
+        $this->recipe('Ensalada', [], keys: ['lettuce']);
+        $this->asyncTransport()->reset();
+
+        $this->save([], notes: 'Entre semana, nada muy elaborado.');
+        self::assertCount(1, $this->queued(JudgeNotes::class), 'saving the notes queues the judging');
+
+        $this->mockBedrock([$this->judgements([
+            ['n' => 1, 'fit' => 'poor', 'when' => 'weekdays', 'reason_es' => 'Laboriosa para entre semana', 'reason_en' => 'Fiddly for a weekday'],
+            ['n' => 2, 'fit' => 'good', 'when' => 'weekdays', 'reason_es' => 'Rápida', 'reason_en' => 'Quick'],
+            ['n' => 9, 'fit' => 'poor', 'when' => 'always', 'reason_es' => 'No existe', 'reason_en' => 'No such recipe'],
+        ])]);
+        $this->judgeNotes();
+
+        $prompt = $this->userText($this->bedrockRequests[0]);
+        self::assertStringContainsString('Entre semana, nada muy elaborado.', $prompt);
+        self::assertStringContainsString('1. Cocido completo | 180 min | 1 steps | chickpeas, beef', $prompt);
+
+        /** @var list<array{title: string, notesFit?: array{fit: string, when: string, reason: array{es: string, en: string}|null}}> $recipes */
+        $recipes = $this->client->request('GET', '/api/recipes')->toArray();
+        $fits = array_column($recipes, 'notesFit', 'title');
+        // (assertEquals: jsonb keeps object keys in its own order.)
+        self::assertEquals(['fit' => 'poor', 'when' => 'weekdays', 'reason' => ['es' => 'Laboriosa para entre semana', 'en' => 'Fiddly for a weekday']], $fits['Cocido completo']);
+        self::assertSame('good', $fits['Tortilla francesa']['fit']);
+        self::assertArrayNotHasKey('Ensalada', $fits, 'left out by the model: neutral, nothing to say');
+
+        $impact = $this->profile()['impact'];
+        self::assertSame([1, 1, 0], [$impact['notesGood'], $impact['notesPoor'], $impact['notesPending']]);
+        self::assertCount(1, self::getContainer()->get(EntityManagerInterface::class)->getRepository(ExtractionRun::class)->findBy(['step' => 'notes_fit']));
+
+        $this->judgeNotes();
+        self::assertCount(1, $this->bedrockRequests, 'nothing left to judge: no call');
+
+        // A recipe that changes is judged again; new notes, the whole library.
+        $this->client->request('PATCH', '/api/recipes/'.$this->recipeId('Ensalada'), ['headers' => ['Content-Type' => 'application/merge-patch+json'], 'json' => ['title' => 'Ensalada de pasta']]);
+        self::assertCount(1, $this->queued(JudgeNotes::class));
+        $this->save([], notes: 'Los niños no comen picante.');
+        self::assertSame(3, $this->profile()['impact']['notesPending']);
+        /** @var list<array<string, mixed>> $recipes */
+        $recipes = $this->client->request('GET', '/api/recipes')->toArray();
+        self::assertArrayNotHasKey('notesFit', $recipes[0], 'judged against other notes: stale');
+    }
+
+    public function testThePlannerFollowsTheNotes(): void
+    {
+        foreach (range(1, 10) as $i) {
+            $this->recipe("Rápida $i", [], keys: ['onion', "veg_$i"]);
+        }
+        foreach (range(1, 3) as $i) {
+            $this->recipe("Laboriosa $i", [], keys: ['onion', "slow_$i"]);
+        }
+        $notes = 'Entre semana, nada muy elaborado.';
+        $this->save([], notes: $notes);
+        $hash = Taste::notesHash($notes);
+        self::assertNotNull($hash);
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        foreach ($entityManager->getRepository(Recipe::class)->findAll() as $recipe) {
+            $slow = str_starts_with($recipe->getTitle(), 'Laboriosa');
+            $recipe->judgeNotes($hash, $recipe->factsFingerprint(), $slow ? 'poor' : 'neutral', $slow ? 'weekdays' : 'always', $slow ? ['es' => 'Laboriosa', 'en' => 'Fiddly'] : null);
+        }
+        $entityManager->flush();
+
+        // Monday to Friday, lunch and dinner: ten meals, ten quick recipes.
+        foreach (range(1, 3) as $_) {
+            $plan = $this->createPlan(10);
+            $titles = array_map(static fn (array $e): string => $e['recipe']['title'] ?? '', $plan['entries']);
+            self::assertSame([], array_filter($titles, static fn (string $t): bool => str_starts_with($t, 'Laboriosa')), 'nothing fiddly on weekdays while there is something else');
+            $this->client->request('DELETE', '/api/meal-plans/'.$plan['id']);
+        }
+    }
+
     // —— Helpers ————————————————————————————————————————————————
 
     /**
@@ -247,7 +326,7 @@ final class TasteProfileTest extends ApiTestCase
      * @param list<string>         $keys
      * @param list<string>         $tags
      */
-    private function recipe(string $title, ?array $groups, ?Heaviness $heaviness = Heaviness::Medium, array $optional = [], array $keys = ['onion'], array $tags = []): void
+    private function recipe(string $title, ?array $groups, ?Heaviness $heaviness = Heaviness::Medium, array $optional = [], array $keys = ['onion'], array $tags = [], ?int $minutes = null): void
     {
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $owner = $entityManager->find(User::class, $this->ana->getId());
@@ -258,6 +337,8 @@ final class TasteProfileTest extends ApiTestCase
         $recipe->setTitle($title);
         $recipe->setMealTypes([MealType::Lunch, MealType::Dinner]);
         $recipe->setTags($tags);
+        $recipe->setCookMinutes($minutes);
+        $recipe->setSteps(['Cocinar.']);
         $recipe->setIngredients(array_map(static function (string $key): RecipeIngredient {
             $ingredient = new RecipeIngredient();
             $ingredient->setRawText($key);
@@ -270,6 +351,54 @@ final class TasteProfileTest extends ApiTestCase
         }
         $entityManager->persist($recipe);
         $entityManager->flush();
+    }
+
+    /** @return array{impact: array{notesGood: ?int, notesPoor: ?int, notesPending: ?int}} */
+    private function profile(): array
+    {
+        /** @var array{impact: array{notesGood: ?int, notesPoor: ?int, notesPending: ?int}} $profile */
+        $profile = $this->client->request('GET', '/api/taste-profile')->toArray();
+
+        return $profile;
+    }
+
+    private function judgeNotes(): void
+    {
+        $household = $this->ana->getHousehold()->getId()->toRfc4122();
+        self::getContainer()->get(JudgeNotesHandler::class)(new JudgeNotes($household));
+        self::getContainer()->get(EntityManagerInterface::class)->clear();
+    }
+
+    /**
+     * @param class-string $class
+     *
+     * @return list<object> messages of that class queued since the last call
+     */
+    private function queued(string $class): array
+    {
+        $transport = $this->asyncTransport();
+        $messages = array_values(array_filter(array_map(static fn ($envelope): object => $envelope->getMessage(), $transport->getSent()), static fn (object $m): bool => $m instanceof $class));
+        $transport->reset();
+
+        return $messages;
+    }
+
+    private function asyncTransport(): InMemoryTransport
+    {
+        $transport = self::getContainer()->get('messenger.transport.async');
+        self::assertInstanceOf(InMemoryTransport::class, $transport);
+
+        return $transport;
+    }
+
+    /** @param list<array<string, mixed>> $judgements */
+    private function judgements(array $judgements): JsonMockResponse
+    {
+        return new JsonMockResponse([
+            'output' => ['message' => ['role' => 'assistant', 'content' => [['toolUse' => ['toolUseId' => 't1', 'name' => NotesJudge::TOOL, 'input' => ['judgements' => $judgements]]]]]],
+            'stopReason' => 'tool_use',
+            'usage' => ['inputTokens' => 800, 'outputTokens' => 200],
+        ]);
     }
 
     private function recipeId(string $title): string
@@ -286,9 +415,9 @@ final class TasteProfileTest extends ApiTestCase
      *
      * @return array{rules: array{excludeGroups: list<array{group: string, strength: string}>}, updatedBy: string, summary: array{es: string, en: string}, impact: array{unread: int}}
      */
-    private function save(array $rules, ?array $summary = null): array
+    private function save(array $rules, ?array $summary = null, ?string $notes = null): array
     {
-        $response = $this->client->request('PUT', '/api/taste-profile', ['json' => ['answers' => ['diet' => null], 'rules' => $rules, 'notes' => null, 'summary' => $summary]]);
+        $response = $this->client->request('PUT', '/api/taste-profile', ['json' => ['answers' => ['diet' => null], 'rules' => $rules, 'notes' => $notes, 'summary' => $summary]]);
         self::assertResponseIsSuccessful();
         /** @var array{rules: array{excludeGroups: list<array{group: string, strength: string}>}, updatedBy: string, summary: array{es: string, en: string}, impact: array{unread: int}} $profile */
         $profile = $response->toArray();

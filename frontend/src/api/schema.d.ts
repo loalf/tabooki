@@ -707,7 +707,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate" | "taste_profile";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate" | "taste_profile" | "notes_fit";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -729,7 +729,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate" | "taste_profile";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate" | "taste_profile" | "notes_fit";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -1189,7 +1189,7 @@ export interface components {
             readonly rating?: number | null;
             reasons?: {
                 /** @enum {string} */
-                code: "asked" | "heaviness" | "shares" | "overTime" | "repeat" | "relaxedWeekly" | "relaxedAvoid" | "nothingAllowed" | "breaks";
+                code: "asked" | "heaviness" | "shares" | "notesFit" | "notesMisfit" | "overTime" | "repeat" | "relaxedWeekly" | "relaxedAvoid" | "nothingAllowed" | "breaks";
                 value?: string;
                 names?: {
                     es: string;
@@ -1230,7 +1230,7 @@ export interface components {
             readonly rating?: number | null;
             reasons?: {
                 /** @enum {string} */
-                code: "asked" | "heaviness" | "shares" | "overTime" | "repeat" | "relaxedWeekly" | "relaxedAvoid" | "nothingAllowed" | "breaks";
+                code: "asked" | "heaviness" | "shares" | "notesFit" | "notesMisfit" | "overTime" | "repeat" | "relaxedWeekly" | "relaxedAvoid" | "nothingAllowed" | "breaks";
                 value?: string;
                 names?: {
                     es: string;
@@ -1321,6 +1321,16 @@ export interface components {
                     en: string;
                 };
             }[] | null;
+            notesFit?: {
+                /** @enum {string} */
+                fit: "good" | "poor";
+                /** @enum {string} */
+                when: "always" | "weekdays" | "weekends" | "lunch" | "dinner";
+                reason?: {
+                    es: string;
+                    en: string;
+                } | null;
+            } | null;
             /** Format: date */
             lastCookedOn?: string | null;
             /**
@@ -1382,6 +1392,16 @@ export interface components {
                     en: string;
                 };
             }[] | null;
+            notesFit?: {
+                /** @enum {string} */
+                fit: "good" | "poor";
+                /** @enum {string} */
+                when: "always" | "weekdays" | "weekends" | "lunch" | "dinner";
+                reason?: {
+                    es: string;
+                    en: string;
+                } | null;
+            } | null;
             /** Format: date */
             lastCookedOn?: string | null;
             /**
@@ -1448,6 +1468,16 @@ export interface components {
                     en: string;
                 };
             }[] | null;
+            notesFit?: {
+                /** @enum {string} */
+                fit: "good" | "poor";
+                /** @enum {string} */
+                when: "always" | "weekdays" | "weekends" | "lunch" | "dinner";
+                reason?: {
+                    es: string;
+                    en: string;
+                } | null;
+            } | null;
             /** Format: date */
             lastCookedOn?: string | null;
             /**
@@ -1626,6 +1656,16 @@ export interface components {
                     en: string;
                 };
             }[] | null;
+            notesFit?: {
+                /** @enum {string} */
+                fit: "good" | "poor";
+                /** @enum {string} */
+                when: "always" | "weekdays" | "weekends" | "lunch" | "dinner";
+                reason?: {
+                    es: string;
+                    en: string;
+                } | null;
+            } | null;
             /** Format: date */
             lastCookedOn?: string | null;
             /**
@@ -1687,6 +1727,16 @@ export interface components {
                     en: string;
                 };
             }[] | null;
+            notesFit?: {
+                /** @enum {string} */
+                fit: "good" | "poor";
+                /** @enum {string} */
+                when: "always" | "weekdays" | "weekends" | "lunch" | "dinner";
+                reason?: {
+                    es: string;
+                    en: string;
+                } | null;
+            } | null;
             /** Format: date */
             lastCookedOn?: string | null;
             /**
@@ -1753,6 +1803,16 @@ export interface components {
                     en: string;
                 };
             }[] | null;
+            notesFit?: {
+                /** @enum {string} */
+                fit: "good" | "poor";
+                /** @enum {string} */
+                when: "always" | "weekdays" | "weekends" | "lunch" | "dinner";
+                reason?: {
+                    es: string;
+                    en: string;
+                } | null;
+            } | null;
             /** Format: date */
             lastCookedOn?: string | null;
             /**
@@ -2288,6 +2348,12 @@ export interface components {
             excludeGroups?: number[];
             /** @description recipes each excludeIngredients rule leaves out, in order */
             excludeIngredients?: number[];
+            /** @description Recipes the notes say fit well (for some meals at least); null without notes. */
+            notesGood?: number | null;
+            /** @description Recipes the notes say fit poorly (for some meals at least); null without notes. */
+            notesPoor?: number | null;
+            /** @description Recipes not judged against the notes yet; null without notes. */
+            notesPending?: number | null;
         };
         "TasteImpactView.jsonld": {
             /**
@@ -2325,6 +2391,12 @@ export interface components {
             excludeGroups?: number[];
             /** @description recipes each excludeIngredients rule leaves out, in order */
             excludeIngredients?: number[];
+            /** @description Recipes the notes say fit well (for some meals at least); null without notes. */
+            notesGood?: number | null;
+            /** @description Recipes the notes say fit poorly (for some meals at least); null without notes. */
+            notesPoor?: number | null;
+            /** @description Recipes not judged against the notes yet; null without notes. */
+            notesPending?: number | null;
         };
         /**
          * @description What the household likes (docs/PLAN.md §6.1): the questionnaire's answers, the rules the
@@ -2550,6 +2622,12 @@ export interface components {
             excludeGroups?: number[];
             /** @description recipes each excludeIngredients rule leaves out, in order */
             excludeIngredients?: number[];
+            /** @description Recipes the notes say fit well (for some meals at least); null without notes. */
+            notesGood?: number | null;
+            /** @description Recipes the notes say fit poorly (for some meals at least); null without notes. */
+            notesPoor?: number | null;
+            /** @description Recipes not judged against the notes yet; null without notes. */
+            notesPending?: number | null;
         };
         /** @description What some rules would do to the library (after removing one on the review screen). */
         "TasteProfile.TasteImpactView.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
@@ -2588,6 +2666,12 @@ export interface components {
             excludeGroups?: number[];
             /** @description recipes each excludeIngredients rule leaves out, in order */
             excludeIngredients?: number[];
+            /** @description Recipes the notes say fit well (for some meals at least); null without notes. */
+            notesGood?: number | null;
+            /** @description Recipes the notes say fit poorly (for some meals at least); null without notes. */
+            notesPoor?: number | null;
+            /** @description Recipes not judged against the notes yet; null without notes. */
+            notesPending?: number | null;
         };
         /** @description Save the likings the household confirmed on the review screen. Plans already made stay as they are. */
         "TasteProfile.TasteProfileInput": {

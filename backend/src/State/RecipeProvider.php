@@ -16,14 +16,13 @@ use App\Repository\MealPlanRepository;
 use App\Repository\TasteProfileRepository;
 use App\Security\CurrentHousehold;
 use App\Taste\Conflict;
-use App\Taste\Taste;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Recipes as Doctrine loads them, plus when each was last on the menu (one query for the whole
  * library): the app uses it to bring back recipes nobody has made in a while. And what each has
- * against the household's likings, when it has said. Before an edit, it
+ * against the household's likings, and what its notes say about it, when it has said. Before an edit, it
  * remembers the recipe's text (see Recipe::keepOriginalIfUntouched()).
  *
  * @implements ProviderInterface<Recipe>
@@ -81,17 +80,18 @@ final readonly class RecipeProvider implements ProviderInterface
             return $result;
         }
         $last = $this->plans->lastCooked($household, new \DateTimeImmutable('today'));
-        $rules = $this->tastes->rulesFor($household);
-        $taste = $rules->isEmpty() ? null : new Taste($rules);
+        $taste = null === $this->tastes->forHousehold($household) ? null : $this->tastes->tasteFor($household);
         if (null !== $taste && !$result instanceof Recipe) {
             $this->loadIngredients($recipes);
         }
         foreach ($recipes as $recipe) {
             $recipe->setLastCookedOn($last[$recipe->getId()->toRfc4122()] ?? null);
-            $recipe->setTasteConflicts(null === $taste ? null : array_map(
-                static fn (Conflict $c): array => $c->toArray(),
-                $taste->conflicts(Candidate::fromRecipe($recipe)),
-            ));
+            if (null === $taste) {
+                continue;
+            }
+            $candidate = Candidate::fromRecipe($recipe);
+            $recipe->setTasteConflicts(array_map(static fn (Conflict $c): array => $c->toArray(), $taste->conflicts($candidate)));
+            $recipe->setNotesFit($taste->notesJudgement($candidate));
         }
 
         return $result;

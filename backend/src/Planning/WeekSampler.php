@@ -35,6 +35,7 @@ final class WeekSampler
     private const float SHORT_OF_MINIMUM = 20;
     private const float REPEAT_TIER = 4;
     private const float WRONG_HEAVINESS = 2;
+    private const float AGAINST_NOTES = 2;
     private const float OVER_TIME = 1;
 
     /** @var array<int, ?Candidate> meals not being filled, by spl_object_id of their entry */
@@ -55,7 +56,7 @@ final class WeekSampler
     /** @var array<string, bool> */
     private array $disliked = [];
 
-    /** @var array<string, array<string, float>> by recipe id, then slot */
+    /** @var array<string, array<string, float>> by recipe id, then meal (WeekSampler::meal()) */
     private array $tasteWeight = [];
 
     /** @var array<string, list<int>> weekly limits (by index) each recipe counts for */
@@ -149,6 +150,7 @@ final class WeekSampler
         $weekFresh = array_values(array_unique(array_merge(...array_map(static fn (Candidate $c): array => $c->fresh, $week))));
 
         $slot = $entry->getSlotType();
+        $weekday = $entry->isWeekday();
         $suits = array_filter($this->library, fn (Candidate $c): bool => $c->suits($slot) && !\in_array($c->id, $this->avoid, true));
         $allowed = array_filter($suits, fn (Candidate $c): bool => !$this->forbidden[$c->id]);
         if ([] === $allowed) {
@@ -187,8 +189,8 @@ final class WeekSampler
 
             return false;
         };
-        $weight = function (Candidate $c) use ($slot, $weekTags, $weekFresh, $needs, $remaining): float {
-            $weight = $c->score($weekTags, $weekFresh) * $this->tasteWeight[$c->id][$slot->value];
+        $weight = function (Candidate $c) use ($slot, $weekday, $weekTags, $weekFresh, $needs, $remaining): float {
+            $weight = $c->score($weekTags, $weekFresh) * $this->tasteWeight[$c->id][self::meal($slot, $weekday)];
             foreach ($needs as $k => $need) {
                 if (\in_array($k, $this->countsFor[$c->id] ?? [], true)) {
                     $weight *= 1 + 4 * $need / max(1, $remaining);
@@ -204,7 +206,7 @@ final class WeekSampler
             $chosen = $this->weightedPick($wanted, $weight);
             $breaks = $this->avoidConflicts($chosen);
 
-            return [$chosen, [...$reasons, ['code' => 'asked'], ...([] === $breaks ? [] : [['code' => 'breaks', 'conflicts' => $breaks]]), ...$this->explain($chosen, $slot, self::freshOf($week, except: $chosen))], $cost];
+            return [$chosen, [...$reasons, ['code' => 'asked'], ...([] === $breaks ? [] : [['code' => 'breaks', 'conflicts' => $breaks]]), ...$this->explain($chosen, $slot, $weekday, self::freshOf($week, except: $chosen))], $cost];
         }
 
         $recentSince = $entry->getDateValue()->modify('-7 days');
@@ -250,8 +252,12 @@ final class WeekSampler
                 if (-1 === $this->taste->heavinessFit($chosen, $slot)) {
                     $cost += self::WRONG_HEAVINESS;
                 }
+                if ('poor' === $this->taste->notesFit($chosen, $slot, $weekday)) {
+                    $reasons[] = ['code' => 'notesMisfit', 'names' => array_filter([$this->taste->notesJudgement($chosen)['reason'] ?? null])];
+                    $cost += self::AGAINST_NOTES;
+                }
 
-                return [$chosen, [...$reasons, ...$this->explain($chosen, $slot, self::freshOf($week, except: $chosen))], $cost];
+                return [$chosen, [...$reasons, ...$this->explain($chosen, $slot, $weekday, self::freshOf($week, except: $chosen))], $cost];
             }
         }
 
@@ -259,16 +265,20 @@ final class WeekSampler
     }
 
     /**
-     * What's worth saying about a good pick: it's what the household wants for this meal, and
-     * what it shares with the rest of the week.
+     * What's worth saying about a good pick: it matches the notes, it's what the household wants
+     * for this meal, and what it shares with the rest of the week.
      *
      * @param list<string> $weekFresh
      *
      * @return list<array<string, mixed>>
      */
-    private function explain(Candidate $chosen, MealType $slot, array $weekFresh): array
+    private function explain(Candidate $chosen, MealType $slot, bool $weekday, array $weekFresh): array
     {
         $reasons = [];
+        $reason = $this->taste->notesJudgement($chosen)['reason'] ?? null;
+        if ('good' === $this->taste->notesFit($chosen, $slot, $weekday) && null !== $reason) {
+            $reasons[] = ['code' => 'notesFit', 'names' => [$reason]];
+        }
         if (1 === $this->taste->heavinessFit($chosen, $slot) && null !== $chosen->heaviness) {
             $reasons[] = ['code' => 'heaviness', 'value' => $chosen->heaviness->value];
         }
@@ -302,6 +312,12 @@ final class WeekSampler
             static fn (Conflict $c): array => $c->toArray(),
             array_filter($this->taste->conflicts($candidate), static fn (Conflict $c): bool => Strength::Avoid === $c->strength),
         ));
+    }
+
+    /** "lunch-weekday", "dinner-weekend"…: what the household's likings can tell apart. */
+    private static function meal(MealType $slot, bool $weekday): string
+    {
+        return $slot->value.($weekday ? '-weekday' : '-weekend');
     }
 
     /** A dinner whose next-day lunch is being filled too, with leftovers on, feeds two meals. */
@@ -343,7 +359,9 @@ final class WeekSampler
         $this->forbidden[$candidate->id] = $never;
         $this->disliked[$candidate->id] = !$never && [] !== $conflicts;
         foreach (MealType::cases() as $slot) {
-            $this->tasteWeight[$candidate->id][$slot->value] = $this->taste->weight($candidate, $slot);
+            foreach ([true, false] as $weekday) {
+                $this->tasteWeight[$candidate->id][self::meal($slot, $weekday)] = $this->taste->weight($candidate, $slot, $weekday);
+            }
         }
         $this->countsFor[$candidate->id] = array_keys(array_filter(
             $this->taste->rules->weekly,

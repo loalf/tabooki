@@ -4302,7 +4302,8 @@
                             "classify",
                             "translate",
                             "annotate",
-                            "taste_profile"
+                            "taste_profile",
+                            "notes_fit"
                         ]
                     },
                     "model": {
@@ -4373,7 +4374,8 @@
                             "classify",
                             "translate",
                             "annotate",
-                            "taste_profile"
+                            "taste_profile",
+                            "notes_fit"
                         ]
                     },
                     "model": {
@@ -5481,6 +5483,8 @@
                                         "asked",
                                         "heaviness",
                                         "shares",
+                                        "notesFit",
+                                        "notesMisfit",
                                         "overTime",
                                         "repeat",
                                         "relaxedWeekly",
@@ -5629,6 +5633,8 @@
                                         "asked",
                                         "heaviness",
                                         "shares",
+                                        "notesFit",
+                                        "notesMisfit",
                                         "overTime",
                                         "repeat",
                                         "relaxedWeekly",
@@ -5913,6 +5919,53 @@
                             }
                         }
                     },
+                    "notesFit": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "required": [
+                            "fit",
+                            "when"
+                        ],
+                        "properties": {
+                            "fit": {
+                                "type": "string",
+                                "enum": [
+                                    "good",
+                                    "poor"
+                                ]
+                            },
+                            "when": {
+                                "type": "string",
+                                "enum": [
+                                    "always",
+                                    "weekdays",
+                                    "weekends",
+                                    "lunch",
+                                    "dinner"
+                                ]
+                            },
+                            "reason": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "required": [
+                                    "es",
+                                    "en"
+                                ],
+                                "properties": {
+                                    "es": {
+                                        "type": "string"
+                                    },
+                                    "en": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
                     "lastCookedOn": {
                         "type": [
                             "string",
@@ -6115,6 +6168,53 @@
                                         "en": {
                                             "type": "string"
                                         }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "notesFit": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "required": [
+                            "fit",
+                            "when"
+                        ],
+                        "properties": {
+                            "fit": {
+                                "type": "string",
+                                "enum": [
+                                    "good",
+                                    "poor"
+                                ]
+                            },
+                            "when": {
+                                "type": "string",
+                                "enum": [
+                                    "always",
+                                    "weekdays",
+                                    "weekends",
+                                    "lunch",
+                                    "dinner"
+                                ]
+                            },
+                            "reason": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "required": [
+                                    "es",
+                                    "en"
+                                ],
+                                "properties": {
+                                    "es": {
+                                        "type": "string"
+                                    },
+                                    "en": {
+                                        "type": "string"
                                     }
                                 }
                             }
@@ -6359,6 +6459,53 @@
                                         "en": {
                                             "type": "string"
                                         }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "notesFit": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "required": [
+                            "fit",
+                            "when"
+                        ],
+                        "properties": {
+                            "fit": {
+                                "type": "string",
+                                "enum": [
+                                    "good",
+                                    "poor"
+                                ]
+                            },
+                            "when": {
+                                "type": "string",
+                                "enum": [
+                                    "always",
+                                    "weekdays",
+                                    "weekends",
+                                    "lunch",
+                                    "dinner"
+                                ]
+                            },
+                            "reason": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "required": [
+                                    "es",
+                                    "en"
+                                ],
+                                "properties": {
+                                    "es": {
+                                        "type": "string"
+                                    },
+                                    "en": {
+                                        "type": "string"
                                     }
                                 }
                             }
@@ -7011,6 +7158,53 @@
                                     }
                                 }
                             },
+                            "notesFit": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "required": [
+                                    "fit",
+                                    "when"
+                                ],
+                                "properties": {
+                                    "fit": {
+                                        "type": "string",
+                                        "enum": [
+                                            "good",
+                                            "poor"
+                                        ]
+                                    },
+                                    "when": {
+                                        "type": "string",
+                                        "enum": [
+                                            "always",
+                                            "weekdays",
+                                            "weekends",
+                                            "lunch",
+                                            "dinner"
+                                        ]
+                                    },
+                                    "reason": {
+                                        "type": [
+                                            "object",
+                                            "null"
+                                        ],
+                                        "required": [
+                                            "es",
+                                            "en"
+                                        ],
+                                        "properties": {
+                                            "es": {
+                                                "type": "string"
+                                            },
+                                            "en": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
                             "lastCookedOn": {
                                 "type": [
                                     "string",
@@ -7220,6 +7414,53 @@
                                                 "en": {
                                                     "type": "string"
                                                 }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "notesFit": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "required": [
+                                    "fit",
+                                    "when"
+                                ],
+                                "properties": {
+                                    "fit": {
+                                        "type": "string",
+                                        "enum": [
+                                            "good",
+                                            "poor"
+                                        ]
+                                    },
+                                    "when": {
+                                        "type": "string",
+                                        "enum": [
+                                            "always",
+                                            "weekdays",
+                                            "weekends",
+                                            "lunch",
+                                            "dinner"
+                                        ]
+                                    },
+                                    "reason": {
+                                        "type": [
+                                            "object",
+                                            "null"
+                                        ],
+                                        "required": [
+                                            "es",
+                                            "en"
+                                        ],
+                                        "properties": {
+                                            "es": {
+                                                "type": "string"
+                                            },
+                                            "en": {
+                                                "type": "string"
                                             }
                                         }
                                     }
@@ -7471,6 +7712,53 @@
                                                 "en": {
                                                     "type": "string"
                                                 }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "notesFit": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "required": [
+                                    "fit",
+                                    "when"
+                                ],
+                                "properties": {
+                                    "fit": {
+                                        "type": "string",
+                                        "enum": [
+                                            "good",
+                                            "poor"
+                                        ]
+                                    },
+                                    "when": {
+                                        "type": "string",
+                                        "enum": [
+                                            "always",
+                                            "weekdays",
+                                            "weekends",
+                                            "lunch",
+                                            "dinner"
+                                        ]
+                                    },
+                                    "reason": {
+                                        "type": [
+                                            "object",
+                                            "null"
+                                        ],
+                                        "required": [
+                                            "es",
+                                            "en"
+                                        ],
+                                        "properties": {
+                                            "es": {
+                                                "type": "string"
+                                            },
+                                            "en": {
+                                                "type": "string"
                                             }
                                         }
                                     }
@@ -8928,6 +9216,27 @@
                         "items": {
                             "type": "integer"
                         }
+                    },
+                    "notesGood": {
+                        "description": "Recipes the notes say fit well (for some meals at least); null without notes.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "notesPoor": {
+                        "description": "Recipes the notes say fit poorly (for some meals at least); null without notes.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "notesPending": {
+                        "description": "Recipes not judged against the notes yet; null without notes.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
                     }
                 }
             },
@@ -8993,6 +9302,27 @@
                         "items": {
                             "type": "integer"
                         }
+                    },
+                    "notesGood": {
+                        "description": "Recipes the notes say fit well (for some meals at least); null without notes.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "notesPoor": {
+                        "description": "Recipes the notes say fit poorly (for some meals at least); null without notes.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "notesPending": {
+                        "description": "Recipes not judged against the notes yet; null without notes.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
                     }
                 }
             },
@@ -9969,6 +10299,27 @@
                         "items": {
                             "type": "integer"
                         }
+                    },
+                    "notesGood": {
+                        "description": "Recipes the notes say fit well (for some meals at least); null without notes.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "notesPoor": {
+                        "description": "Recipes the notes say fit poorly (for some meals at least); null without notes.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "notesPending": {
+                        "description": "Recipes not judged against the notes yet; null without notes.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
                     }
                 }
             },
@@ -10039,6 +10390,27 @@
                                 "items": {
                                     "type": "integer"
                                 }
+                            },
+                            "notesGood": {
+                                "description": "Recipes the notes say fit well (for some meals at least); null without notes.",
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "notesPoor": {
+                                "description": "Recipes the notes say fit poorly (for some meals at least); null without notes.",
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "notesPending": {
+                                "description": "Recipes not judged against the notes yet; null without notes.",
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
                             }
                         }
                     }

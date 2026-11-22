@@ -31,6 +31,7 @@ use App\Message\AnnotateRecipe;
 use App\Message\ExtractSource;
 use App\Message\TranslateRecipe;
 use App\Repository\SourceRepository;
+use App\Taste\NotesQueue;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -93,6 +94,7 @@ final readonly class ExtractSourceHandler
         private LoggerInterface $logger,
         private Pricing $pricing,
         private MessageBusInterface $bus,
+        private NotesQueue $notes,
     ) {
     }
 
@@ -147,7 +149,8 @@ final readonly class ExtractSourceHandler
 
         $this->entityManager->flush();
 
-        // New or rewritten recipes: write them in the other language too, and read their facts.
+        // New or rewritten recipes: write them in the other language too, read their facts, and
+        // judge them against the household's notes.
         // (Asked to the repository: the link's own list doesn't know the recipes this run created.)
         foreach ($this->entityManager->getRepository(Recipe::class)->findBy(['source' => $source]) as $recipe) {
             if ($recipe->needsTranslation()) {
@@ -156,6 +159,7 @@ final readonly class ExtractSourceHandler
             if ($recipe->needsFacts()) {
                 $this->bus->dispatch(new AnnotateRecipe($recipe->getId()->toRfc4122()));
             }
+            $this->notes->recipeChanged($recipe);
         }
     }
 

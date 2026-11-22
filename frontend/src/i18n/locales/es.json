@@ -320,7 +320,9 @@
       "relaxedAvoid": "No había otra opción. {{conflicts}}.",
       "nothingAllowed": "Nada del recetario encaja con vuestros gustos para esta {{meal}}.",
       "breaks": "Elegida a mano. {{conflicts}}.",
-      "warning": "No encaja del todo con vuestros gustos"
+      "warning": "No encaja del todo con vuestros gustos",
+      "notesFit": "{{reason}}, como pedís en las notas",
+      "notesMisfit": "Va contra vuestras notas ({{reason}}): no había otra opción."
     }
   },
   "shopping": {
@@ -492,7 +494,8 @@
       "classify": "Ordenar ingredientes",
       "translate": "Traducir la receta",
       "annotate": "Leer cómo es",
-      "taste_profile": "Entender vuestros gustos"
+      "taste_profile": "Entender vuestros gustos",
+      "notes_fit": "Revisar recetas con vuestras notas"
     },
     "classifyWhat": "Ingredientes nuevos de la lista",
     "translateWhat": "Receta escrita a mano",
@@ -738,6 +741,13 @@
         "vegetarian": "No es vegetariana",
         "pescatarian": "Lleva carne"
       }
+    },
+    "notesPending_one": "Tabooki está revisando {{count}} receta con estas notas…",
+    "notesPending_other": "Tabooki está revisando {{count}} recetas con estas notas…",
+    "notesJudged": "Según estas notas, {{good}} recetas encajan mejor y {{poor}} peor: el menú lo tiene en cuenta.",
+    "notesSay": {
+      "good": "Según vuestras notas, encaja",
+      "poor": "Según vuestras notas"
     }
   }
 }
