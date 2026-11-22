@@ -1,6 +1,5 @@
-import { useQueryClient } from '@tanstack/react-query'
 import { AlertCircle, ChevronRight, ClipboardPaste, ExternalLink, LoaderCircle, PenLine, RotateCw, Trash2 } from 'lucide-react'
-import { type FormEvent, useEffect, useRef, useState } from 'react'
+import { type FormEvent, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { hostOf, isWorking, type Source, useDeleteSource, useExtractSource, useInbox } from '@/api/library'
@@ -44,7 +43,6 @@ export function InboxList({ sources }: { sources: Source[] }) {
 export function InboxBanner({ onOpen }: { onOpen: () => void }) {
   const { t } = useTranslation()
   const { data: sources = [] } = useInbox()
-  useRefreshRecipesWhenExtracted(sources)
   if (!sources.length) return null
 
   const working = sources.filter(isWorking).length
@@ -76,20 +74,6 @@ export function InboxBanner({ onOpen }: { onOpen: () => void }) {
       <ChevronRight className="size-5 shrink-0" aria-hidden />
     </button>
   )
-}
-
-/** A link leaving the inbox usually means it just became a recipe: show it in the grid. */
-function useRefreshRecipesWhenExtracted(sources: Source[]) {
-  const queryClient = useQueryClient()
-  const previous = useRef<Set<string> | null>(null)
-  useEffect(() => {
-    const ids = new Set(sources.map((s) => s.id!))
-    if (previous.current && [...previous.current].some((id) => !ids.has(id))) {
-      void queryClient.invalidateQueries({ queryKey: ['recipes'] })
-      void queryClient.invalidateQueries({ queryKey: ['recipe-tags'] })
-    }
-    previous.current = ids
-  }, [sources, queryClient])
 }
 
 function SourceRow({ source }: { source: Source }) {

@@ -50,6 +50,22 @@ export function LibraryPage() {
     )
   }, [debouncedQuery, setParams])
 
+  // A toast about a link that needs a hand links to ?inbox=1: the inbox is in the "add recipe"
+  // sheet. Closing it drops the flag, so coming back here later doesn't open it again.
+  const inboxRequested = params.get('inbox') === '1'
+  const closeAdding = () => {
+    setAdding(false)
+    if (!inboxRequested) return
+    setParams(
+      (current) => {
+        const next = new URLSearchParams(current)
+        next.delete('inbox')
+        return next
+      },
+      { replace: true },
+    )
+  }
+
   // A new object each render is fine: query keys are compared by value.
   const filters: RecipeFilters = { q: debouncedQuery, tags, favorite, needsReview }
   const recipes = useRecipes(filters)
@@ -215,7 +231,7 @@ export function LibraryPage() {
         )}
       </section>
 
-      {adding && <AddRecipeSheet onClose={() => setAdding(false)} />}
+      {(adding || inboxRequested) && <AddRecipeSheet onClose={closeAdding} />}
     </>
   )
 }

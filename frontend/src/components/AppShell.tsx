@@ -3,7 +3,9 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router'
 import { useMe } from '@/auth/useAuth'
+import { ImportWatcher } from '@/components/library/ImportWatcher'
 import { Splash } from '@/components/Splash'
+import { Toaster } from '@/components/Toaster'
 import { AboveTabBar, isRecipeDetail } from '@/lib/layout'
 import { cn } from '@/lib/utils'
 
@@ -36,6 +38,8 @@ export function AppShell() {
       <>
         <ScrollRestoration getKey={(location) => location.pathname} />
         <Outlet />
+        <ImportWatcher />
+        <Toaster />
       </>
     )
   }
@@ -52,6 +56,8 @@ export function AppShell() {
           <Outlet />
         </AboveTabBar>
       </main>
+      <ImportWatcher />
+      <Toaster />
       {!detail && (
         <div className="fixed inset-x-0 bottom-0 z-30">
           <div ref={setAboveTabBar} />

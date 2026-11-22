@@ -14,7 +14,8 @@
     "cancel": "Cancelar",
     "save": "Guardar",
     "saving": "Guardando…",
-    "confirmDelete": "Toca otra vez para borrar"
+    "confirmDelete": "Toca otra vez para borrar",
+    "dismiss": "Cerrar"
   },
   "login": {
     "title": "Inicia sesión",
@@ -76,6 +77,16 @@
       "bannerSaved_one": "{{count}} enlace guardado",
       "bannerSaved_other": "{{count}} enlaces guardados",
       "bannerHint": "Toca para verlos"
+    },
+    "imported": {
+      "ready": "Receta lista",
+      "readyToReview": "Receta lista para revisar",
+      "readyMany_one": "{{count}} receta lista",
+      "readyMany_other": "{{count}} recetas listas",
+      "failed": "No se ha podido extraer",
+      "needsInput": "Una receta necesita tu ayuda",
+      "open": "Abrir",
+      "see": "Ver"
     },
     "toReview_one": "{{count}} por revisar",
     "toReview_other": "{{count}} por revisar",
