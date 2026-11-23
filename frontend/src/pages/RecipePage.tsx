@@ -15,6 +15,7 @@ import {
 } from '@/api/library'
 import { useMe } from '@/auth/useAuth'
 import { NutritionCard } from '@/components/library/NutritionCard'
+import { SimilarRecipes } from '@/components/library/SimilarRecipes'
 import { Thumbnail } from '@/components/library/Thumbnail'
 import { EmptyState } from '@/components/PageHeader'
 import { AddToMenuSheet } from '@/components/plan/AddToMenuSheet'
@@ -378,6 +379,8 @@ function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) 
           )}
         </section>
       )}
+
+      <SimilarRecipes id={id} />
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t-2 border-outline bg-card pb-[env(safe-area-inset-bottom)]">
         <div className="mx-auto flex max-w-2xl gap-2.5 px-4 pt-3 pb-3">

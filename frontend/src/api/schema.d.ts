@@ -552,6 +552,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/recipes/{id}/similar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of SimilarRecipe resources.
+         * @description Retrieves the collection of SimilarRecipe resources.
+         */
+        get: operations["api_recipes_idsimilar_get_collection"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/sources": {
         parameters: {
             query?: never;
@@ -2608,6 +2628,34 @@ export interface components {
             recipes?: string[];
             /** @default false */
             checked: boolean;
+        };
+        /** @description Up to 6 recipes of the library most like this one, by the ingredients they share (rare ones counting more) and their tags */
+        SimilarRecipe: {
+            id?: string;
+            title?: string;
+            thumbnail?: string | null;
+            totalMinutes?: number | null;
+            favorite?: boolean;
+            shared?: {
+                es: string;
+                en: string;
+            }[];
+            /** @description How alike, 0 to 1 */
+            score?: number;
+        };
+        /** @description Up to 6 recipes of the library most like this one, by the ingredients they share (rare ones counting more) and their tags */
+        "SimilarRecipe.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            id?: string;
+            title?: string;
+            thumbnail?: string | null;
+            totalMinutes?: number | null;
+            favorite?: boolean;
+            shared?: {
+                es: string;
+                en: string;
+            }[];
+            /** @description How alike, 0 to 1 */
+            score?: number;
         };
         /**
          * @description A link saved to the library (blog post, YouTube video, Instagram reel, ...).
@@ -5208,6 +5256,43 @@ export interface operations {
                     "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
                     "application/problem+json": components["schemas"]["ConstraintViolation"];
                     "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    api_recipes_idsimilar_get_collection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Recipe identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description SimilarRecipe collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchemaNoPagination"] & {
+                        member: components["schemas"]["SimilarRecipe.jsonld"][];
+                    };
+                    "application/json": components["schemas"]["SimilarRecipe"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };

@@ -23,6 +23,7 @@ final readonly class Candidate
      * @param list<string>                                 $keys               canonical keys of the ingredients it needs
      * @param list<string>                                 $optionalKeys
      * @param array<string, array{es: string, en: string}> $freshNames         the fresh ingredients' names, by key
+     * @param array<string, float>                         $freshGrams         grams of each fresh ingredient, where the lines are weighed
      * @param list<Allergen>                               $allergens          from the foods of the lines it needs (see $allergensComplete)
      * @param list<Allergen>                               $optionalAllergens
      */
@@ -48,6 +49,7 @@ final readonly class Candidate
         public array $allergens = [],
         public array $optionalAllergens = [],
         public bool $allergensComplete = false,
+        public array $freshGrams = [],
     ) {
     }
 
@@ -59,6 +61,7 @@ final readonly class Candidate
         $freshNames = [];
         $keys = [];
         $optionalKeys = [];
+        $freshGrams = [];
         foreach ($recipe->getIngredients() as $i => $ingredient) {
             $key = $ingredient->getCanonicalKey();
             if (null === $key || '' === $key) {
@@ -71,6 +74,9 @@ final readonly class Candidate
             $keys[] = $key;
             if (Planner::isFresh($key)) {
                 $fresh[] = $key;
+                if (null !== $ingredient->getGrams()) {
+                    $freshGrams[$key] = ($freshGrams[$key] ?? 0.0) + $ingredient->getGrams();
+                }
                 // The ingredient's name alone ("cilantro"), never its whole line with the amount.
                 $name = $ingredient->getName() ?? $translated[$i]['name'] ?? null;
                 $other = $translated[$i]['name'] ?? $name;
@@ -103,6 +109,7 @@ final readonly class Candidate
             allergens: $recipe->getAllergens(),
             optionalAllergens: $recipe->getOptionalAllergens(),
             allergensComplete: $recipe->isAllergensComplete(),
+            freshGrams: $freshGrams,
         );
     }
 

@@ -60,8 +60,8 @@ final class IngredientMatch
         return \array_slice($clean, 0, 20);
     }
 
-    /** @return list<string> */
-    private static function words(string $key): array
+    /** @return list<string> a key's words, singular */
+    public static function words(string $key): array
     {
         // Singular, roughly: tomatoes → tomato, olives → olive (both sides go through the same).
         return array_map(

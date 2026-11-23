@@ -13,6 +13,7 @@ export type RecipePatch = Schemas['Recipe-recipe.write.jsonMergePatch']
 export type IngredientInput = Schemas['RecipeIngredient-recipe.write']
 export type Ingredient = Schemas['RecipeIngredient-recipe.read']
 export type RecipeTag = Schemas['RecipeTag']
+export type SimilarRecipe = Schemas['SimilarRecipe']
 
 export type SourceStatus = Source['status']
 
@@ -25,6 +26,7 @@ const keys = {
   recipes: ['recipes'] as const,
   recipeList: (filters: RecipeFilters) => ['recipes', 'list', filters] as const,
   recipe: (id: string) => ['recipes', 'detail', id] as const,
+  similar: (id: string) => ['recipes', 'similar', id] as const,
   tags: ['recipe-tags'] as const,
 }
 
@@ -171,6 +173,19 @@ export function useRecipe(id: string | null) {
     },
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2,
     refetchInterval: (query) => (isReextracting(query.state.data) ? 2500 : false),
+  })
+}
+
+/** "More like this": recipes of the library sharing the most with this one (App\Library\Similarity). */
+export function useSimilarRecipes(id: string) {
+  return useQuery({
+    queryKey: keys.similar(id),
+    queryFn: async () => {
+      const { data, error, response } = await api.GET('/api/recipes/{id}/similar', { params: { path: { id } } })
+      if (!data) throw failure(response, error)
+      return data
+    },
+    staleTime: 5 * 60_000,
   })
 }
 

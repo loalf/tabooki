@@ -3259,6 +3259,91 @@
                 }
             }
         },
+        "/api/recipes/{id}/similar": {
+            "get": {
+                "operationId": "api_recipes_idsimilar_get_collection",
+                "tags": [
+                    "SimilarRecipe"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "SimilarRecipe collection",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "SimilarRecipe.jsonld collection.",
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/HydraCollectionBaseSchemaNoPagination"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "member"
+                                            ],
+                                            "properties": {
+                                                "member": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/SimilarRecipe.jsonld"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/SimilarRecipe"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves the collection of SimilarRecipe resources.",
+                "description": "Retrieves the collection of SimilarRecipe resources.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Recipe identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            }
+        },
         "/api/sources": {
             "get": {
                 "operationId": "api_sources_get_collection",
@@ -10909,6 +10994,111 @@
                     }
                 }
             },
+            "SimilarRecipe": {
+                "type": "object",
+                "description": "Up to 6 recipes of the library most like this one, by the ingredients they share (rare ones counting more) and their tags",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "thumbnail": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "totalMinutes": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "favorite": {
+                        "type": "boolean"
+                    },
+                    "shared": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "es",
+                                "en"
+                            ],
+                            "properties": {
+                                "es": {
+                                    "type": "string"
+                                },
+                                "en": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "score": {
+                        "description": "How alike, 0 to 1",
+                        "type": "number"
+                    }
+                }
+            },
+            "SimilarRecipe.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            },
+                            "thumbnail": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "totalMinutes": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "favorite": {
+                                "type": "boolean"
+                            },
+                            "shared": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": [
+                                        "es",
+                                        "en"
+                                    ],
+                                    "properties": {
+                                        "es": {
+                                            "type": "string"
+                                        },
+                                        "en": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "score": {
+                                "description": "How alike, 0 to 1",
+                                "type": "number"
+                            }
+                        }
+                    }
+                ],
+                "description": "Up to 6 recipes of the library most like this one, by the ingredients they share (rare ones counting more) and their tags"
+            },
             "Source-meal_plan.read_recipe.list": {
                 "type": "object",
                 "description": "A link saved to the library (blog post, YouTube video, Instagram reel, ...).\nExtraction (M2) turns it into one or more recipes; until then it can be turned\ninto a recipe by hand.",
@@ -14034,6 +14224,10 @@
         {
             "name": "ShoppingList",
             "description": "A week's shopping list (see App\\Shopping\\ShoppingListBuilder). Every action answers with the\nwhole list. Lines are identified by `key`: the ingredient key, or \"item:<id>\" for items\nadded by hand."
+        },
+        {
+            "name": "SimilarRecipe",
+            "description": "A library recipe like another one (\"more like this\", App\\Library\\Similarity), and what they share."
         },
         {
             "name": "SwapFeedback",

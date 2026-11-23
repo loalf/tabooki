@@ -287,6 +287,10 @@
       "sulphites": "sulphites",
       "lupin": "lupin",
       "molluscs": "molluscs"
+    },
+    "similar": {
+      "title": "More like this",
+      "shared": "With {{what}}"
     }
   },
   "plan": {

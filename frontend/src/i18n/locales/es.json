@@ -287,6 +287,10 @@
       "sulphites": "sulfitos",
       "lupin": "altramuces",
       "molluscs": "moluscos"
+    },
+    "similar": {
+      "title": "Parecidas",
+      "shared": "Con {{what}}"
     }
   },
   "plan": {
