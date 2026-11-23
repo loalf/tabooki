@@ -17,6 +17,7 @@ use App\Llm\LlmException;
 use App\Llm\Pricing;
 use App\Llm\Prompt;
 use App\Message\DescribeFoods;
+use App\Message\SuggestSubstitutes;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -112,6 +113,9 @@ final readonly class DescribeFoodsHandler
         // More waiting: next batch. Not when this one described nothing, or it would loop on the same foods.
         if ([] !== $described && [] !== $this->pending(1)) {
             $this->bus->dispatch(new DescribeFoods($message->householdId));
+        } elseif ([] !== $described) {
+            // All described: now what can stand in for them.
+            $this->bus->dispatch(new SuggestSubstitutes($message->householdId));
         }
     }
 

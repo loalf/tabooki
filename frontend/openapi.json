@@ -5037,6 +5037,7 @@
                             "images",
                             "classify",
                             "foods",
+                            "substitutes",
                             "translate",
                             "annotate",
                             "taste_profile",
@@ -5112,6 +5113,7 @@
                             "images",
                             "classify",
                             "foods",
+                            "substitutes",
                             "translate",
                             "annotate",
                             "taste_profile",
@@ -8394,6 +8396,71 @@
                             }
                         }
                     },
+                    "substitutes": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "By ingredient key, best first; null when there are none",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "required": [
+                                    "key",
+                                    "name",
+                                    "ratio",
+                                    "note"
+                                ],
+                                "properties": {
+                                    "key": {
+                                        "type": "string"
+                                    },
+                                    "name": {
+                                        "type": "object",
+                                        "required": [
+                                            "es",
+                                            "en"
+                                        ],
+                                        "properties": {
+                                            "es": {
+                                                "type": "string"
+                                            },
+                                            "en": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "ratio": {
+                                        "type": "number",
+                                        "description": "Grams of it for each gram of the ingredient"
+                                    },
+                                    "note": {
+                                        "anyOf": [
+                                            {
+                                                "type": "object",
+                                                "required": [
+                                                    "es",
+                                                    "en"
+                                                ],
+                                                "properties": {
+                                                    "es": {
+                                                        "type": "string"
+                                                    },
+                                                    "en": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "type": "null"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
                     "notesFit": {
                         "type": [
                             "object",
@@ -9916,6 +9983,71 @@
                                     }
                                 }
                             },
+                            "substitutes": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "description": "By ingredient key, best first; null when there are none",
+                                "additionalProperties": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "required": [
+                                            "key",
+                                            "name",
+                                            "ratio",
+                                            "note"
+                                        ],
+                                        "properties": {
+                                            "key": {
+                                                "type": "string"
+                                            },
+                                            "name": {
+                                                "type": "object",
+                                                "required": [
+                                                    "es",
+                                                    "en"
+                                                ],
+                                                "properties": {
+                                                    "es": {
+                                                        "type": "string"
+                                                    },
+                                                    "en": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            },
+                                            "ratio": {
+                                                "type": "number",
+                                                "description": "Grams of it for each gram of the ingredient"
+                                            },
+                                            "note": {
+                                                "anyOf": [
+                                                    {
+                                                        "type": "object",
+                                                        "required": [
+                                                            "es",
+                                                            "en"
+                                                        ],
+                                                        "properties": {
+                                                            "es": {
+                                                                "type": "string"
+                                                            },
+                                                            "en": {
+                                                                "type": "string"
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        "type": "null"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            },
                             "notesFit": {
                                 "type": [
                                     "object",
@@ -10896,6 +11028,13 @@
                     "checked": {
                         "default": false,
                         "type": "boolean"
+                    },
+                    "substitutes": {
+                        "description": "what to buy instead when the shop hasn't got it, best first, in the viewer's language",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 }
             },
@@ -10991,6 +11130,13 @@
                     "checked": {
                         "default": false,
                         "type": "boolean"
+                    },
+                    "substitutes": {
+                        "description": "what to buy instead when the shop hasn't got it, best first, in the viewer's language",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 }
             },

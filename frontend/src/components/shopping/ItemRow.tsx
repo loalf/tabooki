@@ -40,6 +40,9 @@ export function ItemRow({ item, scope }: { item: ShoppingItem; scope: ListScope 
             <span className="font-semibold">{item.name.charAt(0).toLocaleUpperCase(i18n.language) + item.name.slice(1)}</span>
             {amounts && <span className="ml-2 text-sm text-muted-foreground tabular-nums">{amounts}</span>}
             {!!item.recipes?.length && <span className="block truncate text-xs text-muted-foreground no-underline">{item.recipes.join(' · ')}</span>}
+            {!!item.substitutes?.length && !item.checked && (
+              <span className="block truncate text-xs text-muted-foreground">{t('shopping.substitutes', { what: item.substitutes.join(', ') })}</span>
+            )}
           </span>
         </button>
         {item.manual ? (

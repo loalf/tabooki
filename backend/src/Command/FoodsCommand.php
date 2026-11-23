@@ -10,6 +10,7 @@ use App\Entity\Recipe;
 use App\Food\FoodCatalog;
 use App\Food\RecipeWeigher;
 use App\Message\DescribeFoods;
+use App\Message\SuggestSubstitutes;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -58,6 +59,9 @@ final readonly class FoodsCommand
         if ($undescribed > 0 && 0 === $added && [] !== $households) {
             // Nothing new, so nothing was queued: queue it now (describing chains batch after batch).
             $this->bus->dispatch(new DescribeFoods($households[0]->getId()->toRfc4122()));
+        } elseif (0 === $undescribed && [] !== $households) {
+            // Everything described (describing queues this when it ends): what can stand in for each, if not asked yet.
+            $this->bus->dispatch(new SuggestSubstitutes($households[0]->getId()->toRfc4122()));
         }
 
         $io->success(\sprintf(

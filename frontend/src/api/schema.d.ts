@@ -867,7 +867,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "substitutes" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -889,7 +889,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "substitutes" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -1883,6 +1883,22 @@ export interface components {
                     en: string;
                 };
             }[] | null;
+            /** @description By ingredient key, best first; null when there are none */
+            substitutes?: {
+                [key: string]: {
+                    key: string;
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @description Grams of it for each gram of the ingredient */
+                    ratio: number;
+                    note: {
+                        es: string;
+                        en: string;
+                    } | null;
+                }[];
+            } | null;
             notesFit?: {
                 /** @enum {string} */
                 fit: "good" | "poor";
@@ -2279,6 +2295,22 @@ export interface components {
                     en: string;
                 };
             }[] | null;
+            /** @description By ingredient key, best first; null when there are none */
+            substitutes?: {
+                [key: string]: {
+                    key: string;
+                    name: {
+                        es: string;
+                        en: string;
+                    };
+                    /** @description Grams of it for each gram of the ingredient */
+                    ratio: number;
+                    note: {
+                        es: string;
+                        en: string;
+                    } | null;
+                }[];
+            } | null;
             notesFit?: {
                 /** @enum {string} */
                 fit: "good" | "poor";
@@ -2593,6 +2625,8 @@ export interface components {
             recipes?: string[];
             /** @default false */
             checked: boolean;
+            /** @description what to buy instead when the shop hasn't got it, best first, in the viewer's language */
+            substitutes?: string[];
         };
         "ShoppingListViewItem.jsonld": {
             /**
@@ -2628,6 +2662,8 @@ export interface components {
             recipes?: string[];
             /** @default false */
             checked: boolean;
+            /** @description what to buy instead when the shop hasn't got it, best first, in the viewer's language */
+            substitutes?: string[];
         };
         /** @description Up to 6 recipes of the library most like this one, by the ingredients they share (rare ones counting more) and their tags */
         SimilarRecipe: {

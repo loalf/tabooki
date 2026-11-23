@@ -118,6 +118,10 @@ class Food
     #[ORM\Column(options: ['default' => false])]
     private bool $edited = false;
 
+    /** When the text model was asked what can stand in for it (FoodSubstitution); null while it hasn't. */
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $substitutesAt = null;
+
     public function __construct(string $key)
     {
         $this->id = Uuid::v7();
@@ -234,6 +238,11 @@ class Food
     public function isDescribed(): bool
     {
         return null !== $this->describedAt;
+    }
+
+    public function substitutesAsked(): void
+    {
+        $this->substitutesAt = new \DateTimeImmutable();
     }
 
     public function isEdited(): bool

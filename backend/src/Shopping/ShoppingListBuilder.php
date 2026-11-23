@@ -11,6 +11,7 @@ use App\Entity\MealPlan;
 use App\Entity\ShoppingList;
 use App\Enum\Aisle;
 use App\Enum\Language;
+use App\Food\Substitutes;
 use App\Repository\MealPlanRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -25,6 +26,7 @@ final readonly class ShoppingListBuilder
         private MealPlanRepository $plans,
         private IngredientCatalog $catalog,
         private EntityManagerInterface $entityManager,
+        private Substitutes $substitutes,
     ) {
     }
 
@@ -70,6 +72,9 @@ final readonly class ShoppingListBuilder
             static fn (array $line): array => ['name' => $line['name'], 'language' => $line['language']],
             $lines,
         ));
+        // What to buy when the shop hasn't got it.
+        $substitutes = $this->substitutes->forKeys($household, array_map(strval(...), array_keys($lines)));
+        $language = Language::ofLocale($locale)->value;
         foreach ($lines as $key => $line) {
             $ingredient = $catalog[$key] ?? null;
             $item = new ShoppingListViewItem();
@@ -81,6 +86,7 @@ final readonly class ShoppingListBuilder
             $item->amounts = $line['quantities']->amounts();
             $item->recipes = array_values(array_unique($line['recipes']));
             $item->checked = $list?->isChecked($key) ?? false;
+            $item->substitutes = array_map(static fn (array $s): string => $s['name'][$language], $substitutes[$key] ?? []);
             $view->items[] = $item;
         }
         usort($view->items, static fn (ShoppingListViewItem $a, ShoppingListViewItem $b): int => [Aisle::from($a->aisle)->order(), mb_strtolower($a->name)] <=> [Aisle::from($b->aisle)->order(), mb_strtolower($b->name)]);

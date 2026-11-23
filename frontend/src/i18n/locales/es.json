@@ -291,6 +291,11 @@
     "similar": {
       "title": "Parecidas",
       "shared": "Con {{what}}"
+    },
+    "substitutes": {
+      "title": "En su lugar",
+      "show": "Qué usar en lugar de {{name}}",
+      "ratio": "{{ratio}}× la cantidad"
     }
   },
   "plan": {
@@ -475,7 +480,8 @@
     "forMeals_one": "Para el menú de la semana · {{count}} comida",
     "forMeals_other": "Para el menú de la semana · {{count}} comidas",
     "inCart_one": "En el carro · {{count}}",
-    "inCart_other": "En el carro · {{count}}"
+    "inCart_other": "En el carro · {{count}}",
+    "substitutes": "Si no hay: {{what}}"
   },
   "settings": {
     "title": "Ajustes",
@@ -582,6 +588,7 @@
       "images": "Leer las imágenes",
       "classify": "Ordenar ingredientes",
       "foods": "Consultar alimentos",
+      "substitutes": "Buscar sustitutos",
       "translate": "Traducir la receta",
       "annotate": "Leer cómo es",
       "taste_profile": "Entender vuestros gustos",
@@ -597,7 +604,8 @@
     "unpriced_other": "{{count}} llamadas usan un modelo sin precio configurado y no cuentan en los totales.",
     "footnote": "Precios de lista de Amazon Bedrock en dólares, sin impuestos. Meses en hora UTC.",
     "annotateWhat": "Receta escrita a mano",
-    "tasteWhat": "Gustos de la casa"
+    "tasteWhat": "Gustos de la casa",
+    "substitutesWhat": "Ingredientes nuevos: qué usar en su lugar"
   },
   "password": {
     "current": "Contraseña actual",

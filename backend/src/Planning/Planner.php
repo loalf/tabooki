@@ -49,7 +49,7 @@ final readonly class Planner
     private const array GENERIC_TAGS = ['rápida', 'rapida', 'quick', 'fácil', 'facil', 'easy', 'sana', 'saludable', 'healthy', 'casera', 'homemade'];
 
     /** Always in the kitchen: sharing them saves nothing. */
-    private const array STAPLES = [
+    public const array STAPLES = [
         'salt', 'sea_salt', 'pepper', 'black_pepper', 'water', 'olive_oil', 'extra_virgin_olive_oil', 'oil', 'vegetable_oil',
         'sunflower_oil', 'sugar', 'flour', 'wheat_flour', 'vinegar', 'garlic', 'onion', 'paprika', 'sweet_paprika', 'cumin',
         'oregano', 'bay_leaf', 'butter',

@@ -59,6 +59,13 @@ final readonly class KeyMerger
                 $db->executeStatement('DELETE FROM food WHERE id = ?', [$old]);
             }
 
+            // Substitutes named by the old key: by the new one, unless the food has it already or is it.
+            $db->executeStatement(
+                'DELETE FROM food_substitution s USING food f WHERE f.id = s.food_id AND s.substitute_key = ? AND (f.key = ? OR EXISTS (SELECT 1 FROM food_substitution o WHERE o.food_id = s.food_id AND o.substitute_key = ?))',
+                [$from, $to, $to],
+            );
+            $db->executeStatement('UPDATE food_substitution SET substitute_key = ? WHERE substitute_key = ?', [$to, $from]);
+
             $lists = (int) $db->executeStatement(
                 'UPDATE shopping_list SET checked = (SELECT COALESCE(jsonb_agg(DISTINCT CASE WHEN v = ? THEN ? ELSE v END), \'[]\') FROM jsonb_array_elements_text(checked) v) WHERE jsonb_exists(checked, ?)',
                 [$from, $to, $from],

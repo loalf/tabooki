@@ -1,4 +1,4 @@
-import { CalendarCheck, CalendarPlus, Check, ChefHat, ChevronLeft, Clock, Ellipsis, ExternalLink, Flame, Heart, NotebookPen, ShieldAlert, Languages, Leaf, LoaderCircle, Minus, Pencil, Plus, RefreshCw, Scale, Sparkles, Star, Sun, Trash2 } from 'lucide-react'
+import { ArrowLeftRight, CalendarCheck, CalendarPlus, Check, ChefHat, ChevronLeft, Clock, Ellipsis, ExternalLink, Flame, Heart, NotebookPen, ShieldAlert, Languages, Leaf, LoaderCircle, Minus, Pencil, Plus, RefreshCw, Scale, Sparkles, Star, Sun, Trash2 } from 'lucide-react'
 import { type ReactNode, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
@@ -76,6 +76,29 @@ function RoundButton({ label, onClick, children, className, pressed }: { label: 
 const AMOUNT =
   /^((?:\d+(?:[.,]\d+)?|\d+\s*\/\s*\d+|[½¼¾⅓⅔])(?:\s*(?:-|–|a)\s*\d+(?:[.,]\d+)?)?\s*(?:(?:kg|g|gr|mg|l|ml|cl|dl|oz|lb|cdas?|cditas?|cucharadas?|cucharaditas?|tazas?|vasos?|dientes?|hojas?|latas?|pizcas?|ramitas?|manojos?|tbsp|tsp|cups?|cloves?|cans?|pinch(?:es)?)\b\.?)?)\s*(.*)$/i
 
+type Substitute = NonNullable<Recipe['substitutes']>[string][number]
+
+/** What can stand in for an ingredient, best first, with how it changes the dish and how much to use. */
+function SubstituteList({ substitutes }: { substitutes: Substitute[] }) {
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language.startsWith('en') ? 'en' : 'es'
+  const ratio = new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 2 })
+  return (
+    <div className="mt-2 rounded-md bg-muted px-3 py-2 text-sm text-foreground">
+      <p className="text-xs font-bold tracking-wide text-muted-foreground uppercase">{t('recipe.substitutes.title')}</p>
+      <ul className="mt-1 flex flex-col gap-0.5">
+        {substitutes.map((s) => (
+          <li key={s.key}>
+            <span className="font-semibold first-letter:uppercase">{s.name[lang]}</span>
+            {s.ratio !== 1 && <span className="text-muted-foreground tabular-nums"> · {t('recipe.substitutes.ratio', { ratio: ratio.format(s.ratio) })}</span>}
+            {s.note && <span className="text-muted-foreground"> · {s.note[lang]}</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 function IngredientLine({ text }: { text: string }) {
   const match = AMOUNT.exec(text)
   if (!match || !match[2]) return <span className="flex-1">{text}</span>
@@ -89,6 +112,7 @@ function IngredientLine({ text }: { text: string }) {
 
 function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) {
   const { t, i18n } = useTranslation()
+  const [substitutesOpen, setSubstitutesOpen] = useState<string | null>(null)
   const id = recipe.id!
   const update = useUpdateRecipe(id)
   // Opened from the menu: cook mode gets that meal's servings and rates that meal.
@@ -329,14 +353,30 @@ function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) 
                   <ul className="flex flex-col divide-y">
                     {group.items.map((ingredient, i) => {
                       const line = scaleLine(ingredient.rawText, ingredient.quantity, factor, i18n.language)
+                      const substitutes = (ingredient.canonicalKey && recipe.substitutes?.[ingredient.canonicalKey]) || []
+                      const lineId = `${index}-${i}`
                       return (
-                        <li key={i} className={cn('flex items-baseline gap-3 px-0.5 py-2.5 text-[15px]', ingredient.optional && 'text-muted-foreground')}>
-                          <IngredientLine text={line.text} />
-                          {!line.scaled && (
-                            <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-xs font-semibold text-muted-foreground tabular-nums" title={t('cook.notScaled')}>
-                              ×{new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 2 }).format(factor)}
-                            </span>
-                          )}
+                        <li key={i} className={cn('px-0.5 py-2.5 text-[15px]', ingredient.optional && 'text-muted-foreground')}>
+                          <div className="flex items-baseline gap-3">
+                            <IngredientLine text={line.text} />
+                            {!line.scaled && (
+                              <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 text-xs font-semibold text-muted-foreground tabular-nums" title={t('cook.notScaled')}>
+                                ×{new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 2 }).format(factor)}
+                              </span>
+                            )}
+                            {substitutes.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => setSubstitutesOpen(substitutesOpen === lineId ? null : lineId)}
+                                aria-expanded={substitutesOpen === lineId}
+                                aria-label={t('recipe.substitutes.show', { name: ingredient.name ?? ingredient.rawText })}
+                                className="-my-2 grid size-9 shrink-0 translate-y-1 place-items-center self-center rounded-full text-muted-foreground"
+                              >
+                                <ArrowLeftRight className="size-4" aria-hidden />
+                              </button>
+                            )}
+                          </div>
+                          {substitutesOpen === lineId && <SubstituteList substitutes={substitutes} />}
                         </li>
                       )
                     })}

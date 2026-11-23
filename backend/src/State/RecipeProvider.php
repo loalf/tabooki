@@ -11,6 +11,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\State\ProviderInterface;
 use App\Entity\Recipe;
+use App\Food\Substitutes;
 use App\Planning\Candidate;
 use App\Repository\MealPlanRepository;
 use App\Repository\TasteProfileRepository;
@@ -42,6 +43,7 @@ final readonly class RecipeProvider implements ProviderInterface
         private CurrentHousehold $current,
         private TasteProfileRepository $tastes,
         private EntityManagerInterface $entityManager,
+        private Substitutes $substitutes,
     ) {
     }
 
@@ -78,6 +80,10 @@ final readonly class RecipeProvider implements ProviderInterface
         $household = $this->current->householdOrNull();
         if (null === $household) {
             return $result;
+        }
+        if ($result instanceof Recipe) {
+            $keys = array_values(array_filter(array_map(static fn ($i): ?string => $i->getCanonicalKey(), $result->getIngredients())));
+            $result->setSubstitutes($this->substitutes->forKeys($household, $keys));
         }
         $last = $this->plans->lastCooked($household, new \DateTimeImmutable('today'));
         $taste = null === $this->tastes->forHousehold($household) ? null : $this->tastes->tasteFor($household);

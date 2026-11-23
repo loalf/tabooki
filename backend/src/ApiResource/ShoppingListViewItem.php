@@ -50,4 +50,7 @@ final class ShoppingListViewItem
     public array $recipes = [];
 
     public bool $checked = false;
+
+    /** @var list<string> what to buy instead when the shop hasn't got it, best first, in the viewer's language */
+    public array $substitutes = [];
 }

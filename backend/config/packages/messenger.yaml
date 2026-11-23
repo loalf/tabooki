@@ -18,6 +18,7 @@ framework:
             'App\Message\ExtractSource': async
             'App\Message\ClassifyIngredients': async
             'App\Message\DescribeFoods': async
+            'App\Message\SuggestSubstitutes': async
             'App\Message\TranslateRecipe': async
             'App\Message\AnnotateRecipe': async
             'App\Message\JudgeNotes': async

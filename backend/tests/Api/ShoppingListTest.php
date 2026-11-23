@@ -7,6 +7,8 @@ namespace App\Tests\Api;
 use ApiPlatform\Test\ApiTestCase;
 use ApiPlatform\Test\Client;
 use App\Entity\ExtractionRun;
+use App\Entity\Food;
+use App\Entity\FoodSubstitution;
 use App\Entity\Ingredient;
 use App\Entity\Recipe;
 use App\Entity\RecipeIngredient;
@@ -20,7 +22,7 @@ use Symfony\Component\HttpClient\Response\JsonMockResponse;
 use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
 
 /**
- * @phpstan-type Item array{key: string, ingredientId?: string|null, name: string, aisle: string, staple: bool, manual: bool, amounts: list<array{quantity: float|int, unit: string|null}>, recipes: list<string>, checked: bool}
+ * @phpstan-type Item array{key: string, ingredientId?: string|null, name: string, aisle: string, staple: bool, manual: bool, amounts: list<array{quantity: float|int, unit: string|null}>, recipes: list<string>, checked: bool, substitutes: list<string>}
  * @phpstan-type ListView array{week: string, planned: bool, meals: int, classifying: bool, items: list<Item>}
  */
 final class ShoppingListTest extends ApiTestCase
@@ -75,6 +77,23 @@ final class ShoppingListTest extends ApiTestCase
         self::assertSame('cebolla', $items['onion']['name']);
         self::assertTrue($list['classifying']);
         $this->assertClassificationQueued();
+    }
+
+    public function testWhatToBuyInsteadInTheViewersLanguage(): void
+    {
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $cream = new Food('heavy_cream');
+        $entityManager->persist($cream);
+        $entityManager->persist(new FoodSubstitution($cream, 'greek_yogurt', 'yogur griego', 'greek yogurt', 1, null, null, 0));
+        $entityManager->persist(new FoodSubstitution($cream, 'evaporated_milk', 'leche evaporada', 'evaporated milk', 1, null, null, 1));
+        $entityManager->flush();
+        $soup = $this->recipe('Crema', Language::Es, servings: 2, ingredients: [['200 ml de nata', 'nata', 'heavy_cream', 200, 'ml'], ['sal', 'sal', 'salt', null, null]]);
+        $plan = $this->plan([['2026-11-23', 'lunch', 2]]);
+        $this->choose($plan, 0, $soup);
+
+        $items = $this->byKey($this->list());
+        self::assertSame(['yogur griego', 'leche evaporada'], $items['heavy_cream']['substitutes']);
+        self::assertSame([], $items['salt']['substitutes']);
     }
 
     public function testClassificationNamesAndSortsIngredients(): void

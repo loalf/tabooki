@@ -291,6 +291,11 @@
     "similar": {
       "title": "More like this",
       "shared": "With {{what}}"
+    },
+    "substitutes": {
+      "title": "Instead",
+      "show": "What to use instead of {{name}}",
+      "ratio": "{{ratio}}× the amount"
     }
   },
   "plan": {
@@ -475,7 +480,8 @@
     "forMeals_one": "For the week's menu · {{count}} meal",
     "forMeals_other": "For the week's menu · {{count}} meals",
     "inCart_one": "In the cart · {{count}}",
-    "inCart_other": "In the cart · {{count}}"
+    "inCart_other": "In the cart · {{count}}",
+    "substitutes": "If they’re out: {{what}}"
   },
   "settings": {
     "title": "Settings",
@@ -582,6 +588,7 @@
       "images": "Reading the pictures",
       "classify": "Sorting ingredients",
       "foods": "Looking up foods",
+      "substitutes": "Find substitutes",
       "translate": "Translating the recipe",
       "annotate": "Reading what it's like",
       "taste_profile": "Understanding your tastes",
@@ -597,7 +604,8 @@
     "unpriced_other": "{{count}} calls use a model with no price configured and are not in the totals.",
     "footnote": "Amazon Bedrock list prices in US dollars, before tax. Months in UTC.",
     "annotateWhat": "A recipe typed in",
-    "tasteWhat": "Household tastes"
+    "tasteWhat": "Household tastes",
+    "substitutesWhat": "New ingredients: what to use instead"
   },
   "password": {
     "current": "Current password",

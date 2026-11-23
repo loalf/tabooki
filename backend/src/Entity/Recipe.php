@@ -30,6 +30,7 @@ use App\State\RecipeProcessor;
 use App\State\RecipeProvider;
 use App\State\ReextractRecipeProcessor;
 use App\Taste\Conflict;
+use App\Taste\Names;
 use App\Translation\RecipeText;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -207,6 +208,29 @@ class Recipe implements HouseholdOwned
     #[Groups(['recipe:read', 'recipe:list'])]
     #[ApiProperty(schema: ['type' => ['array', 'null'], 'items' => Conflict::API_SCHEMA])]
     private ?array $tasteConflicts = null;
+
+    /**
+     * What can stand in for its ingredients, by ingredient key (App\Food\Substitutes). Not stored:
+     * RecipeProvider fills it in when one recipe is read.
+     *
+     * @var array<string, list<array{key: string, name: array{es: string, en: string}, ratio: float, note: array{es: string, en: string}|null}>>
+     */
+    #[Groups(['recipe:read'])]
+    #[ApiProperty(schema: [
+        'type' => ['object', 'null'],
+        'description' => 'By ingredient key, best first; null when there are none',
+        'additionalProperties' => ['type' => 'array', 'items' => [
+            'type' => 'object',
+            'required' => ['key', 'name', 'ratio', 'note'],
+            'properties' => [
+                'key' => ['type' => 'string'],
+                'name' => Names::API_SCHEMA,
+                'ratio' => ['type' => 'number', 'description' => 'Grams of it for each gram of the ingredient'],
+                'note' => ['anyOf' => [Names::API_SCHEMA, ['type' => 'null']]],
+            ],
+        ]],
+    ])]
+    private array $substitutes = [];
 
     /**
      * What the text model made of the recipe against the household's free-text notes
@@ -587,6 +611,22 @@ class Recipe implements HouseholdOwned
     public function setLastCookedOn(?\DateTimeImmutable $lastCookedOn): void
     {
         $this->lastCookedOn = $lastCookedOn;
+    }
+
+    /**
+     * Null rather than empty: an empty map would go out as a JSON list.
+     *
+     * @return array<string, list<array{key: string, name: array{es: string, en: string}, ratio: float, note: array{es: string, en: string}|null}>>|null
+     */
+    public function getSubstitutes(): ?array
+    {
+        return [] === $this->substitutes ? null : $this->substitutes;
+    }
+
+    /** @param array<string, list<array{key: string, name: array{es: string, en: string}, ratio: float, note: array{es: string, en: string}|null}>> $substitutes */
+    public function setSubstitutes(array $substitutes): void
+    {
+        $this->substitutes = $substitutes;
     }
 
     /** @return list<array<string, mixed>>|null */
