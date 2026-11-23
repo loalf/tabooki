@@ -109,13 +109,16 @@ final class ExtractionSchema
         ];
     }
 
-    public static function instructions(string $interfaceLanguage, bool $estimates = false): string
+    /** @param list<string> $knownKeys ingredient keys already in the catalog, to reuse */
+    public static function instructions(string $interfaceLanguage, bool $estimates = false, array $knownKeys = []): string
     {
         $language = 'en' === $interfaceLanguage ? 'English' : 'Spanish';
         $code = 'en' === $interfaceLanguage ? 'en' : 'es';
         $faithfulness = $estimates
             ? 'Use what the material says, writes or shows first. When an amount isn\'t given, estimate it from what is shown (how big the spoonful or the pour is, how full the pan or bowl gets, package and can sizes, how many pieces) and from usual proportions for the dish and its servings, and set estimated: true on that ingredient. Estimate servings the same way when they aren\'t stated. Don\'t estimate "to taste" amounts (salt, pepper): leave them null. Steps describe what is done, even when nobody says it. Never invent ingredients or steps that aren\'t in the material. A recipe with estimated amounts can be "complete"; list "quantities (estimated)" in missing_fields.'
             : 'Never invent. Use only what the material says or shows. If quantities, servings or steps aren\'t there, leave them null or empty, say so in missing_fields, and use status "partial". Don\'t guess amounts from experience.';
+
+        $known = [] === $knownKeys ? '' : ' Keys already in use, to reuse exactly when it is the same ingredient: '.implode(', ', $knownKeys).'.';
 
         return <<<TXT
             You turn cooking content (a recipe blog page, a YouTube video's description and transcript, an Instagram, TikTok or Facebook caption, the pictures of a photo or carousel post, or a video) into structured recipes for a household meal planner.
@@ -124,7 +127,8 @@ final class ExtractionSchema
 
             Rules:
             - {$faithfulness}
-            - The cook reads {$language}. Write every recipe in {$language}: title, ingredient lines, names, preparations and groups, steps, notes and tags. When the material is in another language, translate it the way a cook writing in {$language} would (natural ingredient names, not word for word), and set language to "{$code}".
+            - The cook reads {$language}. Write every recipe in {$language}: title, ingredient lines, names, preparations and groups, steps, notes and tags. When the material is in another language, translate it the way a cook writing in {$language} would (natural ingredient names, not word for word), and set language to "{$code}". The only exception is canonical_key.
+            - canonical_key is always English, whatever the recipe language: lowercase snake_case, singular, the plain name a shop uses ("ajo" → "garlic", "nata para cocinar" → "cooking_cream", "tomates cherry" → "cherry_tomato", "garbanzos cocidos" → "chickpeas_cooked"). The same ingredient always gets the same key, so shopping lists can add them up.{$known}
             - Units: store metric. Convert ounces, pounds, cups, fluid ounces, sticks of butter and °F to g, ml and °C (cups of flour ≈ 120 g, sugar ≈ 200 g, rice ≈ 185 g; other cups become ml; 1 stick of butter = 113 g). Keep teaspoons (tsp), tablespoons (tbsp), pinches, cloves, cans and counted items as they are. Spanish "cucharada" = tbsp, "cucharadita" = tsp, "pizca" = pinch, "diente" = clove. Write each raw line in {$language} with the amount you stored, so it reads "450 g de salchicha" and not "1 lb sausage"; keep the material's own wording when it's already in {$language} and in those units.
             - Ingredients that aren't measured ("sal", "aceite para freír", "salt and pepper to taste") have quantity null: that's normal and doesn't make a recipe partial.
             - Ignore everything that isn't the recipe: life stories, ads, hashtags, calls to follow or comment, sponsor codes.

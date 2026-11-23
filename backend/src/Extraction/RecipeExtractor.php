@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Extraction;
 
+use App\Food\FoodCatalog;
 use App\Llm\Content;
 use App\Llm\LlmClient;
 use App\Llm\LlmException;
@@ -18,6 +19,7 @@ final readonly class RecipeExtractor
 {
     public function __construct(
         private LlmClient $llm,
+        private FoodCatalog $foods,
         #[Autowire('%env(BEDROCK_TEXT_MODEL)%')]
         private string $textModel,
         #[Autowire('%env(bool:EXTRACTION_THINKING)%')]
@@ -104,7 +106,7 @@ final readonly class RecipeExtractor
     {
         $completion = $this->llm->complete(new Prompt(
             model: $model,
-            system: ExtractionSchema::instructions($interfaceLanguage, $estimates),
+            system: ExtractionSchema::instructions($interfaceLanguage, $estimates, $this->foods->knownKeys()),
             content: $content,
             toolName: ExtractionSchema::TOOL_NAME,
             toolDescription: 'Save the recipes found in the material, or report that there is none.',

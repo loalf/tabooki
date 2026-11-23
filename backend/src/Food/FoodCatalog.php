@@ -39,6 +39,19 @@ final readonly class FoodCatalog
     }
 
     /**
+     * The catalog's keys, most used first, for extraction to reuse ("garlic", not "ajo" or
+     * "garlic_clove"). Capped so the prompt stays small.
+     *
+     * @return list<string>
+     */
+    public function knownKeys(int $limit = 400): array
+    {
+        return array_values(array_filter($this->entityManager->getConnection()->fetchFirstColumn(
+            'SELECT f.key FROM food f LEFT JOIN recipe_ingredient ri ON ri.canonical_key = f.key GROUP BY f.key ORDER BY COUNT(ri.id) DESC, f.key LIMIT '.$limit,
+        ), \is_string(...)));
+    }
+
+    /**
      * @param array<string, array{name: string, language: string}> $seen a name for each key, as recipes have it
      *
      * @return int how many foods are new

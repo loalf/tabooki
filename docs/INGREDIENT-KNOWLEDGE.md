@@ -37,6 +37,7 @@ Considered Neo4j next to Postgres and rejected it (2026-11-23):
 - [ ] Optional `parent_id` for an ingredient hierarchy (chipotle → chili). Deferred: each food carries its own flags, so nothing needs inheriting yet
 - [x] `Ingredient.food` (nullable): set to the food with the same key when the household ingredient is created; `PATCH /api/ingredients/{id}` with `food` points it at another one
 - [x] Linking: extraction already gives normalized English keys, so the link is 1:1 by key (`FoodCatalog`, on every extracted or edited recipe). Lines typed by hand (no key, `x_…` fallback keys) are left out until phase 2 parses them
+- [x] Keys stay English and consistent: extraction is told `canonical_key` is English whatever the recipe language, and is given the catalog's keys (most used first, up to 400) to reuse. `app:foods:merge` has the text model review the catalog for Spanish, plural or reworded keys ("ajo" → "garlic", "cherry_tomatoes" → "cherry_tomato"), shows the merges and makes them once confirmed. `app:foods:merge <from> <to>` merges one pair by hand. A merge rewrites recipe lines, household ingredients, checked shopping lines, taste rules and foods
 - [ ] UI to see a food and relink an ingredient (the API is there)
 - [x] Seed from the library: `app:foods` creates the foods, links existing household ingredients, and queues `DescribeFoods`, which has the text model fill in each food in batches of 40 (step "foods" on the costs page)
 - [ ] Import BEDCA/USDA figures over the model's estimates (`source` tells them apart; check BEDCA's licence first)
