@@ -42,6 +42,7 @@ final readonly class TasteImpact
         $view->dinnerMatching = $matching(MealType::Dinner);
         $view->diet = null === $rules->diet ? null : $removes(new TasteRules(diet: $rules->diet));
         $view->excludeGroups = array_map(static fn (ExcludedGroup $rule): int => $removes(new TasteRules(excludeGroups: [$rule])), $rules->excludeGroups);
+        $view->excludeAllergens = array_map(static fn (ExcludedAllergen $rule): int => $removes(new TasteRules(excludeAllergens: [$rule])), $rules->excludeAllergens);
         $view->excludeIngredients = array_map(static fn (ExcludedIngredient $rule): int => $removes(new TasteRules(excludeIngredients: [$rule])), $rules->excludeIngredients);
 
         $notesHash = Taste::notesHash($notes);

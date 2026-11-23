@@ -1349,6 +1349,12 @@ export interface components {
                     /** @enum {string} */
                     strength: "never" | "avoid";
                 }[];
+                excludeAllergens?: {
+                    /** @enum {string} */
+                    allergen: "celery" | "mustard" | "sulphites" | "lupin" | "molluscs";
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
                 excludeIngredients?: {
                     keys: string[];
                     name: {
@@ -1473,6 +1479,12 @@ export interface components {
                     /** @enum {string} */
                     strength: "never" | "avoid";
                 }[];
+                excludeAllergens?: {
+                    /** @enum {string} */
+                    allergen: "celery" | "mustard" | "sulphites" | "lupin" | "molluscs";
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
                 excludeIngredients?: {
                     keys: string[];
                     name: {
@@ -1542,8 +1554,8 @@ export interface components {
                     /** @enum {string} */
                     strength: "never" | "avoid";
                     /** @enum {string} */
-                    kind: "diet" | "group" | "ingredient" | "unknown";
-                    /** @description The diet or the food group */
+                    kind: "diet" | "group" | "allergen" | "ingredient" | "unknown";
+                    /** @description The diet, the food group or the allergen */
                     value?: string;
                     name?: {
                         es: string;
@@ -1583,8 +1595,8 @@ export interface components {
                     /** @enum {string} */
                     strength: "never" | "avoid";
                     /** @enum {string} */
-                    kind: "diet" | "group" | "ingredient" | "unknown";
-                    /** @description The diet or the food group */
+                    kind: "diet" | "group" | "allergen" | "ingredient" | "unknown";
+                    /** @description The diet, the food group or the allergen */
                     value?: string;
                     name?: {
                         es: string;
@@ -1656,8 +1668,8 @@ export interface components {
                 /** @enum {string} */
                 strength: "never" | "avoid";
                 /** @enum {string} */
-                kind: "diet" | "group" | "ingredient" | "unknown";
-                /** @description The diet or the food group */
+                kind: "diet" | "group" | "allergen" | "ingredient" | "unknown";
+                /** @description The diet, the food group or the allergen */
                 value?: string;
                 name?: {
                     es: string;
@@ -1747,8 +1759,8 @@ export interface components {
                 /** @enum {string} */
                 strength: "never" | "avoid";
                 /** @enum {string} */
-                kind: "diet" | "group" | "ingredient" | "unknown";
-                /** @description The diet or the food group */
+                kind: "diet" | "group" | "allergen" | "ingredient" | "unknown";
+                /** @description The diet, the food group or the allergen */
                 value?: string;
                 name?: {
                     es: string;
@@ -1843,8 +1855,8 @@ export interface components {
                 /** @enum {string} */
                 strength: "never" | "avoid";
                 /** @enum {string} */
-                kind: "diet" | "group" | "ingredient" | "unknown";
-                /** @description The diet or the food group */
+                kind: "diet" | "group" | "allergen" | "ingredient" | "unknown";
+                /** @description The diet, the food group or the allergen */
                 value?: string;
                 name?: {
                     es: string;
@@ -2052,8 +2064,8 @@ export interface components {
                 /** @enum {string} */
                 strength: "never" | "avoid";
                 /** @enum {string} */
-                kind: "diet" | "group" | "ingredient" | "unknown";
-                /** @description The diet or the food group */
+                kind: "diet" | "group" | "allergen" | "ingredient" | "unknown";
+                /** @description The diet, the food group or the allergen */
                 value?: string;
                 name?: {
                     es: string;
@@ -2143,8 +2155,8 @@ export interface components {
                 /** @enum {string} */
                 strength: "never" | "avoid";
                 /** @enum {string} */
-                kind: "diet" | "group" | "ingredient" | "unknown";
-                /** @description The diet or the food group */
+                kind: "diet" | "group" | "allergen" | "ingredient" | "unknown";
+                /** @description The diet, the food group or the allergen */
                 value?: string;
                 name?: {
                     es: string;
@@ -2239,8 +2251,8 @@ export interface components {
                 /** @enum {string} */
                 strength: "never" | "avoid";
                 /** @enum {string} */
-                kind: "diet" | "group" | "ingredient" | "unknown";
-                /** @description The diet or the food group */
+                kind: "diet" | "group" | "allergen" | "ingredient" | "unknown";
+                /** @description The diet, the food group or the allergen */
                 value?: string;
                 name?: {
                     es: string;
@@ -2850,6 +2862,8 @@ export interface components {
             diet?: number | null;
             /** @description recipes each excludeGroups rule leaves out, in order */
             excludeGroups?: number[];
+            /** @description recipes each excludeAllergens rule leaves out, in order */
+            excludeAllergens?: number[];
             /** @description recipes each excludeIngredients rule leaves out, in order */
             excludeIngredients?: number[];
             /** @description Recipes the notes say fit well (for some meals at least); null without notes. */
@@ -2893,6 +2907,8 @@ export interface components {
             diet?: number | null;
             /** @description recipes each excludeGroups rule leaves out, in order */
             excludeGroups?: number[];
+            /** @description recipes each excludeAllergens rule leaves out, in order */
+            excludeAllergens?: number[];
             /** @description recipes each excludeIngredients rule leaves out, in order */
             excludeIngredients?: number[];
             /** @description Recipes the notes say fit well (for some meals at least); null without notes. */
@@ -2920,6 +2936,12 @@ export interface components {
                 excludeGroups: {
                     /** @enum {string} */
                     group: "red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol";
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                excludeAllergens: {
+                    /** @enum {string} */
+                    allergen: "celery" | "mustard" | "sulphites" | "lupin" | "molluscs";
                     /** @enum {string} */
                     strength: "never" | "avoid";
                 }[];
@@ -2988,6 +3010,12 @@ export interface components {
                     /** @enum {string} */
                     strength: "never" | "avoid";
                 }[];
+                excludeAllergens: {
+                    /** @enum {string} */
+                    allergen: "celery" | "mustard" | "sulphites" | "lupin" | "molluscs";
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
                 excludeIngredients: {
                     keys: string[];
                     name: {
@@ -3044,6 +3072,12 @@ export interface components {
                 excludeGroups: {
                     /** @enum {string} */
                     group: "red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol";
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                excludeAllergens: {
+                    /** @enum {string} */
+                    allergen: "celery" | "mustard" | "sulphites" | "lupin" | "molluscs";
                     /** @enum {string} */
                     strength: "never" | "avoid";
                 }[];
@@ -3129,6 +3163,8 @@ export interface components {
             diet?: number | null;
             /** @description recipes each excludeGroups rule leaves out, in order */
             excludeGroups?: number[];
+            /** @description recipes each excludeAllergens rule leaves out, in order */
+            excludeAllergens?: number[];
             /** @description recipes each excludeIngredients rule leaves out, in order */
             excludeIngredients?: number[];
             /** @description Recipes the notes say fit well (for some meals at least); null without notes. */
@@ -3173,6 +3209,8 @@ export interface components {
             diet?: number | null;
             /** @description recipes each excludeGroups rule leaves out, in order */
             excludeGroups?: number[];
+            /** @description recipes each excludeAllergens rule leaves out, in order */
+            excludeAllergens?: number[];
             /** @description recipes each excludeIngredients rule leaves out, in order */
             excludeIngredients?: number[];
             /** @description Recipes the notes say fit well (for some meals at least); null without notes. */
@@ -3194,6 +3232,12 @@ export interface components {
                 excludeGroups: {
                     /** @enum {string} */
                     group: "red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol";
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                excludeAllergens: {
+                    /** @enum {string} */
+                    allergen: "celery" | "mustard" | "sulphites" | "lupin" | "molluscs";
                     /** @enum {string} */
                     strength: "never" | "avoid";
                 }[];
@@ -3243,6 +3287,12 @@ export interface components {
                 excludeGroups: {
                     /** @enum {string} */
                     group: "red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol";
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                excludeAllergens: {
+                    /** @enum {string} */
+                    allergen: "celery" | "mustard" | "sulphites" | "lupin" | "molluscs";
                     /** @enum {string} */
                     strength: "never" | "avoid";
                 }[];
@@ -3296,6 +3346,12 @@ export interface components {
                 excludeGroups: {
                     /** @enum {string} */
                     group: "red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol";
+                    /** @enum {string} */
+                    strength: "never" | "avoid";
+                }[];
+                excludeAllergens: {
+                    /** @enum {string} */
+                    allergen: "celery" | "mustard" | "sulphites" | "lupin" | "molluscs";
                     /** @enum {string} */
                     strength: "never" | "avoid";
                 }[];

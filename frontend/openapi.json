@@ -6387,6 +6387,35 @@
                                     }
                                 }
                             },
+                            "excludeAllergens": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": [
+                                        "allergen",
+                                        "strength"
+                                    ],
+                                    "properties": {
+                                        "allergen": {
+                                            "type": "string",
+                                            "enum": [
+                                                "celery",
+                                                "mustard",
+                                                "sulphites",
+                                                "lupin",
+                                                "molluscs"
+                                            ]
+                                        },
+                                        "strength": {
+                                            "type": "string",
+                                            "enum": [
+                                                "never",
+                                                "avoid"
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
                             "excludeIngredients": {
                                 "type": "array",
                                 "items": {
@@ -6840,6 +6869,35 @@
                                             }
                                         }
                                     },
+                                    "excludeAllergens": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "required": [
+                                                "allergen",
+                                                "strength"
+                                            ],
+                                            "properties": {
+                                                "allergen": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "celery",
+                                                        "mustard",
+                                                        "sulphites",
+                                                        "lupin",
+                                                        "molluscs"
+                                                    ]
+                                                },
+                                                "strength": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "never",
+                                                        "avoid"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    },
                                     "excludeIngredients": {
                                         "type": "array",
                                         "items": {
@@ -7155,13 +7213,14 @@
                                                 "enum": [
                                                     "diet",
                                                     "group",
+                                                    "allergen",
                                                     "ingredient",
                                                     "unknown"
                                                 ]
                                             },
                                             "value": {
                                                 "type": "string",
-                                                "description": "The diet or the food group"
+                                                "description": "The diet, the food group or the allergen"
                                             },
                                             "name": {
                                                 "type": "object",
@@ -7305,13 +7364,14 @@
                                                 "enum": [
                                                     "diet",
                                                     "group",
+                                                    "allergen",
                                                     "ingredient",
                                                     "unknown"
                                                 ]
                                             },
                                             "value": {
                                                 "type": "string",
-                                                "description": "The diet or the food group"
+                                                "description": "The diet, the food group or the allergen"
                                             },
                                             "name": {
                                                 "type": "object",
@@ -7513,13 +7573,14 @@
                                     "enum": [
                                         "diet",
                                         "group",
+                                        "allergen",
                                         "ingredient",
                                         "unknown"
                                     ]
                                 },
                                 "value": {
                                     "type": "string",
-                                    "description": "The diet or the food group"
+                                    "description": "The diet, the food group or the allergen"
                                 },
                                 "name": {
                                     "type": "object",
@@ -7848,13 +7909,14 @@
                                     "enum": [
                                         "diet",
                                         "group",
+                                        "allergen",
                                         "ingredient",
                                         "unknown"
                                     ]
                                 },
                                 "value": {
                                     "type": "string",
-                                    "description": "The diet or the food group"
+                                    "description": "The diet, the food group or the allergen"
                                 },
                                 "name": {
                                     "type": "object",
@@ -8220,13 +8282,14 @@
                                     "enum": [
                                         "diet",
                                         "group",
+                                        "allergen",
                                         "ingredient",
                                         "unknown"
                                     ]
                                 },
                                 "value": {
                                     "type": "string",
-                                    "description": "The diet or the food group"
+                                    "description": "The diet, the food group or the allergen"
                                 },
                                 "name": {
                                     "type": "object",
@@ -9018,13 +9081,14 @@
                                             "enum": [
                                                 "diet",
                                                 "group",
+                                                "allergen",
                                                 "ingredient",
                                                 "unknown"
                                             ]
                                         },
                                         "value": {
                                             "type": "string",
-                                            "description": "The diet or the food group"
+                                            "description": "The diet, the food group or the allergen"
                                         },
                                         "name": {
                                             "type": "object",
@@ -9360,13 +9424,14 @@
                                             "enum": [
                                                 "diet",
                                                 "group",
+                                                "allergen",
                                                 "ingredient",
                                                 "unknown"
                                             ]
                                         },
                                         "value": {
                                             "type": "string",
-                                            "description": "The diet or the food group"
+                                            "description": "The diet, the food group or the allergen"
                                         },
                                         "name": {
                                             "type": "object",
@@ -9739,13 +9804,14 @@
                                             "enum": [
                                                 "diet",
                                                 "group",
+                                                "allergen",
                                                 "ingredient",
                                                 "unknown"
                                             ]
                                         },
                                         "value": {
                                             "type": "string",
-                                            "description": "The diet or the food group"
+                                            "description": "The diet, the food group or the allergen"
                                         },
                                         "name": {
                                             "type": "object",
@@ -11492,6 +11558,13 @@
                             "type": "integer"
                         }
                     },
+                    "excludeAllergens": {
+                        "description": "recipes each excludeAllergens rule leaves out, in order",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
                     "excludeIngredients": {
                         "description": "recipes each excludeIngredients rule leaves out, in order",
                         "type": "array",
@@ -11578,6 +11651,13 @@
                             "type": "integer"
                         }
                     },
+                    "excludeAllergens": {
+                        "description": "recipes each excludeAllergens rule leaves out, in order",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
                     "excludeIngredients": {
                         "description": "recipes each excludeIngredients rule leaves out, in order",
                         "type": "array",
@@ -11626,6 +11706,7 @@
                             "version",
                             "diet",
                             "excludeGroups",
+                            "excludeAllergens",
                             "excludeIngredients",
                             "weekly",
                             "mealHeaviness",
@@ -11676,6 +11757,35 @@
                                                 "soy",
                                                 "sesame",
                                                 "alcohol"
+                                            ]
+                                        },
+                                        "strength": {
+                                            "type": "string",
+                                            "enum": [
+                                                "never",
+                                                "avoid"
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            "excludeAllergens": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": [
+                                        "allergen",
+                                        "strength"
+                                    ],
+                                    "properties": {
+                                        "allergen": {
+                                            "type": "string",
+                                            "enum": [
+                                                "celery",
+                                                "mustard",
+                                                "sulphites",
+                                                "lupin",
+                                                "molluscs"
                                             ]
                                         },
                                         "strength": {
@@ -11928,6 +12038,7 @@
                             "version",
                             "diet",
                             "excludeGroups",
+                            "excludeAllergens",
                             "excludeIngredients",
                             "weekly",
                             "mealHeaviness",
@@ -11978,6 +12089,35 @@
                                                 "soy",
                                                 "sesame",
                                                 "alcohol"
+                                            ]
+                                        },
+                                        "strength": {
+                                            "type": "string",
+                                            "enum": [
+                                                "never",
+                                                "avoid"
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            "excludeAllergens": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": [
+                                        "allergen",
+                                        "strength"
+                                    ],
+                                    "properties": {
+                                        "allergen": {
+                                            "type": "string",
+                                            "enum": [
+                                                "celery",
+                                                "mustard",
+                                                "sulphites",
+                                                "lupin",
+                                                "molluscs"
                                             ]
                                         },
                                         "strength": {
@@ -12231,6 +12371,7 @@
                                     "version",
                                     "diet",
                                     "excludeGroups",
+                                    "excludeAllergens",
                                     "excludeIngredients",
                                     "weekly",
                                     "mealHeaviness",
@@ -12281,6 +12422,35 @@
                                                         "soy",
                                                         "sesame",
                                                         "alcohol"
+                                                    ]
+                                                },
+                                                "strength": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "never",
+                                                        "avoid"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "excludeAllergens": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "required": [
+                                                "allergen",
+                                                "strength"
+                                            ],
+                                            "properties": {
+                                                "allergen": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "celery",
+                                                        "mustard",
+                                                        "sulphites",
+                                                        "lupin",
+                                                        "molluscs"
                                                     ]
                                                 },
                                                 "strength": {
@@ -12580,6 +12750,13 @@
                             "type": "integer"
                         }
                     },
+                    "excludeAllergens": {
+                        "description": "recipes each excludeAllergens rule leaves out, in order",
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
                     "excludeIngredients": {
                         "description": "recipes each excludeIngredients rule leaves out, in order",
                         "type": "array",
@@ -12671,6 +12848,13 @@
                                     "type": "integer"
                                 }
                             },
+                            "excludeAllergens": {
+                                "description": "recipes each excludeAllergens rule leaves out, in order",
+                                "type": "array",
+                                "items": {
+                                    "type": "integer"
+                                }
+                            },
                             "excludeIngredients": {
                                 "description": "recipes each excludeIngredients rule leaves out, in order",
                                 "type": "array",
@@ -12718,6 +12902,7 @@
                             "version",
                             "diet",
                             "excludeGroups",
+                            "excludeAllergens",
                             "excludeIngredients",
                             "weekly",
                             "mealHeaviness",
@@ -12768,6 +12953,35 @@
                                                 "soy",
                                                 "sesame",
                                                 "alcohol"
+                                            ]
+                                        },
+                                        "strength": {
+                                            "type": "string",
+                                            "enum": [
+                                                "never",
+                                                "avoid"
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            "excludeAllergens": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": [
+                                        "allergen",
+                                        "strength"
+                                    ],
+                                    "properties": {
+                                        "allergen": {
+                                            "type": "string",
+                                            "enum": [
+                                                "celery",
+                                                "mustard",
+                                                "sulphites",
+                                                "lupin",
+                                                "molluscs"
                                             ]
                                         },
                                         "strength": {
@@ -12989,6 +13203,7 @@
                             "version",
                             "diet",
                             "excludeGroups",
+                            "excludeAllergens",
                             "excludeIngredients",
                             "weekly",
                             "mealHeaviness",
@@ -13039,6 +13254,35 @@
                                                 "soy",
                                                 "sesame",
                                                 "alcohol"
+                                            ]
+                                        },
+                                        "strength": {
+                                            "type": "string",
+                                            "enum": [
+                                                "never",
+                                                "avoid"
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            "excludeAllergens": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": [
+                                        "allergen",
+                                        "strength"
+                                    ],
+                                    "properties": {
+                                        "allergen": {
+                                            "type": "string",
+                                            "enum": [
+                                                "celery",
+                                                "mustard",
+                                                "sulphites",
+                                                "lupin",
+                                                "molluscs"
                                             ]
                                         },
                                         "strength": {
@@ -13247,6 +13491,7 @@
                                     "version",
                                     "diet",
                                     "excludeGroups",
+                                    "excludeAllergens",
                                     "excludeIngredients",
                                     "weekly",
                                     "mealHeaviness",
@@ -13297,6 +13542,35 @@
                                                         "soy",
                                                         "sesame",
                                                         "alcohol"
+                                                    ]
+                                                },
+                                                "strength": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "never",
+                                                        "avoid"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "excludeAllergens": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "required": [
+                                                "allergen",
+                                                "strength"
+                                            ],
+                                            "properties": {
+                                                "allergen": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "celery",
+                                                        "mustard",
+                                                        "sulphites",
+                                                        "lupin",
+                                                        "molluscs"
                                                     ]
                                                 },
                                                 "strength": {

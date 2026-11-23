@@ -25,7 +25,7 @@ final readonly class TasteRules
     /** For OpenAPI (constant, for attributes): the shape of toArray(). */
     public const array API_SCHEMA = [
         'type' => 'object',
-        'required' => ['version', 'diet', 'excludeGroups', 'excludeIngredients', 'weekly', 'mealHeaviness', 'prefer', 'maxSpice'],
+        'required' => ['version', 'diet', 'excludeGroups', 'excludeAllergens', 'excludeIngredients', 'weekly', 'mealHeaviness', 'prefer', 'maxSpice'],
         'properties' => [
             'version' => ['type' => 'integer'],
             'diet' => ['type' => ['string', 'null'], 'enum' => ['vegan', 'vegetarian', 'pescatarian', null]],
@@ -33,6 +33,11 @@ final readonly class TasteRules
                 'type' => 'object',
                 'required' => ['group', 'strength'],
                 'properties' => ['group' => ['type' => 'string', 'enum' => self::GROUPS], 'strength' => self::STRENGTH],
+            ]],
+            'excludeAllergens' => ['type' => 'array', 'items' => [
+                'type' => 'object',
+                'required' => ['allergen', 'strength'],
+                'properties' => ['allergen' => ['type' => 'string', 'enum' => ['celery', 'mustard', 'sulphites', 'lupin', 'molluscs']], 'strength' => self::STRENGTH],
             ]],
             'excludeIngredients' => ['type' => 'array', 'items' => [
                 'type' => 'object',
@@ -67,6 +72,7 @@ final readonly class TasteRules
      * @param list<ExcludedIngredient> $excludeIngredients
      * @param list<WeeklyLimit>        $weekly
      * @param list<Preference>         $prefer
+     * @param list<ExcludedAllergen>   $excludeAllergens
      */
     public function __construct(
         public ?Diet $diet = null,
@@ -77,6 +83,7 @@ final readonly class TasteRules
         public ?Heaviness $dinner = null,
         public array $prefer = [],
         public ?int $maxSpice = null,
+        public array $excludeAllergens = [],
     ) {
     }
 
@@ -108,6 +115,7 @@ final readonly class TasteRules
         return self::fromArray([
             'diet' => $diet?->value,
             'excludeGroups' => [...$mine['excludeGroups'], ...$theirs['excludeGroups']],
+            'excludeAllergens' => [...$mine['excludeAllergens'], ...$theirs['excludeAllergens']],
             'excludeIngredients' => [...$mine['excludeIngredients'], ...$theirs['excludeIngredients']],
             'weekly' => [...$mine['weekly'], ...$theirs['weekly']],
             'mealHeaviness' => [
@@ -141,6 +149,13 @@ final readonly class TasteRules
                 $groups[$rule->group->value] = $rule;
             }
         }
+        $allergens = [];
+        foreach (array_filter(array_map(ExcludedAllergen::fromArray(...), $list('excludeAllergens'))) as $rule) {
+            $kept = $allergens[$rule->allergen->value] ?? null;
+            if (null === $kept || Strength::Never === $rule->strength) {
+                $allergens[$rule->allergen->value] = $rule;
+            }
+        }
         $meals = \is_array($data['mealHeaviness'] ?? null) ? $data['mealHeaviness'] : [];
         $heaviness = static fn (mixed $value): ?Heaviness => \is_string($value) ? Heaviness::tryFrom($value) : null;
         $spice = $data['maxSpice'] ?? null;
@@ -154,11 +169,12 @@ final readonly class TasteRules
             dinner: $heaviness($meals['dinner'] ?? null),
             prefer: \array_slice(array_values(array_filter(array_map(Preference::fromArray(...), $list('prefer')))), 0, 10),
             maxSpice: \is_int($spice) && $spice >= 0 && $spice < 2 ? $spice : null,
+            excludeAllergens: array_values($allergens),
         );
     }
 
     /**
-     * @return array{version: int, diet: ?string, excludeGroups: list<array{group: string, strength: string}>,
+     * @return array{version: int, diet: ?string, excludeGroups: list<array{group: string, strength: string}>, excludeAllergens: list<array{allergen: string, strength: string}>,
      *     excludeIngredients: list<array{keys: list<string>, name: array{es: string, en: string}, strength: string}>,
      *     weekly: list<array{groups: list<string>, max: ?int, min: ?int}>, mealHeaviness: array{lunch: ?string, dinner: ?string},
      *     prefer: list<array{tags: list<string>, name: array{es: string, en: string}, weight: string}>, maxSpice: ?int}
@@ -169,6 +185,7 @@ final readonly class TasteRules
             'version' => self::VERSION,
             'diet' => $this->diet?->value,
             'excludeGroups' => array_map(static fn (ExcludedGroup $r): array => $r->toArray(), $this->excludeGroups),
+            'excludeAllergens' => array_map(static fn (ExcludedAllergen $r): array => $r->toArray(), $this->excludeAllergens),
             'excludeIngredients' => array_map(static fn (ExcludedIngredient $r): array => $r->toArray(), $this->excludeIngredients),
             'weekly' => array_map(static fn (WeeklyLimit $r): array => $r->toArray(), $this->weekly),
             'mealHeaviness' => ['lunch' => $this->lunch?->value, 'dinner' => $this->dinner?->value],
@@ -188,11 +205,15 @@ final readonly class TasteRules
         $diet = \is_string($answers['diet'] ?? null) ? Diet::tryFrom($answers['diet']) : null;
 
         $groups = [];
+        $allergens = [];
         foreach (\is_array($answers['avoid'] ?? null) ? $answers['avoid'] : [] as $item) {
-            $group = \is_array($item) && \is_string($item['item'] ?? null) ? FoodGroup::tryFrom($item['item']) : null;
+            $value = \is_array($item) && \is_string($item['item'] ?? null) ? $item['item'] : null;
+            $group = null === $value ? null : FoodGroup::tryFrom($value);
             $strength = \is_array($item) ? Strength::read($item['strength'] ?? null) : null;
             if (null !== $group && null !== $strength) {
                 $groups[] = ['group' => $group->value, 'strength' => $strength->value];
+            } elseif (null !== $value && null !== $strength && \in_array($value, ExcludedAllergen::values(), true)) {
+                $allergens[] = ['allergen' => $value, 'strength' => $strength->value];
             }
         }
 
@@ -219,6 +240,7 @@ final readonly class TasteRules
         return self::fromArray([
             'diet' => $diet?->value,
             'excludeGroups' => $groups,
+            'excludeAllergens' => $allergens,
             'weekly' => $weekly,
             'mealHeaviness' => $meals,
             'maxSpice' => match ($answers['spice'] ?? null) {
@@ -247,6 +269,11 @@ final readonly class TasteRules
         return $object([
             'diet' => $nullable(['type' => 'string', 'enum' => array_map(static fn (Diet $d): string => $d->value, Diet::cases())], 'null: eats anything.'),
             'excludeGroups' => ['type' => 'array', 'items' => $object(['group' => $group, 'strength' => $strength])],
+            'excludeAllergens' => [
+                'type' => 'array',
+                'description' => 'Allergies no food group covers: celery, mustard, sulphites, lupin, molluscs (shellfish is a food group).',
+                'items' => $object(['allergen' => ['type' => 'string', 'enum' => ExcludedAllergen::values()], 'strength' => $strength]),
+            ],
             'excludeIngredients' => [
                 'type' => 'array',
                 'description' => 'Ingredients that are no food group (coriander, mushrooms, olives).',

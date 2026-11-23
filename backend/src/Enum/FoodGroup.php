@@ -34,6 +34,28 @@ enum FoodGroup: string
         return [self::RedMeat, self::Pork, self::Poultry, self::ProcessedMeat, self::Fish, self::Shellfish];
     }
 
+    /**
+     * The allergens that mean this group is in a dish: an allergy to the group also checks the
+     * recipe's foods for them, which catch what reading the dish misses (wheat in soy sauce).
+     *
+     * @return list<Allergen>
+     */
+    public function allergens(): array
+    {
+        return match ($this) {
+            self::Gluten => [Allergen::Gluten],
+            self::Dairy => [Allergen::Milk],
+            self::Egg => [Allergen::Eggs],
+            self::Fish => [Allergen::Fish],
+            self::Shellfish => [Allergen::Crustaceans, Allergen::Molluscs],
+            self::TreeNuts => [Allergen::TreeNuts],
+            self::Peanuts => [Allergen::Peanuts],
+            self::Soy => [Allergen::Soy],
+            self::Sesame => [Allergen::Sesame],
+            default => [],
+        };
+    }
+
     /** @return list<string> */
     public static function values(): array
     {

@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace App\Taste;
 
 /**
- * Why a recipe doesn't fit a household's likings: its diet, a food group, an ingredient, or
- * that nobody knows yet what it contains (its facts haven't been read) and an allergy or diet
- * needs to know.
+ * Why a recipe doesn't fit a household's likings: its diet, a food group, an allergen, an
+ * ingredient, or that nobody knows yet what it contains (its facts haven't been read, or its
+ * foods described) and an allergy or diet needs to know.
  */
 final readonly class Conflict
 {
     public const string DIET = 'diet';
     public const string GROUP = 'group';
+    public const string ALLERGEN = 'allergen';
     public const string INGREDIENT = 'ingredient';
     public const string UNKNOWN = 'unknown';
 
@@ -22,8 +23,8 @@ final readonly class Conflict
         'required' => ['strength', 'kind'],
         'properties' => [
             'strength' => ['type' => 'string', 'enum' => ['never', 'avoid']],
-            'kind' => ['type' => 'string', 'enum' => [self::DIET, self::GROUP, self::INGREDIENT, self::UNKNOWN]],
-            'value' => ['type' => 'string', 'description' => 'The diet or the food group'],
+            'kind' => ['type' => 'string', 'enum' => [self::DIET, self::GROUP, self::ALLERGEN, self::INGREDIENT, self::UNKNOWN]],
+            'value' => ['type' => 'string', 'description' => 'The diet, the food group or the allergen'],
             'name' => Names::API_SCHEMA,
         ],
     ];

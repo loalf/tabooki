@@ -12,6 +12,8 @@ type Step = (typeof STEPS)[number]
 
 /** Food groups people usually leave out, in the order they think of them. */
 const AVOID_GROUPS: FoodGroup[] = ['fish', 'shellfish', 'pork', 'red_meat', 'poultry', 'processed_meat', 'cheese', 'dairy', 'egg', 'gluten', 'tree_nuts', 'peanuts', 'soy', 'sesame', 'alcohol']
+/** Allergies no food group covers (App\Taste\ExcludedAllergen): only the recipes' foods can tell. */
+const AVOID_ALLERGENS = ['celery', 'mustard', 'sulphites', 'lupin', 'molluscs'] as const
 /** Common dislikes that aren't food groups: the model maps them onto ingredients. */
 const AVOID_OTHERS = ['mushrooms', 'coriander', 'olives', 'onion', 'eggplant'] as const
 const MORE = ['legumes', 'vegetables', 'salads', 'soups', 'rice', 'pasta', 'fish', 'asian', 'mexican', 'italian'] as const
@@ -160,10 +162,16 @@ function Avoid({ value, onChange }: { value: Avoided[]; onChange: (value: Avoide
   const { t } = useTranslation()
   const [typed, setTyped] = useState('')
   const has = (item: string) => value.some((v) => v.item === item)
-  const toggle = (item: string, custom: boolean) =>
-    onChange(has(item) ? value.filter((v) => v.item !== item) : [...value, { item, strength: 'avoid', ...(custom ? { custom: true } : {}) }])
+  // An allergen is usually an allergy, so it starts as one.
+  const toggle = (item: string, custom: boolean, strength: Strength = 'avoid') =>
+    onChange(has(item) ? value.filter((v) => v.item !== item) : [...value, { item, strength, ...(custom ? { custom: true } : {}) }])
   const setStrength = (item: string, strength: Strength) => onChange(value.map((v) => (v.item === item ? { ...v, strength } : v)))
-  const labelOf = (v: Avoided) => ((AVOID_GROUPS as string[]).includes(v.item) ? t(`recipe.facts.group.${v.item}`) : v.item)
+  const labelOf = (v: Avoided) =>
+    (AVOID_GROUPS as string[]).includes(v.item)
+      ? t(`recipe.facts.group.${v.item}`)
+      : (AVOID_ALLERGENS as readonly string[]).includes(v.item)
+        ? t(`recipe.allergen.${v.item}`)
+        : v.item
 
   const add = (event: FormEvent) => {
     event.preventDefault()
@@ -181,6 +189,11 @@ function Avoid({ value, onChange }: { value: Avoided[]; onChange: (value: Avoide
         {AVOID_GROUPS.map((group) => (
           <Chip key={group} active={has(group)} onClick={() => toggle(group, false)}>
             {t(`recipe.facts.group.${group}`)}
+          </Chip>
+        ))}
+        {AVOID_ALLERGENS.map((allergen) => (
+          <Chip key={allergen} active={has(allergen)} onClick={() => toggle(allergen, false, 'never')}>
+            {t(`recipe.allergen.${allergen}`)}
           </Chip>
         ))}
         {[...others, ...typedOnes].map((item) => (

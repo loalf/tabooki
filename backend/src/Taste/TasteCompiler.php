@@ -207,6 +207,11 @@ final readonly class TasteCompiler
                 $data['excludeGroups'][] = $rule->toArray();
             }
         }
+        foreach ($draft->excludeAllergens as $rule) {
+            if (Strength::Never === $rule->strength) {
+                $data['excludeAllergens'][] = $rule->toArray();
+            }
+        }
 
         return TasteRules::fromArray($data);
     }
@@ -221,8 +226,9 @@ final readonly class TasteCompiler
         return <<<TXT
             You help a household in Spain tell its meal planner what it likes to eat. You get its answers to a short questionnaire, draft rules already derived from the tappable answers, and the ingredient keys and English tags its recipes use. Answer with the final rules, notes and a summary.
             - Start from draft_rules and keep them, unless the free text (answers.other) or the follow-up answers (answers.followUps) clearly change them.
-            - answers.avoid items that aren't a food group of the schema (custom: true, or things like mushrooms, coriander, olives) become excludeIngredients with the same strength: keys are the matching keys from household_ingredients plus the usual canonical English snake_case keys for that ingredient (singular, e.g. "coriander", "fresh_coriander"); name in Spanish and English, short and lowercase.
+            - answers.avoid items that aren't a food group or an excludeAllergens allergen of the schema (custom: true, or things like mushrooms, coriander, olives) become excludeIngredients with the same strength: keys are the matching keys from household_ingredients plus the usual canonical English snake_case keys for that ingredient (singular, e.g. "coriander", "fresh_coriander"); name in Spanish and English, short and lowercase.
             - answers.more become prefer rules with weight "more": tags are the household_tags that mean it (legumes: legumes, chickpeas, lentils, beans…); if none fits, the usual English words. answers.less, the same with weight "less".
+            - An allergy to celery, mustard, sulphites, lupin or molluscs is excludeAllergens ("never"), not an ingredient: the planner checks every food of a recipe for it.
             - From the free text, make a rule of anything a rule can say: a food group or an ingredient to leave out (an allergy or something they can't eat is "never"; a dislike is "avoid"), a diet, a weekly limit ("meat at most twice" counts red_meat, pork, poultry and processed_meat; with fish too it's also fish and shellfish), more or less of something, how filling lunch or dinner should be (mealHeaviness), how spicy.
             - notes: what they said that no rule can express ("nothing fiddly on weekdays", "the kids don't like sauces"), short, in their words' language; null when there is nothing left.
             - summary: es (Spanish, speaking to them as "vosotros") and en (English, "you"): 2–4 short sentences covering every rule and the notes, saying exactly what the rules say and nothing more (a rule about fish isn't one about shellfish). "Coméis de todo menos pescado y marisco (alergia). Carne o pescado, como mucho dos veces por semana…"

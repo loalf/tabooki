@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Taste;
 
+use App\Enum\Allergen;
 use App\Enum\Diet;
 use App\Enum\FoodGroup;
 use App\Enum\Heaviness;
@@ -81,9 +82,22 @@ final readonly class Taste
                 continue;
             }
             $groups = $firm ? [...$recipe->foodGroups, ...$recipe->optionalFoodGroups] : $recipe->foodGroups;
-            if (\in_array($rule->group, $groups, true)) {
+            // An allergy also goes by the foods' allergens ("may contain" included): a dislike only by the dish.
+            $allergens = $firm ? [...$recipe->allergens, ...$recipe->optionalAllergens] : [];
+            if (\in_array($rule->group, $groups, true) || [] !== array_filter($rule->group->allergens(), static fn (Allergen $a): bool => \in_array($a, $allergens, true))) {
                 $conflict = new Conflict($rule->strength, Conflict::GROUP, $rule->group->value);
                 $firm ? $never[] = $conflict : $avoid[] = $conflict;
+            }
+        }
+
+        foreach ($rules->excludeAllergens as $rule) {
+            $firm = Strength::Never === $rule->strength;
+            if (\in_array($rule->allergen, $firm ? [...$recipe->allergens, ...$recipe->optionalAllergens] : $recipe->allergens, true)) {
+                $conflict = new Conflict($rule->strength, Conflict::ALLERGEN, $rule->allergen->value);
+                $firm ? $never[] = $conflict : $avoid[] = $conflict;
+            } elseif ($firm && !$recipe->allergensComplete) {
+                // Only the foods can tell, and one of them isn't described yet.
+                $unknown = true;
             }
         }
 

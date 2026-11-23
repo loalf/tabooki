@@ -34,6 +34,9 @@ final class TasteImpactView
     /** @var list<int> recipes each excludeGroups rule leaves out, in order */
     public array $excludeGroups = [];
 
+    /** @var list<int> recipes each excludeAllergens rule leaves out, in order */
+    public array $excludeAllergens = [];
+
     /** @var list<int> recipes each excludeIngredients rule leaves out, in order */
     public array $excludeIngredients = [];
 

@@ -134,12 +134,11 @@ function RuleEditor({ rules, line, onChange }: { rules: TasteRules; line: RuleLi
         />
       )
     case 'group':
+    case 'allergen':
     case 'ingredient': {
-      const list = line.kind === 'group' ? rules.excludeGroups : rules.excludeIngredients
-      const set = (strength: 'never' | 'avoid') => {
-        const next = list.map((rule, j) => (j === i ? { ...rule, strength } : rule))
-        onChange(line.kind === 'group' ? { ...rules, excludeGroups: next as TasteRules['excludeGroups'] } : { ...rules, excludeIngredients: next as TasteRules['excludeIngredients'] })
-      }
+      const key = ({ group: 'excludeGroups', allergen: 'excludeAllergens', ingredient: 'excludeIngredients' } as const)[line.kind]
+      const list: { strength: 'never' | 'avoid' }[] = rules[key]
+      const set = (strength: 'never' | 'avoid') => onChange({ ...rules, [key]: list.map((rule, j) => (j === i ? { ...rule, strength } : rule)) })
       return <Choices value={list[i]?.strength} options={['avoid', 'never'] as const} label={(s) => t(`taste.q.avoid.${s}`)} onChange={set} />
     }
     case 'weekly': {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Planning;
 
 use App\Entity\Recipe;
+use App\Enum\Allergen;
 use App\Enum\FoodGroup;
 use App\Enum\Heaviness;
 use App\Enum\Language;
@@ -22,6 +23,8 @@ final readonly class Candidate
      * @param list<string>                                 $keys               canonical keys of the ingredients it needs
      * @param list<string>                                 $optionalKeys
      * @param array<string, array{es: string, en: string}> $freshNames         the fresh ingredients' names, by key
+     * @param list<Allergen>                               $allergens          from the foods of the lines it needs (see $allergensComplete)
+     * @param list<Allergen>                               $optionalAllergens
      */
     public function __construct(
         public Recipe $recipe,
@@ -42,6 +45,9 @@ final readonly class Candidate
         public array $keys = [],
         public array $optionalKeys = [],
         public array $freshNames = [],
+        public array $allergens = [],
+        public array $optionalAllergens = [],
+        public bool $allergensComplete = false,
     ) {
     }
 
@@ -94,6 +100,9 @@ final readonly class Candidate
             keys: array_values(array_unique($keys)),
             optionalKeys: array_values(array_unique($optionalKeys)),
             freshNames: $freshNames,
+            allergens: $recipe->getAllergens(),
+            optionalAllergens: $recipe->getOptionalAllergens(),
+            allergensComplete: $recipe->isAllergensComplete(),
         );
     }
 

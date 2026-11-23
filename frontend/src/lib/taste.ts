@@ -10,7 +10,7 @@ export const ANIMAL_PROTEIN: FoodGroup[] = ['red_meat', 'pork', 'poultry', 'proc
 export type RuleLine = {
   id: string
   /** What it is, to edit it: which part of the rules, and where in its list. */
-  kind: 'diet' | 'group' | 'ingredient' | 'weekly' | 'meals' | 'prefer' | 'spice'
+  kind: 'diet' | 'group' | 'allergen' | 'ingredient' | 'weekly' | 'meals' | 'prefer' | 'spice'
   index: number
   text: string
   /** Recipes it leaves out of the library, when it does. */
@@ -49,6 +49,17 @@ export function ruleLines(rules: TasteRules, impact: TasteImpact | undefined, t:
       removes: impact?.excludeGroups?.[i],
       firm: rule.strength === 'never',
       without: () => ({ ...rules, excludeGroups: rules.excludeGroups.filter((_, j) => j !== i) }),
+    }),
+  )
+  rules.excludeAllergens.forEach((rule, i) =>
+    lines.push({
+      id: `allergen-${rule.allergen}`,
+      kind: 'allergen',
+      index: i,
+      text: t(`taste.rule.${rule.strength}`, { what: t(`recipe.allergen.${rule.allergen}`) }),
+      removes: impact?.excludeAllergens?.[i],
+      firm: rule.strength === 'never',
+      without: () => ({ ...rules, excludeAllergens: rules.excludeAllergens.filter((_, j) => j !== i) }),
     }),
   )
   rules.excludeIngredients.forEach((rule, i) =>
@@ -100,7 +111,9 @@ export function conflictText(conflict: TasteConflict, t: TFunction, language: st
   const what =
     conflict.kind === 'group' && conflict.value && (FOOD_GROUPS as string[]).includes(conflict.value)
       ? t(`recipe.facts.group.${conflict.value}`)
-      : (conflict.name?.[lang(language)] ?? '')
+      : conflict.kind === 'allergen' && conflict.value
+        ? t(`recipe.allergen.${conflict.value}`)
+        : (conflict.name?.[lang(language)] ?? '')
   switch (conflict.kind) {
     case 'diet':
       return t(`taste.conflict.diet.${conflict.value}`)
