@@ -24,6 +24,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/foods": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of Food resources.
+         * @description Retrieves the collection of Food resources.
+         */
+        get: operations["api_foods_get_collection"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/foods/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a Food resource.
+         * @description Retrieves a Food resource.
+         */
+        get: operations["api_foods_id_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ingredients/{id}": {
         parameters: {
             query?: never;
@@ -807,7 +847,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -829,7 +869,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -1008,6 +1048,78 @@ export interface components {
             readonly type?: string;
             readonly description?: string | null;
         };
+        /**
+         * @description What a food is, shared by every household: nutrition per 100 g, allergens, food groups, spice,
+         *     and how much a piece or a millilitre weighs (docs/INGREDIENT-KNOWLEDGE.md). One per canonical
+         *     key; a household's Ingredient points at one, and can be pointed at another by hand. Filled in
+         *     by the text model (DescribeFoodsHandler); a fix made by hand is kept for good.
+         */
+        "Food-food.read": {
+            /** Format: uuid */
+            readonly id?: string;
+            key?: string;
+            readonly nameEs?: string | null;
+            readonly nameEn?: string | null;
+            readonly kcal?: number | null;
+            readonly protein?: number | null;
+            readonly fat?: number | null;
+            readonly saturatedFat?: number | null;
+            readonly carbs?: number | null;
+            readonly sugar?: number | null;
+            readonly fiber?: number | null;
+            readonly salt?: number | null;
+            /** @description 0 not spicy, 1 mild, 2 hot. */
+            readonly spice?: number | null;
+            readonly gramsPerPiece?: number | null;
+            /** @description Grams per millilitre. */
+            readonly density?: number | null;
+            /** @enum {string|null} */
+            readonly source?: "llm" | "manual" | "bedca" | "usda" | null;
+            readonly foodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+            readonly allergens?: ("gluten" | "crustaceans" | "eggs" | "fish" | "peanuts" | "soy" | "milk" | "tree_nuts" | "celery" | "mustard" | "sesame" | "sulphites" | "lupin" | "molluscs")[];
+            /**
+             * @description The strictest diet it suits (vegan, vegetarian, pescatarian); null for meat, or while undescribed.
+             * @enum {string|null}
+             */
+            readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
+            readonly described?: boolean;
+        };
+        /**
+         * @description What a food is, shared by every household: nutrition per 100 g, allergens, food groups, spice,
+         *     and how much a piece or a millilitre weighs (docs/INGREDIENT-KNOWLEDGE.md). One per canonical
+         *     key; a household's Ingredient points at one, and can be pointed at another by hand. Filled in
+         *     by the text model (DescribeFoodsHandler); a fix made by hand is kept for good.
+         */
+        "Food.jsonld-food.read": components["schemas"]["HydraItemBaseSchema"] & {
+            /** Format: uuid */
+            readonly id?: string;
+            key?: string;
+            readonly nameEs?: string | null;
+            readonly nameEn?: string | null;
+            readonly kcal?: number | null;
+            readonly protein?: number | null;
+            readonly fat?: number | null;
+            readonly saturatedFat?: number | null;
+            readonly carbs?: number | null;
+            readonly sugar?: number | null;
+            readonly fiber?: number | null;
+            readonly salt?: number | null;
+            /** @description 0 not spicy, 1 mild, 2 hot. */
+            readonly spice?: number | null;
+            readonly gramsPerPiece?: number | null;
+            /** @description Grams per millilitre. */
+            readonly density?: number | null;
+            /** @enum {string|null} */
+            readonly source?: "llm" | "manual" | "bedca" | "usda" | null;
+            readonly foodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
+            readonly allergens?: ("gluten" | "crustaceans" | "eggs" | "fish" | "peanuts" | "soy" | "milk" | "tree_nuts" | "celery" | "mustard" | "sesame" | "sulphites" | "lupin" | "molluscs")[];
+            /**
+             * @description The strictest diet it suits (vegan, vegetarian, pescatarian); null for meat, or while undescribed.
+             * @enum {string|null}
+             */
+            readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
+            readonly described?: boolean;
+        };
         HydraCollectionBaseSchema: components["schemas"]["HydraCollectionBaseSchemaNoPagination"] & {
             /**
              * @example {
@@ -1062,7 +1174,8 @@ export interface components {
          * @description The household's catalog of ingredients, one per canonical key ("onion", whatever the recipe
          *     language), so a shopping list can merge them, name them in each viewer's language and put
          *     them in the right aisle (docs/PLAN.md §7). New ones are classified by the text model
-         *     (ClassifyIngredientsHandler); a fix made in the app is kept for good.
+         *     (ClassifyIngredientsHandler); a fix made in the app is kept for good. Each points at the shared
+         *     Food with the same key (nutrition, allergens…), or at another one chosen by hand.
          */
         "Ingredient-ingredient.read": {
             /** Format: uuid */
@@ -1080,12 +1193,19 @@ export interface components {
              * @default false
              */
             staple: boolean;
+            /**
+             * Format: iri-reference
+             * @description What it is, nutritionally: the food with the same key when it was added, or another one set by hand.
+             * @example https://example.com/
+             */
+            food?: string | null;
         };
         /**
          * @description The household's catalog of ingredients, one per canonical key ("onion", whatever the recipe
          *     language), so a shopping list can merge them, name them in each viewer's language and put
          *     them in the right aisle (docs/PLAN.md §7). New ones are classified by the text model
-         *     (ClassifyIngredientsHandler); a fix made in the app is kept for good.
+         *     (ClassifyIngredientsHandler); a fix made in the app is kept for good. Each points at the shared
+         *     Food with the same key (nutrition, allergens…), or at another one chosen by hand.
          */
         "Ingredient-ingredient.write.jsonMergePatch": {
             nameEs?: string | null;
@@ -1100,12 +1220,19 @@ export interface components {
              * @default false
              */
             staple: boolean;
+            /**
+             * Format: iri-reference
+             * @description What it is, nutritionally: the food with the same key when it was added, or another one set by hand.
+             * @example https://example.com/
+             */
+            food?: string | null;
         };
         /**
          * @description The household's catalog of ingredients, one per canonical key ("onion", whatever the recipe
          *     language), so a shopping list can merge them, name them in each viewer's language and put
          *     them in the right aisle (docs/PLAN.md §7). New ones are classified by the text model
-         *     (ClassifyIngredientsHandler); a fix made in the app is kept for good.
+         *     (ClassifyIngredientsHandler); a fix made in the app is kept for good. Each points at the shared
+         *     Food with the same key (nutrition, allergens…), or at another one chosen by hand.
          */
         "Ingredient.jsonld-ingredient.read": components["schemas"]["HydraItemBaseSchema"] & {
             /** Format: uuid */
@@ -1123,6 +1250,12 @@ export interface components {
              * @default false
              */
             staple: boolean;
+            /**
+             * Format: iri-reference
+             * @description What it is, nutritionally: the food with the same key when it was added, or another one set by hand.
+             * @example https://example.com/
+             */
+            food?: string | null;
         };
         /** @description The signed-in user and their household: what the SPA needs to boot. */
         "Me-me.read": {
@@ -3180,6 +3313,89 @@ export interface operations {
                 content: {
                     "application/ld+json": components["schemas"]["Costs.jsonld"];
                     "application/json": components["schemas"]["Costs"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_foods_get_collection: {
+        parameters: {
+            query?: {
+                /** @description The collection page number */
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Food collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchema"] & {
+                        member: components["schemas"]["Food.jsonld-food.read"][];
+                    };
+                    "application/json": components["schemas"]["Food-food.read"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    api_foods_id_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Food identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Food resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Food.jsonld-food.read"];
+                    "application/json": components["schemas"]["Food-food.read"];
                 };
             };
             /** @description Forbidden */

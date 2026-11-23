@@ -82,6 +82,176 @@
                 "parameters": []
             }
         },
+        "/api/foods": {
+            "get": {
+                "operationId": "api_foods_get_collection",
+                "tags": [
+                    "Food"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Food collection",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "Food.jsonld-food.read collection.",
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/HydraCollectionBaseSchema"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "member"
+                                            ],
+                                            "properties": {
+                                                "member": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Food.jsonld-food.read"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Food-food.read"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves the collection of Food resources.",
+                "description": "Retrieves the collection of Food resources.",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The collection page number",
+                        "required": false,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        },
+                        "style": "form",
+                        "explode": true
+                    }
+                ]
+            }
+        },
+        "/api/foods/{id}": {
+            "get": {
+                "operationId": "api_foods_id_get",
+                "tags": [
+                    "Food"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Food resource",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Food.jsonld-food.read"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Food-food.read"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves a Food resource.",
+                "description": "Retrieves a Food resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Food identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            }
+        },
         "/api/ingredients/{id}": {
             "patch": {
                 "operationId": "api_ingredients_id_patch",
@@ -4781,6 +4951,7 @@
                             "video",
                             "images",
                             "classify",
+                            "foods",
                             "translate",
                             "annotate",
                             "taste_profile",
@@ -4855,6 +5026,7 @@
                             "video",
                             "images",
                             "classify",
+                            "foods",
                             "translate",
                             "annotate",
                             "taste_profile",
@@ -5287,6 +5459,387 @@
                 ],
                 "description": "A representation of common errors."
             },
+            "Food-food.read": {
+                "type": "object",
+                "description": "What a food is, shared by every household: nutrition per 100 g, allergens, food groups, spice,\nand how much a piece or a millilitre weighs (docs/INGREDIENT-KNOWLEDGE.md). One per canonical\nkey; a household's Ingredient points at one, and can be pointed at another by hand. Filled in\nby the text model (DescribeFoodsHandler); a fix made by hand is kept for good.",
+                "properties": {
+                    "id": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "key": {
+                        "type": "string"
+                    },
+                    "nameEs": {
+                        "readOnly": true,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "nameEn": {
+                        "readOnly": true,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "kcal": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "protein": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "fat": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "saturatedFat": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "carbs": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "sugar": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "fiber": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "salt": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "spice": {
+                        "readOnly": true,
+                        "description": "0 not spicy, 1 mild, 2 hot.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "gramsPerPiece": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "density": {
+                        "readOnly": true,
+                        "description": "Grams per millilitre.",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "source": {
+                        "readOnly": true,
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "llm",
+                            "manual",
+                            "bedca",
+                            "usda",
+                            null
+                        ]
+                    },
+                    "foodGroups": {
+                        "readOnly": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "red_meat",
+                                "pork",
+                                "poultry",
+                                "processed_meat",
+                                "fish",
+                                "shellfish",
+                                "animal_stock",
+                                "egg",
+                                "dairy",
+                                "cheese",
+                                "gluten",
+                                "tree_nuts",
+                                "peanuts",
+                                "soy",
+                                "sesame",
+                                "alcohol"
+                            ]
+                        }
+                    },
+                    "allergens": {
+                        "readOnly": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "gluten",
+                                "crustaceans",
+                                "eggs",
+                                "fish",
+                                "peanuts",
+                                "soy",
+                                "milk",
+                                "tree_nuts",
+                                "celery",
+                                "mustard",
+                                "sesame",
+                                "sulphites",
+                                "lupin",
+                                "molluscs"
+                            ]
+                        }
+                    },
+                    "diet": {
+                        "readOnly": true,
+                        "description": "The strictest diet it suits (vegan, vegetarian, pescatarian); null for meat, or while undescribed.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "vegan",
+                            "vegetarian",
+                            "pescatarian",
+                            null
+                        ]
+                    },
+                    "described": {
+                        "readOnly": true,
+                        "type": "boolean"
+                    }
+                }
+            },
+            "Food.jsonld-food.read": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "key": {
+                                "type": "string"
+                            },
+                            "nameEs": {
+                                "readOnly": true,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "nameEn": {
+                                "readOnly": true,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "kcal": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "protein": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "fat": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "saturatedFat": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "carbs": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "sugar": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "fiber": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "salt": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "spice": {
+                                "readOnly": true,
+                                "description": "0 not spicy, 1 mild, 2 hot.",
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "gramsPerPiece": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "density": {
+                                "readOnly": true,
+                                "description": "Grams per millilitre.",
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "source": {
+                                "readOnly": true,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "llm",
+                                    "manual",
+                                    "bedca",
+                                    "usda",
+                                    null
+                                ]
+                            },
+                            "foodGroups": {
+                                "readOnly": true,
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "red_meat",
+                                        "pork",
+                                        "poultry",
+                                        "processed_meat",
+                                        "fish",
+                                        "shellfish",
+                                        "animal_stock",
+                                        "egg",
+                                        "dairy",
+                                        "cheese",
+                                        "gluten",
+                                        "tree_nuts",
+                                        "peanuts",
+                                        "soy",
+                                        "sesame",
+                                        "alcohol"
+                                    ]
+                                }
+                            },
+                            "allergens": {
+                                "readOnly": true,
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "gluten",
+                                        "crustaceans",
+                                        "eggs",
+                                        "fish",
+                                        "peanuts",
+                                        "soy",
+                                        "milk",
+                                        "tree_nuts",
+                                        "celery",
+                                        "mustard",
+                                        "sesame",
+                                        "sulphites",
+                                        "lupin",
+                                        "molluscs"
+                                    ]
+                                }
+                            },
+                            "diet": {
+                                "readOnly": true,
+                                "description": "The strictest diet it suits (vegan, vegetarian, pescatarian); null for meat, or while undescribed.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "vegan",
+                                    "vegetarian",
+                                    "pescatarian",
+                                    null
+                                ]
+                            },
+                            "described": {
+                                "readOnly": true,
+                                "type": "boolean"
+                            }
+                        }
+                    }
+                ],
+                "description": "What a food is, shared by every household: nutrition per 100 g, allergens, food groups, spice,\nand how much a piece or a millilitre weighs (docs/INGREDIENT-KNOWLEDGE.md). One per canonical\nkey; a household's Ingredient points at one, and can be pointed at another by hand. Filled in\nby the text model (DescribeFoodsHandler); a fix made by hand is kept for good."
+            },
             "HydraCollectionBaseSchema": {
                 "allOf": [
                     {
@@ -5436,7 +5989,7 @@
             },
             "Ingredient-ingredient.read": {
                 "type": "object",
-                "description": "The household's catalog of ingredients, one per canonical key (\"onion\", whatever the recipe\nlanguage), so a shopping list can merge them, name them in each viewer's language and put\nthem in the right aisle (docs/PLAN.md \u00a77). New ones are classified by the text model\n(ClassifyIngredientsHandler); a fix made in the app is kept for good.",
+                "description": "The household's catalog of ingredients, one per canonical key (\"onion\", whatever the recipe\nlanguage), so a shopping list can merge them, name them in each viewer's language and put\nthem in the right aisle (docs/PLAN.md \u00a77). New ones are classified by the text model\n(ClassifyIngredientsHandler); a fix made in the app is kept for good. Each points at the shared\nFood with the same key (nutrition, allergens\u2026), or at another one chosen by hand.",
                 "properties": {
                     "id": {
                         "readOnly": true,
@@ -5479,12 +6032,21 @@
                         "description": "Always in the kitchen (salt, oil\u2026): listed apart, to check rather than buy.",
                         "default": false,
                         "type": "boolean"
+                    },
+                    "food": {
+                        "description": "What it is, nutritionally: the food with the same key when it was added, or another one set by hand.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "iri-reference",
+                        "example": "https://example.com/"
                     }
                 }
             },
             "Ingredient-ingredient.write.jsonMergePatch": {
                 "type": "object",
-                "description": "The household's catalog of ingredients, one per canonical key (\"onion\", whatever the recipe\nlanguage), so a shopping list can merge them, name them in each viewer's language and put\nthem in the right aisle (docs/PLAN.md \u00a77). New ones are classified by the text model\n(ClassifyIngredientsHandler); a fix made in the app is kept for good.",
+                "description": "The household's catalog of ingredients, one per canonical key (\"onion\", whatever the recipe\nlanguage), so a shopping list can merge them, name them in each viewer's language and put\nthem in the right aisle (docs/PLAN.md \u00a77). New ones are classified by the text model\n(ClassifyIngredientsHandler); a fix made in the app is kept for good. Each points at the shared\nFood with the same key (nutrition, allergens\u2026), or at another one chosen by hand.",
                 "properties": {
                     "nameEs": {
                         "maxLength": 100,
@@ -5519,6 +6081,15 @@
                         "description": "Always in the kitchen (salt, oil\u2026): listed apart, to check rather than buy.",
                         "default": false,
                         "type": "boolean"
+                    },
+                    "food": {
+                        "description": "What it is, nutritionally: the food with the same key when it was added, or another one set by hand.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "iri-reference",
+                        "example": "https://example.com/"
                     }
                 }
             },
@@ -5571,11 +6142,20 @@
                                 "description": "Always in the kitchen (salt, oil\u2026): listed apart, to check rather than buy.",
                                 "default": false,
                                 "type": "boolean"
+                            },
+                            "food": {
+                                "description": "What it is, nutritionally: the food with the same key when it was added, or another one set by hand.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "iri-reference",
+                                "example": "https://example.com/"
                             }
                         }
                     }
                 ],
-                "description": "The household's catalog of ingredients, one per canonical key (\"onion\", whatever the recipe\nlanguage), so a shopping list can merge them, name them in each viewer's language and put\nthem in the right aisle (docs/PLAN.md \u00a77). New ones are classified by the text model\n(ClassifyIngredientsHandler); a fix made in the app is kept for good."
+                "description": "The household's catalog of ingredients, one per canonical key (\"onion\", whatever the recipe\nlanguage), so a shopping list can merge them, name them in each viewer's language and put\nthem in the right aisle (docs/PLAN.md \u00a77). New ones are classified by the text model\n(ClassifyIngredientsHandler); a fix made in the app is kept for good. Each points at the shared\nFood with the same key (nutrition, allergens\u2026), or at another one chosen by hand."
             },
             "Me-me.read": {
                 "type": "object",
@@ -12592,8 +13172,12 @@
             "description": "What the household likes (docs/PLAN.md \u00a76.1): the questionnaire's answers, the rules the\nplanner follows, the notes and summary, and what the rules do to the library. 404 until the\nhousehold has said."
         },
         {
+            "name": "Food",
+            "description": "What a food is, shared by every household: nutrition per 100 g, allergens, food groups, spice,\nand how much a piece or a millilitre weighs (docs/INGREDIENT-KNOWLEDGE.md). One per canonical\nkey; a household's Ingredient points at one, and can be pointed at another by hand. Filled in\nby the text model (DescribeFoodsHandler); a fix made by hand is kept for good."
+        },
+        {
             "name": "Ingredient",
-            "description": "The household's catalog of ingredients, one per canonical key (\"onion\", whatever the recipe\nlanguage), so a shopping list can merge them, name them in each viewer's language and put\nthem in the right aisle (docs/PLAN.md \u00a77). New ones are classified by the text model\n(ClassifyIngredientsHandler); a fix made in the app is kept for good."
+            "description": "The household's catalog of ingredients, one per canonical key (\"onion\", whatever the recipe\nlanguage), so a shopping list can merge them, name them in each viewer's language and put\nthem in the right aisle (docs/PLAN.md \u00a77). New ones are classified by the text model\n(ClassifyIngredientsHandler); a fix made in the app is kept for good. Each points at the shared\nFood with the same key (nutrition, allergens\u2026), or at another one chosen by hand."
         },
         {
             "name": "MealPlan",

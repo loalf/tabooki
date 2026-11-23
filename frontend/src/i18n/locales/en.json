@@ -521,6 +521,7 @@
       "video": "Watching the video",
       "images": "Reading the pictures",
       "classify": "Sorting ingredients",
+      "foods": "Looking up foods",
       "translate": "Translating the recipe",
       "annotate": "Reading what it's like",
       "taste_profile": "Understanding your tastes",
@@ -529,6 +530,7 @@
       "dictation": "Dictation"
     },
     "classifyWhat": "New ingredients on the list",
+    "foodsWhat": "New ingredients: nutrition and allergens",
     "translateWhat": "A recipe typed in",
     "deletedLink": "Deleted link",
     "unpriced_one": "{{count}} call uses a model with no price configured and is not in the totals.",

@@ -6,6 +6,7 @@ namespace App\Shopping;
 
 use App\Entity\Household;
 use App\Entity\Ingredient;
+use App\Food\FoodCatalog;
 use App\Message\ClassifyIngredients;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -24,6 +25,7 @@ final readonly class IngredientCatalog
     public function __construct(
         private EntityManagerInterface $entityManager,
         private MessageBusInterface $bus,
+        private FoodCatalog $foods,
     ) {
     }
 
@@ -38,13 +40,16 @@ final readonly class IngredientCatalog
             return [];
         }
 
+        // Each new ingredient points at the shared food with its key, so that food must exist first.
+        $this->foods->ensure($household, $seen);
+
         // Insert the missing ones in one statement; ON CONFLICT makes it safe for concurrent requests.
         $connection = $this->entityManager->getConnection();
         $values = [];
         $parameters = ['household' => $household->getId()->toRfc4122()];
         $i = 0;
         foreach ($seen as $key => $name) {
-            $values[] = \sprintf('(:id%1$d, :household, :key%1$d, :es%1$d, :en%1$d, \'other\', :staple%1$d, false)', $i);
+            $values[] = \sprintf('(:id%1$d, :household, :key%1$d, :es%1$d, :en%1$d, \'other\', :staple%1$d, false, (SELECT id FROM food WHERE key = :key%1$d))', $i);
             $parameters['id'.$i] = Uuid::v7()->toRfc4122();
             $parameters['key'.$i] = $key;
             $parameters['es'.$i] = 'es' === $name['language'] ? mb_substr($name['name'], 0, 100) : null;
@@ -53,7 +58,7 @@ final readonly class IngredientCatalog
             ++$i;
         }
         $inserted = $connection->executeStatement(
-            'INSERT INTO ingredient (id, household_id, canonical_key, name_es, name_en, aisle, staple, edited) VALUES '
+            'INSERT INTO ingredient (id, household_id, canonical_key, name_es, name_en, aisle, staple, edited, food_id) VALUES '
             .implode(', ', $values).' ON CONFLICT (household_id, canonical_key) DO NOTHING',
             $parameters,
         );

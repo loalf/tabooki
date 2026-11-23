@@ -521,6 +521,7 @@
       "video": "Ver el vídeo",
       "images": "Leer las imágenes",
       "classify": "Ordenar ingredientes",
+      "foods": "Consultar alimentos",
       "translate": "Traducir la receta",
       "annotate": "Leer cómo es",
       "taste_profile": "Entender vuestros gustos",
@@ -529,6 +530,7 @@
       "dictation": "Dictado"
     },
     "classifyWhat": "Ingredientes nuevos de la lista",
+    "foodsWhat": "Ingredientes nuevos: nutrición y alérgenos",
     "translateWhat": "Receta escrita a mano",
     "deletedLink": "Enlace borrado",
     "unpriced_one": "{{count}} llamada usa un modelo sin precio configurado y no cuenta en los totales.",

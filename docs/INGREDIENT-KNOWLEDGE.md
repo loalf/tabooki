@@ -24,20 +24,22 @@ Considered Neo4j next to Postgres and rejected it (2026-11-23):
 ## The hard part is the data
 
 1. **Grams.** `RecipeIngredient.quantity`/`unit` are nullable and can be spoons, pieces or pinches. Nutrition needs grams, so each line gets an estimated weight.
-2. **Nutrition source.** BEDCA (the Spanish food composition database) fits the mostly Spanish recipes; USDA FoodData Central covers the gaps.
+2. **Nutrition source.** BEDCA (the Spanish food composition database) fits the mostly Spanish recipes; USDA FoodData Central covers the gaps. For now the text model estimates the figures (`source = llm`), asked to follow BEDCA/USDA values: good enough for planning, and the import can replace them later.
 3. **Amounts matter.** A pinch of pimentón doesn't make a stew spicy, one habanero does. Optional ingredients are left out of the totals or shown separately.
 
 ## Roadmap
 
 ### 1. Shared food catalog
 
-- [ ] `Food` entity, **not** household-scoped: names (es/en), nutrition per 100g (kcal, protein, fat, saturated fat, carbs, sugar, fibre, salt), source and source id (BEDCA/USDA/LLM/manual)
-- [ ] Flags on `Food`: spicy level, allergens (the 14 EU ones), vegan, vegetarian, gluten-free, lactose-free
-- [ ] Unit conversions on `Food`: grams per piece (1 onion), density (g/ml for spoons and cups), with sensible defaults for a pinch or a splash
-- [ ] Optional `parent_id` for an ingredient hierarchy (chipotle → chili) so flags are inherited
-- [ ] `Ingredient.food` (nullable): links each household ingredient to a shared food
-- [ ] Linking step: match `canonicalKey` → `Food` (exact or alias first, LLM suggestion second), with a way to fix wrong links by hand
-- [ ] Seed or import: start with the ingredients already in the library, filled from BEDCA/USDA
+- [x] `Food` entity, **not** household-scoped, one per canonical key: names (es/en), nutrition per 100g (kcal, protein, fat, saturated fat, carbs, sugar, fiber, salt), `source` (llm/manual/bedca/usda), `edited` so the model never overwrites a fix
+- [x] Flags on `Food`: `spice` 0–2 (the same scale as `Recipe.spice`), `allergens` (the 14 EU ones, `Allergen` enum), `foodGroups` (the existing `FoodGroup` enum). Vegan/vegetarian/pescatarian come from the food groups through `Diet::of()`; gluten-free and milk-free come from the allergens, so they aren't stored separately
+- [x] Unit conversions on `Food`: `gramsPerPiece` (1 onion), `density` (g/ml for spoons and cups). Defaults for a pinch or a splash move to phase 2, where grams are worked out
+- [ ] Optional `parent_id` for an ingredient hierarchy (chipotle → chili). Deferred: each food carries its own flags, so nothing needs inheriting yet
+- [x] `Ingredient.food` (nullable): set to the food with the same key when the household ingredient is created; `PATCH /api/ingredients/{id}` with `food` points it at another one
+- [x] Linking: extraction already gives normalized English keys, so the link is 1:1 by key (`FoodCatalog`, on every extracted or edited recipe). Lines typed by hand (no key, `x_…` fallback keys) are left out until phase 2 parses them
+- [ ] UI to see a food and relink an ingredient (the API is there)
+- [x] Seed from the library: `app:foods` creates the foods, links existing household ingredients, and queues `DescribeFoods`, which has the text model fill in each food in batches of 40 (step "foods" on the costs page)
+- [ ] Import BEDCA/USDA figures over the model's estimates (`source` tells them apart; check BEDCA's licence first)
 
 ### 2. Grams per recipe line
 

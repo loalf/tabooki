@@ -19,7 +19,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  * The household's catalog of ingredients, one per canonical key ("onion", whatever the recipe
  * language), so a shopping list can merge them, name them in each viewer's language and put
  * them in the right aisle (docs/PLAN.md §7). New ones are classified by the text model
- * (ClassifyIngredientsHandler); a fix made in the app is kept for good.
+ * (ClassifyIngredientsHandler); a fix made in the app is kept for good. Each points at the shared
+ * Food with the same key (nutrition, allergens…), or at another one chosen by hand.
  */
 #[ORM\Entity]
 #[ORM\UniqueConstraint(name: 'ingredient_household_key', columns: ['household_id', 'canonical_key'])]
@@ -64,6 +65,12 @@ class Ingredient implements HouseholdOwned
     #[ORM\Column(options: ['default' => false])]
     #[Groups(['ingredient:read', 'ingredient:write'])]
     private bool $staple = false;
+
+    /** What it is, nutritionally: the food with the same key when it was added, or another one set by hand. */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
+    #[Groups(['ingredient:read', 'ingredient:write'])]
+    private ?Food $food = null;
 
     /** When the text model filled in names and aisle; null while it hasn't (yet). */
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
@@ -153,6 +160,16 @@ class Ingredient implements HouseholdOwned
     {
         $this->staple = $staple;
         $this->edited = true;
+    }
+
+    public function getFood(): ?Food
+    {
+        return $this->food;
+    }
+
+    public function setFood(?Food $food): void
+    {
+        $this->food = $food;
     }
 
     public function isEdited(): bool

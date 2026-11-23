@@ -24,6 +24,7 @@ use App\Extraction\PostImage;
 use App\Extraction\RecipeExtractor;
 use App\Extraction\Transcriber;
 use App\Extraction\Transcript;
+use App\Food\FoodCatalog;
 use App\Library\Metadata\MetadataFetcher;
 use App\Llm\LlmException;
 use App\Llm\Pricing;
@@ -95,6 +96,7 @@ final readonly class ExtractSourceHandler
         private Pricing $pricing,
         private MessageBusInterface $bus,
         private NotesQueue $notes,
+        private FoodCatalog $foods,
     ) {
     }
 
@@ -149,8 +151,8 @@ final readonly class ExtractSourceHandler
 
         $this->entityManager->flush();
 
-        // New or rewritten recipes: write them in the other language too, read their facts, and
-        // judge them against the household's notes.
+        // New or rewritten recipes: write them in the other language too, read their facts, judge
+        // them against the household's notes, and bring their ingredients into the food catalog.
         // (Asked to the repository: the link's own list doesn't know the recipes this run created.)
         foreach ($this->entityManager->getRepository(Recipe::class)->findBy(['source' => $source]) as $recipe) {
             if ($recipe->needsTranslation()) {
@@ -160,6 +162,7 @@ final readonly class ExtractSourceHandler
                 $this->bus->dispatch(new AnnotateRecipe($recipe->getId()->toRfc4122()));
             }
             $this->notes->recipeChanged($recipe);
+            $this->foods->recipeChanged($recipe);
         }
     }
 
