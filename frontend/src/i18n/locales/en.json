@@ -114,7 +114,19 @@
     "light": "Light",
     "hearty": "Hearty",
     "vegetarian": "Vegetarian",
-    "fits": "Fit you"
+    "fits": "Fit you",
+    "more": {
+      "title": "More filters",
+      "kcal": "Calories per serving",
+      "kcalMax": "Up to {{kcal}} kcal",
+      "protein": "Protein per serving",
+      "proteinMin": "{{grams}} g or more",
+      "spice": "Spice",
+      "spice_none": "Not spicy",
+      "spice_hot": "Spicy",
+      "without": "Without",
+      "note": "Only recipes known to match show up: if figures or ingredients are still unknown, they’re left out. To leave out an ingredient, search for it with a dash in front: -coriander."
+    }
   },
   "recipe": {
     "favorite": "Favorite",

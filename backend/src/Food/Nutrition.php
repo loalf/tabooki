@@ -79,15 +79,19 @@ final class Nutrition
      * @param list<RecipeIngredient> $lines
      * @param array<string, Food>    $foods by key
      *
-     * @return array{list<Allergen>, list<Allergen>} what the dish needs brings, and what only its optional lines do
+     * Also whether every line the dish needs has a described food: otherwise what it is free of isn't known
+     *
+     * @return array{list<Allergen>, list<Allergen>, bool} needed, only optional, complete
      */
     public static function allergens(array $lines, array $foods): array
     {
         $needed = [];
         $optional = [];
+        $complete = true;
         foreach ($lines as $line) {
             $food = $foods[$line->getCanonicalKey() ?? ''] ?? null;
             if (null === $food || !$food->isDescribed()) {
+                $complete = $complete && $line->isOptional();
                 continue;
             }
             foreach ($food->getAllergens() as $allergen) {
@@ -96,7 +100,7 @@ final class Nutrition
         }
         $needed = Allergen::listFrom($needed);
 
-        return [$needed, array_values(array_filter(Allergen::listFrom($optional), static fn (Allergen $a): bool => !\in_array($a, $needed, true)))];
+        return [$needed, array_values(array_filter(Allergen::listFrom($optional), static fn (Allergen $a): bool => !\in_array($a, $needed, true))), $complete && [] !== $lines];
     }
 
     private static function per100g(Food $food, string $field): ?float

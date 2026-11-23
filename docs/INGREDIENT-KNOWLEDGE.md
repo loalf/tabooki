@@ -61,7 +61,7 @@ Considered Neo4j next to Postgres and rejected it (2026-11-23):
 
 ### 4. Search and planning
 
-- [ ] Filters: has/excludes ingredient, flags, kcal range, protein minimum
+- [x] Filters: "More filters" on the library: kcal per serving (up to 400/600/800), protein (20/30 g or more), spice (not spicy/spicy), and "without" any of the 14 allergens. Filtered in the browser like the other chips (the list carries `nutrition`, `allergens`, `allergensComplete`). Unknown never passes: no figures, no spice reading, or a needed line whose food isn't described (`Recipe.allergensComplete`) leaves the recipe out; "without" also checks the annotate step's food groups. Excluding an ingredient is a search word with a dash (`-chorizo`; it matches the start of words and drops a final "s"). Including one is the search as before
 - [ ] The planner and taste profile use the flags ("no spicy on weekdays", allergens as hard rules)
 - [ ] Substitutions table (food ↔ food) used by swaps and the shopping list
 - [ ] "More like this": ingredient overlap in SQL first

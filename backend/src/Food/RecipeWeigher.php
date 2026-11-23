@@ -33,8 +33,8 @@ final readonly class RecipeWeigher
             [$grams, $source] = self::weightOf($line, $foods[$line->getCanonicalKey() ?? ''] ?? null, $estimates[$line->getPosition()] ?? null);
             $line->weigh($grams, $source);
         }
-        [$allergens, $optionalAllergens] = Nutrition::allergens($lines, $foods);
-        $recipe->applyIngredientFacts(Nutrition::perServing($lines, $foods, $recipe->getServings()), $allergens, $optionalAllergens);
+        [$allergens, $optionalAllergens, $complete] = Nutrition::allergens($lines, $foods);
+        $recipe->applyIngredientFacts(Nutrition::perServing($lines, $foods, $recipe->getServings()), $allergens, $optionalAllergens, $complete);
     }
 
     /**

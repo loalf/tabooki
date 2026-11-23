@@ -289,7 +289,7 @@ class Recipe implements HouseholdOwned
      * @var array<string, int|float>|null
      */
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
-    #[Groups(['recipe:read'])]
+    #[Groups(['recipe:read', 'recipe:list'])]
     #[ApiProperty(schema: ['type' => ['object', 'null'], 'required' => [...Nutrition::FIELDS, 'coverage', 'unweighed'], 'properties' => [
         'kcal' => ['type' => 'integer'],
         'protein' => ['type' => 'number'],
@@ -311,6 +311,10 @@ class Recipe implements HouseholdOwned
     /** @var list<string> Allergen values only its optional lines bring */
     #[ORM\Column(name: 'optional_allergens', type: Types::JSON, options: ['jsonb' => true, 'default' => '[]'])]
     private array $optionalAllergenValues = [];
+
+    /** Every line the dish needs has a described food: what isn't in `allergens` isn't in the dish. */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $allergensComplete = false;
 
     /** @var list<string> facts fixed by hand (FACTS), which the model leaves alone */
     #[ORM\Column(type: Types::JSON, options: ['jsonb' => true, 'default' => '[]'])]
@@ -855,7 +859,7 @@ class Recipe implements HouseholdOwned
     }
 
     /** @return list<Allergen> */
-    #[Groups(['recipe:read'])]
+    #[Groups(['recipe:read', 'recipe:list'])]
     public function getAllergens(): array
     {
         return array_map(Allergen::from(...), $this->allergenValues);
@@ -868,6 +872,13 @@ class Recipe implements HouseholdOwned
         return array_map(Allergen::from(...), $this->optionalAllergenValues);
     }
 
+    /** Whether every line the dish needs has a described food, so an allergen missing from `allergens` is known to be missing. */
+    #[Groups(['recipe:read', 'recipe:list'])]
+    public function isAllergensComplete(): bool
+    {
+        return $this->allergensComplete;
+    }
+
     /**
      * What the lines' foods say about the dish (App\Food\RecipeWeigher).
      *
@@ -875,8 +886,9 @@ class Recipe implements HouseholdOwned
      * @param list<Allergen>                $allergens
      * @param list<Allergen>                $optionalAllergens
      */
-    public function applyIngredientFacts(?array $nutrition, array $allergens, array $optionalAllergens): void
+    public function applyIngredientFacts(?array $nutrition, array $allergens, array $optionalAllergens, bool $allergensComplete): void
     {
+        $this->allergensComplete = $allergensComplete;
         $this->nutrition = $nutrition;
         $this->allergenValues = array_map(static fn (Allergen $a): string => $a->value, $allergens);
         $this->optionalAllergenValues = array_map(static fn (Allergen $a): string => $a->value, $optionalAllergens);

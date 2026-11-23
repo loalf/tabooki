@@ -59,12 +59,16 @@ final class NutritionTest extends TestCase
             'egg' => self::food(kcal: 143, allergens: [Allergen::Eggs]),
         ];
 
-        [$needed, $optional] = Nutrition::allergens([
-            self::line('pasta', 200), self::line('egg', 55, optional: true), self::line('parmesan', 20, optional: true),
+        [$needed, $optional, $complete] = Nutrition::allergens([
+            self::line('pasta', 200), self::line('egg', 55, optional: true), self::line('parmesan', 20, optional: true), self::line('mystery', 5, optional: true),
         ], $foods);
 
         self::assertSame([Allergen::Gluten, Allergen::Eggs], $needed);
         self::assertSame([Allergen::Milk], $optional, 'eggs are needed anyway');
+        self::assertTrue($complete, 'an unknown optional line can be left out');
+
+        self::assertFalse(Nutrition::allergens([self::line('pasta', 200), self::line('mystery', 5)], $foods)[2], 'a needed line whose food is unknown');
+        self::assertFalse(Nutrition::allergens([], $foods)[2], 'no lines, nothing known');
     }
 
     private static function line(string $key, ?float $grams, bool $optional = false): RecipeIngredient

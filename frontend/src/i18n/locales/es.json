@@ -114,7 +114,19 @@
     "light": "Ligeras",
     "hearty": "Contundentes",
     "vegetarian": "Vegetarianas",
-    "fits": "Encajan"
+    "fits": "Encajan",
+    "more": {
+      "title": "Más filtros",
+      "kcal": "Calorías por ración",
+      "kcalMax": "Hasta {{kcal}} kcal",
+      "protein": "Proteína por ración",
+      "proteinMin": "{{grams}} g o más",
+      "spice": "Picante",
+      "spice_none": "Nada picante",
+      "spice_hot": "Que pique",
+      "without": "Sin",
+      "note": "Solo salen las recetas de las que se sabe: si faltan cifras o ingredientes por conocer, se quedan fuera. Para quitar un ingrediente, búscalo con un guion delante: -cilantro."
+    }
   },
   "recipe": {
     "favorite": "Favorita",

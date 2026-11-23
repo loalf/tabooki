@@ -19,7 +19,7 @@ use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\JsonMockResponse;
 
 /**
- * @phpstan-type View array{nutrition?: array{kcal: int|float, protein: int|float, coverage: int|float, unweighed: int}|null, allergens?: list<string>, optionalAllergens?: list<string>}
+ * @phpstan-type View array{nutrition?: array{kcal: int|float, protein: int|float, coverage: int|float, unweighed: int}|null, allergens?: list<string>, optionalAllergens?: list<string>, allergensComplete?: bool}
  * @phpstan-type Line array{rawText: string, canonicalKey?: string|null, name?: string|null, quantity?: float|int|null, unit?: string|null, grams?: float|int|null, gramsSource?: string|null}
  */
 final class RecipeWeightsTest extends ApiTestCase
@@ -118,6 +118,7 @@ final class RecipeWeightsTest extends ApiTestCase
             ['rawText' => 'Parmesano (opcional)', 'canonicalKey' => 'parmesan', 'quantity' => 20, 'unit' => 'g', 'optional' => true],
         ]);
         self::assertNull($this->get($id)['nutrition'] ?? null, 'nothing known about the foods yet');
+        self::assertFalse($this->get($id)['allergensComplete'] ?? null, 'so nothing known to be missing either');
 
         $this->mockBedrock(['foods' => [
             [...self::food('chickpeas_cooked'), 'kcal' => 140, 'protein' => 7],
@@ -134,6 +135,11 @@ final class RecipeWeightsTest extends ApiTestCase
         self::assertEquals([1, 0], [$recipe['nutrition']['coverage'] ?? null, $recipe['nutrition']['unweighed'] ?? null]);
         self::assertSame(['gluten'], $recipe['allergens'] ?? null);
         self::assertSame(['milk'], $recipe['optionalAllergens'] ?? null);
+        self::assertTrue($recipe['allergensComplete'] ?? null);
+
+        /** @var list<array{title: string, nutrition: array{kcal: int}|null, allergens: list<string>, allergensComplete: bool}> $list */
+        $list = $this->client->request('GET', '/api/recipes')->toArray();
+        self::assertSame([320, ['gluten'], true], [$list[0]['nutrition']['kcal'] ?? null, $list[0]['allergens'], $list[0]['allergensComplete']], 'the library filters on them');
 
         // The household says its "chickpeas" are dried ones: the recipe follows.
         $ingredients = self::getContainer()->get(IngredientCatalog::class)->forKeys($this->ana->getHousehold(), ['chickpeas_cooked' => ['name' => 'garbanzos', 'language' => 'es']]);

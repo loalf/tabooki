@@ -1,5 +1,5 @@
-import { ChevronDown, Feather, Heart, Leaf, ListChecks, Plus, Salad, Search, Soup, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { ChevronDown, Feather, Heart, Leaf, ListChecks, Plus, Salad, Search, SlidersHorizontal, Soup, X } from 'lucide-react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
 import { type RecipeFilters, type RecipeListItem, useRecipes, useReviewCount, useTagNames } from '@/api/library'
@@ -17,6 +17,61 @@ const SORTS = ['recent', 'quick', 'rating', 'az'] as const
 const HEAVY_FILTERS = ['light', 'hearty'] as const
 type HeavyFilter = (typeof HEAVY_FILTERS)[number]
 type Sort = (typeof SORTS)[number]
+
+// "More filters": what a serving brings, how spicy, what it is free of. In the URL like the rest.
+const KCAL_MAX = [400, 600, 800] as const
+const PROTEIN_MIN = [20, 30] as const
+const SPICE_FILTERS = ['none', 'hot'] as const
+type SpiceFilter = (typeof SPICE_FILTERS)[number]
+type Allergen = NonNullable<RecipeListItem['allergens']>[number]
+type FoodGroup = NonNullable<RecipeListItem['foodGroups']>[number]
+const ALLERGENS: Allergen[] = ['gluten', 'milk', 'eggs', 'fish', 'crustaceans', 'molluscs', 'tree_nuts', 'peanuts', 'soy', 'sesame', 'celery', 'mustard', 'sulphites', 'lupin']
+// What the recipe's own reading says it contains backs up what its foods say.
+const ALLERGEN_GROUPS: Partial<Record<Allergen, FoodGroup[]>> = {
+  gluten: ['gluten'],
+  milk: ['dairy', 'cheese'],
+  eggs: ['egg'],
+  fish: ['fish'],
+  crustaceans: ['shellfish'],
+  molluscs: ['shellfish'],
+  tree_nuts: ['tree_nuts'],
+  peanuts: ['peanuts'],
+  soy: ['soy'],
+  sesame: ['sesame'],
+}
+
+type MoreFilters = { kcal: number | null; protein: number | null; spice: SpiceFilter | null; without: Allergen[] }
+
+function readMoreFilters(params: URLSearchParams): MoreFilters {
+  const number = <T extends number>(key: string, allowed: readonly T[]) => allowed.find((n) => String(n) === params.get(key)) ?? null
+  return {
+    kcal: number('kcal', KCAL_MAX),
+    protein: number('protein', PROTEIN_MIN),
+    spice: SPICE_FILTERS.find((s) => s === params.get('spice')) ?? null,
+    without: ALLERGENS.filter((a) => params.getAll('without').includes(a)),
+  }
+}
+
+function moreFiltersCount(f: MoreFilters): number {
+  return Number(f.kcal !== null) + Number(f.protein !== null) + Number(f.spice !== null) + f.without.length
+}
+
+/** Unknown figures, spice or allergens never pass: a filter is a promise. */
+function passesMoreFilters(r: RecipeListItem, f: MoreFilters): boolean {
+  if (f.kcal !== null && !(r.nutrition && r.nutrition.kcal <= f.kcal)) return false
+  if (f.protein !== null && !(r.nutrition && r.nutrition.protein >= f.protein)) return false
+  if (f.spice === 'none' && r.spice !== 0) return false
+  if (f.spice === 'hot' && !((r.spice ?? 0) >= 1)) return false
+  if (f.without.length) {
+    if (!r.allergensComplete) return false
+    const groups = r.foodGroups ?? []
+    for (const allergen of f.without) {
+      if (r.allergens?.includes(allergen)) return false
+      if (ALLERGEN_GROUPS[allergen]?.some((g) => groups.includes(g))) return false
+    }
+  }
+  return true
+}
 
 function sortRecipes(recipes: RecipeListItem[], sort: Sort, locale: string): RecipeListItem[] {
   if (sort === 'recent') return recipes
@@ -41,6 +96,9 @@ export function LibraryPage() {
   const heavy: HeavyFilter | null = HEAVY_FILTERS.find((h) => h === params.get('heavy')) ?? null
   const vegetarian = params.get('veg') === '1'
   const fitting = params.get('fits') === '1'
+  const more = readMoreFilters(params)
+  const moreCount = moreFiltersCount(more)
+  const [showMore, setShowMore] = useState(moreCount > 0)
   const [query, setQuery] = useState(params.get('q') ?? '')
   const debouncedQuery = useDebounced(query)
 
@@ -77,12 +135,13 @@ export function LibraryPage() {
   const recipes = useRecipes(filters)
   const allTags = useTagNames()
   const reviewCount = useReviewCount()
-  const filtering = Boolean(filters.q.trim() || tags.length || favorite || needsReview || heavy || vegetarian || fitting)
+  const filtering = Boolean(filters.q.trim() || tags.length || favorite || needsReview || heavy || vegetarian || fitting || moreCount)
   const shown = (recipes.data ?? []).filter(
     (r) =>
       (!heavy || r.heaviness === heavy) &&
       (!vegetarian || r.diet === 'vegetarian' || r.diet === 'vegan') &&
-      (!fitting || (!r.tasteConflicts?.length && !(r.notesFit?.fit === 'poor' && r.notesFit.when === 'always'))),
+      (!fitting || (!r.tasteConflicts?.length && !(r.notesFit?.fit === 'poor' && r.notesFit.when === 'always'))) &&
+      passesMoreFilters(r, more),
   )
   // Only once the household has said what it likes (recipes then say what they have against it).
   const hasTaste = (recipes.data ?? []).some((r) => r.tasteConflicts != null)
@@ -112,6 +171,24 @@ export function LibraryPage() {
       const next = new URLSearchParams(current)
       if (next.get('heavy') === value) next.delete('heavy')
       else next.set('heavy', value)
+      return next
+    })
+
+  /** One choice per key (kcal, protein, spice): tapping the chosen one again drops it. */
+  const toggleChoice = (key: 'kcal' | 'protein' | 'spice', value: string) =>
+    setParams((current) => {
+      const next = new URLSearchParams(current)
+      if (next.get(key) === value) next.delete(key)
+      else next.set(key, value)
+      return next
+    })
+
+  const toggleWithout = (allergen: Allergen) =>
+    setParams((current) => {
+      const next = new URLSearchParams(current)
+      const selected = next.getAll('without')
+      next.delete('without')
+      for (const a of selected.includes(allergen) ? selected.filter((s) => s !== allergen) : [...selected, allergen]) next.append('without', a)
       return next
     })
 
@@ -177,6 +254,11 @@ export function LibraryPage() {
           <Chip active={!filtering} onClick={clearFilters} className={cn(!filtering && 'bg-foreground text-background')}>
             {t('library.all')}
           </Chip>
+          <Chip active={moreCount > 0} onClick={() => setShowMore((open) => !open)} aria-expanded={showMore} aria-controls="more-filters">
+            <SlidersHorizontal className="size-4" aria-hidden />
+            {t('library.more.title')}
+            {moreCount > 0 && <span className="tabular-nums">· {moreCount}</span>}
+          </Chip>
           {(reviewCount > 0 || needsReview) && (
             <Chip active={needsReview} onClick={() => toggleFlag('review')}>
               <ListChecks className="size-4" aria-hidden />
@@ -211,6 +293,10 @@ export function LibraryPage() {
             </Chip>
           ))}
         </div>
+
+        {showMore && (
+          <MoreFiltersPanel filters={more} onChoice={toggleChoice} onWithout={toggleWithout} />
+        )}
 
         {recipes.isPending ? (
           <RecipeGridSkeleton />
@@ -273,6 +359,63 @@ export function LibraryPage() {
 
       {(adding || inboxRequested) && <AddRecipeSheet onClose={closeAdding} />}
     </>
+  )
+}
+
+function MoreFiltersPanel({
+  filters,
+  onChoice,
+  onWithout,
+}: {
+  filters: MoreFilters
+  onChoice: (key: 'kcal' | 'protein' | 'spice', value: string) => void
+  onWithout: (allergen: Allergen) => void
+}) {
+  const { t, i18n } = useTranslation()
+  const number = (n: number) => new Intl.NumberFormat(i18n.language).format(n)
+  const group = (label: string, chips: ReactNode) => (
+    <div role="group" aria-label={label} className="flex flex-col gap-1.5">
+      <h3 className="text-xs font-bold tracking-wide text-muted-foreground uppercase">{label}</h3>
+      <div className="flex flex-wrap gap-2">{chips}</div>
+    </div>
+  )
+
+  return (
+    <section id="more-filters" aria-label={t('library.more.title')} className="flex flex-col gap-3.5 rounded-lg border-2 border-outline bg-card p-3.5">
+      {group(
+        t('library.more.kcal'),
+        KCAL_MAX.map((kcal) => (
+          <Chip key={kcal} active={filters.kcal === kcal} onClick={() => onChoice('kcal', String(kcal))}>
+            {t('library.more.kcalMax', { kcal: number(kcal) })}
+          </Chip>
+        )),
+      )}
+      {group(
+        t('library.more.protein'),
+        PROTEIN_MIN.map((grams) => (
+          <Chip key={grams} active={filters.protein === grams} onClick={() => onChoice('protein', String(grams))}>
+            {t('library.more.proteinMin', { grams: number(grams) })}
+          </Chip>
+        )),
+      )}
+      {group(
+        t('library.more.spice'),
+        SPICE_FILTERS.map((spice) => (
+          <Chip key={spice} active={filters.spice === spice} onClick={() => onChoice('spice', spice)}>
+            {t(`library.more.spice_${spice}`)}
+          </Chip>
+        )),
+      )}
+      {group(
+        t('library.more.without'),
+        ALLERGENS.map((allergen) => (
+          <Chip key={allergen} active={filters.without.includes(allergen)} onClick={() => onWithout(allergen)}>
+            <span className="inline-block first-letter:uppercase">{t(`recipe.allergen.${allergen}`)}</span>
+          </Chip>
+        )),
+      )}
+      <p className="text-xs text-muted-foreground">{t('library.more.note')}</p>
+    </section>
   )
 }
 

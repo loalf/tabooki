@@ -142,6 +142,10 @@ final class RecipesTest extends ApiTestCase
         self::assertSame(['Lentejas veganas', 'Lentejas con chorizo'], $this->titles('/api/recipes?q=lentejas'));
         self::assertSame(['Lentejas con chorizo'], $this->titles('/api/recipes?q=lentejas%20chorizo'));
         self::assertSame([], $this->titles('/api/recipes?q=100%25'));
+        self::assertSame(['Lentejas veganas'], $this->titles('/api/recipes?q=lentejas%20-CHORIZOS'), 'a dash leaves out what starts with the word, singular too');
+        self::assertSame(['Lentejas veganas', 'Puré de calabaza'], $this->titles('/api/recipes?q=-chorizo%20-'), 'a lone dash means nothing');
+        self::assertSame(['Lentejas veganas', 'Lentejas con chorizo'], $this->titles('/api/recipes?q=-moscada'));
+        self::assertSame(['Lentejas con chorizo', 'Puré de calabaza'], $this->titles('/api/recipes?q=-veganas'));
 
         self::assertSame(['Lentejas veganas', 'Puré de calabaza'], $this->titles('/api/recipes?tags[]=vegetariano'));
         self::assertSame(['Lentejas veganas'], $this->titles('/api/recipes?tags[]=vegetariano&tags[]=Legumbres'));

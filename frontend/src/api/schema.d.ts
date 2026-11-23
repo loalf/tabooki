@@ -1690,6 +1690,25 @@ export interface components {
             heaviness?: "light" | "medium" | "hearty" | null;
             /** @description 0 not spicy, 1 mild, 2 hot. */
             spice?: number | null;
+            nutrition?: {
+                kcal: number;
+                protein: number;
+                fat: number;
+                saturatedFat: number;
+                carbs: number;
+                sugar: number;
+                fiber: number;
+                salt: number;
+                /** @description Share of the weighed grams whose figures are known, 0 to 1. */
+                coverage: number;
+                /** @description Lines nobody could weigh, left out. */
+                unweighed: number;
+            } | null;
+            /**
+             * @description Every line the dish needs has a described food: what isn't in `allergens` isn't in the dish.
+             * @default false
+             */
+            readonly allergensComplete: boolean;
             readonly totalMinutes?: number | null;
             mealTypes?: ("lunch" | "dinner")[];
             foodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
@@ -1698,6 +1717,7 @@ export interface components {
              * @enum {string|null}
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
+            readonly allergens?: ("gluten" | "crustaceans" | "eggs" | "fish" | "peanuts" | "soy" | "milk" | "tree_nuts" | "celery" | "mustard" | "sesame" | "sulphites" | "lupin" | "molluscs")[];
         };
         "Recipe-recipe.list": {
             /** Format: uuid */
@@ -1761,6 +1781,25 @@ export interface components {
             heaviness?: "light" | "medium" | "hearty" | null;
             /** @description 0 not spicy, 1 mild, 2 hot. */
             spice?: number | null;
+            nutrition?: {
+                kcal: number;
+                protein: number;
+                fat: number;
+                saturatedFat: number;
+                carbs: number;
+                sugar: number;
+                fiber: number;
+                salt: number;
+                /** @description Share of the weighed grams whose figures are known, 0 to 1. */
+                coverage: number;
+                /** @description Lines nobody could weigh, left out. */
+                unweighed: number;
+            } | null;
+            /**
+             * @description Every line the dish needs has a described food: what isn't in `allergens` isn't in the dish.
+             * @default false
+             */
+            readonly allergensComplete: boolean;
             readonly totalMinutes?: number | null;
             mealTypes?: ("lunch" | "dinner")[];
             foodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
@@ -1769,6 +1808,7 @@ export interface components {
              * @enum {string|null}
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
+            readonly allergens?: ("gluten" | "crustaceans" | "eggs" | "fish" | "peanuts" | "soy" | "milk" | "tree_nuts" | "celery" | "mustard" | "sesame" | "sulphites" | "lupin" | "molluscs")[];
         };
         "Recipe-recipe.read": {
             /** Format: uuid */
@@ -1860,6 +1900,11 @@ export interface components {
                 /** @description Lines nobody could weigh, left out. */
                 unweighed: number;
             } | null;
+            /**
+             * @description Every line the dish needs has a described food: what isn't in `allergens` isn't in the dish.
+             * @default false
+             */
+            readonly allergensComplete: boolean;
             /** Format: date-time */
             readonly createdAt?: string;
             /** Format: date-time */
@@ -2041,6 +2086,25 @@ export interface components {
             heaviness?: "light" | "medium" | "hearty" | null;
             /** @description 0 not spicy, 1 mild, 2 hot. */
             spice?: number | null;
+            nutrition?: {
+                kcal: number;
+                protein: number;
+                fat: number;
+                saturatedFat: number;
+                carbs: number;
+                sugar: number;
+                fiber: number;
+                salt: number;
+                /** @description Share of the weighed grams whose figures are known, 0 to 1. */
+                coverage: number;
+                /** @description Lines nobody could weigh, left out. */
+                unweighed: number;
+            } | null;
+            /**
+             * @description Every line the dish needs has a described food: what isn't in `allergens` isn't in the dish.
+             * @default false
+             */
+            readonly allergensComplete: boolean;
             readonly totalMinutes?: number | null;
             mealTypes?: ("lunch" | "dinner")[];
             foodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
@@ -2049,6 +2113,7 @@ export interface components {
              * @enum {string|null}
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
+            readonly allergens?: ("gluten" | "crustaceans" | "eggs" | "fish" | "peanuts" | "soy" | "milk" | "tree_nuts" | "celery" | "mustard" | "sesame" | "sulphites" | "lupin" | "molluscs")[];
         };
         "Recipe.jsonld-recipe.list": components["schemas"]["HydraItemBaseSchema"] & {
             /** Format: uuid */
@@ -2112,6 +2177,25 @@ export interface components {
             heaviness?: "light" | "medium" | "hearty" | null;
             /** @description 0 not spicy, 1 mild, 2 hot. */
             spice?: number | null;
+            nutrition?: {
+                kcal: number;
+                protein: number;
+                fat: number;
+                saturatedFat: number;
+                carbs: number;
+                sugar: number;
+                fiber: number;
+                salt: number;
+                /** @description Share of the weighed grams whose figures are known, 0 to 1. */
+                coverage: number;
+                /** @description Lines nobody could weigh, left out. */
+                unweighed: number;
+            } | null;
+            /**
+             * @description Every line the dish needs has a described food: what isn't in `allergens` isn't in the dish.
+             * @default false
+             */
+            readonly allergensComplete: boolean;
             readonly totalMinutes?: number | null;
             mealTypes?: ("lunch" | "dinner")[];
             foodGroups?: ("red_meat" | "pork" | "poultry" | "processed_meat" | "fish" | "shellfish" | "animal_stock" | "egg" | "dairy" | "cheese" | "gluten" | "tree_nuts" | "peanuts" | "soy" | "sesame" | "alcohol")[];
@@ -2120,6 +2204,7 @@ export interface components {
              * @enum {string|null}
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
+            readonly allergens?: ("gluten" | "crustaceans" | "eggs" | "fish" | "peanuts" | "soy" | "milk" | "tree_nuts" | "celery" | "mustard" | "sesame" | "sulphites" | "lupin" | "molluscs")[];
         };
         "Recipe.jsonld-recipe.read": components["schemas"]["HydraItemBaseSchema"] & {
             /** Format: uuid */
@@ -2211,6 +2296,11 @@ export interface components {
                 /** @description Lines nobody could weigh, left out. */
                 unweighed: number;
             } | null;
+            /**
+             * @description Every line the dish needs has a described food: what isn't in `allergens` isn't in the dish.
+             * @default false
+             */
+            readonly allergensComplete: boolean;
             /** Format: date-time */
             readonly createdAt?: string;
             /** Format: date-time */
