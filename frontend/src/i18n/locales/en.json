@@ -595,6 +595,7 @@
       "foods": "Looking up foods",
       "substitutes": "Find substitutes",
       "bedca": "Pair with BEDCA",
+      "usda": "Pair with USDA",
       "embed": "Prepare search",
       "search": "Search by meaning",
       "translate": "Translating the recipe",
@@ -616,7 +617,8 @@
     "substitutesWhat": "New ingredients: what to use instead",
     "embedWhat": "Recipe: to find it by meaning",
     "searchWhat": "A search",
-    "bedcaWhat": "Foods: their BEDCA figures"
+    "bedcaWhat": "Foods: their BEDCA figures",
+    "usdaWhat": "Foods: their USDA figures"
   },
   "password": {
     "current": "Current password",
@@ -930,7 +932,9 @@
       "corrected": "Fixed by hand by {{who}} on {{when}}.",
       "bedcaRef": "From AESAN/BEDCA Base de Datos Española de Composición de Alimentos v1.0 (2010): “{{food}}”.",
       "saltFromSodium": "Salt is worked out from its sodium.",
-      "stillEstimated": "Estimated by Tabooki, as BEDCA doesn’t give it: {{fields}}."
+      "stillEstimated": "Estimated by Tabooki, as the table doesn’t give it: {{fields}}.",
+      "usdaRef": "From USDA FoodData Central: “{{food}}”.",
+      "carbsWithoutFibre": "Carbohydrates are USDA’s without their fibre."
     },
     "usedIn_one": "In {{count}} recipe",
     "usedIn_other": "In {{count}} recipes",

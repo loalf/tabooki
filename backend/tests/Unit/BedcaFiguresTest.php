@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit;
 
 use App\Food\Bedca\BedcaFigures;
+use App\Food\Bedca\BedcaFood;
 use PHPUnit\Framework\TestCase;
 
 final class BedcaFiguresTest extends TestCase
@@ -12,7 +13,7 @@ final class BedcaFiguresTest extends TestCase
     public function testKilojoulesBecomeKcalAndSodiumBecomesSalt(): void
     {
         // BEDCA's "Nata, líquida, para cocinar, 18% de grasa".
-        $figures = BedcaFigures::of([
+        $figures = BedcaFigures::entry(new BedcaFood(923, 'Nata, líquida, para cocinar, 18% de grasa', 'Cream'), [
             'ENERC' => ['value' => 840.078, 'unit' => 'kJ'],
             'PROT' => ['value' => 2.51, 'unit' => 'g'],
             'FAT' => ['value' => 19.9894, 'unit' => 'g'],
@@ -30,7 +31,7 @@ final class BedcaFiguresTest extends TestCase
     public function testWhatIsntGivenStaysUnknownAndContradictionsAreCaught(): void
     {
         // BEDCA's "Garbanzo, hervido": energy of the dried ones, nutrients of the boiled ones.
-        $boiled = BedcaFigures::of([
+        $boiled = BedcaFigures::entry(new BedcaFood(2192, 'Garbanzo, hervido', 'Chickpea, boiled'), [
             'ENERC' => ['value' => 1500.6, 'unit' => 'kJ'],
             'PROT' => ['value' => 8.9, 'unit' => 'g'],
             'FAT' => ['value' => 2.5, 'unit' => 'g'],
@@ -42,6 +43,7 @@ final class BedcaFiguresTest extends TestCase
         self::assertNull($boiled->values['sugar'], 'not given');
         self::assertNull($boiled->values['salt']);
 
-        self::assertSame('no energy', BedcaFigures::of(['PROT' => ['value' => 1.0, 'unit' => 'g']])->problem);
+        self::assertSame('no energy', BedcaFigures::entry(new BedcaFood(1, 'X', 'X'), ['PROT' => ['value' => 1.0, 'unit' => 'g']])->problem);
+        self::assertSame('2192 Garbanzo, hervido', $boiled->ref);
     }
 }

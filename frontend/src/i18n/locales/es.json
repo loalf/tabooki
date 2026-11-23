@@ -595,6 +595,7 @@
       "foods": "Consultar alimentos",
       "substitutes": "Buscar sustitutos",
       "bedca": "Emparejar con BEDCA",
+      "usda": "Emparejar con USDA",
       "embed": "Preparar la búsqueda",
       "search": "Buscar por significado",
       "translate": "Traducir la receta",
@@ -616,7 +617,8 @@
     "substitutesWhat": "Ingredientes nuevos: qué usar en su lugar",
     "embedWhat": "Receta: para buscarla por significado",
     "searchWhat": "Una búsqueda",
-    "bedcaWhat": "Alimentos: sus cifras de BEDCA"
+    "bedcaWhat": "Alimentos: sus cifras de BEDCA",
+    "usdaWhat": "Alimentos: sus cifras de USDA"
   },
   "password": {
     "current": "Contraseña actual",
@@ -930,7 +932,9 @@
       "corrected": "Corregido a mano por {{who}} el {{when}}.",
       "bedcaRef": "Según AESAN/BEDCA Base de Datos Española de Composición de Alimentos v1.0 (2010): «{{food}}».",
       "saltFromSodium": "La sal se calcula a partir de su sodio.",
-      "stillEstimated": "Estimado por Tabooki, porque BEDCA no lo da: {{fields}}."
+      "stillEstimated": "Estimado por Tabooki, porque la tabla no lo da: {{fields}}.",
+      "usdaRef": "Según USDA FoodData Central: «{{food}}».",
+      "carbsWithoutFibre": "Los hidratos son los de USDA sin su fibra."
     },
     "usedIn_one": "En {{count}} receta",
     "usedIn_other": "En {{count}} recetas",

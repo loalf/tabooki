@@ -951,7 +951,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "substitutes" | "bedca" | "embed" | "search" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "substitutes" | "bedca" | "usda" | "embed" | "search" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -973,7 +973,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "substitutes" | "bedca" | "embed" | "search" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "substitutes" | "bedca" | "usda" | "embed" | "search" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
             /** @default  */
             model: string;
             /** @default 0 */

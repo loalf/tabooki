@@ -18,6 +18,8 @@ services:
       OPENROUTER_TRANSCRIPTION_MODEL: ${OPENROUTER_TRANSCRIPTION_MODEL:-openai/whisper-large-v3}
       # Search by meaning (recipes and queries as vectors).
       BEDROCK_EMBEDDING_MODEL: ${BEDROCK_EMBEDDING_MODEL:-eu.cohere.embed-v4:0}
+      # USDA FoodData Central (app:foods:usda): a data.gov key.
+      USDA_API_KEY: ${USDA_API_KEY:-DEMO_KEY}
       # Password emails (docs/DEPLOY.md). Without MAILER_DSN they are discarded.
       MAILER_DSN: ${MAILER_DSN:-null://null}
       MAILER_FROM: ${MAILER_FROM:-Tabooki <no-reply@tabooki.xyz>}
@@ -58,6 +60,8 @@ services:
       OPENROUTER_TRANSCRIPTION_MODEL: ${OPENROUTER_TRANSCRIPTION_MODEL:-openai/whisper-large-v3}
       # Search by meaning (recipes and queries as vectors).
       BEDROCK_EMBEDDING_MODEL: ${BEDROCK_EMBEDDING_MODEL:-eu.cohere.embed-v4:0}
+      # USDA FoodData Central (app:foods:usda): a data.gov key.
+      USDA_API_KEY: ${USDA_API_KEY:-DEMO_KEY}
       # Password emails (docs/DEPLOY.md). Without MAILER_DSN they are discarded.
       MAILER_DSN: ${MAILER_DSN:-null://null}
       MAILER_FROM: ${MAILER_FROM:-Tabooki <no-reply@tabooki.xyz>}

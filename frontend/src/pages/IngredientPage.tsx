@@ -176,9 +176,10 @@ function FoodCard({ food }: { food: FoodDetail }) {
                 who: food.correctedByName ?? t('ingredients.someone'),
                 when: new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(food.correctedAt)),
               })
-            : food.source === 'bedca'
+            : food.source === 'bedca' || food.source === 'usda'
               ? [
-                  t('ingredients.source.bedcaRef', { food: food.sourceRef?.replace(/^\d+\s+/, '') ?? '' }),
+                  t(`ingredients.source.${food.source}Ref`, { food: food.sourceRef?.replace(/^\d+\s+/, '') ?? '' }),
+                  food.source === 'usda' ? t('ingredients.source.carbsWithoutFibre') : null,
                   t('ingredients.source.saltFromSodium'),
                   food.estimatedFields?.length
                     ? t('ingredients.source.stillEstimated', {
