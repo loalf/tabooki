@@ -250,6 +250,232 @@
                 ]
             }
         },
+        "/api/foods/{id}/correction": {
+            "post": {
+                "operationId": "food_correct",
+                "tags": [
+                    "Food"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Food resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Food.jsonld-food.read"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Food-food.read"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a Food resource.",
+                "description": "Creates a Food resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Food identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The new Food resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Food.FoodCorrectionInput-food.correct"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Food.FoodCorrectionInput-food.correct"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/foods/{id}/estimate": {
+            "post": {
+                "operationId": "food_estimate",
+                "tags": [
+                    "Food"
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Food resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Food.jsonld-food.read"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Food-food.read"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a Food resource.",
+                "description": "Creates a Food resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Food identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            }
+        },
         "/api/ingredients": {
             "get": {
                 "operationId": "api_ingredients_get_collection",
@@ -5905,6 +6131,20 @@
                             null
                         ]
                     },
+                    "edited": {
+                        "readOnly": true,
+                        "description": "Changed by hand: the model leaves it alone.",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "correctedAt": {
+                        "readOnly": true,
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
                     "substitutes": {
                         "type": "array",
                         "items": {
@@ -6027,6 +6267,14 @@
                     "described": {
                         "readOnly": true,
                         "type": "boolean"
+                    },
+                    "correctedByName": {
+                        "readOnly": true,
+                        "description": "Who fixed it by hand, by name.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     }
                 }
             },
@@ -6149,6 +6397,20 @@
                             null
                         ]
                     },
+                    "edited": {
+                        "readOnly": true,
+                        "description": "Changed by hand: the model leaves it alone.",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "correctedAt": {
+                        "readOnly": true,
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
                     "substitutes": {
                         "type": "array",
                         "items": {
@@ -6271,6 +6533,14 @@
                     "described": {
                         "readOnly": true,
                         "type": "boolean"
+                    },
+                    "correctedByName": {
+                        "readOnly": true,
+                        "description": "Who fixed it by hand, by name.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     }
                 }
             },
@@ -6393,6 +6663,20 @@
                             null
                         ]
                     },
+                    "edited": {
+                        "readOnly": true,
+                        "description": "Changed by hand: the model leaves it alone.",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "correctedAt": {
+                        "readOnly": true,
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
                     "substitutes": {
                         "type": "array",
                         "items": {
@@ -6515,6 +6799,100 @@
                     "described": {
                         "readOnly": true,
                         "type": "boolean"
+                    },
+                    "correctedByName": {
+                        "readOnly": true,
+                        "description": "Who fixed it by hand, by name.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "Food.FoodCorrectionInput-food.correct": {
+                "type": "object",
+                "description": "Fix the food's figures by hand (all of them at once): the model leaves them alone from then on, and every recipe with it is worked out again. Foods are shared.",
+                "properties": {
+                    "kcal": {
+                        "minimum": 0,
+                        "maximum": 900,
+                        "default": 0,
+                        "type": "number"
+                    },
+                    "protein": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "default": 0,
+                        "type": "number"
+                    },
+                    "fat": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "default": 0,
+                        "type": "number"
+                    },
+                    "saturatedFat": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "default": 0,
+                        "type": "number"
+                    },
+                    "carbs": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "default": 0,
+                        "type": "number"
+                    },
+                    "sugar": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "default": 0,
+                        "type": "number"
+                    },
+                    "fiber": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "default": 0,
+                        "type": "number"
+                    },
+                    "salt": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "default": 0,
+                        "type": "number"
+                    },
+                    "allergens": {
+                        "description": "Allergen values",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "spice": {
+                        "minimum": 0,
+                        "maximum": 2,
+                        "description": "0 not spicy, 1 mild, 2 hot.",
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "gramsPerPiece": {
+                        "minimum": 0.1,
+                        "maximum": 20000,
+                        "description": "One piece as bought or counted (1 onion); null when it isn't counted.",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "density": {
+                        "minimum": 0.1,
+                        "maximum": 5,
+                        "description": "Grams per millilitre; null when it's never measured by volume.",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
                     }
                 }
             },
@@ -6641,6 +7019,20 @@
                                     null
                                 ]
                             },
+                            "edited": {
+                                "readOnly": true,
+                                "description": "Changed by hand: the model leaves it alone.",
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "correctedAt": {
+                                "readOnly": true,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
                             "substitutes": {
                                 "type": "array",
                                 "items": {
@@ -6763,6 +7155,14 @@
                             "described": {
                                 "readOnly": true,
                                 "type": "boolean"
+                            },
+                            "correctedByName": {
+                                "readOnly": true,
+                                "description": "Who fixed it by hand, by name.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
                             }
                         }
                     }
@@ -6892,6 +7292,20 @@
                                     null
                                 ]
                             },
+                            "edited": {
+                                "readOnly": true,
+                                "description": "Changed by hand: the model leaves it alone.",
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "correctedAt": {
+                                "readOnly": true,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
                             "substitutes": {
                                 "type": "array",
                                 "items": {
@@ -7014,6 +7428,14 @@
                             "described": {
                                 "readOnly": true,
                                 "type": "boolean"
+                            },
+                            "correctedByName": {
+                                "readOnly": true,
+                                "description": "Who fixed it by hand, by name.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
                             }
                         }
                     }
@@ -7143,6 +7565,20 @@
                                     null
                                 ]
                             },
+                            "edited": {
+                                "readOnly": true,
+                                "description": "Changed by hand: the model leaves it alone.",
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "correctedAt": {
+                                "readOnly": true,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
                             "substitutes": {
                                 "type": "array",
                                 "items": {
@@ -7265,6 +7701,14 @@
                             "described": {
                                 "readOnly": true,
                                 "type": "boolean"
+                            },
+                            "correctedByName": {
+                                "readOnly": true,
+                                "description": "Who fixed it by hand, by name.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
                             }
                         }
                     }

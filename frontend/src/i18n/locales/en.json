@@ -924,7 +924,8 @@
       "llm": "Values estimated by Tabooki from tables such as BEDCA and USDA: a guide, not a label.",
       "manual": "Fixed by hand.",
       "bedca": "From BEDCA.",
-      "usda": "From USDA FoodData Central."
+      "usda": "From USDA FoodData Central.",
+      "corrected": "Fixed by hand by {{who}} on {{when}}."
     },
     "usedIn_one": "In {{count}} recipe",
     "usedIn_other": "In {{count}} recipes",
@@ -937,6 +938,23 @@
       "none": "No food matches.",
       "current": "The current one",
       "error": "Couldn’t change it. Try again."
+    },
+    "someone": "someone",
+    "correct": {
+      "edit": "Correct",
+      "undo": "Back to the estimate",
+      "title": "Correct the values",
+      "hint": "Per 100 g, as a recipe uses it (raw, or drained if tinned). It applies to every recipe with this food, other households’ too.",
+      "kcal": "Calories",
+      "spice": "Spice",
+      "spice_0": "Not spicy",
+      "spice_1": "A little spicy",
+      "spice_2": "Spicy",
+      "piece": "1 piece weighs",
+      "spoon": "1 tablespoon weighs",
+      "weightsHint": "Leave it empty if it isn’t counted in pieces or measured with spoons.",
+      "invalid": "Check the marked values: sugar can’t be more than the carbohydrates, nor saturated fat more than the fat.",
+      "error": "Couldn’t save it. Try again."
     }
   }
 }

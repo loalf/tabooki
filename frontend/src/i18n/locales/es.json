@@ -924,7 +924,8 @@
       "llm": "Valores estimados por Tabooki con tablas como BEDCA y USDA: una orientación, no una etiqueta.",
       "manual": "Corregido a mano.",
       "bedca": "Según BEDCA.",
-      "usda": "Según USDA FoodData Central."
+      "usda": "Según USDA FoodData Central.",
+      "corrected": "Corregido a mano por {{who}} el {{when}}."
     },
     "usedIn_one": "En {{count}} receta",
     "usedIn_other": "En {{count}} recetas",
@@ -937,6 +938,23 @@
       "none": "Ningún alimento coincide.",
       "current": "El actual",
       "error": "No se ha podido cambiar. Inténtalo de nuevo."
+    },
+    "someone": "alguien",
+    "correct": {
+      "edit": "Corregir",
+      "undo": "Volver a la estimación",
+      "title": "Corregir los valores",
+      "hint": "Por 100 g, como lo usa una receta (crudo, o escurrido si es de bote). Vale para todas las recetas con este alimento, también las de otras casas.",
+      "kcal": "Calorías",
+      "spice": "Picante",
+      "spice_0": "No pica",
+      "spice_1": "Pica un poco",
+      "spice_2": "Pica",
+      "piece": "1 unidad pesa",
+      "spoon": "1 cucharada pesa",
+      "weightsHint": "Déjalo vacío si no se cuenta por unidades o no se mide con cucharas.",
+      "invalid": "Revisa los valores marcados: el azúcar no puede pasar de los hidratos, ni las grasas saturadas de las grasas.",
+      "error": "No se ha podido guardar. Inténtalo de nuevo."
     }
   }
 }

@@ -1,11 +1,21 @@
-import { ArrowLeft, ArrowLeftRight, Check, LoaderCircle, Search, ShieldAlert, Undo2 } from 'lucide-react'
-import { type ReactNode, useState } from 'react'
+import { ArrowLeft, ArrowLeftRight, Check, LoaderCircle, Pencil, Search, ShieldAlert, Undo2 } from 'lucide-react'
+import { type FormEvent, type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router'
 import { ApiError } from '@/api/client'
-import { type FoodDetail, foodName, ingredientName, useFoodSearch, useIngredient, useRepointIngredient } from '@/api/ingredients'
+import {
+  type FoodCorrection,
+  type FoodDetail,
+  foodName,
+  ingredientName,
+  useCorrectFood,
+  useEstimateFood,
+  useFoodSearch,
+  useIngredient,
+  useRepointIngredient,
+} from '@/api/ingredients'
 import { EmptyState, PageHeader } from '@/components/PageHeader'
-import { Button, inputClass } from '@/components/ui'
+import { Button, Chip, inputClass } from '@/components/ui'
 import { useDebounced } from '@/lib/useDebounced'
 import { cn } from '@/lib/utils'
 
@@ -89,9 +99,12 @@ function FoodCard({ food }: { food: FoodDetail }) {
   const { t, i18n } = useTranslation()
   const lang = i18n.language.startsWith('en') ? 'en' : 'es'
   const number = (value: number, digits = 1) => new Intl.NumberFormat(i18n.language, { maximumFractionDigits: digits }).format(value)
+  const [editing, setEditing] = useState(false)
+  const estimate = useEstimateFood(food.id!)
   if (!food.described) {
     return <p className="rounded-lg border-2 border-dashed border-muted-foreground/60 p-3.5 text-sm text-muted-foreground">{t('ingredients.pending')}</p>
   }
+  if (editing) return <FoodForm food={food} onDone={() => setEditing(false)} />
   const rows: { label: string; value: number | null | undefined; sub?: boolean; digits?: number }[] = [
     { label: t('recipe.nutrition.protein'), value: food.protein },
     { label: t('recipe.nutrition.carbs'), value: food.carbs },
@@ -156,8 +169,126 @@ function FoodCard({ food }: { food: FoodDetail }) {
         </Facts>
       )}
 
-      <p className="mt-3 text-xs text-muted-foreground">{t(`ingredients.source.${food.source ?? 'llm'}`)}</p>
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t-2 border-outline/15 pt-3">
+        <p className="min-w-0 flex-1 text-xs text-muted-foreground">
+          {food.edited && food.correctedAt
+            ? t('ingredients.source.corrected', {
+                who: food.correctedByName ?? t('ingredients.someone'),
+                when: new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(food.correctedAt)),
+              })
+            : t(`ingredients.source.${food.source ?? 'llm'}`)}
+        </p>
+        <span className="flex gap-2">
+          {food.edited && (
+            <Button variant="ghost" size="sm" disabled={estimate.isPending} onClick={() => estimate.mutate()}>
+              <Undo2 className="size-4" aria-hidden />
+              {t('ingredients.correct.undo')}
+            </Button>
+          )}
+          <Button variant="secondary" size="sm" onClick={() => setEditing(true)}>
+            <Pencil className="size-4" aria-hidden />
+            {t('ingredients.correct.edit')}
+          </Button>
+        </span>
+      </div>
     </section>
+  )
+}
+
+const ALLERGENS = ['gluten', 'milk', 'eggs', 'fish', 'crustaceans', 'molluscs', 'tree_nuts', 'peanuts', 'soy', 'sesame', 'celery', 'mustard', 'sulphites', 'lupin'] as const
+const FIGURES = ['kcal', 'protein', 'carbs', 'sugar', 'fat', 'saturatedFat', 'fiber', 'salt'] as const
+type Figure = (typeof FIGURES)[number]
+/** Millilitres in a tablespoon: the weight of one says the density. */
+const TABLESPOON_ML = 15
+
+/** Fix the food's figures by hand. Foods are shared: the fix applies to every recipe with it. */
+function FoodForm({ food, onDone }: { food: FoodDetail; onDone: () => void }) {
+  const { t, i18n } = useTranslation()
+  const correct = useCorrectFood(food.id!)
+  const text = (value: number | null | undefined, digits = 2) => (value == null ? '' : new Intl.NumberFormat(i18n.language, { maximumFractionDigits: digits, useGrouping: false }).format(value))
+  const [figures, setFigures] = useState<Record<Figure, string>>(() => Object.fromEntries(FIGURES.map((f) => [f, text(food[f])])) as Record<Figure, string>)
+  const [allergens, setAllergens] = useState<string[]>(food.allergens ?? [])
+  const [spice, setSpice] = useState(food.spice ?? 0)
+  const [piece, setPiece] = useState(text(food.gramsPerPiece, 0))
+  const [spoon, setSpoon] = useState(text(food.density == null ? null : food.density * TABLESPOON_ML, 1))
+  const parse = (value: string): number | null => {
+    const n = Number.parseFloat(value.replace(',', '.'))
+    return Number.isFinite(n) ? n : null
+  }
+  const invalid = new Set((correct.error as { violations?: { propertyPath: string }[] } | null)?.violations?.map((v) => v.propertyPath.replace(/\[\d+\]$/, '')) ?? [])
+
+  const save = (event: FormEvent) => {
+    event.preventDefault()
+    const spoonGrams = parse(spoon)
+    const body = {
+      ...(Object.fromEntries(FIGURES.map((f) => [f, parse(figures[f]) ?? 0])) as Record<Figure, number>),
+      allergens: allergens as FoodCorrection['allergens'],
+      spice,
+      gramsPerPiece: parse(piece),
+      density: spoonGrams == null ? null : spoonGrams / TABLESPOON_ML,
+    } as FoodCorrection
+    correct.mutate(body, { onSuccess: onDone })
+  }
+  const field = (name: string, label: string, value: string, onChange: (v: string) => void, suffix: string) => (
+    <label key={name} className="flex items-center justify-between gap-3 text-sm">
+      <span>{label}</span>
+      <span className="flex items-center gap-1.5">
+        <input
+          inputMode="decimal"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          aria-invalid={invalid.has(name) || undefined}
+          className={cn(inputClass, 'h-9 w-24 text-right tabular-nums', invalid.has(name) && 'border-destructive')}
+        />
+        <span className="w-8 text-muted-foreground">{suffix}</span>
+      </span>
+    </label>
+  )
+
+  return (
+    <form onSubmit={save} aria-labelledby="correct-title" className="rounded-lg border-2 border-outline bg-card p-3.5">
+      <h2 id="correct-title" className="text-sm font-extrabold">{t('ingredients.correct.title')}</h2>
+      <p className="mt-1 text-xs text-muted-foreground">{t('ingredients.correct.hint')}</p>
+      <div className="mt-3 flex flex-col gap-1.5">
+        {FIGURES.map((f) =>
+          field(f, f === 'kcal' ? t('ingredients.correct.kcal') : t(`recipe.nutrition.${f}`), figures[f], (v) => setFigures({ ...figures, [f]: v }), f === 'kcal' ? 'kcal' : 'g'),
+        )}
+      </div>
+      <fieldset className="mt-3 border-t-2 border-outline/15 pt-3">
+        <legend className="text-sm font-semibold">{t('recipe.allergens')}</legend>
+        <div className="mt-1.5 flex flex-wrap gap-2">
+          {ALLERGENS.map((a) => (
+            <Chip key={a} active={allergens.includes(a)} onClick={() => setAllergens(allergens.includes(a) ? allergens.filter((x) => x !== a) : [...allergens, a])}>
+              <span className="inline-block first-letter:uppercase">{t(`recipe.allergen.${a}`)}</span>
+            </Chip>
+          ))}
+        </div>
+      </fieldset>
+      <fieldset className="mt-3 border-t-2 border-outline/15 pt-3">
+        <legend className="text-sm font-semibold">{t('ingredients.correct.spice')}</legend>
+        <div className="mt-1.5 flex flex-wrap gap-2">
+          {[0, 1, 2].map((s) => (
+            <Chip key={s} active={spice === s} onClick={() => setSpice(s)}>
+              {t(`ingredients.correct.spice_${s}`)}
+            </Chip>
+          ))}
+        </div>
+      </fieldset>
+      <div className="mt-3 flex flex-col gap-1.5 border-t-2 border-outline/15 pt-3">
+        {field('gramsPerPiece', t('ingredients.correct.piece'), piece, setPiece, 'g')}
+        {field('density', t('ingredients.correct.spoon'), spoon, setSpoon, 'g')}
+        <p className="text-xs text-muted-foreground">{t('ingredients.correct.weightsHint')}</p>
+      </div>
+      {correct.isError && <p className="mt-3 text-sm text-destructive">{invalid.size ? t('ingredients.correct.invalid') : t('ingredients.correct.error')}</p>}
+      <div className="mt-3 flex justify-end gap-2">
+        <Button variant="ghost" size="sm" onClick={onDone}>
+          {t('common.cancel')}
+        </Button>
+        <Button type="submit" size="sm" disabled={correct.isPending}>
+          {t('common.save')}
+        </Button>
+      </div>
+    </form>
   )
 }
 

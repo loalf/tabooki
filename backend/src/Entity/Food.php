@@ -8,12 +8,15 @@ use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\QueryParameter;
+use App\Dto\FoodCorrectionInput;
 use App\Enum\Allergen;
 use App\Enum\Diet;
 use App\Enum\FoodGroup;
 use App\Enum\FoodSource;
 use App\Food\FoodFacts;
+use App\State\FoodCorrectionProcessor;
 use App\State\FoodSearchProvider;
 use App\Taste\Names;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -34,6 +37,25 @@ use Symfony\Component\Uid\Uuid;
 #[ApiResource(
     operations: [
         new Get(uriTemplate: '/foods/{id}'),
+        new Post(
+            uriTemplate: '/foods/{id}/correction',
+            status: 200,
+            description: 'Fix the food\'s figures by hand (all of them at once): the model leaves them alone from then on, and every recipe with it is worked out again. Foods are shared.',
+            input: FoodCorrectionInput::class,
+            denormalizationContext: ['groups' => ['food:correct']],
+            read: false,
+            processor: FoodCorrectionProcessor::class,
+            name: 'food_correct',
+        ),
+        new Post(
+            uriTemplate: '/foods/{id}/estimate',
+            status: 202,
+            description: 'Undo the fixes: the model describes the food again in the background.',
+            input: false,
+            read: false,
+            processor: FoodCorrectionProcessor::class,
+            name: 'food_estimate',
+        ),
         new GetCollection(
             uriTemplate: '/foods',
             paginationEnabled: false,
@@ -136,7 +158,17 @@ class Food
 
     /** Changed by hand: the model leaves it alone. */
     #[ORM\Column(options: ['default' => false])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private bool $edited = false;
+
+    /** Who fixed it by hand, and when. */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
+    private ?User $correctedBy = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    #[Groups(['food:read', 'ingredient:read'])]
+    private ?\DateTimeImmutable $correctedAt = null;
 
     /** @var Collection<int, FoodSubstitution> best first */
     #[ORM\OneToMany(targetEntity: FoodSubstitution::class, mappedBy: 'food')]
@@ -309,12 +341,35 @@ class Food
     }
 
     /** A fix made by hand (or figures from a better source): the model won't overwrite it. */
-    public function correct(FoodFacts $facts, FoodSource $source = FoodSource::Manual): void
+    public function correct(FoodFacts $facts, FoodSource $source = FoodSource::Manual, ?User $by = null): void
     {
         $this->describedAt ??= new \DateTimeImmutable();
         $this->apply($facts);
         $this->source = $source;
         $this->edited = true;
+        $this->correctedBy = $by;
+        $this->correctedAt = new \DateTimeImmutable();
+    }
+
+    /** Back to the model's figures: it describes the food again (DescribeFoods). Until then the fixed ones stay. */
+    public function forgetCorrection(): void
+    {
+        $this->edited = false;
+        $this->describedAt = null;
+        $this->correctedBy = null;
+        $this->correctedAt = null;
+    }
+
+    /** Who fixed it by hand, by name. */
+    #[Groups(['food:read', 'ingredient:read'])]
+    public function getCorrectedByName(): ?string
+    {
+        return $this->correctedBy?->getDisplayName();
+    }
+
+    public function getCorrectedAt(): ?\DateTimeImmutable
+    {
+        return $this->correctedAt;
     }
 
     private function apply(FoodFacts $facts): void

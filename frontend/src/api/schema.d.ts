@@ -64,6 +64,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/foods/{id}/correction": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a Food resource.
+         * @description Creates a Food resource.
+         */
+        post: operations["food_correct"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/foods/{id}/estimate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a Food resource.
+         * @description Creates a Food resource.
+         */
+        post: operations["food_estimate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ingredients": {
         parameters: {
             query?: never;
@@ -1139,6 +1179,13 @@ export interface components {
             readonly density?: number | null;
             /** @enum {string|null} */
             readonly source?: "llm" | "manual" | "bedca" | "usda" | null;
+            /**
+             * @description Changed by hand: the model leaves it alone.
+             * @default false
+             */
+            readonly edited: boolean;
+            /** Format: date-time */
+            readonly correctedAt?: string | null;
             substitutes?: {
                 key: string;
                 name: {
@@ -1159,6 +1206,8 @@ export interface components {
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
             readonly described?: boolean;
+            /** @description Who fixed it by hand, by name. */
+            readonly correctedByName?: string | null;
         };
         /**
          * @description What a food is, shared by every household: nutrition per 100 g, allergens, food groups, spice,
@@ -1187,6 +1236,13 @@ export interface components {
             readonly density?: number | null;
             /** @enum {string|null} */
             readonly source?: "llm" | "manual" | "bedca" | "usda" | null;
+            /**
+             * @description Changed by hand: the model leaves it alone.
+             * @default false
+             */
+            readonly edited: boolean;
+            /** Format: date-time */
+            readonly correctedAt?: string | null;
             substitutes?: {
                 key: string;
                 name: {
@@ -1207,6 +1263,8 @@ export interface components {
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
             readonly described?: boolean;
+            /** @description Who fixed it by hand, by name. */
+            readonly correctedByName?: string | null;
         };
         /**
          * @description What a food is, shared by every household: nutrition per 100 g, allergens, food groups, spice,
@@ -1235,6 +1293,13 @@ export interface components {
             readonly density?: number | null;
             /** @enum {string|null} */
             readonly source?: "llm" | "manual" | "bedca" | "usda" | null;
+            /**
+             * @description Changed by hand: the model leaves it alone.
+             * @default false
+             */
+            readonly edited: boolean;
+            /** Format: date-time */
+            readonly correctedAt?: string | null;
             substitutes?: {
                 key: string;
                 name: {
@@ -1255,6 +1320,38 @@ export interface components {
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
             readonly described?: boolean;
+            /** @description Who fixed it by hand, by name. */
+            readonly correctedByName?: string | null;
+        };
+        /** @description Fix the food's figures by hand (all of them at once): the model leaves them alone from then on, and every recipe with it is worked out again. Foods are shared. */
+        "Food.FoodCorrectionInput-food.correct": {
+            /** @default 0 */
+            kcal: number;
+            /** @default 0 */
+            protein: number;
+            /** @default 0 */
+            fat: number;
+            /** @default 0 */
+            saturatedFat: number;
+            /** @default 0 */
+            carbs: number;
+            /** @default 0 */
+            sugar: number;
+            /** @default 0 */
+            fiber: number;
+            /** @default 0 */
+            salt: number;
+            /** @description Allergen values */
+            allergens?: string[];
+            /**
+             * @description 0 not spicy, 1 mild, 2 hot.
+             * @default 0
+             */
+            spice: number;
+            /** @description One piece as bought or counted (1 onion); null when it isn't counted. */
+            gramsPerPiece?: number | null;
+            /** @description Grams per millilitre; null when it's never measured by volume. */
+            density?: number | null;
         };
         /**
          * @description What a food is, shared by every household: nutrition per 100 g, allergens, food groups, spice,
@@ -1283,6 +1380,13 @@ export interface components {
             readonly density?: number | null;
             /** @enum {string|null} */
             readonly source?: "llm" | "manual" | "bedca" | "usda" | null;
+            /**
+             * @description Changed by hand: the model leaves it alone.
+             * @default false
+             */
+            readonly edited: boolean;
+            /** Format: date-time */
+            readonly correctedAt?: string | null;
             substitutes?: {
                 key: string;
                 name: {
@@ -1303,6 +1407,8 @@ export interface components {
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
             readonly described?: boolean;
+            /** @description Who fixed it by hand, by name. */
+            readonly correctedByName?: string | null;
         };
         /**
          * @description What a food is, shared by every household: nutrition per 100 g, allergens, food groups, spice,
@@ -1331,6 +1437,13 @@ export interface components {
             readonly density?: number | null;
             /** @enum {string|null} */
             readonly source?: "llm" | "manual" | "bedca" | "usda" | null;
+            /**
+             * @description Changed by hand: the model leaves it alone.
+             * @default false
+             */
+            readonly edited: boolean;
+            /** Format: date-time */
+            readonly correctedAt?: string | null;
             substitutes?: {
                 key: string;
                 name: {
@@ -1351,6 +1464,8 @@ export interface components {
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
             readonly described?: boolean;
+            /** @description Who fixed it by hand, by name. */
+            readonly correctedByName?: string | null;
         };
         /**
          * @description What a food is, shared by every household: nutrition per 100 g, allergens, food groups, spice,
@@ -1379,6 +1494,13 @@ export interface components {
             readonly density?: number | null;
             /** @enum {string|null} */
             readonly source?: "llm" | "manual" | "bedca" | "usda" | null;
+            /**
+             * @description Changed by hand: the model leaves it alone.
+             * @default false
+             */
+            readonly edited: boolean;
+            /** Format: date-time */
+            readonly correctedAt?: string | null;
             substitutes?: {
                 key: string;
                 name: {
@@ -1399,6 +1521,8 @@ export interface components {
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
             readonly described?: boolean;
+            /** @description Who fixed it by hand, by name. */
+            readonly correctedByName?: string | null;
         };
         HydraCollectionBaseSchema: components["schemas"]["HydraCollectionBaseSchemaNoPagination"] & {
             /**
@@ -4042,6 +4166,126 @@ export interface operations {
                     "application/ld+json": components["schemas"]["Error.jsonld"];
                     "application/problem+json": components["schemas"]["Error"];
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    food_correct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Food identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new Food resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["Food.FoodCorrectionInput-food.correct"];
+                "application/json": components["schemas"]["Food.FoodCorrectionInput-food.correct"];
+            };
+        };
+        responses: {
+            /** @description Food resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Food.jsonld-food.read"];
+                    "application/json": components["schemas"]["Food-food.read"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    food_estimate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Food identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Food resource created */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Food.jsonld-food.read"];
+                    "application/json": components["schemas"]["Food-food.read"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
                 };
             };
         };
