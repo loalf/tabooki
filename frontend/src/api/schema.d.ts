@@ -2213,6 +2213,10 @@ export interface components {
             canonicalKey?: string | null;
             /** @default false */
             optional: boolean;
+            /** @description The whole line's weight in grams, for the recipe's servings; null while unknown. */
+            grams?: number | null;
+            /** @enum {string|null} */
+            gramsSource?: "manual" | "measured" | "estimated" | "converted" | null;
         };
         "RecipeIngredient-recipe.write": {
             /** @description Sub-heading the line belongs to ("For the sauce"), if the recipe has groups. */
@@ -2227,6 +2231,10 @@ export interface components {
             canonicalKey?: string | null;
             /** @default false */
             optional: boolean;
+            /** @description The whole line's weight in grams, for the recipe's servings; null while unknown. */
+            grams?: number | null;
+            /** @enum {string|null} */
+            gramsSource?: "manual" | "measured" | "estimated" | "converted" | null;
         };
         "RecipeIngredient.jsonld-recipe.read": {
             /** @description Sub-heading the line belongs to ("For the sauce"), if the recipe has groups. */
@@ -2241,6 +2249,10 @@ export interface components {
             canonicalKey?: string | null;
             /** @default false */
             optional: boolean;
+            /** @description The whole line's weight in grams, for the recipe's servings; null while unknown. */
+            grams?: number | null;
+            /** @enum {string|null} */
+            gramsSource?: "manual" | "measured" | "estimated" | "converted" | null;
         };
         /** @description A tag used in the household's library and how many recipes carry it: the library's filter chips. */
         RecipeTag: {

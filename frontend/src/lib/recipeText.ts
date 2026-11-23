@@ -61,6 +61,11 @@ function key(group: string | null, rawText: string) {
   return `${group ?? ''}\u0000${rawText}`
 }
 
+/** Identifies a line across edits of the text: its group and its text. */
+export function lineKey(ingredient: { groupName?: string | null; rawText: string }): string {
+  return key(ingredient.groupName ?? null, ingredient.rawText)
+}
+
 /** Groups consecutive ingredients by their sub-heading, for display. */
 export function groupIngredients(ingredients: Ingredient[]): { name: string | null; items: Ingredient[] }[] {
   const groups: { name: string | null; items: Ingredient[] }[] = []

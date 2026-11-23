@@ -10,6 +10,7 @@ use App\Entity\Household;
 use App\Enum\Allergen;
 use App\Enum\FoodGroup;
 use App\Food\FoodFacts;
+use App\Food\RecipeWeigher;
 use App\Llm\Content;
 use App\Llm\LlmClient;
 use App\Llm\LlmException;
@@ -39,6 +40,7 @@ final readonly class DescribeFoodsHandler
         private EntityManagerInterface $entityManager,
         private LlmClient $llm,
         private MessageBusInterface $bus,
+        private RecipeWeigher $weigher,
         private LoggerInterface $logger,
         private Pricing $pricing,
         #[Autowire('%env(BEDROCK_TEXT_MODEL)%')]
@@ -89,7 +91,7 @@ final readonly class DescribeFoodsHandler
         foreach ($pending as $food) {
             $byKey[$food->getKey()] = $food;
         }
-        $described = 0;
+        $described = [];
         $answers = $completion->toolInput['foods'] ?? [];
         foreach (\is_array($answers) ? $answers : [] as $answer) {
             if (!\is_array($answer) || !\is_string($answer['key'] ?? null) || !isset($byKey[$answer['key']])) {
@@ -97,15 +99,18 @@ final readonly class DescribeFoodsHandler
             }
             $byKey[$answer['key']]->describe(self::facts($answer));
             unset($byKey[$answer['key']]);
-            ++$described;
+            $described[] = $answer['key'];
         }
         $this->entityManager->flush();
+        // Their weight per piece and density are known now: the recipes using them weighed again.
+        $this->weigher->weighRecipesWith($described);
+        $this->entityManager->flush();
         $this->logger->info('Described {count} foods ({in} in / {out} out tokens)', [
-            'count' => $described, 'in' => $completion->inputTokens, 'out' => $completion->outputTokens,
+            'count' => \count($described), 'in' => $completion->inputTokens, 'out' => $completion->outputTokens,
         ]);
 
         // More waiting: next batch. Not when this one described nothing, or it would loop on the same foods.
-        if ($described > 0 && [] !== $this->pending(1)) {
+        if ([] !== $described && [] !== $this->pending(1)) {
             $this->bus->dispatch(new DescribeFoods($message->householdId));
         }
     }

@@ -58,7 +58,7 @@ final class RecipeFactsTest extends ApiTestCase
         // What the model was asked: the recipe, optional ingredients marked.
         $prompt = $this->bedrockRequests[0];
         self::assertSame(RecipeAnnotator::TOOL, self::at($prompt, 'toolConfig', 'tools', 0, 'toolSpec', 'name'));
-        self::assertStringContainsString('- Panceta (optional)', self::at($prompt, 'messages', 0, 'content', 0, 'text'));
+        self::assertStringContainsString('3. Panceta (optional)', self::at($prompt, 'messages', 0, 'content', 0, 'text'));
 
         $recipe = $this->client->request('GET', '/api/recipes/'.$id)->toArray();
         self::assertSame('hearty', $recipe['heaviness']);
@@ -117,7 +117,7 @@ final class RecipeFactsTest extends ApiTestCase
 
         $this->patch($id, ['foodGroups' => [], 'optionalFoodGroups' => ['egg']]);
         $this->patch($id, ['title' => 'Pasta sin nada']);
-        self::assertSame([], $this->queuedReadings(), 'every fact fixed by hand: nothing left to read');
+        self::assertSame([$id], $this->queuedReadings(), 'every fact fixed by hand: still read, for what its lines weigh');
         self::assertSame('vegan', $this->client->request('GET', '/api/recipes/'.$id)->toArray()['diet'], 'optional ingredients can be left out');
     }
 

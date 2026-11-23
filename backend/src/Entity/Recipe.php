@@ -109,6 +109,9 @@ class Recipe implements HouseholdOwned
     /** The facts someone can fix by hand. */
     public const array FACTS = ['heaviness', 'spice', 'foodGroups', 'optionalFoodGroups'];
 
+    /** 2: the facts include each ingredient line's weight (docs/INGREDIENT-KNOWLEDGE.md). */
+    private const int FACTS_VERSION = 2;
+
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[Groups(['recipe:read', 'recipe:list'])]
@@ -819,7 +822,10 @@ class Recipe implements HouseholdOwned
         return $this->factsEdited;
     }
 
-    /** Identifies what the facts are read from: the title and the ingredient lines (steps hardly change them). */
+    /**
+     * What the facts were read for: what is read (FACTS_VERSION; raising it has every recipe read
+     * again by app:annotate), from the title and ingredient lines (steps hardly change them).
+     */
     public function factsFingerprint(): string
     {
         $ingredients = array_map(
@@ -827,13 +833,13 @@ class Recipe implements HouseholdOwned
             array_values($this->ingredients->toArray()),
         );
 
-        return hash('xxh128', json_encode([$this->title, $ingredients], \JSON_THROW_ON_ERROR | \JSON_UNESCAPED_UNICODE));
+        return hash('xxh128', json_encode([self::FACTS_VERSION, $this->title, $ingredients], \JSON_THROW_ON_ERROR | \JSON_UNESCAPED_UNICODE));
     }
 
-    /** Never read, or read from a title or ingredients that have changed since; and something is left to fill in. */
+    /** Never read, or read from a title or ingredients that have changed since; and something is left to fill in (a fact, or the lines' weights). */
     public function needsFacts(): bool
     {
-        return $this->factsFrom !== $this->factsFingerprint() && \count(array_diff(self::FACTS, $this->factsEdited)) > 0;
+        return $this->factsFrom !== $this->factsFingerprint() && (\count(array_diff(self::FACTS, $this->factsEdited)) > 0 || !$this->ingredients->isEmpty());
     }
 
     /** What the model read from the recipe as it is now (one read from an older text is ignored), except the facts fixed by hand. */
@@ -855,6 +861,13 @@ class Recipe implements HouseholdOwned
         if (!$edited('optionalFoodGroups')) {
             // Whatever the dish needs anyway isn't brought by its optional ingredients.
             $this->optionalFoodGroupValues = array_values(array_diff(self::groupValues($facts->optionalFoodGroups), $this->foodGroupValues));
+        }
+        // Lines typed by hand: what they are, so they reach the shopping list and the food catalog.
+        foreach ($this->ingredients as $line) {
+            $read = $facts->lines[$line->getPosition()] ?? null;
+            if (null !== $read && null !== $read['key']) {
+                $line->fillIn($read['key'], $read['name'], $read['quantity'], $read['unit']);
+            }
         }
         $this->factsFrom = $from;
 

@@ -25,6 +25,7 @@ use App\Extraction\RecipeExtractor;
 use App\Extraction\Transcriber;
 use App\Extraction\Transcript;
 use App\Food\FoodCatalog;
+use App\Food\RecipeWeigher;
 use App\Library\Metadata\MetadataFetcher;
 use App\Llm\LlmException;
 use App\Llm\Pricing;
@@ -97,6 +98,7 @@ final readonly class ExtractSourceHandler
         private MessageBusInterface $bus,
         private NotesQueue $notes,
         private FoodCatalog $foods,
+        private RecipeWeigher $weigher,
     ) {
     }
 
@@ -163,7 +165,9 @@ final readonly class ExtractSourceHandler
             }
             $this->notes->recipeChanged($recipe);
             $this->foods->recipeChanged($recipe);
+            $this->weigher->weigh($recipe);
         }
+        $this->entityManager->flush();
     }
 
     /**

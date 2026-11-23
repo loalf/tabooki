@@ -160,7 +160,19 @@
       "stepsHint": "Un paso por línea.",
       "stepsPlaceholder": "Precalienta el horno a 180 °C.\nMezcla la harina con los huevos.",
       "saveError": "No se ha podido guardar la receta. Inténtalo de nuevo.",
-      "fixErrors": "Revisa los campos marcados."
+      "fixErrors": "Revisa los campos marcados.",
+      "weights": {
+        "title": "Pesos",
+        "hint": "Lo que pesa cada línea, para la nutrición. Se calculan solos; escribe un número para corregir uno y bórralo para volver al calculado.",
+        "pending": "Se calcula al guardar",
+        "source": {
+          "manual": "A mano",
+          "measured": "Medido",
+          "estimated": "Estimado",
+          "converted": "Peso habitual"
+        },
+        "gramsOf": "Gramos de {{line}}"
+      }
     },
     "review": {
       "badge": "Revisar",

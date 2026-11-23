@@ -15,8 +15,10 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 final readonly class KeyMerger
 {
-    public function __construct(private EntityManagerInterface $entityManager)
-    {
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        private RecipeWeigher $weigher,
+    ) {
     }
 
     /** @return array{recipeLines: int, ingredients: int, lists: int, tastes: int} what changed */
@@ -65,6 +67,9 @@ final readonly class KeyMerger
             return ['recipeLines' => $recipeLines, 'ingredients' => $ingredients, 'lists' => $lists, 'tastes' => $this->mergeInTastes($db, $from, $to)];
         });
         $this->entityManager->clear();
+        // Another food, maybe another weight per piece.
+        $this->weigher->weighRecipesWith([$to]);
+        $this->entityManager->flush();
 
         return $changed;
     }

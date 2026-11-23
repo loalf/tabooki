@@ -44,9 +44,12 @@ Considered Neo4j next to Postgres and rejected it (2026-11-23):
 
 ### 2. Grams per recipe line
 
-- [ ] `RecipeIngredient.grams` (nullable float) plus `gramsEstimated` (bool)
-- [ ] Work it out from quantity + unit + the food's conversions; ask the LLM in the existing extraction pipeline for vague lines ("al gusto", "un chorrito")
-- [ ] Show it and allow edits on the recipe review screen
+- [x] `RecipeIngredient.grams` (whole line, nullable) plus `gramsSource`: `manual` > `measured` > `estimated` > `converted`, most trusted first (`RecipeWeigher`)
+- [x] Work it out: `measured` from g/kg/ml/l/spoons (volumes through the food's density, water's when unknown); `estimated` by the text model in the existing annotate step, which reads every line in context ("1 cebolla grande", "sal al gusto", "aceite para freír"); `converted` from the food's weight per piece, or a usual can (400 g), clove (5 g) or pinch (0.4 g) when there is no estimate yet. Weighed again when a recipe is saved or read, and when its foods are described or merged
+- [x] Lines typed by hand: the same annotate call gives them a key, name, quantity and unit, so they now reach the food catalog and merge on the shopping list. Extraction's values are never overwritten
+- [x] Existing recipes: `FACTS_VERSION` in the facts fingerprint was raised, so `app:annotate` re-reads them all once; `app:foods` weighs every recipe
+- [x] Show it and allow edits: a "Weights" section on the recipe edit page lists each line's grams and where they come from; typing a number fixes it by hand, clearing it goes back to the worked-out one. Unchanged lines keep their weight through edits
+- [ ] Repointing a household ingredient at another food (`PATCH /api/ingredients/{id}`) doesn't weigh its recipes again yet: phase 3's "recompute" item
 
 ### 3. Derived recipe properties
 

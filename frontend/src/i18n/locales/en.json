@@ -160,7 +160,19 @@
       "stepsHint": "One step per line.",
       "stepsPlaceholder": "Preheat the oven to 180 °C.\nMix the flour and the eggs.",
       "saveError": "Couldn't save the recipe. Please try again.",
-      "fixErrors": "Please fix the highlighted fields."
+      "fixErrors": "Please fix the highlighted fields.",
+      "weights": {
+        "title": "Weights",
+        "hint": "What each line weighs, for nutrition. Worked out on their own; type a number to fix one, clear it to go back.",
+        "pending": "Worked out after saving",
+        "source": {
+          "manual": "By hand",
+          "measured": "Measured",
+          "estimated": "Estimated",
+          "converted": "Usual weight"
+        },
+        "gramsOf": "Grams of {{line}}"
+      }
     },
     "review": {
       "badge": "Review",

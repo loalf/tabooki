@@ -1,9 +1,10 @@
-import { ArrowLeft, Link2, Minus, Plus } from 'lucide-react'
+import { ArrowLeft, ChevronDown, Link2, Minus, Plus, Scale } from 'lucide-react'
 import { type FormEvent, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 import {
   hostOf,
+  type IngredientInput,
   type Recipe,
   type RecipeInput,
   type Source,
@@ -22,7 +23,7 @@ import { TagInput } from '@/components/TagInput'
 import { Button, Chip, Field, inputClass, textareaClass } from '@/components/ui'
 import { LOCALES } from '@/i18n'
 import { FOOD_GROUPS, type FoodGroup, HEAVINESS, type Heaviness, SPICE, sortGroups } from '@/lib/facts'
-import { ingredientsToText, stepsToText, textToIngredients, textToSteps } from '@/lib/recipeText'
+import { ingredientsToText, lineKey, stepsToText, textToIngredients, textToSteps } from '@/lib/recipeText'
 import { cn } from '@/lib/utils'
 import { useGoBack } from '@/lib/useGoBack'
 
@@ -84,6 +85,9 @@ function RecipeForm({ existing, source }: { existing?: Recipe; source?: Source }
   const [heaviness, setHeaviness] = useState<Heaviness | null>(existing?.heaviness ?? null)
   const [spice, setSpice] = useState<number | null>(existing?.spice ?? null)
   const [foodGroups, setFoodGroups] = useState<FoodGroup[]>(sortGroups(existing?.foodGroups ?? []))
+  // Weights typed in (a number) or cleared (null: worked out again), by line.
+  const [weights, setWeights] = useState<Record<string, number | null>>({})
+  const lines = textToIngredients(ingredientsText, existing?.ingredients)
 
   const linkedSource = existing?.source ?? source
   const violations = save.error instanceof ValidationError ? save.error.violations : []
@@ -105,7 +109,10 @@ function RecipeForm({ existing, source }: { existing?: Recipe; source?: Source }
       cookMinutes: toMinutes(cookMinutes),
       mealTypes,
       tags,
-      ingredients: textToIngredients(ingredientsText, existing?.ingredients),
+      ingredients: lines.map((line) => {
+        const typed = weights[lineKey(line)]
+        return typed === undefined ? line : { ...line, grams: typed, gramsSource: typed === null ? null : 'manual' }
+      }),
       steps: textToSteps(stepsText),
       notes: notes.trim() || null,
       // Facts only when changed here: the model may have read them while the form was open,
@@ -252,6 +259,10 @@ function RecipeForm({ existing, source }: { existing?: Recipe; source?: Source }
         <FieldError message={errorFor('ingredients')} />
       </Field>
 
+      {lines.length > 0 && (
+        <WeightsField lines={lines} weights={weights} onChange={(key, grams) => setWeights({ ...weights, [key]: grams })} />
+      )}
+
       <Field label={t('recipe.steps')} hint={t('recipe.form.stepsHint')}>
         <textarea
           rows={8}
@@ -292,6 +303,67 @@ function RecipeForm({ existing, source }: { existing?: Recipe; source?: Source }
       </div>
     </form>
   )
+}
+
+/** What each ingredient line weighs, for nutrition: shown with where it comes from, and fixable by hand. */
+function WeightsField({
+  lines,
+  weights,
+  onChange,
+}: {
+  lines: IngredientInput[]
+  weights: Record<string, number | null>
+  onChange: (key: string, grams: number | null) => void
+}) {
+  const { t } = useTranslation()
+  return (
+    <details className="group rounded-lg border-2 border-outline bg-card px-3.5 py-2.5">
+      <summary className="flex cursor-pointer list-none items-center gap-3 py-1 [&::-webkit-details-marker]:hidden">
+        <Scale className="size-5 shrink-0 text-brand" aria-hidden />
+        <span className="flex-1">
+          <span className="block text-sm font-semibold">{t('recipe.form.weights.title')}</span>
+          <span className="block text-xs text-muted-foreground">{t('recipe.form.weights.hint')}</span>
+        </span>
+        <ChevronDown className="size-5 transition-transform group-open:rotate-180" aria-hidden />
+      </summary>
+      <ul className="mt-2 flex flex-col divide-y divide-border">
+        {lines.map((line, i) => {
+          const key = lineKey(line)
+          const typed = weights[key]
+          // Worked-out weights rounded for reading; a typed one exactly as typed.
+          const shown = typed === undefined ? (line.grams == null ? '' : formatGrams(line.grams)) : typed === null ? '' : String(typed)
+          const source = typed === undefined ? line.gramsSource ?? null : typed === null ? null : 'manual'
+          return (
+            <li key={`${key}-${i}`} className="flex items-center gap-3 py-2">
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm">{line.rawText}</span>
+                <span className="block text-xs text-muted-foreground">
+                  {source ? t(`recipe.form.weights.source.${source}`) : t('recipe.form.weights.pending')}
+                </span>
+              </span>
+              <label className="flex shrink-0 items-center gap-1 text-sm">
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  step="any"
+                  value={shown}
+                  onChange={(e) => onChange(key, e.target.value.trim() === '' ? null : Math.max(0, Number(e.target.value)))}
+                  aria-label={t('recipe.form.weights.gramsOf', { line: line.rawText })}
+                  className={cn(inputClass, 'w-20 text-right')}
+                />
+                <span className="text-muted-foreground">g</span>
+              </label>
+            </li>
+          )
+        })}
+      </ul>
+    </details>
+  )
+}
+
+function formatGrams(grams: number): string {
+  return String(grams >= 10 ? Math.round(grams) : Math.round(grams * 10) / 10)
 }
 
 function FieldError({ message }: { message?: string }) {

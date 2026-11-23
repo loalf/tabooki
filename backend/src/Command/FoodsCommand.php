@@ -8,6 +8,7 @@ use App\Entity\Food;
 use App\Entity\Household;
 use App\Entity\Recipe;
 use App\Food\FoodCatalog;
+use App\Food\RecipeWeigher;
 use App\Message\DescribeFoods;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -16,10 +17,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 /**
- * Brings every ingredient of every recipe into the shared food catalog, points the households'
- * catalog ingredients that don't point anywhere yet at the food with their key, and queues the
- * description of the foods that lack one: recipes saved before the catalog existed, or a
- * description that failed. New and edited recipes do this on their own.
+ * Brings every ingredient of every recipe into the shared food catalog and weighs its lines
+ * again, points the households' catalog ingredients that don't point anywhere yet at the food
+ * with their key, and queues the description of the foods that lack one: recipes saved before
+ * the catalog existed, or a description that failed. New and edited recipes do this on their own.
  */
 #[AsCommand(name: 'app:foods', description: 'Fill the shared food catalog from the recipes and describe what is missing')]
 final readonly class FoodsCommand
@@ -28,6 +29,7 @@ final readonly class FoodsCommand
         private EntityManagerInterface $entityManager,
         private FoodCatalog $foods,
         private MessageBusInterface $bus,
+        private RecipeWeigher $weigher,
     ) {
     }
 
@@ -43,8 +45,10 @@ final readonly class FoodsCommand
                 ->getQuery()->getResult();
             foreach ($recipes as $recipe) {
                 $added += $this->foods->recipeChanged($recipe);
+                $this->weigher->weigh($recipe);
             }
         }
+        $this->entityManager->flush();
 
         $linked = $this->entityManager->getConnection()->executeStatement(
             'UPDATE ingredient i SET food_id = f.id FROM food f WHERE i.food_id IS NULL AND f.key = i.canonical_key',

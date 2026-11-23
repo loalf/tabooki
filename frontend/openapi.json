@@ -9607,6 +9607,28 @@
                     "optional": {
                         "default": false,
                         "type": "boolean"
+                    },
+                    "grams": {
+                        "minimum": 0,
+                        "maximum": 100000,
+                        "description": "The whole line's weight in grams, for the recipe's servings; null while unknown.",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "gramsSource": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "manual",
+                            "measured",
+                            "estimated",
+                            "converted",
+                            null
+                        ]
                     }
                 },
                 "required": [
@@ -9668,6 +9690,28 @@
                     "optional": {
                         "default": false,
                         "type": "boolean"
+                    },
+                    "grams": {
+                        "minimum": 0,
+                        "maximum": 100000,
+                        "description": "The whole line's weight in grams, for the recipe's servings; null while unknown.",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "gramsSource": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "manual",
+                            "measured",
+                            "estimated",
+                            "converted",
+                            null
+                        ]
                     }
                 },
                 "required": [
@@ -9729,6 +9773,28 @@
                     "optional": {
                         "default": false,
                         "type": "boolean"
+                    },
+                    "grams": {
+                        "minimum": 0,
+                        "maximum": 100000,
+                        "description": "The whole line's weight in grams, for the recipe's servings; null while unknown.",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "gramsSource": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "manual",
+                            "measured",
+                            "estimated",
+                            "converted",
+                            null
+                        ]
                     }
                 },
                 "required": [

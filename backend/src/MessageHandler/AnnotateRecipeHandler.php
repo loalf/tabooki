@@ -6,6 +6,8 @@ namespace App\MessageHandler;
 
 use App\Entity\ExtractionRun;
 use App\Entity\Recipe;
+use App\Food\FoodCatalog;
+use App\Food\RecipeWeigher;
 use App\Llm\LlmException;
 use App\Llm\Pricing;
 use App\Message\AnnotateRecipe;
@@ -18,8 +20,8 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * Reads a recipe's facts (heaviness, spice, food groups) after it is added or its title or
- * ingredients change. Each call is logged in extraction_run (step "annotate") for the costs
+ * Reads a recipe's facts (heaviness, spice, food groups, each line's weight) after it is added
+ * or its title or ingredients change. Each call is logged in extraction_run (step "annotate") for the costs
  * page. A failed call is retried by Messenger; meanwhile the planner treats the facts as unknown.
  */
 #[AsMessageHandler]
@@ -28,6 +30,8 @@ final readonly class AnnotateRecipeHandler
     public function __construct(
         private EntityManagerInterface $entityManager,
         private RecipeAnnotator $annotator,
+        private FoodCatalog $foods,
+        private RecipeWeigher $weigher,
         private LoggerInterface $logger,
         private Pricing $pricing,
         #[Autowire('%env(BEDROCK_TEXT_MODEL)%')]
@@ -69,6 +73,10 @@ final readonly class AnnotateRecipeHandler
 
             return;
         }
+        // Lines typed by hand may have just got a key: their foods, then every line's weight.
+        $this->entityManager->flush();
+        $this->foods->recipeChanged($recipe);
+        $this->weigher->weigh($recipe, $facts->grams());
         $this->entityManager->flush();
     }
 
