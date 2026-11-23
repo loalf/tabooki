@@ -408,6 +408,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/recipe-search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves the collection of RecipeSearchResult resources.
+         * @description Retrieves the collection of RecipeSearchResult resources.
+         */
+        get: operations["api_recipe-search_get_collection"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/recipe-tags": {
         parameters: {
             query?: never;
@@ -867,7 +887,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "substitutes" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "substitutes" | "embed" | "search" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -889,7 +909,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "substitutes" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "substitutes" | "embed" | "search" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -2439,6 +2459,18 @@ export interface components {
             grams?: number | null;
             /** @enum {string|null} */
             gramsSource?: "manual" | "measured" | "estimated" | "converted" | null;
+        };
+        /** @description Up to 12 of the household's recipes closest in meaning to the words ("algo ligero con garbanzos"); words after a dash leave recipes out */
+        RecipeSearchResult: {
+            id?: string;
+            /** @description Cosine similarity, -1 to 1; above about 0.3 it is usually about the same thing */
+            score?: number;
+        };
+        /** @description Up to 12 of the household's recipes closest in meaning to the words ("algo ligero con garbanzos"); words after a dash leave recipes out */
+        "RecipeSearchResult.jsonld": components["schemas"]["HydraItemBaseSchema"] & {
+            id?: string;
+            /** @description Cosine similarity, -1 to 1; above about 0.3 it is usually about the same thing */
+            score?: number;
         };
         /** @description A tag used in the household's library and how many recipes carry it: the library's filter chips. */
         RecipeTag: {
@@ -4907,6 +4939,43 @@ export interface operations {
                     "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
                     "application/problem+json": components["schemas"]["ConstraintViolation"];
                     "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    "api_recipe-search_get_collection": {
+        parameters: {
+            query: {
+                /** @description RecipeSearchResult q */
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description RecipeSearchResult collection */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["HydraCollectionBaseSchemaNoPagination"] & {
+                        member: components["schemas"]["RecipeSearchResult.jsonld"][];
+                    };
+                    "application/json": components["schemas"]["RecipeSearchResult"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };

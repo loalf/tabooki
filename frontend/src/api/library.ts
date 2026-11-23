@@ -27,6 +27,7 @@ const keys = {
   recipeList: (filters: RecipeFilters) => ['recipes', 'list', filters] as const,
   recipe: (id: string) => ['recipes', 'detail', id] as const,
   similar: (id: string) => ['recipes', 'similar', id] as const,
+  meaning: (q: string) => ['recipes', 'meaning', q] as const,
   tags: ['recipe-tags'] as const,
 }
 
@@ -173,6 +174,25 @@ export function useRecipe(id: string | null) {
     },
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2,
     refetchInterval: (query) => (isReextracting(query.state.data) ? 2500 : false),
+  })
+}
+
+/**
+ * Search by meaning (App\Search\RecipeSearch): the household's recipes closest to the words,
+ * best first, only those close enough. From 3 letters; nothing while it can't be reached.
+ */
+export function useMeaningSearch(q: string) {
+  const query = q.trim()
+  return useQuery({
+    queryKey: keys.meaning(query),
+    enabled: query.replace(/(^|\s)-\S*/g, '').trim().length >= 3,
+    queryFn: async () => {
+      const { data, error, response } = await api.GET('/api/recipe-search', { params: { query: { q: query } } })
+      if (!data) throw failure(response, error)
+      return data
+    },
+    staleTime: 5 * 60_000,
+    retry: false,
   })
 }
 

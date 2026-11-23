@@ -19,6 +19,7 @@ framework:
             'App\Message\ClassifyIngredients': async
             'App\Message\DescribeFoods': async
             'App\Message\SuggestSubstitutes': async
+            'App\Message\EmbedRecipe': async
             'App\Message\TranslateRecipe': async
             'App\Message\AnnotateRecipe': async
             'App\Message\JudgeNotes': async

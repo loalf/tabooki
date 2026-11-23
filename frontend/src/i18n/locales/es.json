@@ -126,6 +126,10 @@
       "spice_hot": "Que pique",
       "without": "Sin",
       "note": "Solo salen las recetas de las que se sabe: si faltan cifras o ingredientes por conocer, se quedan fuera. Para quitar un ingrediente, búscalo con un guion delante: -cilantro."
+    },
+    "closeBy": {
+      "title": "Por lo que buscas",
+      "hint": "Sin esas palabras, pero van de eso."
     }
   },
   "recipe": {
@@ -589,6 +593,8 @@
       "classify": "Ordenar ingredientes",
       "foods": "Consultar alimentos",
       "substitutes": "Buscar sustitutos",
+      "embed": "Preparar la búsqueda",
+      "search": "Buscar por significado",
       "translate": "Traducir la receta",
       "annotate": "Leer cómo es",
       "taste_profile": "Entender vuestros gustos",
@@ -605,7 +611,9 @@
     "footnote": "Precios de lista de Amazon Bedrock en dólares, sin impuestos. Meses en hora UTC.",
     "annotateWhat": "Receta escrita a mano",
     "tasteWhat": "Gustos de la casa",
-    "substitutesWhat": "Ingredientes nuevos: qué usar en su lugar"
+    "substitutesWhat": "Ingredientes nuevos: qué usar en su lugar",
+    "embedWhat": "Receta: para buscarla por significado",
+    "searchWhat": "Una búsqueda"
   },
   "password": {
     "current": "Contraseña actual",

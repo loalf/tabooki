@@ -126,6 +126,10 @@
       "spice_hot": "Spicy",
       "without": "Without",
       "note": "Only recipes known to match show up: if figures or ingredients are still unknown, they’re left out. To leave out an ingredient, search for it with a dash in front: -coriander."
+    },
+    "closeBy": {
+      "title": "Close to what you’re after",
+      "hint": "Not those words, but what they’re about."
     }
   },
   "recipe": {
@@ -589,6 +593,8 @@
       "classify": "Sorting ingredients",
       "foods": "Looking up foods",
       "substitutes": "Find substitutes",
+      "embed": "Prepare search",
+      "search": "Search by meaning",
       "translate": "Translating the recipe",
       "annotate": "Reading what it's like",
       "taste_profile": "Understanding your tastes",
@@ -605,7 +611,9 @@
     "footnote": "Amazon Bedrock list prices in US dollars, before tax. Months in UTC.",
     "annotateWhat": "A recipe typed in",
     "tasteWhat": "Household tastes",
-    "substitutesWhat": "New ingredients: what to use instead"
+    "substitutesWhat": "New ingredients: what to use instead",
+    "embedWhat": "Recipe: to find it by meaning",
+    "searchWhat": "A search"
   },
   "password": {
     "current": "Current password",

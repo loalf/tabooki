@@ -61,7 +61,7 @@ api-types: ## Regenerate TypeScript API types from the OpenAPI spec
 
 ## —— Quality ——————————————————————————————————————————————————
 test: ## Run backend tests
-	$(PHP) bash -c 'php bin/console doctrine:database:create --if-not-exists --env=test -q && php bin/console doctrine:schema:update --force --complete --env=test -q && php bin/phpunit'
+	$(PHP) bash -c 'php bin/console doctrine:database:create --if-not-exists --env=test -q && php bin/console dbal:run-sql --env=test -q "CREATE EXTENSION IF NOT EXISTS vector" && php bin/console doctrine:schema:update --force --complete --env=test -q && php bin/phpunit'
 
 phpstan: ## Static analysis (backend)
 	$(PHP) vendor/bin/phpstan analyse --memory-limit=1G

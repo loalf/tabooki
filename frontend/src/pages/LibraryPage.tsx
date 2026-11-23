@@ -2,7 +2,7 @@ import { ChevronDown, Feather, Heart, Leaf, ListChecks, Plus, Salad, Search, Sli
 import { type ReactNode, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
-import { type RecipeFilters, type RecipeListItem, useRecipes, useReviewCount, useTagNames } from '@/api/library'
+import { type RecipeFilters, type RecipeListItem, useMeaningSearch, useRecipes, useReviewCount, useTagNames } from '@/api/library'
 import { AddRecipeSheet } from '@/components/library/AddRecipeSheet'
 import { InboxBanner } from '@/components/library/Inbox'
 import { RecipeCard } from '@/components/library/RecipeCard'
@@ -136,13 +136,22 @@ export function LibraryPage() {
   const allTags = useTagNames()
   const reviewCount = useReviewCount()
   const filtering = Boolean(filters.q.trim() || tags.length || favorite || needsReview || heavy || vegetarian || fitting || moreCount)
-  const shown = (recipes.data ?? []).filter(
-    (r) =>
-      (!heavy || r.heaviness === heavy) &&
-      (!vegetarian || r.diet === 'vegetarian' || r.diet === 'vegan') &&
-      (!fitting || (!r.tasteConflicts?.length && !(r.notesFit?.fit === 'poor' && r.notesFit.when === 'always'))) &&
-      passesMoreFilters(r, more),
-  )
+  const passes = (r: RecipeListItem) =>
+    (!heavy || r.heaviness === heavy) &&
+    (!vegetarian || r.diet === 'vegetarian' || r.diet === 'vegan') &&
+    (!fitting || (!r.tasteConflicts?.length && !(r.notesFit?.fit === 'poor' && r.notesFit.when === 'always'))) &&
+    passesMoreFilters(r, more)
+  const shown = (recipes.data ?? []).filter(passes)
+
+  // By meaning: what the words don't find ("algo ligero con garbanzos"), from the library without
+  // the words but with the other filters, closest first.
+  const meaning = useMeaningSearch(debouncedQuery)
+  const unworded = useRecipes({ ...filters, q: '' })
+  const byId = new Map((unworded.data ?? []).map((r) => [r.id, r]))
+  const shownIds = new Set(shown.map((r) => r.id))
+  const closeBy = (meaning.data ?? [])
+    .map((found) => byId.get(found.id))
+    .filter((r): r is RecipeListItem => r !== undefined && !shownIds.has(r.id) && passes(r))
   // Only once the household has said what it likes (recipes then say what they have against it).
   const hasTaste = (recipes.data ?? []).some((r) => r.tasteConflicts != null)
 
@@ -302,6 +311,8 @@ export function LibraryPage() {
           <RecipeGridSkeleton />
         ) : recipes.isError ? (
           <EmptyState>{t('library.loadError')}</EmptyState>
+        ) : shown.length === 0 && closeBy.length > 0 ? (
+          <CloseBy recipes={closeBy} />
         ) : shown.length === 0 ? (
           filtering ? (
             <EmptyState
@@ -353,6 +364,7 @@ export function LibraryPage() {
                 </li>
               ))}
             </ul>
+            {closeBy.length > 0 && <CloseBy recipes={closeBy} />}
           </>
         )}
       </section>
@@ -415,6 +427,28 @@ function MoreFiltersPanel({
         )),
       )}
       <p className="text-xs text-muted-foreground">{t('library.more.note')}</p>
+    </section>
+  )
+}
+
+/** Recipes found by meaning rather than by the words, closest first. */
+function CloseBy({ recipes }: { recipes: RecipeListItem[] }) {
+  const { t } = useTranslation()
+  return (
+    <section aria-labelledby="close-by-title" className="mt-3 flex flex-col gap-2">
+      <div>
+        <h2 id="close-by-title" className="text-[17px] font-extrabold">
+          {t('library.closeBy.title')}
+        </h2>
+        <p className="text-xs text-muted-foreground">{t('library.closeBy.hint')}</p>
+      </div>
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {recipes.map((recipe) => (
+          <li key={recipe.id} className="flex">
+            <RecipeCard recipe={recipe} />
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }

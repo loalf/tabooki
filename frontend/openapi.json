@@ -2503,6 +2503,91 @@
                 ]
             }
         },
+        "/api/recipe-search": {
+            "get": {
+                "operationId": "api_recipe-search_get_collection",
+                "tags": [
+                    "RecipeSearchResult"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "RecipeSearchResult collection",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "RecipeSearchResult.jsonld collection.",
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/HydraCollectionBaseSchemaNoPagination"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "member"
+                                            ],
+                                            "properties": {
+                                                "member": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/RecipeSearchResult.jsonld"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/RecipeSearchResult"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves the collection of RecipeSearchResult resources.",
+                "description": "Retrieves the collection of RecipeSearchResult resources.",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "RecipeSearchResult q",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "form",
+                        "explode": true
+                    }
+                ]
+            }
+        },
         "/api/recipe-tags": {
             "get": {
                 "operationId": "api_recipe-tags_get_collection",
@@ -5038,6 +5123,8 @@
                             "classify",
                             "foods",
                             "substitutes",
+                            "embed",
+                            "search",
                             "translate",
                             "annotate",
                             "taste_profile",
@@ -5114,6 +5201,8 @@
                             "classify",
                             "foods",
                             "substitutes",
+                            "embed",
+                            "search",
                             "translate",
                             "annotate",
                             "taste_profile",
@@ -10616,6 +10705,39 @@
                     "rawText"
                 ]
             },
+            "RecipeSearchResult": {
+                "type": "object",
+                "description": "Up to 12 of the household's recipes closest in meaning to the words (\"algo ligero con garbanzos\"); words after a dash leave recipes out",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "score": {
+                        "description": "Cosine similarity, -1 to 1; above about 0.3 it is usually about the same thing",
+                        "type": "number"
+                    }
+                }
+            },
+            "RecipeSearchResult.jsonld": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "score": {
+                                "description": "Cosine similarity, -1 to 1; above about 0.3 it is usually about the same thing",
+                                "type": "number"
+                            }
+                        }
+                    }
+                ],
+                "description": "Up to 12 of the household's recipes closest in meaning to the words (\"algo ligero con garbanzos\"); words after a dash leave recipes out"
+            },
             "RecipeTag": {
                 "type": "object",
                 "description": "A tag used in the household's library and how many recipes carry it: the library's filter chips.",
@@ -14362,6 +14484,10 @@
         {
             "name": "Password",
             "description": "Forgotten passwords, for people who aren't signed in (changing it while signed in is\nPOST /api/me/password). See App\\Security\\PasswordReset."
+        },
+        {
+            "name": "RecipeSearchResult",
+            "description": "A library recipe found by meaning (App\\Search\\RecipeSearch), and how close it is."
         },
         {
             "name": "RecipeTag",

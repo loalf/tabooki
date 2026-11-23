@@ -15,6 +15,9 @@ parameters:
     app.llm_prices:
         # Claude Haiku 5.5, for prompts up to 100K tokens (ours are a few thousand).
         'eu.anthropic.claude-haiku-5-5': { input: 0.10, output: 0.50 }
+        # Search by meaning: input only.
+        'eu.cohere.embed-v4:0': { input: 0.12, output: 0 }
+        'amazon.titan-embed-text-v2:0': { input: 0.02, output: 0 }
 
 services:
     # default configuration for services in *this* file

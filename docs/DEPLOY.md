@@ -97,6 +97,17 @@ that introduced translations (or if some failed), translate the rest:
 ssh demo.rootware.xyz 'cd /opt/tabooki && docker compose -f compose.yaml -f compose.prod.yaml exec php bin/console app:translate'
 ```
 
+The ingredient knowledge (docs/INGREDIENT-KNOWLEDGE.md) fills itself in as recipes come in. After
+the deploys that introduced it, run once for the recipes already there: `app:annotate` (weights),
+`app:foods` (foods, nutrition, allergens, substitutes) and `app:embed` (search by meaning):
+
+```sh
+ssh demo.rootware.xyz 'cd /opt/tabooki && docker compose -f compose.yaml -f compose.prod.yaml exec php sh -c "bin/console app:annotate && bin/console app:foods && bin/console app:embed"'
+```
+
+The database image is built here (`deploy/postgres/`: Postgres 17 alpine with pgvector), so the
+first deploy with it rebuilds and restarts the database container; its data volume stays.
+
 ## Email (password resets)
 
 "Forgot your password?" emails a link, and everyone gets a note when their password changes.
