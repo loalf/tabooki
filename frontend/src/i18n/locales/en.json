@@ -485,7 +485,8 @@
     "forMeals_other": "For the week's menu · {{count}} meals",
     "inCart_one": "In the cart · {{count}}",
     "inCart_other": "In the cart · {{count}}",
-    "substitutes": "If they’re out: {{what}}"
+    "substitutes": "If they’re out: {{what}}",
+    "aboutIngredient": "About this ingredient"
   },
   "settings": {
     "title": "Settings",
@@ -892,5 +893,50 @@
     "error": "Couldn't transcribe it. Try again.",
     "nothing": "Nothing was heard. Try again.",
     "denied": "No microphone permission."
+  },
+  "ingredients": {
+    "title": "Ingredients",
+    "settingsHint": "What each one is: nutrition, allergens and substitutes",
+    "intro": "Every one in your recipes and what Tabooki knows about it. If one isn’t what it says, change it here.",
+    "search": "Search ingredients",
+    "loadError": "Couldn’t load the ingredients. Try again.",
+    "noMatches": "No ingredient matches.",
+    "empty": "Once you save recipes, their ingredients show up here.",
+    "recipes_one": "{{count}} recipe",
+    "recipes_other": "{{count}} recipes",
+    "kcal": "{{kcal}} kcal/100 g",
+    "repointed": "another food",
+    "unknown": "No data",
+    "notFound": "That ingredient doesn’t exist.",
+    "is": "It’s “{{food}}” ({{key}}).",
+    "noFood": "Not linked to any food yet.",
+    "pending": "Tabooki is still looking this food up; check back in a while.",
+    "per100": "Per 100 g",
+    "noAllergens": "No allergens.",
+    "groups": "Groups",
+    "spice": {
+      "1": "A little spicy.",
+      "2": "Spicy."
+    },
+    "perPiece": "1 piece ≈ {{grams}} g",
+    "perSpoon": "1 tablespoon ≈ {{grams}} g",
+    "source": {
+      "llm": "Values estimated by Tabooki from tables such as BEDCA and USDA: a guide, not a label.",
+      "manual": "Fixed by hand.",
+      "bedca": "From BEDCA.",
+      "usda": "From USDA FoodData Central."
+    },
+    "usedIn_one": "In {{count}} recipe",
+    "usedIn_other": "In {{count}} recipes",
+    "repoint": {
+      "title": "Is it another food?",
+      "hint": "Say your “chickpeas” are dried, not cooked. Changing it works out your recipes’ nutrition, weights and allergens again.",
+      "choose": "Choose another",
+      "back": "Back to “{{key}}”",
+      "search": "Search foods (dried chickpeas…)",
+      "none": "No food matches.",
+      "current": "The current one",
+      "error": "Couldn’t change it. Try again."
+    }
   }
 }

@@ -7,10 +7,10 @@ namespace App\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Entity\Recipe;
-use App\Food\FoodCatalog;
 use App\Food\RecipeWeigher;
 use App\Message\AnnotateRecipe;
 use App\Message\TranslateRecipe;
+use App\Shopping\IngredientCatalog;
 use App\Taste\NotesQueue;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -27,10 +27,10 @@ use Symfony\Component\Messenger\MessageBusInterface;
 final readonly class RecipeProcessor implements ProcessorInterface
 {
     public function __construct(
+        private IngredientCatalog $ingredientCatalog,
         private HouseholdOwnedProcessor $persist,
         private MessageBusInterface $bus,
         private NotesQueue $notes,
-        private FoodCatalog $foods,
         private RecipeWeigher $weigher,
         private EntityManagerInterface $entityManager,
     ) {
@@ -47,7 +47,7 @@ final readonly class RecipeProcessor implements ProcessorInterface
             $this->bus->dispatch(new AnnotateRecipe($data->getId()->toRfc4122()));
         }
         $this->notes->recipeChanged($data);
-        $this->foods->recipeChanged($data);
+        $this->ingredientCatalog->recipeChanged($data);
         $this->weigher->weigh($data);
         $this->entityManager->flush();
 

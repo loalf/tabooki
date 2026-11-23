@@ -24,7 +24,6 @@ use App\Extraction\PostImage;
 use App\Extraction\RecipeExtractor;
 use App\Extraction\Transcriber;
 use App\Extraction\Transcript;
-use App\Food\FoodCatalog;
 use App\Food\RecipeWeigher;
 use App\Library\Metadata\MetadataFetcher;
 use App\Llm\LlmException;
@@ -33,6 +32,7 @@ use App\Message\AnnotateRecipe;
 use App\Message\ExtractSource;
 use App\Message\TranslateRecipe;
 use App\Repository\SourceRepository;
+use App\Shopping\IngredientCatalog;
 use App\Taste\NotesQueue;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -85,6 +85,7 @@ final readonly class ExtractSourceHandler
     ];
 
     public function __construct(
+        private IngredientCatalog $ingredientCatalog,
         private SourceRepository $sources,
         private EvidenceCollector $collector,
         private RecipeExtractor $extractor,
@@ -97,7 +98,6 @@ final readonly class ExtractSourceHandler
         private Pricing $pricing,
         private MessageBusInterface $bus,
         private NotesQueue $notes,
-        private FoodCatalog $foods,
         private RecipeWeigher $weigher,
     ) {
     }
@@ -164,7 +164,7 @@ final readonly class ExtractSourceHandler
                 $this->bus->dispatch(new AnnotateRecipe($recipe->getId()->toRfc4122()));
             }
             $this->notes->recipeChanged($recipe);
-            $this->foods->recipeChanged($recipe);
+            $this->ingredientCatalog->recipeChanged($recipe);
             $this->weigher->weigh($recipe);
         }
         $this->entityManager->flush();

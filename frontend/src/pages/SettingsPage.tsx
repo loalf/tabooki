@@ -1,4 +1,4 @@
-import { ChevronRight, LogOut, Receipt, Salad } from 'lucide-react'
+import { Apple, ChevronRight, LogOut, Receipt, Salad } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useTasteProfile, useTasteSuggestions } from '@/api/taste'
@@ -95,6 +95,15 @@ function SettingsContent() {
       <ShareSettings />
 
       <ChangePassword />
+
+      <Link to="/settings/ingredients" className="flex items-center gap-3 rounded-lg sticker bg-card p-4">
+        <Apple className="size-5 shrink-0 text-primary" aria-hidden />
+        <span className="flex-1">
+          <span className="block font-extrabold">{t('ingredients.title')}</span>
+          <span className="block text-sm text-muted-foreground">{t('ingredients.settingsHint')}</span>
+        </span>
+        <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+      </Link>
 
       <Link to="/settings/costs" className="flex items-center gap-3 rounded-lg sticker bg-card p-4">
         <Receipt className="size-5 shrink-0 text-primary" aria-hidden />

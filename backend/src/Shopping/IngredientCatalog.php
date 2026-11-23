@@ -6,6 +6,7 @@ namespace App\Shopping;
 
 use App\Entity\Household;
 use App\Entity\Ingredient;
+use App\Entity\Recipe;
 use App\Food\FoodCatalog;
 use App\Message\ClassifyIngredients;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,6 +28,28 @@ final readonly class IngredientCatalog
         private MessageBusInterface $bus,
         private FoodCatalog $foods,
     ) {
+    }
+
+    /**
+     * After a recipe was added or changed: the shared food and the household's entry for each of
+     * its ingredients, so the household can see and fix them all (not only those a shopping list
+     * has needed).
+     *
+     * @return int how many foods are new
+     */
+    public function recipeChanged(Recipe $recipe): int
+    {
+        $added = $this->foods->recipeChanged($recipe);
+        $seen = [];
+        foreach ($recipe->getIngredients() as $line) {
+            $key = $line->getCanonicalKey();
+            if (null !== $key && '' !== $key && !str_starts_with($key, 'x_')) {
+                $seen[$key] ??= ['name' => $line->getName() ?? $line->getRawText(), 'language' => $recipe->getLanguage()->value];
+            }
+        }
+        $this->forKeys($recipe->getHousehold(), $seen);
+
+        return $added;
     }
 
     /**

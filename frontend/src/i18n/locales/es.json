@@ -485,7 +485,8 @@
     "forMeals_other": "Para el menú de la semana · {{count}} comidas",
     "inCart_one": "En el carro · {{count}}",
     "inCart_other": "En el carro · {{count}}",
-    "substitutes": "Si no hay: {{what}}"
+    "substitutes": "Si no hay: {{what}}",
+    "aboutIngredient": "Ver ingrediente"
   },
   "settings": {
     "title": "Ajustes",
@@ -892,5 +893,50 @@
     "error": "No se ha podido transcribir. Inténtalo de nuevo.",
     "nothing": "No se ha oído nada. Prueba otra vez.",
     "denied": "Sin permiso para el micrófono."
+  },
+  "ingredients": {
+    "title": "Ingredientes",
+    "settingsHint": "Qué es cada uno: nutrición, alérgenos y sustitutos",
+    "intro": "Todos los de vuestras recetas y lo que Tabooki sabe de cada uno. Si alguno no es lo que dice, cámbialo aquí.",
+    "search": "Busca un ingrediente",
+    "loadError": "No se han podido cargar los ingredientes. Inténtalo de nuevo.",
+    "noMatches": "Ningún ingrediente coincide.",
+    "empty": "Cuando guardéis recetas, sus ingredientes aparecerán aquí.",
+    "recipes_one": "{{count}} receta",
+    "recipes_other": "{{count}} recetas",
+    "kcal": "{{kcal}} kcal/100 g",
+    "repointed": "otro alimento",
+    "unknown": "Sin datos",
+    "notFound": "Ese ingrediente no existe.",
+    "is": "Es «{{food}}» ({{key}}).",
+    "noFood": "Aún no está unido a ningún alimento.",
+    "pending": "Tabooki aún está consultando este alimento; vuelve en un rato.",
+    "per100": "Por 100 g",
+    "noAllergens": "Sin alérgenos.",
+    "groups": "Grupos",
+    "spice": {
+      "1": "Pica un poco.",
+      "2": "Pica."
+    },
+    "perPiece": "1 unidad ≈ {{grams}} g",
+    "perSpoon": "1 cucharada ≈ {{grams}} g",
+    "source": {
+      "llm": "Valores estimados por Tabooki con tablas como BEDCA y USDA: una orientación, no una etiqueta.",
+      "manual": "Corregido a mano.",
+      "bedca": "Según BEDCA.",
+      "usda": "Según USDA FoodData Central."
+    },
+    "usedIn_one": "En {{count}} receta",
+    "usedIn_other": "En {{count}} recetas",
+    "repoint": {
+      "title": "¿Es otro alimento?",
+      "hint": "Si «garbanzos» son secos y no cocidos, por ejemplo. Al cambiarlo, la nutrición, los pesos y los alérgenos de vuestras recetas se recalculan.",
+      "choose": "Elegir otro",
+      "back": "Volver a «{{key}}»",
+      "search": "Busca el alimento (garbanzos secos…)",
+      "none": "Ningún alimento coincide.",
+      "current": "El actual",
+      "error": "No se ha podido cambiar. Inténtalo de nuevo."
+    }
   }
 }

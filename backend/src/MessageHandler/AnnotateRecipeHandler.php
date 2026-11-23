@@ -6,13 +6,13 @@ namespace App\MessageHandler;
 
 use App\Entity\ExtractionRun;
 use App\Entity\Recipe;
-use App\Food\FoodCatalog;
 use App\Food\RecipeWeigher;
 use App\Llm\LlmException;
 use App\Llm\Pricing;
 use App\Message\AnnotateRecipe;
 use App\Planning\AnnotationException;
 use App\Planning\RecipeAnnotator;
+use App\Shopping\IngredientCatalog;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -28,9 +28,9 @@ use Symfony\Component\Uid\Uuid;
 final readonly class AnnotateRecipeHandler
 {
     public function __construct(
+        private IngredientCatalog $ingredientCatalog,
         private EntityManagerInterface $entityManager,
         private RecipeAnnotator $annotator,
-        private FoodCatalog $foods,
         private RecipeWeigher $weigher,
         private LoggerInterface $logger,
         private Pricing $pricing,
@@ -75,7 +75,7 @@ final readonly class AnnotateRecipeHandler
         }
         // Lines typed by hand may have just got a key: their foods, then every line's weight.
         $this->entityManager->flush();
-        $this->foods->recipeChanged($recipe);
+        $this->ingredientCatalog->recipeChanged($recipe);
         $this->weigher->weigh($recipe, $facts->grams());
         $this->entityManager->flush();
     }

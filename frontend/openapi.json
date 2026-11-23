@@ -98,7 +98,7 @@
                                     "description": "Food.jsonld-food.read collection.",
                                     "allOf": [
                                         {
-                                            "$ref": "#/components/schemas/HydraCollectionBaseSchema"
+                                            "$ref": "#/components/schemas/HydraCollectionBaseSchemaNoPagination"
                                         },
                                         {
                                             "type": "object",
@@ -153,15 +153,13 @@
                 "description": "Retrieves the collection of Food resources.",
                 "parameters": [
                     {
-                        "name": "page",
+                        "name": "q",
                         "in": "query",
-                        "description": "The collection page number",
+                        "description": "Words in its key or one of its names (case and accent insensitive), to point an ingredient at it; up to 30, those used most first",
                         "required": false,
                         "deprecated": false,
                         "schema": {
-                            "type": "integer",
-                            "default": 1,
-                            "minimum": 1
+                            "type": "string"
                         },
                         "style": "form",
                         "explode": true
@@ -252,7 +250,160 @@
                 ]
             }
         },
+        "/api/ingredients": {
+            "get": {
+                "operationId": "api_ingredients_get_collection",
+                "tags": [
+                    "Ingredient"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ingredient collection",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "Ingredient.jsonld-ingredient.read collection.",
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/HydraCollectionBaseSchemaNoPagination"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "member"
+                                            ],
+                                            "properties": {
+                                                "member": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Ingredient.jsonld-ingredient.read"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Ingredient-ingredient.read"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves the collection of Ingredient resources.",
+                "description": "Retrieves the collection of Ingredient resources.",
+                "parameters": []
+            }
+        },
         "/api/ingredients/{id}": {
+            "get": {
+                "operationId": "api_ingredients_id_get",
+                "tags": [
+                    "Ingredient"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ingredient resource",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ingredient.jsonld-ingredient.read_ingredient.item"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ingredient-ingredient.read_ingredient.item"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Retrieves a Ingredient resource.",
+                "description": "Retrieves a Ingredient resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Ingredient identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            },
             "patch": {
                 "operationId": "api_ingredients_id_patch",
                 "tags": [
@@ -5754,6 +5905,551 @@
                             null
                         ]
                     },
+                    "substitutes": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "key",
+                                "name",
+                                "ratio",
+                                "note"
+                            ],
+                            "properties": {
+                                "key": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "object",
+                                    "required": [
+                                        "es",
+                                        "en"
+                                    ],
+                                    "properties": {
+                                        "es": {
+                                            "type": "string"
+                                        },
+                                        "en": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "ratio": {
+                                    "type": "number"
+                                },
+                                "note": {
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "es",
+                                                "en"
+                                            ],
+                                            "properties": {
+                                                "es": {
+                                                    "type": "string"
+                                                },
+                                                "en": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "foodGroups": {
+                        "readOnly": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "red_meat",
+                                "pork",
+                                "poultry",
+                                "processed_meat",
+                                "fish",
+                                "shellfish",
+                                "animal_stock",
+                                "egg",
+                                "dairy",
+                                "cheese",
+                                "gluten",
+                                "tree_nuts",
+                                "peanuts",
+                                "soy",
+                                "sesame",
+                                "alcohol"
+                            ]
+                        }
+                    },
+                    "allergens": {
+                        "readOnly": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "gluten",
+                                "crustaceans",
+                                "eggs",
+                                "fish",
+                                "peanuts",
+                                "soy",
+                                "milk",
+                                "tree_nuts",
+                                "celery",
+                                "mustard",
+                                "sesame",
+                                "sulphites",
+                                "lupin",
+                                "molluscs"
+                            ]
+                        }
+                    },
+                    "diet": {
+                        "readOnly": true,
+                        "description": "The strictest diet it suits (vegan, vegetarian, pescatarian); null for meat, or while undescribed.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "vegan",
+                            "vegetarian",
+                            "pescatarian",
+                            null
+                        ]
+                    },
+                    "described": {
+                        "readOnly": true,
+                        "type": "boolean"
+                    }
+                }
+            },
+            "Food-ingredient.read": {
+                "type": "object",
+                "description": "What a food is, shared by every household: nutrition per 100 g, allergens, food groups, spice,\nand how much a piece or a millilitre weighs (docs/INGREDIENT-KNOWLEDGE.md). One per canonical\nkey; a household's Ingredient points at one, and can be pointed at another by hand. Filled in\nby the text model (DescribeFoodsHandler); a fix made by hand is kept for good.",
+                "properties": {
+                    "id": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "key": {
+                        "type": "string"
+                    },
+                    "nameEs": {
+                        "readOnly": true,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "nameEn": {
+                        "readOnly": true,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "kcal": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "protein": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "fat": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "saturatedFat": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "carbs": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "sugar": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "fiber": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "salt": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "spice": {
+                        "readOnly": true,
+                        "description": "0 not spicy, 1 mild, 2 hot.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "gramsPerPiece": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "density": {
+                        "readOnly": true,
+                        "description": "Grams per millilitre.",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "source": {
+                        "readOnly": true,
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "llm",
+                            "manual",
+                            "bedca",
+                            "usda",
+                            null
+                        ]
+                    },
+                    "substitutes": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "key",
+                                "name",
+                                "ratio",
+                                "note"
+                            ],
+                            "properties": {
+                                "key": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "object",
+                                    "required": [
+                                        "es",
+                                        "en"
+                                    ],
+                                    "properties": {
+                                        "es": {
+                                            "type": "string"
+                                        },
+                                        "en": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "ratio": {
+                                    "type": "number"
+                                },
+                                "note": {
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "es",
+                                                "en"
+                                            ],
+                                            "properties": {
+                                                "es": {
+                                                    "type": "string"
+                                                },
+                                                "en": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "foodGroups": {
+                        "readOnly": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "red_meat",
+                                "pork",
+                                "poultry",
+                                "processed_meat",
+                                "fish",
+                                "shellfish",
+                                "animal_stock",
+                                "egg",
+                                "dairy",
+                                "cheese",
+                                "gluten",
+                                "tree_nuts",
+                                "peanuts",
+                                "soy",
+                                "sesame",
+                                "alcohol"
+                            ]
+                        }
+                    },
+                    "allergens": {
+                        "readOnly": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "gluten",
+                                "crustaceans",
+                                "eggs",
+                                "fish",
+                                "peanuts",
+                                "soy",
+                                "milk",
+                                "tree_nuts",
+                                "celery",
+                                "mustard",
+                                "sesame",
+                                "sulphites",
+                                "lupin",
+                                "molluscs"
+                            ]
+                        }
+                    },
+                    "diet": {
+                        "readOnly": true,
+                        "description": "The strictest diet it suits (vegan, vegetarian, pescatarian); null for meat, or while undescribed.",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "vegan",
+                            "vegetarian",
+                            "pescatarian",
+                            null
+                        ]
+                    },
+                    "described": {
+                        "readOnly": true,
+                        "type": "boolean"
+                    }
+                }
+            },
+            "Food-ingredient.read_ingredient.item": {
+                "type": "object",
+                "description": "What a food is, shared by every household: nutrition per 100 g, allergens, food groups, spice,\nand how much a piece or a millilitre weighs (docs/INGREDIENT-KNOWLEDGE.md). One per canonical\nkey; a household's Ingredient points at one, and can be pointed at another by hand. Filled in\nby the text model (DescribeFoodsHandler); a fix made by hand is kept for good.",
+                "properties": {
+                    "id": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "key": {
+                        "type": "string"
+                    },
+                    "nameEs": {
+                        "readOnly": true,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "nameEn": {
+                        "readOnly": true,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "kcal": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "protein": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "fat": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "saturatedFat": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "carbs": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "sugar": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "fiber": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "salt": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "spice": {
+                        "readOnly": true,
+                        "description": "0 not spicy, 1 mild, 2 hot.",
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "gramsPerPiece": {
+                        "readOnly": true,
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "density": {
+                        "readOnly": true,
+                        "description": "Grams per millilitre.",
+                        "type": [
+                            "number",
+                            "null"
+                        ]
+                    },
+                    "source": {
+                        "readOnly": true,
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "enum": [
+                            "llm",
+                            "manual",
+                            "bedca",
+                            "usda",
+                            null
+                        ]
+                    },
+                    "substitutes": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "key",
+                                "name",
+                                "ratio",
+                                "note"
+                            ],
+                            "properties": {
+                                "key": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "object",
+                                    "required": [
+                                        "es",
+                                        "en"
+                                    ],
+                                    "properties": {
+                                        "es": {
+                                            "type": "string"
+                                        },
+                                        "en": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "ratio": {
+                                    "type": "number"
+                                },
+                                "note": {
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "es",
+                                                "en"
+                                            ],
+                                            "properties": {
+                                                "es": {
+                                                    "type": "string"
+                                                },
+                                                "en": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
                     "foodGroups": {
                         "readOnly": true,
                         "type": "array",
@@ -5944,6 +6640,565 @@
                                     "usda",
                                     null
                                 ]
+                            },
+                            "substitutes": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": [
+                                        "key",
+                                        "name",
+                                        "ratio",
+                                        "note"
+                                    ],
+                                    "properties": {
+                                        "key": {
+                                            "type": "string"
+                                        },
+                                        "name": {
+                                            "type": "object",
+                                            "required": [
+                                                "es",
+                                                "en"
+                                            ],
+                                            "properties": {
+                                                "es": {
+                                                    "type": "string"
+                                                },
+                                                "en": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "ratio": {
+                                            "type": "number"
+                                        },
+                                        "note": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "es",
+                                                        "en"
+                                                    ],
+                                                    "properties": {
+                                                        "es": {
+                                                            "type": "string"
+                                                        },
+                                                        "en": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            "foodGroups": {
+                                "readOnly": true,
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "red_meat",
+                                        "pork",
+                                        "poultry",
+                                        "processed_meat",
+                                        "fish",
+                                        "shellfish",
+                                        "animal_stock",
+                                        "egg",
+                                        "dairy",
+                                        "cheese",
+                                        "gluten",
+                                        "tree_nuts",
+                                        "peanuts",
+                                        "soy",
+                                        "sesame",
+                                        "alcohol"
+                                    ]
+                                }
+                            },
+                            "allergens": {
+                                "readOnly": true,
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "gluten",
+                                        "crustaceans",
+                                        "eggs",
+                                        "fish",
+                                        "peanuts",
+                                        "soy",
+                                        "milk",
+                                        "tree_nuts",
+                                        "celery",
+                                        "mustard",
+                                        "sesame",
+                                        "sulphites",
+                                        "lupin",
+                                        "molluscs"
+                                    ]
+                                }
+                            },
+                            "diet": {
+                                "readOnly": true,
+                                "description": "The strictest diet it suits (vegan, vegetarian, pescatarian); null for meat, or while undescribed.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "vegan",
+                                    "vegetarian",
+                                    "pescatarian",
+                                    null
+                                ]
+                            },
+                            "described": {
+                                "readOnly": true,
+                                "type": "boolean"
+                            }
+                        }
+                    }
+                ],
+                "description": "What a food is, shared by every household: nutrition per 100 g, allergens, food groups, spice,\nand how much a piece or a millilitre weighs (docs/INGREDIENT-KNOWLEDGE.md). One per canonical\nkey; a household's Ingredient points at one, and can be pointed at another by hand. Filled in\nby the text model (DescribeFoodsHandler); a fix made by hand is kept for good."
+            },
+            "Food.jsonld-ingredient.read": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "key": {
+                                "type": "string"
+                            },
+                            "nameEs": {
+                                "readOnly": true,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "nameEn": {
+                                "readOnly": true,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "kcal": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "protein": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "fat": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "saturatedFat": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "carbs": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "sugar": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "fiber": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "salt": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "spice": {
+                                "readOnly": true,
+                                "description": "0 not spicy, 1 mild, 2 hot.",
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "gramsPerPiece": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "density": {
+                                "readOnly": true,
+                                "description": "Grams per millilitre.",
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "source": {
+                                "readOnly": true,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "llm",
+                                    "manual",
+                                    "bedca",
+                                    "usda",
+                                    null
+                                ]
+                            },
+                            "substitutes": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": [
+                                        "key",
+                                        "name",
+                                        "ratio",
+                                        "note"
+                                    ],
+                                    "properties": {
+                                        "key": {
+                                            "type": "string"
+                                        },
+                                        "name": {
+                                            "type": "object",
+                                            "required": [
+                                                "es",
+                                                "en"
+                                            ],
+                                            "properties": {
+                                                "es": {
+                                                    "type": "string"
+                                                },
+                                                "en": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "ratio": {
+                                            "type": "number"
+                                        },
+                                        "note": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "es",
+                                                        "en"
+                                                    ],
+                                                    "properties": {
+                                                        "es": {
+                                                            "type": "string"
+                                                        },
+                                                        "en": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            "foodGroups": {
+                                "readOnly": true,
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "red_meat",
+                                        "pork",
+                                        "poultry",
+                                        "processed_meat",
+                                        "fish",
+                                        "shellfish",
+                                        "animal_stock",
+                                        "egg",
+                                        "dairy",
+                                        "cheese",
+                                        "gluten",
+                                        "tree_nuts",
+                                        "peanuts",
+                                        "soy",
+                                        "sesame",
+                                        "alcohol"
+                                    ]
+                                }
+                            },
+                            "allergens": {
+                                "readOnly": true,
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "gluten",
+                                        "crustaceans",
+                                        "eggs",
+                                        "fish",
+                                        "peanuts",
+                                        "soy",
+                                        "milk",
+                                        "tree_nuts",
+                                        "celery",
+                                        "mustard",
+                                        "sesame",
+                                        "sulphites",
+                                        "lupin",
+                                        "molluscs"
+                                    ]
+                                }
+                            },
+                            "diet": {
+                                "readOnly": true,
+                                "description": "The strictest diet it suits (vegan, vegetarian, pescatarian); null for meat, or while undescribed.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "vegan",
+                                    "vegetarian",
+                                    "pescatarian",
+                                    null
+                                ]
+                            },
+                            "described": {
+                                "readOnly": true,
+                                "type": "boolean"
+                            }
+                        }
+                    }
+                ],
+                "description": "What a food is, shared by every household: nutrition per 100 g, allergens, food groups, spice,\nand how much a piece or a millilitre weighs (docs/INGREDIENT-KNOWLEDGE.md). One per canonical\nkey; a household's Ingredient points at one, and can be pointed at another by hand. Filled in\nby the text model (DescribeFoodsHandler); a fix made by hand is kept for good."
+            },
+            "Food.jsonld-ingredient.read_ingredient.item": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "key": {
+                                "type": "string"
+                            },
+                            "nameEs": {
+                                "readOnly": true,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "nameEn": {
+                                "readOnly": true,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "kcal": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "protein": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "fat": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "saturatedFat": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "carbs": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "sugar": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "fiber": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "salt": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "spice": {
+                                "readOnly": true,
+                                "description": "0 not spicy, 1 mild, 2 hot.",
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "gramsPerPiece": {
+                                "readOnly": true,
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "density": {
+                                "readOnly": true,
+                                "description": "Grams per millilitre.",
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "source": {
+                                "readOnly": true,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "llm",
+                                    "manual",
+                                    "bedca",
+                                    "usda",
+                                    null
+                                ]
+                            },
+                            "substitutes": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": [
+                                        "key",
+                                        "name",
+                                        "ratio",
+                                        "note"
+                                    ],
+                                    "properties": {
+                                        "key": {
+                                            "type": "string"
+                                        },
+                                        "name": {
+                                            "type": "object",
+                                            "required": [
+                                                "es",
+                                                "en"
+                                            ],
+                                            "properties": {
+                                                "es": {
+                                                    "type": "string"
+                                                },
+                                                "en": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "ratio": {
+                                            "type": "number"
+                                        },
+                                        "note": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "es",
+                                                        "en"
+                                                    ],
+                                                    "properties": {
+                                                        "es": {
+                                                            "type": "string"
+                                                        },
+                                                        "en": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
                             },
                             "foodGroups": {
                                 "readOnly": true,
@@ -6211,12 +7466,111 @@
                     },
                     "food": {
                         "description": "What it is, nutritionally: the food with the same key when it was added, or another one set by hand.",
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Food-ingredient.read"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "recipeCount": {
+                        "readOnly": true,
+                        "description": "Not stored: how many of the household's recipes use it (IngredientProvider).",
+                        "default": 0,
+                        "type": "integer"
+                    }
+                }
+            },
+            "Ingredient-ingredient.read_ingredient.item": {
+                "type": "object",
+                "description": "The household's catalog of ingredients, one per canonical key (\"onion\", whatever the recipe\nlanguage), so a shopping list can merge them, name them in each viewer's language and put\nthem in the right aisle (docs/PLAN.md \u00a77). New ones are classified by the text model\n(ClassifyIngredientsHandler); a fix made in the app is kept for good. Each points at the shared\nFood with the same key (nutrition, allergens\u2026), or at another one chosen by hand.",
+                "properties": {
+                    "id": {
+                        "readOnly": true,
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "canonicalKey": {
+                        "type": "string"
+                    },
+                    "nameEs": {
+                        "maxLength": 100,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "nameEn": {
+                        "maxLength": 100,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "aisle": {
+                        "default": "other",
+                        "type": "string",
+                        "enum": [
+                            "produce",
+                            "meat_fish",
+                            "dairy_eggs",
+                            "bakery",
+                            "pantry",
+                            "spices",
+                            "frozen",
+                            "drinks",
+                            "other"
+                        ]
+                    },
+                    "staple": {
+                        "description": "Always in the kitchen (salt, oil\u2026): listed apart, to check rather than buy.",
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "food": {
+                        "description": "What it is, nutritionally: the food with the same key when it was added, or another one set by hand.",
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Food-ingredient.read_ingredient.item"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "recipeCount": {
+                        "readOnly": true,
+                        "description": "Not stored: how many of the household's recipes use it (IngredientProvider).",
+                        "default": 0,
+                        "type": "integer"
+                    },
+                    "recipes": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "id",
+                                "title"
+                            ],
+                            "properties": {
+                                "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                },
+                                "title": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "keyFoodId": {
                         "type": [
                             "string",
                             "null"
                         ],
-                        "format": "iri-reference",
-                        "example": "https://example.com/"
+                        "format": "uuid"
                     }
                 }
             },
@@ -6321,12 +7675,118 @@
                             },
                             "food": {
                                 "description": "What it is, nutritionally: the food with the same key when it was added, or another one set by hand.",
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Food.jsonld-ingredient.read"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "recipeCount": {
+                                "readOnly": true,
+                                "description": "Not stored: how many of the household's recipes use it (IngredientProvider).",
+                                "default": 0,
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "description": "The household's catalog of ingredients, one per canonical key (\"onion\", whatever the recipe\nlanguage), so a shopping list can merge them, name them in each viewer's language and put\nthem in the right aisle (docs/PLAN.md \u00a77). New ones are classified by the text model\n(ClassifyIngredientsHandler); a fix made in the app is kept for good. Each points at the shared\nFood with the same key (nutrition, allergens\u2026), or at another one chosen by hand."
+            },
+            "Ingredient.jsonld-ingredient.read_ingredient.item": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/HydraItemBaseSchema"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "canonicalKey": {
+                                "type": "string"
+                            },
+                            "nameEs": {
+                                "maxLength": 100,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "nameEn": {
+                                "maxLength": 100,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "aisle": {
+                                "default": "other",
+                                "type": "string",
+                                "enum": [
+                                    "produce",
+                                    "meat_fish",
+                                    "dairy_eggs",
+                                    "bakery",
+                                    "pantry",
+                                    "spices",
+                                    "frozen",
+                                    "drinks",
+                                    "other"
+                                ]
+                            },
+                            "staple": {
+                                "description": "Always in the kitchen (salt, oil\u2026): listed apart, to check rather than buy.",
+                                "default": false,
+                                "type": "boolean"
+                            },
+                            "food": {
+                                "description": "What it is, nutritionally: the food with the same key when it was added, or another one set by hand.",
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Food.jsonld-ingredient.read_ingredient.item"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "recipeCount": {
+                                "readOnly": true,
+                                "description": "Not stored: how many of the household's recipes use it (IngredientProvider).",
+                                "default": 0,
+                                "type": "integer"
+                            },
+                            "recipes": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": [
+                                        "id",
+                                        "title"
+                                    ],
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        },
+                                        "title": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "keyFoodId": {
                                 "type": [
                                     "string",
                                     "null"
                                 ],
-                                "format": "iri-reference",
-                                "example": "https://example.com/"
+                                "format": "uuid"
                             }
                         }
                     }

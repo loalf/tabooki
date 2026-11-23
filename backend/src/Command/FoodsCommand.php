@@ -7,10 +7,10 @@ namespace App\Command;
 use App\Entity\Food;
 use App\Entity\Household;
 use App\Entity\Recipe;
-use App\Food\FoodCatalog;
 use App\Food\RecipeWeigher;
 use App\Message\DescribeFoods;
 use App\Message\SuggestSubstitutes;
+use App\Shopping\IngredientCatalog;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -27,8 +27,8 @@ use Symfony\Component\Messenger\MessageBusInterface;
 final readonly class FoodsCommand
 {
     public function __construct(
+        private IngredientCatalog $ingredientCatalog,
         private EntityManagerInterface $entityManager,
-        private FoodCatalog $foods,
         private MessageBusInterface $bus,
         private RecipeWeigher $weigher,
     ) {
@@ -45,7 +45,7 @@ final readonly class FoodsCommand
                 ->where('r.household = :household')->setParameter('household', $household)
                 ->getQuery()->getResult();
             foreach ($recipes as $recipe) {
-                $added += $this->foods->recipeChanged($recipe);
+                $added += $this->ingredientCatalog->recipeChanged($recipe);
                 $this->weigher->weigh($recipe);
             }
         }

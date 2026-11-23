@@ -24,7 +24,7 @@ class FoodSubstitution
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private Uuid $id;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'substitutions')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private Food $food;
 

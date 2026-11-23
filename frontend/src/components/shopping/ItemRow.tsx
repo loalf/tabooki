@@ -1,6 +1,7 @@
 import { MoreHorizontal, X } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 import {
   AISLES,
   type Aisle,
@@ -78,6 +79,9 @@ export function ItemRow({ item, scope }: { item: ShoppingItem; scope: ListScope 
           <Button variant="secondary" size="sm" disabled={update.isPending} onClick={() => update.mutate({ id: item.ingredientId!, staple: !item.staple })}>
             {item.staple ? t('shopping.notStaple') : t('shopping.makeStaple')}
           </Button>
+          <Link to={`/settings/ingredients/${item.ingredientId}`} className="inline-flex h-9 items-center px-2 font-semibold text-primary underline-offset-2 hover:underline">
+            {t('shopping.aboutIngredient')}
+          </Link>
         </div>
       )}
     </li>

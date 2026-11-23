@@ -4,14 +4,20 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\QueryParameter;
 use App\Enum\Allergen;
 use App\Enum\Diet;
 use App\Enum\FoodGroup;
 use App\Enum\FoodSource;
 use App\Food\FoodFacts;
+use App\State\FoodSearchProvider;
+use App\Taste\Names;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -26,7 +32,21 @@ use Symfony\Component\Uid\Uuid;
  */
 #[ORM\Entity]
 #[ApiResource(
-    operations: [new Get(uriTemplate: '/foods/{id}'), new GetCollection(uriTemplate: '/foods')],
+    operations: [
+        new Get(uriTemplate: '/foods/{id}'),
+        new GetCollection(
+            uriTemplate: '/foods',
+            paginationEnabled: false,
+            provider: FoodSearchProvider::class,
+            parameters: [
+                'q' => new QueryParameter(
+                    schema: ['type' => 'string'],
+                    description: 'Words in its key or one of its names (case and accent insensitive), to point an ingredient at it; up to 30, those used most first',
+                    castToArray: false,
+                ),
+            ],
+        ),
+    ],
     normalizationContext: ['groups' => ['food:read']],
     order: ['key' => 'ASC'],
     security: "is_granted('ROLE_USER')",
@@ -35,53 +55,53 @@ class Food
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private Uuid $id;
 
     #[ORM\Column(length: 80, unique: true)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private string $key;
 
     #[ORM\Column(length: 100, nullable: true)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private ?string $nameEs = null;
 
     #[ORM\Column(length: 100, nullable: true)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private ?string $nameEn = null;
 
     // Per 100 g. Null until described.
 
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private ?float $kcal = null;
 
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private ?float $protein = null;
 
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private ?float $fat = null;
 
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private ?float $saturatedFat = null;
 
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private ?float $carbs = null;
 
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private ?float $sugar = null;
 
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private ?float $fiber = null;
 
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private ?float $salt = null;
 
     /** @var list<string> FoodGroup values */
@@ -94,20 +114,20 @@ class Food
 
     /** 0 not spicy, 1 mild, 2 hot. */
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private ?int $spice = null;
 
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private ?float $gramsPerPiece = null;
 
     /** Grams per millilitre. */
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private ?float $density = null;
 
     #[ORM\Column(enumType: FoodSource::class, length: 10, nullable: true)]
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     private ?FoodSource $source = null;
 
     /** When the text model filled it in; null while it hasn't (yet). */
@@ -118,6 +138,11 @@ class Food
     #[ORM\Column(options: ['default' => false])]
     private bool $edited = false;
 
+    /** @var Collection<int, FoodSubstitution> best first */
+    #[ORM\OneToMany(targetEntity: FoodSubstitution::class, mappedBy: 'food')]
+    #[ORM\OrderBy(['position' => 'ASC'])]
+    private Collection $substitutions;
+
     /** When the text model was asked what can stand in for it (FoodSubstitution); null while it hasn't. */
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $substitutesAt = null;
@@ -126,6 +151,28 @@ class Food
     {
         $this->id = Uuid::v7();
         $this->key = $key;
+        $this->substitutions = new ArrayCollection();
+    }
+
+    /**
+     * What can stand in for it, best first.
+     *
+     * @return list<array{key: string, name: array{es: string, en: string}, ratio: float, note: array{es: string, en: string}|null}>
+     */
+    #[Groups(['food:read', 'ingredient:read'])]
+    #[ApiProperty(schema: ['type' => 'array', 'items' => [
+        'type' => 'object',
+        'required' => ['key', 'name', 'ratio', 'note'],
+        'properties' => [
+            'key' => ['type' => 'string'],
+            'name' => Names::API_SCHEMA,
+            'ratio' => ['type' => 'number'],
+            'note' => ['anyOf' => [Names::API_SCHEMA, ['type' => 'null']]],
+        ],
+    ]])]
+    public function getSubstitutes(): array
+    {
+        return array_values(array_map(static fn (FoodSubstitution $s): array => $s->toArray(), $this->substitutions->toArray()));
     }
 
     public function getId(): Uuid
@@ -194,21 +241,21 @@ class Food
     }
 
     /** @return list<FoodGroup> */
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     public function getFoodGroups(): array
     {
         return array_map(FoodGroup::from(...), $this->foodGroupValues);
     }
 
     /** @return list<Allergen> */
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     public function getAllergens(): array
     {
         return array_map(Allergen::from(...), $this->allergenValues);
     }
 
     /** The strictest diet it suits (vegan, vegetarian, pescatarian); null for meat, or while undescribed. */
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     public function getDiet(): ?Diet
     {
         return $this->isDescribed() ? Diet::of($this->getFoodGroups()) : null;
@@ -234,7 +281,7 @@ class Food
         return $this->source;
     }
 
-    #[Groups(['food:read'])]
+    #[Groups(['food:read', 'ingredient:read'])]
     public function isDescribed(): bool
     {
         return null !== $this->describedAt;
