@@ -22,7 +22,7 @@ A personal/household meal planner. The household keeps a **library** of recipe l
 | Units | **Metric everywhere** (g, ml, °C), with spoons, pinches and countable items kept as they are, original text preserved (see 4.3) |
 | Environments | **Local development** on macOS (Apple Silicon) with Docker Compose; **production on a Contabo VPS**, reached only through **Tailscale** |
 
-**Non-goals for v1:** public accounts, social features, nutrition tracking, grocery delivery integrations, native apps.
+**Non-goals for v1:** public accounts, social features, nutrition tracking (logging what each person eats), grocery delivery integrations, native apps. Per-recipe nutrition and ingredient flags (spicy, allergens…) worked out from the ingredients *are* in scope: see [INGREDIENT-KNOWLEDGE.md](INGREDIENT-KNOWLEDGE.md).
 
 ## 2. Core user flows
 
