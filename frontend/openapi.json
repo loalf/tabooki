@@ -8190,6 +8190,58 @@
                             "null"
                         ]
                     },
+                    "nutrition": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "required": [
+                            "kcal",
+                            "protein",
+                            "fat",
+                            "saturatedFat",
+                            "carbs",
+                            "sugar",
+                            "fiber",
+                            "salt",
+                            "coverage",
+                            "unweighed"
+                        ],
+                        "properties": {
+                            "kcal": {
+                                "type": "integer"
+                            },
+                            "protein": {
+                                "type": "number"
+                            },
+                            "fat": {
+                                "type": "number"
+                            },
+                            "saturatedFat": {
+                                "type": "number"
+                            },
+                            "carbs": {
+                                "type": "number"
+                            },
+                            "sugar": {
+                                "type": "number"
+                            },
+                            "fiber": {
+                                "type": "number"
+                            },
+                            "salt": {
+                                "type": "number"
+                            },
+                            "coverage": {
+                                "type": "number",
+                                "description": "Share of the weighed grams whose figures are known, 0 to 1."
+                            },
+                            "unweighed": {
+                                "type": "integer",
+                                "description": "Lines nobody could weigh, left out."
+                            }
+                        }
+                    },
                     "createdAt": {
                         "readOnly": true,
                         "type": "string",
@@ -8291,6 +8343,52 @@
                             "pescatarian",
                             null
                         ]
+                    },
+                    "allergens": {
+                        "readOnly": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "gluten",
+                                "crustaceans",
+                                "eggs",
+                                "fish",
+                                "peanuts",
+                                "soy",
+                                "milk",
+                                "tree_nuts",
+                                "celery",
+                                "mustard",
+                                "sesame",
+                                "sulphites",
+                                "lupin",
+                                "molluscs"
+                            ]
+                        }
+                    },
+                    "optionalAllergens": {
+                        "readOnly": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "gluten",
+                                "crustaceans",
+                                "eggs",
+                                "fish",
+                                "peanuts",
+                                "soy",
+                                "milk",
+                                "tree_nuts",
+                                "celery",
+                                "mustard",
+                                "sesame",
+                                "sulphites",
+                                "lupin",
+                                "molluscs"
+                            ]
+                        }
                     }
                 },
                 "required": [
@@ -9443,6 +9541,58 @@
                                     "null"
                                 ]
                             },
+                            "nutrition": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "required": [
+                                    "kcal",
+                                    "protein",
+                                    "fat",
+                                    "saturatedFat",
+                                    "carbs",
+                                    "sugar",
+                                    "fiber",
+                                    "salt",
+                                    "coverage",
+                                    "unweighed"
+                                ],
+                                "properties": {
+                                    "kcal": {
+                                        "type": "integer"
+                                    },
+                                    "protein": {
+                                        "type": "number"
+                                    },
+                                    "fat": {
+                                        "type": "number"
+                                    },
+                                    "saturatedFat": {
+                                        "type": "number"
+                                    },
+                                    "carbs": {
+                                        "type": "number"
+                                    },
+                                    "sugar": {
+                                        "type": "number"
+                                    },
+                                    "fiber": {
+                                        "type": "number"
+                                    },
+                                    "salt": {
+                                        "type": "number"
+                                    },
+                                    "coverage": {
+                                        "type": "number",
+                                        "description": "Share of the weighed grams whose figures are known, 0 to 1."
+                                    },
+                                    "unweighed": {
+                                        "type": "integer",
+                                        "description": "Lines nobody could weigh, left out."
+                                    }
+                                }
+                            },
                             "createdAt": {
                                 "readOnly": true,
                                 "type": "string",
@@ -9544,6 +9694,52 @@
                                     "pescatarian",
                                     null
                                 ]
+                            },
+                            "allergens": {
+                                "readOnly": true,
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "gluten",
+                                        "crustaceans",
+                                        "eggs",
+                                        "fish",
+                                        "peanuts",
+                                        "soy",
+                                        "milk",
+                                        "tree_nuts",
+                                        "celery",
+                                        "mustard",
+                                        "sesame",
+                                        "sulphites",
+                                        "lupin",
+                                        "molluscs"
+                                    ]
+                                }
+                            },
+                            "optionalAllergens": {
+                                "readOnly": true,
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "gluten",
+                                        "crustaceans",
+                                        "eggs",
+                                        "fish",
+                                        "peanuts",
+                                        "soy",
+                                        "milk",
+                                        "tree_nuts",
+                                        "celery",
+                                        "mustard",
+                                        "sesame",
+                                        "sulphites",
+                                        "lupin",
+                                        "molluscs"
+                                    ]
+                                }
                             }
                         },
                         "required": [

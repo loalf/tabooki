@@ -243,6 +243,38 @@
         "sesame": "sesame",
         "alcohol": "alcohol"
       }
+    },
+    "nutrition": {
+      "title": "Per serving",
+      "protein": "Protein",
+      "carbs": "Carbohydrates",
+      "sugar": "of which sugars",
+      "fat": "Fat",
+      "saturatedFat": "of which saturated",
+      "fiber": "Fibre",
+      "salt": "Salt",
+      "estimate": "Estimated from the ingredients and their weights.",
+      "coverage": "Only {{percent}}% of the weight is a known food.",
+      "unweighed_one": "{{count}} ingredient has no weight and isn't counted.",
+      "unweighed_other": "{{count}} ingredients have no weight and aren't counted."
+    },
+    "allergens": "Allergens",
+    "allergensNote": "From its ingredients: check the labels.",
+    "allergen": {
+      "gluten": "gluten",
+      "crustaceans": "crustaceans",
+      "eggs": "eggs",
+      "fish": "fish",
+      "peanuts": "peanuts",
+      "soy": "soy",
+      "milk": "milk",
+      "tree_nuts": "tree nuts",
+      "celery": "celery",
+      "mustard": "mustard",
+      "sesame": "sesame",
+      "sulphites": "sulphites",
+      "lupin": "lupin",
+      "molluscs": "molluscs"
     }
   },
   "plan": {

@@ -243,6 +243,38 @@
         "sesame": "sésamo",
         "alcohol": "alcohol"
       }
+    },
+    "nutrition": {
+      "title": "Por ración",
+      "protein": "Proteínas",
+      "carbs": "Hidratos de carbono",
+      "sugar": "de los cuales azúcares",
+      "fat": "Grasas",
+      "saturatedFat": "de las cuales saturadas",
+      "fiber": "Fibra",
+      "salt": "Sal",
+      "estimate": "Estimado a partir de los ingredientes y sus pesos.",
+      "coverage": "Solo el {{percent}} % del peso es un alimento conocido.",
+      "unweighed_one": "{{count}} ingrediente no tiene peso y no cuenta.",
+      "unweighed_other": "{{count}} ingredientes no tienen peso y no cuentan."
+    },
+    "allergens": "Alérgenos",
+    "allergensNote": "Según sus ingredientes: revisa las etiquetas.",
+    "allergen": {
+      "gluten": "gluten",
+      "crustaceans": "crustáceos",
+      "eggs": "huevo",
+      "fish": "pescado",
+      "peanuts": "cacahuete",
+      "soy": "soja",
+      "milk": "leche",
+      "tree_nuts": "frutos de cáscara",
+      "celery": "apio",
+      "mustard": "mostaza",
+      "sesame": "sésamo",
+      "sulphites": "sulfitos",
+      "lupin": "altramuces",
+      "molluscs": "moluscos"
     }
   },
   "plan": {

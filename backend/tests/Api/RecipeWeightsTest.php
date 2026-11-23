@@ -8,15 +8,18 @@ use ApiPlatform\Test\ApiTestCase;
 use ApiPlatform\Test\Client;
 use App\Entity\Food;
 use App\Entity\User;
+use App\Food\FoodCatalog;
 use App\Message\AnnotateRecipe;
 use App\Message\DescribeFoods;
 use App\MessageHandler\AnnotateRecipeHandler;
 use App\MessageHandler\DescribeFoodsHandler;
+use App\Shopping\IngredientCatalog;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\JsonMockResponse;
 
 /**
+ * @phpstan-type View array{nutrition?: array{kcal: int|float, protein: int|float, coverage: int|float, unweighed: int}|null, allergens?: list<string>, optionalAllergens?: list<string>}
  * @phpstan-type Line array{rawText: string, canonicalKey?: string|null, name?: string|null, quantity?: float|int|null, unit?: string|null, grams?: float|int|null, gramsSource?: string|null}
  */
 final class RecipeWeightsTest extends ApiTestCase
@@ -105,6 +108,52 @@ final class RecipeWeightsTest extends ApiTestCase
         unset($lines[1]['gramsSource']);
         $this->patch($id, ['ingredients' => $lines]);
         self::assertSame([[180, 'manual'], [5, 'manual']], $this->weights($id));
+    }
+
+    public function testTheRecipeAddsUpItsFoodsAndFollowsAnIngredientPointedElsewhere(): void
+    {
+        $id = $this->create([
+            ['rawText' => '400 g de garbanzos', 'canonicalKey' => 'chickpeas_cooked', 'quantity' => 400, 'unit' => 'g'],
+            ['rawText' => '200 g de pasta', 'canonicalKey' => 'pasta', 'quantity' => 200, 'unit' => 'g'],
+            ['rawText' => 'Parmesano (opcional)', 'canonicalKey' => 'parmesan', 'quantity' => 20, 'unit' => 'g', 'optional' => true],
+        ]);
+        self::assertNull($this->get($id)['nutrition'] ?? null, 'nothing known about the foods yet');
+
+        $this->mockBedrock(['foods' => [
+            [...self::food('chickpeas_cooked'), 'kcal' => 140, 'protein' => 7],
+            [...self::food('pasta'), 'kcal' => 360, 'protein' => 12, 'allergens' => ['gluten']],
+            [...self::food('parmesan'), 'kcal' => 400, 'allergens' => ['milk']],
+            [...self::food('chickpeas_dried'), 'kcal' => 364, 'protein' => 19],
+        ]], 'save_foods');
+        self::getContainer()->get(FoodCatalog::class)->ensure($this->ana->getHousehold(), ['chickpeas_dried' => ['name' => 'garbanzos secos', 'language' => 'es']]);
+        self::getContainer()->get(DescribeFoodsHandler::class)(new DescribeFoods($this->ana->getHousehold()->getId()->toRfc4122()));
+
+        $recipe = $this->get($id);
+        // (400 × 1.40 + 200 × 3.60) / 4 servings = 320 kcal; (28 + 24) / 4 = 13 g protein.
+        self::assertEquals([320, 13], [$recipe['nutrition']['kcal'] ?? null, $recipe['nutrition']['protein'] ?? null]);
+        self::assertEquals([1, 0], [$recipe['nutrition']['coverage'] ?? null, $recipe['nutrition']['unweighed'] ?? null]);
+        self::assertSame(['gluten'], $recipe['allergens'] ?? null);
+        self::assertSame(['milk'], $recipe['optionalAllergens'] ?? null);
+
+        // The household says its "chickpeas" are dried ones: the recipe follows.
+        $ingredients = self::getContainer()->get(IngredientCatalog::class)->forKeys($this->ana->getHousehold(), ['chickpeas_cooked' => ['name' => 'garbanzos', 'language' => 'es']]);
+        $dried = self::getContainer()->get(EntityManagerInterface::class)->getRepository(Food::class)->findOneBy(['key' => 'chickpeas_dried']);
+        self::assertNotNull($dried);
+        $this->client->request('PATCH', '/api/ingredients/'.$ingredients['chickpeas_cooked']->getId()->toRfc4122(), [
+            'json' => ['food' => '/api/foods/'.$dried->getId()->toRfc4122()],
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+        ]);
+        self::assertResponseIsSuccessful();
+        self::assertSame(544, $this->get($id)['nutrition']['kcal'] ?? null, '(400 × 3.64 + 720) / 4');
+    }
+
+    /** @return View */
+    private function get(string $id): array
+    {
+        /** @var View $recipe */
+        $recipe = $this->client->request('GET', '/api/recipes/'.$id)->toArray();
+
+        return $recipe;
     }
 
     /** @param list<Line> $lines */

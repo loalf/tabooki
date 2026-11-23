@@ -13,6 +13,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\QueryParameter;
+use App\Enum\Allergen;
 use App\Enum\Diet;
 use App\Enum\FoodGroup;
 use App\Enum\Heaviness;
@@ -21,6 +22,7 @@ use App\Enum\MealType;
 use App\Enum\SourceStatus;
 use App\Filter\RecipeSearchFilter;
 use App\Filter\RecipeTagsFilter;
+use App\Food\Nutrition;
 use App\Library\SearchText;
 use App\Planning\RecipeFacts;
 use App\Repository\RecipeRepository;
@@ -279,6 +281,36 @@ class Recipe implements HouseholdOwned
     /** Fingerprint of the text the model read the facts from (factsFingerprint()); null if it hasn't. */
     #[ORM\Column(length: 32, nullable: true)]
     private ?string $factsFrom = null;
+
+    /**
+     * Added up from the lines' weights and their foods (App\Food\Nutrition), whenever the lines
+     * are weighed: per serving, with how much of it is known. Null while too little is.
+     *
+     * @var array<string, int|float>|null
+     */
+    #[ORM\Column(type: Types::JSON, nullable: true, options: ['jsonb' => true])]
+    #[Groups(['recipe:read'])]
+    #[ApiProperty(schema: ['type' => ['object', 'null'], 'required' => [...Nutrition::FIELDS, 'coverage', 'unweighed'], 'properties' => [
+        'kcal' => ['type' => 'integer'],
+        'protein' => ['type' => 'number'],
+        'fat' => ['type' => 'number'],
+        'saturatedFat' => ['type' => 'number'],
+        'carbs' => ['type' => 'number'],
+        'sugar' => ['type' => 'number'],
+        'fiber' => ['type' => 'number'],
+        'salt' => ['type' => 'number'],
+        'coverage' => ['type' => 'number', 'description' => 'Share of the weighed grams whose figures are known, 0 to 1.'],
+        'unweighed' => ['type' => 'integer', 'description' => 'Lines nobody could weigh, left out.'],
+    ]])]
+    private ?array $nutrition = null;
+
+    /** @var list<string> Allergen values of the foods the dish needs */
+    #[ORM\Column(name: 'allergens', type: Types::JSON, options: ['jsonb' => true, 'default' => '[]'])]
+    private array $allergenValues = [];
+
+    /** @var list<string> Allergen values only its optional lines bring */
+    #[ORM\Column(name: 'optional_allergens', type: Types::JSON, options: ['jsonb' => true, 'default' => '[]'])]
+    private array $optionalAllergenValues = [];
 
     /** @var list<string> facts fixed by hand (FACTS), which the model leaves alone */
     #[ORM\Column(type: Types::JSON, options: ['jsonb' => true, 'default' => '[]'])]
@@ -814,6 +846,40 @@ class Recipe implements HouseholdOwned
     public function hasFoodGroups(): bool
     {
         return null !== $this->factsFrom || \in_array('foodGroups', $this->factsEdited, true);
+    }
+
+    /** @return array<string, int|float>|null */
+    public function getNutrition(): ?array
+    {
+        return $this->nutrition;
+    }
+
+    /** @return list<Allergen> */
+    #[Groups(['recipe:read'])]
+    public function getAllergens(): array
+    {
+        return array_map(Allergen::from(...), $this->allergenValues);
+    }
+
+    /** @return list<Allergen> */
+    #[Groups(['recipe:read'])]
+    public function getOptionalAllergens(): array
+    {
+        return array_map(Allergen::from(...), $this->optionalAllergenValues);
+    }
+
+    /**
+     * What the lines' foods say about the dish (App\Food\RecipeWeigher).
+     *
+     * @param array<string, int|float>|null $nutrition
+     * @param list<Allergen>                $allergens
+     * @param list<Allergen>                $optionalAllergens
+     */
+    public function applyIngredientFacts(?array $nutrition, array $allergens, array $optionalAllergens): void
+    {
+        $this->nutrition = $nutrition;
+        $this->allergenValues = array_map(static fn (Allergen $a): string => $a->value, $allergens);
+        $this->optionalAllergenValues = array_map(static fn (Allergen $a): string => $a->value, $optionalAllergens);
     }
 
     /** @return list<string> */

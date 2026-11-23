@@ -49,15 +49,15 @@ Considered Neo4j next to Postgres and rejected it (2026-11-23):
 - [x] Lines typed by hand: the same annotate call gives them a key, name, quantity and unit, so they now reach the food catalog and merge on the shopping list. Extraction's values are never overwritten
 - [x] Existing recipes: `FACTS_VERSION` in the facts fingerprint was raised, so `app:annotate` re-reads them all once; `app:foods` weighs every recipe
 - [x] Show it and allow edits: a "Weights" section on the recipe edit page lists each line's grams and where they come from; typing a number fixes it by hand, clearing it goes back to the worked-out one. Unchanged lines keep their weight through edits
-- [ ] Repointing a household ingredient at another food (`PATCH /api/ingredients/{id}`) doesn't weigh its recipes again yet: phase 3's "recompute" item
+- [x] Repointing a household ingredient at another food (`PATCH /api/ingredients/{id}`) weighs that household's recipes with it again (`IngredientProcessor`, phase 3)
 
 ### 3. Derived recipe properties
 
-- [ ] Recipe-level cached columns: kcal and macros **per serving**, plus coverage (share of ingredient weight with known nutrition) so partial numbers aren't shown as exact
-- [ ] Derived flags on `Recipe` (spicy, vegan, allergens…), with amount thresholds where they matter (spicy)
-- [ ] Recompute whenever ingredients, servings or food links change (same pattern as `heaviness` / `food_groups`)
-- [ ] Backfill command for existing recipes
-- [ ] Show it in the UI: a nutrition summary on the recipe page, flag badges
+- [x] `Recipe.nutrition` (JSON): kcal, protein, fat, saturated fat, carbs, sugar, fiber and salt **per serving of the recipe's own servings**, plus `coverage` (share of the weighed grams whose food is described) and `unweighed` (lines with no weight). Optional lines are left out. Null under 50 % coverage, so a guess isn't shown as a figure (`App\Food\Nutrition`)
+- [x] `Recipe.allergens` and `optionalAllergens`, from the lines' foods. Spice and diet stay as the annotate step reads them: it sees the dish in context with amounts ("a pinch of chili", "bacon, optional"), which a per-food flag can't. Food-derived allergens lean cautious ("may contain" in spice mixes and stock cubes counts)
+- [x] Recompute: everything is added up whenever the lines are weighed (recipe saved or read, foods described or merged, an ingredient repointed, `servings` changed)
+- [x] Backfill: `app:foods` weighs and adds up every recipe
+- [x] UI: an allergen line under "contains" and a "Per serving" card under the ingredients on the recipe page, with how complete it is
 
 ### 4. Search and planning
 
@@ -69,6 +69,6 @@ Considered Neo4j next to Postgres and rejected it (2026-11-23):
 
 ## Open questions
 
-- Should per-serving figures use the recipe's servings or the planned servings (default 4)?
-- Should cooking losses (oil absorbed when frying, water lost when roasting) be handled, or ignored for v1?
+- ~~Should per-serving figures use the recipe's servings or the planned servings?~~ The recipe's: a serving's nutrition doesn't change with how many are planned, only the shopping amounts do (2026-11-23)
+- ~~Should cooking losses be handled?~~ Ignored for v1: the weight estimates already count only the oil a fried food soaks up, the biggest one (2026-11-23)
 - Should the nutrition source be licence-checked before importing BEDCA in bulk?

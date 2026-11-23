@@ -12,10 +12,11 @@ use App\Enum\GramsSource;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
- * Works out what each ingredient line of a recipe weighs. Most trusted first: a weight typed in
- * by hand, a measured amount (g, ml, spoons), the text model's estimate for the line, then a
- * count times the food's weight per piece. Run when a recipe is saved or read, and when its
- * foods are described or merged. Doesn't flush.
+ * Works out what each ingredient line of a recipe weighs, then what the dish brings: nutrition
+ * per serving and allergens (App\Food\Nutrition). Weights, most trusted first: typed in by hand,
+ * a measured amount (g, ml, spoons), the text model's estimate for the line, then a count times
+ * the food's weight per piece. Run when a recipe is saved or read, when its foods are described
+ * or merged, and when a household points an ingredient at another food. Doesn't flush.
  */
 final readonly class RecipeWeigher
 {
@@ -27,10 +28,13 @@ final readonly class RecipeWeigher
     public function weigh(Recipe $recipe, array $estimates = []): void
     {
         $foods = $this->foodsFor($recipe);
-        foreach ($recipe->getIngredients() as $line) {
+        $lines = $recipe->getIngredients();
+        foreach ($lines as $line) {
             [$grams, $source] = self::weightOf($line, $foods[$line->getCanonicalKey() ?? ''] ?? null, $estimates[$line->getPosition()] ?? null);
             $line->weigh($grams, $source);
         }
+        [$allergens, $optionalAllergens] = Nutrition::allergens($lines, $foods);
+        $recipe->applyIngredientFacts(Nutrition::perServing($lines, $foods, $recipe->getServings()), $allergens, $optionalAllergens);
     }
 
     /**

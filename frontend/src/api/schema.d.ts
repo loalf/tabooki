@@ -1846,6 +1846,20 @@ export interface components {
             heaviness?: "light" | "medium" | "hearty" | null;
             /** @description 0 not spicy, 1 mild, 2 hot. */
             spice?: number | null;
+            nutrition?: {
+                kcal: number;
+                protein: number;
+                fat: number;
+                saturatedFat: number;
+                carbs: number;
+                sugar: number;
+                fiber: number;
+                salt: number;
+                /** @description Share of the weighed grams whose figures are known, 0 to 1. */
+                coverage: number;
+                /** @description Lines nobody could weigh, left out. */
+                unweighed: number;
+            } | null;
             /** Format: date-time */
             readonly createdAt?: string;
             /** Format: date-time */
@@ -1864,6 +1878,8 @@ export interface components {
              * @enum {string|null}
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
+            readonly allergens?: ("gluten" | "crustaceans" | "eggs" | "fish" | "peanuts" | "soy" | "milk" | "tree_nuts" | "celery" | "mustard" | "sesame" | "sulphites" | "lupin" | "molluscs")[];
+            readonly optionalAllergens?: ("gluten" | "crustaceans" | "eggs" | "fish" | "peanuts" | "soy" | "milk" | "tree_nuts" | "celery" | "mustard" | "sesame" | "sulphites" | "lupin" | "molluscs")[];
         };
         "Recipe-recipe.write": {
             /**
@@ -2181,6 +2197,20 @@ export interface components {
             heaviness?: "light" | "medium" | "hearty" | null;
             /** @description 0 not spicy, 1 mild, 2 hot. */
             spice?: number | null;
+            nutrition?: {
+                kcal: number;
+                protein: number;
+                fat: number;
+                saturatedFat: number;
+                carbs: number;
+                sugar: number;
+                fiber: number;
+                salt: number;
+                /** @description Share of the weighed grams whose figures are known, 0 to 1. */
+                coverage: number;
+                /** @description Lines nobody could weigh, left out. */
+                unweighed: number;
+            } | null;
             /** Format: date-time */
             readonly createdAt?: string;
             /** Format: date-time */
@@ -2199,6 +2229,8 @@ export interface components {
              * @enum {string|null}
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
+            readonly allergens?: ("gluten" | "crustaceans" | "eggs" | "fish" | "peanuts" | "soy" | "milk" | "tree_nuts" | "celery" | "mustard" | "sesame" | "sulphites" | "lupin" | "molluscs")[];
+            readonly optionalAllergens?: ("gluten" | "crustaceans" | "eggs" | "fish" | "peanuts" | "soy" | "milk" | "tree_nuts" | "celery" | "mustard" | "sesame" | "sulphites" | "lupin" | "molluscs")[];
         };
         "RecipeIngredient-recipe.read": {
             /** @description Sub-heading the line belongs to ("For the sauce"), if the recipe has groups. */

@@ -7,7 +7,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Patch;
 use App\Enum\Aisle;
-use App\State\HouseholdOwnedProcessor;
+use App\State\IngredientProcessor;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -26,7 +26,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\UniqueConstraint(name: 'ingredient_household_key', columns: ['household_id', 'canonical_key'])]
 #[ApiResource(
     operations: [
-        new Patch(processor: HouseholdOwnedProcessor::class),
+        new Patch(processor: IngredientProcessor::class),
     ],
     normalizationContext: ['groups' => ['ingredient:read']],
     denormalizationContext: ['groups' => ['ingredient:write']],

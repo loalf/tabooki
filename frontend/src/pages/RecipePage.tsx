@@ -14,6 +14,7 @@ import {
   useUpdateRecipe,
 } from '@/api/library'
 import { useMe } from '@/auth/useAuth'
+import { NutritionCard } from '@/components/library/NutritionCard'
 import { Thumbnail } from '@/components/library/Thumbnail'
 import { EmptyState } from '@/components/PageHeader'
 import { AddToMenuSheet } from '@/components/plan/AddToMenuSheet'
@@ -101,6 +102,8 @@ function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) 
   const tags = recipe.tags ?? []
   const foodGroups = sortGroups(recipe.foodGroups ?? [])
   const optionalGroups = sortGroups(recipe.optionalFoodGroups ?? [])
+  const allergens = recipe.allergens ?? []
+  const optionalAllergens = recipe.optionalAllergens ?? []
   const factor = servings / (recipe.servings || servings)
 
   const cookParams = new URLSearchParams(params)
@@ -236,6 +239,16 @@ function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) 
         </p>
       )}
 
+      {(allergens.length > 0 || optionalAllergens.length > 0) && (
+        <p className="-mt-1 text-[13px] text-muted-foreground" title={t('recipe.allergensNote')}>
+          <span className="font-semibold">{t('recipe.allergens')}:</span> {allergens.map((a) => t(`recipe.allergen.${a}`)).join(' · ')}
+          {optionalAllergens.length > 0 &&
+            (allergens.length > 0
+              ? ` (${t('recipe.facts.optional', { groups: optionalAllergens.map((a) => t(`recipe.allergen.${a}`)).join(' · ') })})`
+              : t('recipe.facts.optional', { groups: optionalAllergens.map((a) => t(`recipe.allergen.${a}`)).join(' · ') }))}
+        </p>
+      )}
+
       {(recipe.tasteConflicts?.length ?? 0) > 0 && (
         <Link to="/settings/taste" className="-mt-1 flex items-start gap-2 rounded-md bg-accent px-3 py-2 text-sm font-semibold text-accent-foreground">
           <ShieldAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
@@ -329,6 +342,7 @@ function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) 
                   </ul>
                 </div>
               ))}
+              {recipe.nutrition && <NutritionCard nutrition={recipe.nutrition} />}
             </>
           )}
         </section>
