@@ -152,6 +152,18 @@ class Food
     #[Groups(['food:read', 'ingredient:read'])]
     private ?FoodSource $source = null;
 
+    /** Where in `source` the figures come from ("2191 Garbanzo, en conserva" in BEDCA). */
+    #[ORM\Column(length: 200, nullable: true)]
+    #[Groups(['food:read', 'ingredient:read'])]
+    private ?string $sourceRef = null;
+
+    /**
+     * @var list<string> nutrition fields `source` doesn't give, still the model's estimate
+     */
+    #[ORM\Column(type: Types::JSON, options: ['jsonb' => true, 'default' => '[]'])]
+    #[Groups(['food:read', 'ingredient:read'])]
+    private array $estimatedFields = [];
+
     /** When the text model filled it in; null while it hasn't (yet). */
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $describedAt = null;
@@ -338,6 +350,37 @@ class Food
         }
         $this->apply($facts);
         $this->source = FoodSource::Llm;
+        $this->sourceRef = null;
+        $this->estimatedFields = [];
+    }
+
+    /**
+     * Figures from a composition table (BEDCA, USDA): the model doesn't describe it again; a fix
+     * by hand still wins.
+     *
+     * @param list<string> $estimated nutrition fields the table doesn't give, left as estimated
+     */
+    public function adopt(FoodFacts $facts, FoodSource $source, string $ref, array $estimated): void
+    {
+        $this->describedAt ??= new \DateTimeImmutable();
+        $this->apply($facts);
+        $this->source = $source;
+        $this->sourceRef = mb_substr($ref, 0, 200);
+        $this->estimatedFields = $estimated;
+        $this->edited = false;
+        $this->correctedBy = null;
+        $this->correctedAt = null;
+    }
+
+    public function getSourceRef(): ?string
+    {
+        return $this->sourceRef;
+    }
+
+    /** @return list<string> */
+    public function getEstimatedFields(): array
+    {
+        return $this->estimatedFields;
     }
 
     /** A fix made by hand (or figures from a better source): the model won't overwrite it. */
@@ -346,6 +389,8 @@ class Food
         $this->describedAt ??= new \DateTimeImmutable();
         $this->apply($facts);
         $this->source = $source;
+        $this->sourceRef = null;
+        $this->estimatedFields = [];
         $this->edited = true;
         $this->correctedBy = $by;
         $this->correctedAt = new \DateTimeImmutable();

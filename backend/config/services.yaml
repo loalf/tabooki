@@ -7,6 +7,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    # BEDCA's answers and the reviewed pairings (app:foods:bedca): kept, never in git.
+    app.bedca_dir: '%kernel.project_dir%/var/bedca'
     # Cached thumbnails (later: uploaded screenshots and videos). A Docker volume in compose.yaml.
     app.media_dir: '%kernel.project_dir%/var/media'
     # For the cost column of extraction runs: USD per million tokens, by model id. Models missing
@@ -42,10 +44,12 @@ services:
 
     bedrock.http_client: '@http_client'
     openrouter.http_client: '@http_client'
+    bedca.http_client: '@http_client'
 
 when@test:
     parameters:
         app.media_dir: '%kernel.project_dir%/var/test-media'
+        app.bedca_dir: '%kernel.project_dir%/var/test-bedca'
 
     services:
         # Tests set canned responses on it: $container->get('link_preview.http_client')->setResponseFactory(...)
@@ -56,6 +60,9 @@ when@test:
             class: Symfony\Component\HttpClient\MockHttpClient
             public: true
         openrouter.http_client:
+            class: Symfony\Component\HttpClient\MockHttpClient
+            public: true
+        bedca.http_client:
             class: Symfony\Component\HttpClient\MockHttpClient
             public: true
         # No yt-dlp in tests: canned answers, see App\Tests\FakeMediaFetcher.

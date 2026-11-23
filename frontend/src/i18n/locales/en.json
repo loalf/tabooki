@@ -594,6 +594,7 @@
       "classify": "Sorting ingredients",
       "foods": "Looking up foods",
       "substitutes": "Find substitutes",
+      "bedca": "Pair with BEDCA",
       "embed": "Prepare search",
       "search": "Search by meaning",
       "translate": "Translating the recipe",
@@ -614,7 +615,8 @@
     "tasteWhat": "Household tastes",
     "substitutesWhat": "New ingredients: what to use instead",
     "embedWhat": "Recipe: to find it by meaning",
-    "searchWhat": "A search"
+    "searchWhat": "A search",
+    "bedcaWhat": "Foods: their BEDCA figures"
   },
   "password": {
     "current": "Current password",
@@ -925,7 +927,10 @@
       "manual": "Fixed by hand.",
       "bedca": "From BEDCA.",
       "usda": "From USDA FoodData Central.",
-      "corrected": "Fixed by hand by {{who}} on {{when}}."
+      "corrected": "Fixed by hand by {{who}} on {{when}}.",
+      "bedcaRef": "From AESAN/BEDCA Base de Datos Española de Composición de Alimentos v1.0 (2010): “{{food}}”.",
+      "saltFromSodium": "Salt is worked out from its sodium.",
+      "stillEstimated": "Estimated by Tabooki, as BEDCA doesn’t give it: {{fields}}."
     },
     "usedIn_one": "In {{count}} recipe",
     "usedIn_other": "In {{count}} recipes",

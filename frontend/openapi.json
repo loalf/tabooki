@@ -5500,6 +5500,7 @@
                             "classify",
                             "foods",
                             "substitutes",
+                            "bedca",
                             "embed",
                             "search",
                             "translate",
@@ -5578,6 +5579,7 @@
                             "classify",
                             "foods",
                             "substitutes",
+                            "bedca",
                             "embed",
                             "search",
                             "translate",
@@ -6131,6 +6133,22 @@
                             null
                         ]
                     },
+                    "sourceRef": {
+                        "readOnly": true,
+                        "description": "Where in `source` the figures come from (\"2191 Garbanzo, en conserva\" in BEDCA).",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "estimatedFields": {
+                        "readOnly": true,
+                        "description": "nutrition fields `source` doesn't give, still the model's estimate",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
                     "edited": {
                         "readOnly": true,
                         "description": "Changed by hand: the model leaves it alone.",
@@ -6397,6 +6415,22 @@
                             null
                         ]
                     },
+                    "sourceRef": {
+                        "readOnly": true,
+                        "description": "Where in `source` the figures come from (\"2191 Garbanzo, en conserva\" in BEDCA).",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "estimatedFields": {
+                        "readOnly": true,
+                        "description": "nutrition fields `source` doesn't give, still the model's estimate",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
                     "edited": {
                         "readOnly": true,
                         "description": "Changed by hand: the model leaves it alone.",
@@ -6662,6 +6696,22 @@
                             "usda",
                             null
                         ]
+                    },
+                    "sourceRef": {
+                        "readOnly": true,
+                        "description": "Where in `source` the figures come from (\"2191 Garbanzo, en conserva\" in BEDCA).",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "estimatedFields": {
+                        "readOnly": true,
+                        "description": "nutrition fields `source` doesn't give, still the model's estimate",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     },
                     "edited": {
                         "readOnly": true,
@@ -7019,6 +7069,22 @@
                                     null
                                 ]
                             },
+                            "sourceRef": {
+                                "readOnly": true,
+                                "description": "Where in `source` the figures come from (\"2191 Garbanzo, en conserva\" in BEDCA).",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "estimatedFields": {
+                                "readOnly": true,
+                                "description": "nutrition fields `source` doesn't give, still the model's estimate",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
                             "edited": {
                                 "readOnly": true,
                                 "description": "Changed by hand: the model leaves it alone.",
@@ -7292,6 +7358,22 @@
                                     null
                                 ]
                             },
+                            "sourceRef": {
+                                "readOnly": true,
+                                "description": "Where in `source` the figures come from (\"2191 Garbanzo, en conserva\" in BEDCA).",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "estimatedFields": {
+                                "readOnly": true,
+                                "description": "nutrition fields `source` doesn't give, still the model's estimate",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
                             "edited": {
                                 "readOnly": true,
                                 "description": "Changed by hand: the model leaves it alone.",
@@ -7564,6 +7646,22 @@
                                     "usda",
                                     null
                                 ]
+                            },
+                            "sourceRef": {
+                                "readOnly": true,
+                                "description": "Where in `source` the figures come from (\"2191 Garbanzo, en conserva\" in BEDCA).",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "estimatedFields": {
+                                "readOnly": true,
+                                "description": "nutrition fields `source` doesn't give, still the model's estimate",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
                             },
                             "edited": {
                                 "readOnly": true,

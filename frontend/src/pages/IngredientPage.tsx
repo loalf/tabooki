@@ -176,7 +176,19 @@ function FoodCard({ food }: { food: FoodDetail }) {
                 who: food.correctedByName ?? t('ingredients.someone'),
                 when: new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(food.correctedAt)),
               })
-            : t(`ingredients.source.${food.source ?? 'llm'}`)}
+            : food.source === 'bedca'
+              ? [
+                  t('ingredients.source.bedcaRef', { food: food.sourceRef?.replace(/^\d+\s+/, '') ?? '' }),
+                  t('ingredients.source.saltFromSodium'),
+                  food.estimatedFields?.length
+                    ? t('ingredients.source.stillEstimated', {
+                        fields: food.estimatedFields.map((f) => (f === 'kcal' ? 'kcal' : t(`recipe.nutrition.${f}`).toLowerCase())).join(', '),
+                      })
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(' ')
+              : t(`ingredients.source.${food.source ?? 'llm'}`)}
         </p>
         <span className="flex gap-2">
           {food.edited && (

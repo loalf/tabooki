@@ -194,7 +194,7 @@ function Breakdown({ title, groups, mono = false }: { title: string; groups: Gro
 function RecentCall({ call }: { call: CostCall }) {
   const { t, i18n } = useTranslation()
   const when = new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(call.at!))
-  const what = call.sourceTitle ?? call.sourceUrl ?? (call.step === 'classify' ? t('costs.classifyWhat') : call.step === 'foods' ? t('costs.foodsWhat') : call.step === 'substitutes' ? t('costs.substitutesWhat') : call.step === 'embed' ? t('costs.embedWhat') : call.step === 'search' ? t('costs.searchWhat') : call.step === 'translate' ? t('costs.translateWhat') : call.step === 'annotate' ? t('costs.annotateWhat') : call.step === 'taste_profile' || call.step === 'notes_fit' || call.step === 'tweak' || call.step === 'dictation' ? t('costs.tasteWhat') : t('costs.deletedLink'))
+  const what = call.sourceTitle ?? call.sourceUrl ?? (call.step === 'classify' ? t('costs.classifyWhat') : call.step === 'foods' ? t('costs.foodsWhat') : call.step === 'substitutes' ? t('costs.substitutesWhat') : call.step === 'bedca' ? t('costs.bedcaWhat') : call.step === 'embed' ? t('costs.embedWhat') : call.step === 'search' ? t('costs.searchWhat') : call.step === 'translate' ? t('costs.translateWhat') : call.step === 'annotate' ? t('costs.annotateWhat') : call.step === 'taste_profile' || call.step === 'notes_fit' || call.step === 'tweak' || call.step === 'dictation' ? t('costs.tasteWhat') : t('costs.deletedLink'))
   return (
     <li className="flex items-baseline gap-3 px-3 py-2.5">
       <div className="min-w-0 flex-1">

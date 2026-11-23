@@ -40,7 +40,8 @@ Considered Neo4j next to Postgres and rejected it (2026-11-23):
 - [x] Keys stay English and consistent: extraction is told `canonical_key` is English whatever the recipe language, and is given the catalog's keys (most used first, up to 400) to reuse. `app:foods:merge` has the text model review the catalog for Spanish, plural or reworded keys ("ajo" → "garlic", "cherry_tomatoes" → "cherry_tomato"), shows the merges and makes them once confirmed. `app:foods:merge <from> <to>` merges one pair by hand. A merge rewrites recipe lines, household ingredients, checked shopping lines, taste rules and foods
 - [x] See a food and point an ingredient at another: Settings → Ingredients lists every ingredient the household's recipes use (`GET /api/ingredients`, with how many recipes use each, its food, kcal and allergens, "no data" while undescribed, "another food" when repointed); one opens its food (per 100 g, allergens, groups, spice, weight of a piece and a tablespoon, substitutes, where the figures come from) and the recipes that use it, and "Is it another food?" searches the shared foods (`GET /api/foods?q=`, accent-insensitive, most used first) to point it elsewhere, or back to its own. The shopping list's fix menu links to it. Household entries are now made when a recipe is saved (`IngredientCatalog::recipeChanged`), not only when a shopping list needs them; `app:foods` adds the missing ones. Correcting a food by hand: "Correct" on its card edits the figures per 100 g, allergens, spice and the weight of a piece and of a tablespoon (`POST /api/foods/{id}/correction`, all at once; sugar can't exceed carbohydrates nor saturated fat the fat). Foods are shared and Tabooki has no public sign-up, so anyone signed in may (decided 2026-11-23); the fix says who made it and when, the model never overwrites it, and every recipe with the food (by key, or pointed at it) is worked out again. "Back to the estimate" (`POST /api/foods/{id}/estimate`) has the model describe it again
 - [x] Seed from the library: `app:foods` creates the foods, links existing household ingredients, and queues `DescribeFoods`, which has the text model fill in each food in batches of 40 (step "foods" on the costs page)
-- [ ] Import BEDCA/USDA figures over the model's estimates (`source` tells them apart; check BEDCA's licence first)
+- [x] Import BEDCA's figures over the model's estimates: `app:foods:bedca` (licence: see "Data licences"). The text model pairs each food with the BEDCA food in the same state, answering with BEDCA's exact Spanish name (looked up here: a copied-wrong id would be another food), 30 foods a call (step "bedca"). Pairs are saved under `var/bedca/pairs.json` with BEDCA's answers (never in git), so what a dry run showed is what the import uses; `--pair key=id` sets one by hand (0: none), `--rematch` asks again, `--skip` leaves foods out. The table shows each pair and its kcal now and in BEDCA; the import happens once confirmed (or `--apply`). Left out: foods fixed by hand; BEDCA entries whose energy contradicts their own nutrients ("Garbanzo, hervido": 359 kcal from nutrients worth 160), since BEDCA's data can't be altered; and pairs far from the estimate (over 1.5× and 40 kcal apart), which are imported only when named. Energy comes from kJ, salt from sodium; a nutrient BEDCA doesn't give (often sugars) stays estimated, and the food's card says which, with the citation. Allergens, groups, spice and weights stay the model's. On the local catalog (2026-11-23): 65 of 104 foods from BEDCA; "cooking cream" went from an estimated 70 to 201 kcal
+- [ ] USDA FoodData Central for what BEDCA lacks (gochujang, halloumi, broths…): CC0, a proper API
 
 ### 2. Grams per recipe line
 
@@ -71,4 +72,27 @@ Considered Neo4j next to Postgres and rejected it (2026-11-23):
 
 - ~~Should per-serving figures use the recipe's servings or the planned servings?~~ The recipe's: a serving's nutrition doesn't change with how many are planned, only the shopping amounts do (2026-11-23)
 - ~~Should cooking losses be handled?~~ Ignored for v1: the weight estimates already count only the oil a fried food soaks up, the biggest one (2026-11-23)
-- Should the nutrition source be licence-checked before importing BEDCA in bulk?
+- ~~Should the nutrition source be licence-checked before importing BEDCA in bulk?~~ Checked (2026-11-23), see "Data licences" below.
+
+## Data licences
+
+Checked 2026-11-23. Not legal advice; re-check if Tabooki's use changes.
+
+**BEDCA** ([Condiciones de uso](https://www.bedca.net/bdpub/UsoBD.pdf), AESAN/BEDCA v1.0, 2010). No open licence (AESAN's open-data page lists it as a database it doesn't manage; a [datos.gob.es request](https://datos.gob.es/es/solicitud-de-datos/base-de-datos-bedca) complains its reuse terms are unclear). What the conditions say:
+
+- Personal, educational or non-commercial use is free; any other use of the data in electronic form ("reproducción, traducción o cualquier uso que no sea personal, educacional o no comercial") needs AESAN/BEDCA's express authorization.
+- Cite the source: "AESAN/BEDCA Base de Datos Española de Composición de Alimentos v1.0 (2010)".
+- Don't modify the data or alter its original meaning.
+- AESAN/BEDCA take no responsibility for the data or its use, software included.
+
+Tabooki is self-hosted for one household and non-commercial, so an import fits, on these terms:
+
+1. Show the citation wherever a food's figures come from BEDCA (`source = bedca`).
+2. Store BEDCA's values as given (rounding aside). Salt is worked out from BEDCA's sodium (× 2.5), and says so.
+3. Don't commit BEDCA's data to git: the import fetches it.
+4. If Tabooki ever goes beyond personal, non-commercial use (paid, public sign-up), ask AESAN/BEDCA first (bedca.adm@gmail.com).
+
+BEDCA has no bulk download or official API, only its web query interface; the conditions say nothing about automated queries, so the import asks politely (one food at a time, cached).
+
+**USDA FoodData Central**: public domain, [CC0 1.0](https://fdc.nal.usda.gov/index.html). Credit is requested ("FoodData Central" as the source), not required. Proper [API](https://fdc.nal.usda.gov/api-guide.html) (free data.gov key) and downloads. Fills what BEDCA lacks.
+

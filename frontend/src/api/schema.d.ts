@@ -951,7 +951,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "substitutes" | "embed" | "search" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "substitutes" | "bedca" | "embed" | "search" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -973,7 +973,7 @@ export interface components {
             /** Format: date-time */
             at?: string;
             /** @enum {string} */
-            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "substitutes" | "embed" | "search" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
+            step?: "text" | "transcript" | "video" | "images" | "classify" | "foods" | "substitutes" | "bedca" | "embed" | "search" | "translate" | "annotate" | "taste_profile" | "notes_fit" | "tweak" | "dictation";
             /** @default  */
             model: string;
             /** @default 0 */
@@ -1179,6 +1179,10 @@ export interface components {
             readonly density?: number | null;
             /** @enum {string|null} */
             readonly source?: "llm" | "manual" | "bedca" | "usda" | null;
+            /** @description Where in `source` the figures come from ("2191 Garbanzo, en conserva" in BEDCA). */
+            readonly sourceRef?: string | null;
+            /** @description nutrition fields `source` doesn't give, still the model's estimate */
+            readonly estimatedFields?: string[];
             /**
              * @description Changed by hand: the model leaves it alone.
              * @default false
@@ -1236,6 +1240,10 @@ export interface components {
             readonly density?: number | null;
             /** @enum {string|null} */
             readonly source?: "llm" | "manual" | "bedca" | "usda" | null;
+            /** @description Where in `source` the figures come from ("2191 Garbanzo, en conserva" in BEDCA). */
+            readonly sourceRef?: string | null;
+            /** @description nutrition fields `source` doesn't give, still the model's estimate */
+            readonly estimatedFields?: string[];
             /**
              * @description Changed by hand: the model leaves it alone.
              * @default false
@@ -1293,6 +1301,10 @@ export interface components {
             readonly density?: number | null;
             /** @enum {string|null} */
             readonly source?: "llm" | "manual" | "bedca" | "usda" | null;
+            /** @description Where in `source` the figures come from ("2191 Garbanzo, en conserva" in BEDCA). */
+            readonly sourceRef?: string | null;
+            /** @description nutrition fields `source` doesn't give, still the model's estimate */
+            readonly estimatedFields?: string[];
             /**
              * @description Changed by hand: the model leaves it alone.
              * @default false
@@ -1380,6 +1392,10 @@ export interface components {
             readonly density?: number | null;
             /** @enum {string|null} */
             readonly source?: "llm" | "manual" | "bedca" | "usda" | null;
+            /** @description Where in `source` the figures come from ("2191 Garbanzo, en conserva" in BEDCA). */
+            readonly sourceRef?: string | null;
+            /** @description nutrition fields `source` doesn't give, still the model's estimate */
+            readonly estimatedFields?: string[];
             /**
              * @description Changed by hand: the model leaves it alone.
              * @default false
@@ -1437,6 +1453,10 @@ export interface components {
             readonly density?: number | null;
             /** @enum {string|null} */
             readonly source?: "llm" | "manual" | "bedca" | "usda" | null;
+            /** @description Where in `source` the figures come from ("2191 Garbanzo, en conserva" in BEDCA). */
+            readonly sourceRef?: string | null;
+            /** @description nutrition fields `source` doesn't give, still the model's estimate */
+            readonly estimatedFields?: string[];
             /**
              * @description Changed by hand: the model leaves it alone.
              * @default false
@@ -1494,6 +1514,10 @@ export interface components {
             readonly density?: number | null;
             /** @enum {string|null} */
             readonly source?: "llm" | "manual" | "bedca" | "usda" | null;
+            /** @description Where in `source` the figures come from ("2191 Garbanzo, en conserva" in BEDCA). */
+            readonly sourceRef?: string | null;
+            /** @description nutrition fields `source` doesn't give, still the model's estimate */
+            readonly estimatedFields?: string[];
             /**
              * @description Changed by hand: the model leaves it alone.
              * @default false

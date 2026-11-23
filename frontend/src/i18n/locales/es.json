@@ -594,6 +594,7 @@
       "classify": "Ordenar ingredientes",
       "foods": "Consultar alimentos",
       "substitutes": "Buscar sustitutos",
+      "bedca": "Emparejar con BEDCA",
       "embed": "Preparar la búsqueda",
       "search": "Buscar por significado",
       "translate": "Traducir la receta",
@@ -614,7 +615,8 @@
     "tasteWhat": "Gustos de la casa",
     "substitutesWhat": "Ingredientes nuevos: qué usar en su lugar",
     "embedWhat": "Receta: para buscarla por significado",
-    "searchWhat": "Una búsqueda"
+    "searchWhat": "Una búsqueda",
+    "bedcaWhat": "Alimentos: sus cifras de BEDCA"
   },
   "password": {
     "current": "Contraseña actual",
@@ -925,7 +927,10 @@
       "manual": "Corregido a mano.",
       "bedca": "Según BEDCA.",
       "usda": "Según USDA FoodData Central.",
-      "corrected": "Corregido a mano por {{who}} el {{when}}."
+      "corrected": "Corregido a mano por {{who}} el {{when}}.",
+      "bedcaRef": "Según AESAN/BEDCA Base de Datos Española de Composición de Alimentos v1.0 (2010): «{{food}}».",
+      "saltFromSodium": "La sal se calcula a partir de su sodio.",
+      "stillEstimated": "Estimado por Tabooki, porque BEDCA no lo da: {{fields}}."
     },
     "usedIn_one": "En {{count}} receta",
     "usedIn_other": "En {{count}} recetas",
