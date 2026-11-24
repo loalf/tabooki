@@ -1,6 +1,6 @@
 import { Apple, ChevronRight, LogOut, Receipt, Salad } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { useTasteProfile, useTasteSuggestions } from '@/api/taste'
 import { useLogout, useMe, useUpdateMe } from '@/auth/useAuth'
 import { ChangePassword } from '@/components/ChangePassword'
@@ -10,13 +10,14 @@ import { Sheet } from '@/components/Sheet'
 import { LOCALES, type Locale } from '@/i18n'
 import { cn } from '@/lib/utils'
 
-/** Deep links (and the share tip in "Añadir receta") land here; day to day it's the account sheet. */
+/** Deep links (and the share tip in "Añadir receta", to #share) land here; day to day it's the account sheet. */
 export function SettingsPage() {
   const { t } = useTranslation()
+  const { hash } = useLocation()
   return (
     <>
       <PageHeader title={t('settings.title')} />
-      <SettingsContent />
+      <SettingsContent openShare={hash === '#share'} />
     </>
   )
 }
@@ -42,7 +43,8 @@ export function Avatar({ name, className }: { name: string; className?: string }
   )
 }
 
-function SettingsContent() {
+/** What's used day to day first; the one-time setup (phone, password) after, one row each until opened. */
+function SettingsContent({ openShare = false }: { openShare?: boolean }) {
   const { t, i18n } = useTranslation()
   const { data: me } = useMe()
   const updateMe = useUpdateMe()
@@ -92,10 +94,6 @@ function SettingsContent() {
 
       <TasteLink />
 
-      <ShareSettings />
-
-      <ChangePassword />
-
       <Link to="/settings/ingredients" className="flex items-center gap-3 rounded-lg sticker bg-card p-4">
         <Apple className="size-5 shrink-0 text-primary" aria-hidden />
         <span className="flex-1">
@@ -113,6 +111,10 @@ function SettingsContent() {
         </span>
         <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
       </Link>
+
+      <ShareSettings defaultOpen={openShare} />
+
+      <ChangePassword />
 
       <button type="button" onClick={() => logout.mutate()} className="flex h-11 items-center gap-2 self-start px-1 font-bold text-destructive">
         <LogOut className="size-5" aria-hidden />

@@ -14,7 +14,7 @@ Every item below works with what the API already returns, so it only needs front
 | 4 | Menú, Compra | [Placeholders while loading; don't wait for last week](#4-menu-and-shopping-placeholders-while-loading) | ☑ |
 | 5 | Hoy | ["No lo hicimos" on pending ratings](#5-today-no-lo-hicimos-on-pending-ratings) | ☑ |
 | 6 | Cocinar | [Timers survive leaving cook mode](#6-cook-mode-timers-survive-leaving-the-screen) | ☑ |
-| 7 | Ajustes | [Back goes back; everyday settings first](#7-settings-back-goes-back-everyday-settings-first) | ☐ |
+| 7 | Ajustes | [Back goes back; everyday settings first](#7-settings-back-goes-back-everyday-settings-first) | ☑ |
 | 8 | Recetas | [Show "on the menu" and rating on cards](#8-library-show-on-the-menu-and-rating-on-cards) | ☐ |
 | 9 | Receta | [Tidy the facts above the ingredients](#9-recipe-tidy-the-facts-above-the-ingredients) | ☐ |
 | 10 | Recetas | [Keep active filters visible](#10-library-keep-active-filters-visible) | ☐ |
@@ -133,6 +133,10 @@ Every item below works with what the API already returns, so it only needs front
 - In `SettingsContent` ([SettingsPage.tsx](../frontend/src/pages/SettingsPage.tsx)), order: account, language, Gustos, Ingredientes, Costes, then "Guardar desde el móvil" and Contraseña collapsed to one row each that expands, then Cerrar sesión.
 
 **Done when.** Hoy → avatar → Ingredientes → back returns to Hoy. The sheet fits the everyday rows in one screen.
+
+**Mockup:** before [1](ui-proposals/07-settings-back/before-1.png) · [2](ui-proposals/07-settings-back/before-2.png) · [3](ui-proposals/07-settings-back/before-3.png) — after [1](ui-proposals/07-settings-back/after-1.png) · [2](ui-proposals/07-settings-back/after-2.png) · [3](ui-proposals/07-settings-back/after-3.png) · [4](ui-proposals/07-settings-back/after-4.png)
+
+**Done 2026-11-24.** The account sheet is in Hoy's address (`/?account`), so going back from Gustos, Ingredientes or Costes reopens it, and the phone's back button closes it. Opened directly, those pages fall back to `/settings`. "Guardar desde el móvil" is a row with "Configurar", like Contraseña. The link in "Añadir receta" goes to `/settings#share`, which opens it and scrolls to it.
 
 ---
 

@@ -1,20 +1,21 @@
 import { AlertTriangle, ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import { type CostCall, type Costs, formatUsd, useCosts } from '@/api/costs'
 import { EmptyState, PageHeader } from '@/components/PageHeader'
+import { useGoBack } from '@/lib/useGoBack'
 import { cn } from '@/lib/utils'
 
 /** What extraction and ingredient sorting have cost: this month, the last six, by step and model. */
 export function CostsPage() {
   const { t } = useTranslation()
-  const navigate = useNavigate()
+  const back = useGoBack('/settings')
   const { data, isPending, isError } = useCosts()
 
   return (
     <>
-      <button type="button" onClick={() => void navigate('/settings')} className="mb-3 inline-flex h-9 items-center gap-1 text-[15px] font-bold">
+      <button type="button" onClick={back} className="mb-3 inline-flex h-9 items-center gap-1 text-[15px] font-bold">
         <ArrowLeft className="size-4" aria-hidden />
         {t('settings.title')}
       </button>

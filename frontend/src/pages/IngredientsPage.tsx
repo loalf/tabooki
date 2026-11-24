@@ -1,17 +1,18 @@
 import { AlertTriangle, ArrowLeft, ChevronRight, Search, X } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import { type HouseholdIngredient, ingredientName, useIngredients } from '@/api/ingredients'
 import { EmptyState, PageHeader } from '@/components/PageHeader'
 import { inputClass } from '@/components/ui'
+import { useGoBack } from '@/lib/useGoBack'
 import { cn } from '@/lib/utils'
 import { SearchText } from '@/lib/searchText'
 
 /** Every ingredient the household's recipes use, with what Tabooki knows about it: to check it, or say it's another food. */
 export function IngredientsPage() {
   const { t, i18n } = useTranslation()
-  const navigate = useNavigate()
+  const back = useGoBack('/settings')
   const ingredients = useIngredients()
   const [query, setQuery] = useState('')
 
@@ -27,7 +28,7 @@ export function IngredientsPage() {
 
   return (
     <>
-      <button type="button" onClick={() => void navigate('/settings')} className="mb-3 inline-flex h-9 items-center gap-1 text-[15px] font-bold">
+      <button type="button" onClick={back} className="mb-3 inline-flex h-9 items-center gap-1 text-[15px] font-bold">
         <ArrowLeft className="size-4" aria-hidden />
         {t('settings.title')}
       </button>

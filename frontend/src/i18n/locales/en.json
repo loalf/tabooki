@@ -512,6 +512,7 @@
       "android": "On Android, install Tabooki (browser menu → Add to Home screen). It then shows up in the Share menu of Instagram, TikTok, YouTube or the browser.",
       "iphone": "iPhone",
       "iphoneIntro": "iPhones don't let web apps appear in the Share menu, so this uses a shortcut in the Shortcuts app. Create a key for your iPhone and follow the steps.",
+      "setUp": "Set up",
       "deviceName": "Device name",
       "create": "Create key",
       "lastUsed": "Last used on {{date}}",

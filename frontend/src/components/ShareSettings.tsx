@@ -1,11 +1,41 @@
 import { Check, Copy, Smartphone, Trash2 } from 'lucide-react'
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { useCreateShareToken, useDeleteShareToken, useShareTokens } from '@/api/share'
 import { Button, inputClass } from '@/components/ui'
 
-/** Saving links from the phone: Android uses the installed app's share target; iPhone a Shortcut with a token. */
-export function ShareSettings() {
+/**
+ * Saving links from the phone: Android uses the installed app's share target; iPhone a Shortcut with a
+ * token. Set up once, so it's a row with "Configurar" until opened (like the password), except when
+ * a link came here for it.
+ */
+export function ShareSettings({ defaultOpen = false }: { defaultOpen?: boolean }) {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(defaultOpen)
+  const section = useRef<HTMLElement>(null)
+  useEffect(() => {
+    if (defaultOpen) section.current?.scrollIntoView({ block: 'start' })
+  }, [defaultOpen])
+
+  return (
+    <section ref={section} className="scroll-mt-4 rounded-lg sticker bg-card p-4" aria-labelledby="share-title">
+      <div className="flex items-center gap-3">
+        <Smartphone className="size-5 shrink-0 text-primary" aria-hidden />
+        <h2 id="share-title" className="flex-1 font-extrabold">
+          {t('settings.share.title')}
+        </h2>
+        {!open && (
+          <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
+            {t('settings.share.setUp')}
+          </Button>
+        )}
+      </div>
+      {open && <ShareSetup />}
+    </section>
+  )
+}
+
+function ShareSetup() {
   const { t, i18n } = useTranslation()
   const { data: tokens = [] } = useShareTokens()
   const create = useCreateShareToken()
@@ -21,12 +51,8 @@ export function ShareSettings() {
   }
 
   return (
-    <section className="rounded-lg sticker bg-card p-4" aria-labelledby="share-title">
-      <h2 id="share-title" className="flex items-center gap-2 font-extrabold">
-        <Smartphone className="size-5 text-primary" aria-hidden />
-        {t('settings.share.title')}
-      </h2>
-      <p className="mt-2 text-sm text-muted-foreground">{t('settings.share.android')}</p>
+    <>
+      <p className="mt-3 text-sm text-muted-foreground">{t('settings.share.android')}</p>
 
       <h3 className="mt-4 text-sm font-extrabold">{t('settings.share.iphone')}</h3>
       <p className="mt-1 text-sm text-muted-foreground">{t('settings.share.iphoneIntro')}</p>
@@ -77,7 +103,7 @@ export function ShareSettings() {
           </Button>
         </form>
       )}
-    </section>
+    </>
   )
 }
 

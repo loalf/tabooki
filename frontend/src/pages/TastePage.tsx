@@ -21,6 +21,7 @@ import { RuleList } from '@/components/taste/RuleList'
 import { Suggestions } from '@/components/taste/Suggestions'
 import { Button, Chip } from '@/components/ui'
 import { impactWarnings } from '@/lib/taste'
+import { useGoBack } from '@/lib/useGoBack'
 import { cn } from '@/lib/utils'
 import { mondayOf, today } from '@/lib/week'
 
@@ -34,12 +35,12 @@ type Stage =
 /** /settings/taste: what the household likes (docs/PLAN.md §6.1). */
 export function TastePage() {
   const { t } = useTranslation()
-  const navigate = useNavigate()
+  const back = useGoBack('/settings')
   const profile = useTasteProfile()
 
   return (
     <>
-      <button type="button" onClick={() => void navigate('/settings')} className="mb-3 inline-flex h-9 items-center gap-1 text-[15px] font-bold">
+      <button type="button" onClick={back} className="mb-3 inline-flex h-9 items-center gap-1 text-[15px] font-bold">
         <ArrowLeft className="size-4" aria-hidden />
         {t('settings.title')}
       </button>

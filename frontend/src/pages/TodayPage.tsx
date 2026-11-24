@@ -1,7 +1,7 @@
 import { CalendarPlus, ChefHat, ChevronRight, Clock, CornerDownRight, Lock, Moon, ShoppingCart, Shuffle, Sparkles, Sun, UtensilsCrossed } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { useMe } from '@/auth/useAuth'
 import { type MealPlan, type MealPlanEntry, type Slot, useMealPlan, useUpdateMeal } from '@/api/plan'
 import { useShoppingList } from '@/api/shopping'
@@ -26,7 +26,14 @@ const SLOTS: Slot[] = ['lunch', 'dinner']
 export function TodayPage() {
   const { t, i18n } = useTranslation()
   const { data: me } = useMe()
-  const [account, setAccount] = useState(false)
+  const [params, setParams] = useSearchParams()
+  const location = useLocation()
+  const navigate = useNavigate()
+  // The account sheet is in the address (?account), so "← Ajustes" on a settings page comes back to
+  // it, and the phone's back button closes it rather than leaving Hoy.
+  const account = params.has('account')
+  const openAccount = () => setParams({ account: '' }, { state: { sheet: true } })
+  const closeAccount = () => ((location.state as { sheet?: boolean } | null)?.sheet ? void navigate(-1) : setParams({}, { replace: true }))
   const now = today()
   const thisWeek = mondayOf(now)
   const plan = useMealPlan(thisWeek)
@@ -43,7 +50,7 @@ export function TodayPage() {
     <>
       <div className="mb-2 flex items-center justify-between gap-2">
         <Wordmark className="text-[1.875rem]" />
-        <button type="button" onClick={() => setAccount(true)} aria-label={t('settings.title')} aria-haspopup="dialog" className="rounded-full">
+        <button type="button" onClick={openAccount} aria-label={t('settings.title')} aria-haspopup="dialog" className="rounded-full">
           <Avatar name={me?.displayName ?? me?.email ?? ''} />
         </button>
       </div>
@@ -65,7 +72,7 @@ export function TodayPage() {
         <Pending plans={[lastWeek.data, plan.data]} nextWeek={nextWeek.isPending ? undefined : (nextWeek.data ?? null)} thisWeek={thisWeek} planned={Boolean(plan.data)} />
       </div>
 
-      {account && <AccountSheet onClose={() => setAccount(false)} />}
+      {account && <AccountSheet onClose={closeAccount} />}
     </>
   )
 }

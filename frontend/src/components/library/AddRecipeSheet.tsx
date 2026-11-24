@@ -23,7 +23,7 @@ export function AddRecipeSheet({ onClose }: { onClose: () => void }) {
           <Link to="/recipes/new" className={sheetRowClass}>
             <SheetRowContent icon={<PenLine />} title={t('library.add.write')} hint={t('library.add.writeHint')} trailing={chevron} />
           </Link>
-          <Link to="/settings" className={sheetRowClass}>
+          <Link to="/settings#share" className={sheetRowClass}>
             <SheetRowContent icon={<Share2 />} title={t('library.add.share')} hint={t('library.add.shareHint')} trailing={chevron} />
           </Link>
         </div>

@@ -512,6 +512,7 @@
       "android": "En Android, instala Tabooki (menú del navegador → Añadir a pantalla de inicio). Después aparecerá en el menú Compartir de Instagram, TikTok, YouTube o el navegador.",
       "iphone": "iPhone",
       "iphoneIntro": "El iPhone no deja a las apps web salir en el menú Compartir, así que se hace con un atajo de la app Atajos. Crea una clave para tu iPhone y sigue los pasos.",
+      "setUp": "Configurar",
       "deviceName": "Nombre del dispositivo",
       "create": "Crear clave",
       "lastUsed": "Usada por última vez el {{date}}",
