@@ -11,7 +11,7 @@ Every item below works with what the API already returns, so it only needs front
 | 1 | Compra | [One line per item](#1-shopping-one-line-per-item) | ☑ |
 | 2 | Menú | [Say what the ⚠ means on the row](#2-menu-say-what-the--means) | ☑ |
 | 3 | Menú, Compra | [Undo after "Fuera"](#3-undo-after-fuera) | ☑ |
-| 4 | Menú, Compra | [Placeholders while loading; don't wait for last week](#4-menu-and-shopping-placeholders-while-loading) | ☐ |
+| 4 | Menú, Compra | [Placeholders while loading; don't wait for last week](#4-menu-and-shopping-placeholders-while-loading) | ☑ |
 | 5 | Hoy | ["No lo hicimos" on pending ratings](#5-today-no-lo-hicimos-on-pending-ratings) | ☐ |
 | 6 | Cocinar | [Timers survive leaving cook mode](#6-cook-mode-timers-survive-leaving-the-screen) | ☐ |
 | 7 | Ajustes | [Back goes back; everyday settings first](#7-settings-back-goes-back-everyday-settings-first) | ☐ |
@@ -83,6 +83,8 @@ Every item below works with what the API already returns, so it only needs front
 **Data.** None needed.
 
 **Done when.** On a slow connection (DevTools throttling), both pages show placeholders, and an existing menu appears without waiting for the previous week.
+
+**Mockup:** [before](ui-proposals/04-loading-placeholders/before.png) · [after](ui-proposals/04-loading-placeholders/after.png). **Done 2026-11-24:** `PlanSkeleton` and `ListSkeleton`. A week with no menu still waits for last week's (behind the same placeholder) before showing the planning form, which starts from it.
 
 ---
 

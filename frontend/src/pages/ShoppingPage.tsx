@@ -88,7 +88,9 @@ export function ShoppingPage() {
         </p>
       )}
 
-      {isPending ? null : isError && !list ? (
+      {isPending ? (
+        <ListSkeleton />
+      ) : isError && !list ? (
         <EmptyState>{t('shopping.loadError')}</EmptyState>
       ) : !planned && !items.length ? (
         <EmptyState
@@ -180,6 +182,26 @@ export function ShoppingPage() {
 
       <QuickAdd scope={scope} />
     </>
+  )
+}
+
+/** Where the list will be, while it loads: what's left and its bar, then an aisle's heading and rows. */
+function ListSkeleton() {
+  return (
+    <div className="flex flex-col gap-5" aria-hidden>
+      <div className="flex flex-col gap-2">
+        <div className="h-6 w-2/5 animate-pulse rounded-md bg-muted" />
+        <div className="h-2.5 animate-pulse rounded-full bg-muted" />
+      </div>
+      <div className="flex flex-col gap-2">
+        <div className="h-5 w-1/3 animate-pulse rounded-md bg-muted" />
+        <div className="flex flex-col gap-1.5">
+          {Array.from({ length: 6 }, (_, i) => (
+            <div key={i} className="h-11 animate-pulse rounded-md bg-muted" />
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }
 

@@ -35,7 +35,7 @@ It creates `smoke@example.invalid` (password `smoke-pass-123`, a test value for 
 cd frontend && node_modules/.bin/vite --config vite.smoke.config.ts   # http://127.0.0.1:5175
 ```
 
-If the item needs a state the script doesn't make (an inbox link, a taste profile, a checked item…), make it through the API or the UI of the smoke household. If the script fails because the smoke user already exists, run `smoke_down.py` first.
+If the item needs a state the script doesn't make (an inbox link, a taste profile, a checked item…), make it through the API or the UI of the smoke household. For a loading state, start the dev server with `SMOKE_SLOW='<regex of API paths>'` (for example `SMOKE_SLOW='^/api/(meal-plans|shopping-lists)'`): matching requests are held back 60 s (`SMOKE_SLOW_MS` to change it). Patching `window.fetch` in the page doesn't work, because the API client keeps the original `fetch` from when it loaded. Restart without the variable afterwards. If the script fails because the smoke user already exists, run `smoke_down.py` first.
 
 In Chrome (load the `anthropic-skills:chrome-browser` skill first if this session hasn't used Chrome yet):
 
@@ -46,6 +46,8 @@ In Chrome (load the `anthropic-skills:chrome-browser` skill first if this sessio
 4. Navigate to the screen, then set a true phone width (390 CSS px):
    `document.documentElement.style.zoom = String(innerWidth / 390)`
    A full navigation (the `navigate` tool, a reload) resets the zoom: set it again after each one. Navigating by clicking inside the app keeps it.
+
+If a page stays on its loading state or shows a load error, check `await fetch('/api/me')` in the page: the session can expire mid-item (401), and signing in again (step 2) fixes it.
 
 Wait for things that load in the background (for example "Ordenando los ingredientes por secciones…" on Compra) before taking the "before" screenshot.
 

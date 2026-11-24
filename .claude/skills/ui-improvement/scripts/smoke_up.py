@@ -44,9 +44,19 @@ RECIPES = [
 ]
 
 VITE_CONFIG = """// Throwaway: created by .claude/skills/ui-improvement/scripts/smoke_up.py, removed by smoke_down.py.
-import { mergeConfig } from 'vite'
+// SMOKE_SLOW=<regex> holds matching requests back for SMOKE_SLOW_MS (default 60 s), to see loading states.
+import { mergeConfig, type Plugin } from 'vite'
 import base from './vite.config'
+const slow: Plugin = {
+  name: 'smoke-slow',
+  configureServer(server) {
+    const pattern = process.env.SMOKE_SLOW ? new RegExp(process.env.SMOKE_SLOW) : null
+    const ms = Number(process.env.SMOKE_SLOW_MS ?? 60000)
+    server.middlewares.use((req, _res, next) => (pattern?.test(req.url ?? '') ? setTimeout(next, ms) : next()))
+  },
+}
 export default mergeConfig(base, {
+  plugins: [slow],
   server: { port: 5175, hmr: false, proxy: { '/api': { target: { protocol: 'https:', host: 'localhost', port: 443, servername: 'localhost' }, secure: false, changeOrigin: true } } },
 })
 """

@@ -43,7 +43,11 @@ export function PlanPage() {
       </div>
       <WeekNav {...nav} />
 
-      {plan.isPending || previous.isPending ? null : plan.isError ? (
+      {/* Last week's menu only matters for planning a new one (its choices are the starting point),
+          so a planned week doesn't wait for it. */}
+      {plan.isPending ? (
+        <PlanSkeleton />
+      ) : plan.isError ? (
         <EmptyState>{t('plan.loadError')}</EmptyState>
       ) : plan.data ? (
         <PlanWeek plan={plan.data} />
@@ -58,6 +62,8 @@ export function PlanPage() {
         >
           {t('plan.emptyLibrary')}
         </EmptyState>
+      ) : previous.isPending ? (
+        <PlanSkeleton />
       ) : (
         // Keyed by week: the choices start over for each week.
         <PlanSetup key={week} week={week} previous={previous.data} />
@@ -104,5 +110,25 @@ function PlanActions({ plan, onClose }: { plan: MealPlan; onClose: () => void })
         </button>
       </div>
     </Sheet>
+  )
+}
+
+/** Where the week will be, while it loads: the day strip, then a day's heading and its two meals, twice. */
+function PlanSkeleton() {
+  return (
+    <div className="flex flex-col gap-5" aria-hidden>
+      <div className="grid grid-cols-7 gap-1.5">
+        {Array.from({ length: 7 }, (_, i) => (
+          <div key={i} className="h-[60px] animate-pulse rounded-[12px] bg-muted" />
+        ))}
+      </div>
+      {[0, 1].map((day) => (
+        <div key={day} className="flex flex-col gap-2">
+          <div className="h-[22px] w-2/5 animate-pulse rounded-md bg-muted" />
+          <div className="h-[76px] animate-pulse rounded-lg bg-muted" />
+          <div className="h-[76px] animate-pulse rounded-lg bg-muted" />
+        </div>
+      ))}
+    </div>
   )
 }
