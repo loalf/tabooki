@@ -674,6 +674,7 @@
     }
   },
   "today": {
+    "notCooked": "Didn't make it",
     "title": "Today we eat",
     "out": "{{meal}}: eating out",
     "change": "Change",

@@ -1,4 +1,4 @@
-import { CalendarPlus, ChefHat, ChevronRight, Clock, CornerDownRight, Lock, Moon, ShoppingCart, Shuffle, Sparkles, Sun } from 'lucide-react'
+import { CalendarPlus, ChefHat, ChevronRight, Clock, CornerDownRight, Lock, Moon, ShoppingCart, Shuffle, Sparkles, Sun, UtensilsCrossed } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
@@ -10,6 +10,7 @@ import { Thumbnail } from '@/components/library/Thumbnail'
 import { formatWeek, formatWeekday } from '@/components/plan/format'
 import { mealQuery } from '@/components/plan/meal'
 import { MealSheet } from '@/components/plan/MealSheet'
+import { useTakeOffMenu } from '@/components/plan/useTakeOffMenu'
 import { pageTitleClass } from '@/components/PageHeader'
 import { StarRating } from '@/components/StarRating'
 import { cn } from '@/lib/utils'
@@ -239,12 +240,17 @@ function Pending({
   )
 }
 
+/**
+ * Rate a meal of the last two days, or say it wasn't cooked: that takes it off the menu (with an
+ * undo), so the card goes and the recipe doesn't count as cooked that day ("última vez").
+ */
 function RateMeal({ plan, entry }: { plan: MealPlan; entry: MealPlanEntry }) {
   const { t, i18n } = useTranslation()
   const update = useUpdateMeal()
+  const { takeOff, isPending: removing } = useTakeOffMenu()
   const when = entry.date === addDays(today(), -1) ? t('today.yesterday') : formatWeekday(entry.date!, i18n.language)
   return (
-    <div className={cn('flex items-center gap-3 rounded-lg sticker bg-card p-3', update.isPending && 'opacity-60')}>
+    <div className={cn('flex items-center gap-3 rounded-lg sticker bg-card p-3', (update.isPending || removing) && 'opacity-60')}>
       <Thumbnail src={entry.recipe?.source?.thumbnail} className="size-12 shrink-0 rounded-[10px] border-2 border-outline" />
       <div className="min-w-0 flex-1">
         <p className="truncate text-[13px] font-bold first-letter:uppercase">
@@ -259,6 +265,16 @@ function RateMeal({ plan, entry }: { plan: MealPlan; entry: MealPlanEntry }) {
           />
         </div>
       </div>
+      <button
+        type="button"
+        disabled={update.isPending || removing}
+        onClick={() => takeOff(plan, entry)}
+        aria-label={`${t('today.notCooked')}: ${entry.recipe?.title ?? ''}`}
+        className="flex w-[62px] shrink-0 flex-col items-center justify-center gap-1 self-stretch rounded-md sticker-sm bg-card px-1 text-center text-[11px] leading-[1.1] font-bold text-balance"
+      >
+        <UtensilsCrossed className="size-[18px]" aria-hidden />
+        {t('today.notCooked')}
+      </button>
     </div>
   )
 }

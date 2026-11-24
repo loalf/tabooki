@@ -674,6 +674,7 @@
     }
   },
   "today": {
+    "notCooked": "No lo hicimos",
     "title": "Hoy comemos",
     "out": "{{meal}}: fuera de casa",
     "change": "Cambiar",
