@@ -5,7 +5,7 @@ import { type MealPlan, type MealPlanEntry, type Slot, useAddMeal } from '@/api/
 import { Thumbnail } from '@/components/library/Thumbnail'
 import { formatWeekday } from '@/components/plan/format'
 import { MealSheet } from '@/components/plan/MealSheet'
-import { hasWarning } from '@/components/plan/reasons'
+import { firstWarning } from '@/components/plan/reasons'
 import { cn } from '@/lib/utils'
 
 /** One lunch or dinner of the week: planned (tap it for everything you can do) or not (a button to plan it). */
@@ -36,6 +36,14 @@ export function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: Meal
   const [open, setOpen] = useState(false)
   const recipe = entry.recipe
   const leftoverOf = entry.leftoverOfId ? plan.entries?.find((e) => e.id === entry.leftoverOfId) : undefined
+  // What the planner had to give up, in two or three words; the meal sheet says it in full.
+  const warning = firstWarning(entry)
+  const warningLabel = warning && (
+    <span className="inline-flex items-center gap-1 font-bold text-destructive">
+      <TriangleAlert className="size-3" aria-hidden />
+      {t(`plan.why.short.${warning}`)}
+    </span>
+  )
 
   return (
     <li>
@@ -54,13 +62,16 @@ export function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: Meal
             {recipe?.title ?? t('plan.noRecipe')}
           </span>
           {leftoverOf ? (
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-primary">
-              <CornerDownRight className="size-3" aria-hidden />
-              {t('plan.leftoversOf', { day: formatWeekday(leftoverOf.date!, i18n.language) })}
+            <span className="inline-flex flex-wrap items-center gap-x-3 text-xs">
+              <span className="inline-flex items-center gap-1 font-bold text-primary">
+                <CornerDownRight className="size-3" aria-hidden />
+                {t('plan.leftoversOf', { day: formatWeekday(leftoverOf.date!, i18n.language) })}
+              </span>
+              {warningLabel}
             </span>
           ) : (
-            (recipe?.totalMinutes != null || entry.rating != null) && (
-              <span className="inline-flex items-center gap-3 text-xs text-muted-foreground">
+            (recipe?.totalMinutes != null || entry.rating != null || warning) && (
+              <span className="inline-flex flex-wrap items-center gap-x-3 text-xs text-muted-foreground">
                 {recipe?.totalMinutes != null && (
                   <span className="inline-flex items-center gap-1">
                     <Clock className="size-3" aria-hidden />
@@ -73,11 +84,11 @@ export function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: Meal
                     {entry.rating}
                   </span>
                 )}
+                {warningLabel}
               </span>
             )
           )}
         </span>
-        {hasWarning(entry) && <TriangleAlert className="size-4 shrink-0 text-destructive" aria-label={t('plan.why.warning')} />}
         {entry.locked && (
           <span className="grid size-7 shrink-0 place-items-center rounded-full bg-card" aria-label={t('plan.sheet.locked')}>
             <Lock className="size-3.5" aria-hidden />

@@ -389,9 +389,17 @@
       "relaxedAvoid": "No había otra opción. {{conflicts}}.",
       "nothingAllowed": "Nada del recetario encaja con vuestros gustos para esta {{meal}}.",
       "breaks": "Elegida a mano. {{conflicts}}.",
-      "warning": "No encaja del todo con vuestros gustos",
       "notesFit": "{{reason}}, como pedís en las notas",
       "notesMisfit": "Va contra vuestras notas ({{reason}}): no había otra opción.",
+      "short": {
+        "repeat": "Se repite",
+        "overTime": "Pasa del tiempo",
+        "relaxedWeekly": "Pasa del límite",
+        "notesMisfit": "Contra vuestras notas",
+        "relaxedAvoid": "Choca con vuestros gustos",
+        "breaks": "Choca con vuestros gustos",
+        "nothingAllowed": "Nada encaja"
+      },
       "swap": {
         "title": "¿Por qué la cambias?",
         "hint": "«{{title}}». Nos ayuda a acertar más. Puedes saltarlo.",

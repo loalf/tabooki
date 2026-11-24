@@ -389,9 +389,17 @@
       "relaxedAvoid": "There was no other option. {{conflicts}}.",
       "nothingAllowed": "Nothing in the library fits your tastes for this {{meal}}.",
       "breaks": "Chosen by hand. {{conflicts}}.",
-      "warning": "Doesn't quite fit your tastes",
       "notesFit": "{{reason}}, as your notes ask",
       "notesMisfit": "Goes against your notes ({{reason}}): there was no other option.",
+      "short": {
+        "repeat": "A repeat",
+        "overTime": "Over the time limit",
+        "relaxedWeekly": "Over the weekly limit",
+        "notesMisfit": "Against your notes",
+        "relaxedAvoid": "Clashes with your tastes",
+        "breaks": "Clashes with your tastes",
+        "nothingAllowed": "Nothing fits"
+      },
       "swap": {
         "title": "Why are you swapping it?",
         "hint": "\"{{title}}\". It helps us get it right. You can skip it.",

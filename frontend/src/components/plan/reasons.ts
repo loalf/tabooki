@@ -44,6 +44,7 @@ export function mealReasons(entry: MealPlanEntry, t: TFunction, language: string
   return { good, warnings }
 }
 
-export function hasWarning(entry: MealPlanEntry): boolean {
-  return (entry.reasons ?? []).some((r) => WARNINGS.has(r.code))
+/** The first thing the planner had to give up on, as a reason code (its short label is plan.why.short.<code>). */
+export function firstWarning(entry: MealPlanEntry): string | null {
+  return (entry.reasons ?? []).find((r) => WARNINGS.has(r.code))?.code ?? null
 }
