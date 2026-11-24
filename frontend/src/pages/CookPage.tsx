@@ -11,7 +11,7 @@ import { EmptyState } from '@/components/PageHeader'
 import { Splash } from '@/components/Splash'
 import { StarRating } from '@/components/StarRating'
 import { Button, CheckMark } from '@/components/ui'
-import { findTimers, formatClock, ingredientsInStep, scaleLine } from '@/lib/cook'
+import { findTimers, formatClock, ingredientsInStep, scaleLine, type StepTimer } from '@/lib/cook'
 import { groupIngredients } from '@/lib/recipeText'
 import { cn } from '@/lib/utils'
 
@@ -54,7 +54,7 @@ function CookView({ recipe }: { recipe: Recipe }) {
   const [checked, setChecked] = useState<ReadonlySet<number>>(new Set())
   const [showIngredients, setShowIngredients] = useState(false)
   const wake = useWakeLock()
-  const { timers, now, start, stop } = useTimers()
+  const { timers, now, start, stop } = useTimers(id)
   const factor = servings / (recipe.servings || servings)
   const touch = useRef<{ x: number; y: number } | null>(null)
 
@@ -87,6 +87,11 @@ function CookView({ recipe }: { recipe: Recipe }) {
     if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(page + (dx < 0 ? 1 : -1))
   }
 
+  // This step's timers that aren't running yet; running ones show as their countdown instead.
+  const idleTimers = page > 0 && page < last ? findTimers(steps[page - 1]).filter((s) => !timers.some((t) => t.step === page && t.seconds === s.seconds)) : []
+  // Room under the step to scroll it clear of the timers' corner: a pill and its gap for each.
+  const docked = timers.length + idleTimers.length
+
   const toggle = (index: number) =>
     setChecked((current) => {
       const next = new Set(current)
@@ -96,7 +101,7 @@ function CookView({ recipe }: { recipe: Recipe }) {
     })
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-2xl flex-col px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto flex min-h-dvh max-w-2xl flex-col px-4 pt-[max(0.75rem,env(safe-area-inset-top))]">
       <header className="flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={close} aria-label={t('cook.close')}>
           <X className="size-5" aria-hidden />
@@ -116,9 +121,8 @@ function CookView({ recipe }: { recipe: Recipe }) {
       </header>
 
       <Progress page={page} last={last} />
-      {timers.length > 0 && <TimerBar timers={timers} now={now} onStop={stop} />}
 
-      <main className="flex-1 py-6" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} aria-live="polite">
+      <main className="flex-1 py-6" style={docked ? { paddingBottom: `${docked * 3.75 + 1.25}rem` } : undefined} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} aria-live="polite">
         {page === 0 ? (
           <section aria-labelledby="cook-ingredients">
             <h1 id="cook-ingredients" className="font-display text-[1.875rem] leading-tight font-normal text-brand">
@@ -147,16 +151,6 @@ function CookView({ recipe }: { recipe: Recipe }) {
             </p>
             <p className="text-[1.75rem] leading-[1.4] text-pretty sm:text-3xl">{steps[page - 1]}</p>
             <StepIngredients step={steps[page - 1]} ingredients={ingredients} factor={factor} locale={i18n.language} />
-            {findTimers(steps[page - 1]).length > 0 && (
-              <div className="mt-6 flex flex-wrap gap-2">
-                {findTimers(steps[page - 1]).map((timer) => (
-                  <Button key={timer.seconds} variant="secondary" onClick={() => start(timer.seconds, timer.label)}>
-                    <TimerIcon className="size-4" aria-hidden />
-                    {t('cook.startTimer', { time: timer.label })}
-                  </Button>
-                ))}
-              </div>
-            )}
             {page < steps.length && (
               <div className="mt-8 rounded-md bg-muted px-3.5 py-3">
                 <p className="text-[11px] font-extrabold tracking-wider text-muted-foreground uppercase">{t('cook.after')}</p>
@@ -169,17 +163,21 @@ function CookView({ recipe }: { recipe: Recipe }) {
         )}
       </main>
 
-      {page < last && (
-        <footer className="grid grid-cols-[auto_1fr] gap-3">
-          <Button variant="secondary" size="icon" className="size-14" disabled={page === 0} onClick={() => go(page - 1)} aria-label={t('cook.previous')}>
-            <ArrowLeft className="size-6" aria-hidden />
-          </Button>
-          <Button className="h-14 text-lg font-bold" onClick={() => go(page + 1)}>
-            {page === 0 ? t('cook.start') : page === last - 1 ? t('cook.finish') : t('cook.next')}
-            {page === last - 1 ? <Check className="size-5" aria-hidden /> : <ArrowRight className="size-5" aria-hidden />}
-          </Button>
-        </footer>
-      )}
+      {/* Pinned to the bottom, so the step buttons and the timers' corner are always in reach. */}
+      <div className={cn('sticky bottom-0 z-10', page === last && 'pb-[max(1rem,env(safe-area-inset-bottom))]')}>
+        <TimerDock idle={idleTimers} timers={timers} now={now} onStart={(timer) => start(timer.seconds, timer.label, page)} onStop={stop} />
+        {page < last && (
+          <footer className="-mx-4 grid grid-cols-[auto_1fr] gap-3 bg-background px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <Button variant="secondary" size="icon" className="size-14" disabled={page === 0} onClick={() => go(page - 1)} aria-label={t('cook.previous')}>
+              <ArrowLeft className="size-6" aria-hidden />
+            </Button>
+            <Button className="h-14 text-lg font-bold" onClick={() => go(page + 1)}>
+              {page === 0 ? t('cook.start') : page === last - 1 ? t('cook.finish') : t('cook.next')}
+              {page === last - 1 ? <Check className="size-5" aria-hidden /> : <ArrowRight className="size-5" aria-hidden />}
+            </Button>
+          </footer>
+        )}
+      </div>
 
       {showIngredients && (
         <div className="fixed inset-0 z-20 flex flex-col justify-end bg-foreground/30" onClick={() => setShowIngredients(false)}>
@@ -319,25 +317,42 @@ function IngredientChecklist({
   )
 }
 
-function TimerBar({ timers, now, onStop }: { timers: Timer[]; now: number; onStop: (id: number) => void }) {
+/**
+ * The timers' corner, just above the step buttons and the same on every step: a step's timer is a
+ * button here, and tapping it turns it into its countdown in the same place. A countdown shows only
+ * the clock, unless several are going and need telling apart. Bottom-up, so the first stays in the
+ * corner.
+ */
+function TimerDock({ idle, timers, now, onStart, onStop }: { idle: StepTimer[]; timers: Timer[]; now: number; onStart: (timer: StepTimer) => void; onStop: (id: number) => void }) {
   const { t } = useTranslation()
+  if (!timers.length && !idle.length) return null
+  const named = timers.length > 1
+  const pill = 'inline-flex h-[52px] items-center gap-2 rounded-full border-2 border-outline px-4 font-extrabold tabular-nums shadow-[2px_2px_0_var(--shadow)]'
   return (
-    <ul className="mt-3 flex flex-wrap gap-2" aria-label={t('cook.timers')}>
-      {timers.map((timer) => (
-        <li key={timer.id}>
-          <button
-            type="button"
-            onClick={() => onStop(timer.id)}
-            aria-label={timer.endsAt <= now ? t('cook.dismissTimer', { time: timer.label }) : t('cook.stopTimer', { time: timer.label })}
-            className={cn(
-              'inline-flex h-10 items-center gap-2 rounded-full border-2 border-outline px-3 font-extrabold tabular-nums shadow-[2px_2px_0_var(--shadow)]',
-              timer.endsAt <= now ? 'animate-pulse bg-highlight text-highlight-foreground' : 'bg-card',
-            )}
-          >
-            <TimerIcon className="size-4" aria-hidden />
-            {timer.endsAt <= now ? t('cook.timeUp') : formatClock((timer.endsAt - now) / 1000)}
-            <span className="text-xs font-normal opacity-75">{timer.label}</span>
-            <X className="size-3.5 opacity-75" aria-hidden />
+    <ul className="pointer-events-none absolute right-0 bottom-full mb-3 flex flex-col-reverse items-end gap-2" aria-label={t('cook.timers')}>
+      {timers.map((timer) => {
+        const up = timer.endsAt <= now
+        return (
+          <li key={timer.id} className="pointer-events-auto">
+            <button
+              type="button"
+              onClick={() => onStop(timer.id)}
+              aria-label={up ? t('cook.dismissTimer', { time: timer.label }) : t('cook.stopTimer', { time: timer.label })}
+              className={cn(pill, up ? 'animate-pulse bg-highlight text-highlight-foreground' : 'bg-foreground text-background')}
+            >
+              <TimerIcon className="size-[18px]" aria-hidden />
+              <span className="text-xl">{up ? t('cook.timeUp') : formatClock((timer.endsAt - now) / 1000)}</span>
+              {named && <span className="text-xs font-normal opacity-85">{timer.label}</span>}
+              <X className="size-4 opacity-85" aria-hidden />
+            </button>
+          </li>
+        )
+      })}
+      {idle.map((timer) => (
+        <li key={`idle-${timer.seconds}`} className="pointer-events-auto">
+          <button type="button" onClick={() => onStart(timer)} aria-label={t('cook.startTimer', { time: timer.label })} className={cn(pill, 'bg-card')}>
+            <TimerIcon className="size-[18px]" aria-hidden />
+            {timer.label}
           </button>
         </li>
       ))}

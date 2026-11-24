@@ -12,8 +12,8 @@ Every item below works with what the API already returns, so it only needs front
 | 2 | Menú | [Say what the ⚠ means on the row](#2-menu-say-what-the--means) | ☑ |
 | 3 | Menú, Compra | [Undo after "Fuera"](#3-undo-after-fuera) | ☑ |
 | 4 | Menú, Compra | [Placeholders while loading; don't wait for last week](#4-menu-and-shopping-placeholders-while-loading) | ☑ |
-| 5 | Hoy | ["No lo hicimos" on pending ratings](#5-today-no-lo-hicimos-on-pending-ratings) | ☐ |
-| 6 | Cocinar | [Timers survive leaving cook mode](#6-cook-mode-timers-survive-leaving-the-screen) | ☐ |
+| 5 | Hoy | ["No lo hicimos" on pending ratings](#5-today-no-lo-hicimos-on-pending-ratings) | ☑ |
+| 6 | Cocinar | [Timers survive leaving cook mode](#6-cook-mode-timers-survive-leaving-the-screen) | ☑ |
 | 7 | Ajustes | [Back goes back; everyday settings first](#7-settings-back-goes-back-everyday-settings-first) | ☐ |
 | 8 | Recetas | [Show "on the menu" and rating on cards](#8-library-show-on-the-menu-and-rating-on-cards) | ☐ |
 | 9 | Receta | [Tidy the facts above the ingredients](#9-recipe-tidy-the-facts-above-the-ingredients) | ☐ |
@@ -100,19 +100,25 @@ Every item below works with what the API already returns, so it only needs front
 
 **Done when.** "No lo hicimos" removes the meal and its card, and that recipe's "última vez" no longer counts that day.
 
+**Mockup:** [before](ui-proposals/05-not-cooked/before.png) · [after](ui-proposals/05-not-cooked/after.png). **Done 2026-11-24:** a first mockup with plain text beside the stars was turned down as not looking tappable. Built as an outlined tile at the card's right edge (crossed cutlery over "No lo hicimos"). Taking a meal off the menu with its undo is now one hook, `useTakeOffMenu`, shared with "Fuera" in the meal sheet. When a card goes, the next un-rated meal of the last two days can take its place.
+
 ---
 
 ## 6. Cook mode: timers survive leaving the screen
 
 **Problem.** The current step is remembered across a reload (`useStoredPage`), but timers are not. Closing cook mode to look at the recipe, or iOS reloading the app, silently loses a running timer.
 
-**Change.** Save the running timers (`label`, `seconds`, `endsAt`) in `sessionStorage` under the recipe's id, and restore them when cook mode opens. A timer that ended while you were away shows "¡Tiempo!" straight away.
+**Change.** Timers live in one corner, bottom right, just above Anterior/Siguiente (now pinned to the bottom), the same on every step. A step's timer is a pill there, and tapping it turns it into its countdown in the same place: only the clock, with the label only while several are going. The step's own button and the bar at the top are gone. Save the running timers (`label`, `seconds`, `endsAt`) in `sessionStorage` under the recipe's id, and restore them when cook mode opens. A timer that ended while you were away shows "¡Tiempo!" straight away.
 
 **Where.** [useTimers.ts](../frontend/src/components/cook/useTimers.ts) (take the recipe id), [CookPage.tsx](../frontend/src/pages/CookPage.tsx). Copy the storage approach of `useStoredPage`, including the private-mode `try/catch`.
 
 **Note.** The beep needs an `AudioContext` that was started by a tap. After a reload, a restored timer can only vibrate, or show the pulse, until the next tap. That's acceptable; say so in a comment.
 
 **Done when.** Start a timer, close cook mode, reopen it: the timer is still counting down.
+
+**Mockup:** before [1](ui-proposals/06-cook-timers-survive/before-1.png) · [2](ui-proposals/06-cook-timers-survive/before-2.png) — after [1](ui-proposals/06-cook-timers-survive/after-1.png) · [2](ui-proposals/06-cook-timers-survive/after-2.png) · [3](ui-proposals/06-cook-timers-survive/after-3.png) · [4](ui-proposals/06-cook-timers-survive/after-4.png)
+
+**Done 2026-11-24.** Timers are saved per recipe in `sessionStorage` and keep counting through closing cook mode and a reload. One that ended meanwhile shows "¡Tiempo!" without ringing late. A timer belongs to the step it was started from, so the same "15 minutos" on two steps are two timers. On a short phone a long step, or the end screen, can sit under the pills until you scroll (the space under the content grows with them).
 
 ---
 

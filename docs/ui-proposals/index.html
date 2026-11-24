@@ -41,6 +41,13 @@
   figure.after figcaption { color: var(--primary) }
   figure img { display: block; width: 100%; max-width: 100%; height: auto; border: 2px solid var(--outline); border-radius: 12px; background: var(--bg) }
 
+  /* A flow: several steps of a journey per side, read left to right, two to a row on a phone. */
+  .flow { display: flex; flex-direction: column; gap: .5rem }
+  .flow h3 { margin: 0; font-size: .8rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+  .flow.after h3 { color: var(--primary) }
+  .flow .steps { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .75rem }
+  .flow figcaption { text-transform: none; letter-spacing: 0; font-weight: 700; font-size: .85rem; color: var(--fg) }
+
   .notes { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem }
   @media (max-width: 560px) { .notes { grid-template-columns: 1fr } }
   .notes div { min-width: 0 }
@@ -66,6 +73,52 @@
 
   <section class="history" aria-labelledby="done-title">
     <h2 id="done-title">Done</h2>
+    <details class="proposal" id="p6">
+      <summary><span class="num">#6 · Cocinar</span><span class="status done">Built</span><h2>Timers live in one corner and survive leaving cook mode</h2></summary>
+      <div class="flow">
+        <h3>Antes</h3>
+        <div class="steps">
+          <figure><figcaption>1 · Tocas el temporizador</figcaption><img src="06-cook-timers-survive/before-1.png" alt="Step 4 right after tapping 'Temporizador 40 minutos': the countdown appears at the top under the progress bar, and the same button stays at the bottom of the step." width="614" height="857" loading="lazy"></figure>
+          <figure><figcaption>2 · Sales y vuelves</figcaption><img src="06-cook-timers-survive/before-2.png" alt="After closing cook mode and opening it again 15 seconds later: no timer anywhere, only the button to start it again." width="614" height="857" loading="lazy"></figure>
+        </div>
+      </div>
+      <div class="flow after">
+        <h3>Después</h3>
+        <div class="steps">
+          <figure><figcaption>1 · Siempre en la esquina</figcaption><img src="06-cook-timers-survive/after-1.png" alt="Step 4 with an outlined '40 minutos' timer pill at the bottom-right corner, just above the Anterior and Terminar buttons, which stay pinned at the bottom." width="614" height="857" loading="lazy"></figure>
+          <figure><figcaption>2 · Tocas: cuenta atrás ahí mismo</figcaption><img src="06-cook-timers-survive/after-2.png" alt="After tapping it, the same pill in the same place turns dark and counts down, showing just 39:58 and an x to stop it." width="614" height="857" loading="lazy"></figure>
+          <figure><figcaption>3 · Otro paso: sigue ahí</figcaption><img src="06-cook-timers-survive/after-3.png" alt="Back on step 3 the countdown pill is still in the same corner: 39:41." width="614" height="857" loading="lazy"></figure>
+          <figure><figcaption>4 · Sales y vuelves: sigue contando</figcaption><img src="06-cook-timers-survive/after-4.png" alt="After closing cook mode and opening it again, the countdown is still in the corner: 31:20." width="614" height="857" loading="lazy"></figure>
+        </div>
+      </div>
+      <div class="notes">
+        <div>
+          <h3>Why it's better</h3>
+          <p>One control instead of two: the button you tap becomes the countdown, and stays in the same corner on every step. Leaving cook mode, or the phone reloading the app, no longer loses it.</p>
+        </div>
+        <div>
+          <h3>What it costs</h3>
+          <p>Anterior/Siguiente stay pinned at the bottom so the corner is always there. On a short phone a long step can scroll under the pill. Outside cook mode it doesn't ring, and after a reload it only vibrates until your next tap.</p>
+        </div>
+      </div>
+    </details>
+    <details class="proposal" id="p5">
+      <summary><span class="num">#5 · Hoy</span><span class="status done">Built</span><h2>"No lo hicimos" on pending ratings</h2></summary>
+      <div class="shots">
+        <figure><figcaption>Antes</figcaption><img src="05-not-cooked/before.png" alt="Hoy, Pendiente: two cards for yesterday's lunch and dinner, each with five empty stars and nothing else." width="614" height="857" loading="lazy"></figure>
+        <figure class="after"><figcaption>Después</figcaption><img src="05-not-cooked/after.png" alt="Same cards with an outlined 'No lo hicimos' button, crossed cutlery over the words, at the right edge of each card." width="614" height="857" loading="lazy"></figure>
+      </div>
+      <div class="notes">
+        <div>
+          <h3>Why it's better</h3>
+          <p>A meal you didn't cook no longer nags for two days or counts as cooked.</p>
+        </div>
+        <div>
+          <h3>What it costs</h3>
+          <p>Long titles get cut a little sooner. Undo as in #3.</p>
+        </div>
+      </div>
+    </details>
     <details class="proposal" id="p4">
       <summary><span class="num">#4 · Menú, Compra</span><span class="status done">Built</span><h2>Placeholders while loading</h2></summary>
       <div class="shots">
