@@ -964,6 +964,24 @@
       "weightsHint": "Déjalo vacío si no se cuenta por unidades o no se mide con cucharas.",
       "invalid": "Revisa los valores marcados: el azúcar no puede pasar de los hidratos, ni las grasas saturadas de las grasas.",
       "error": "No se ha podido guardar. Inténtalo de nuevo."
+    },
+    "substitutes": {
+      "edit": "Cambiar",
+      "hint": "Lo mejor primero, hasta 3. Valen para todas las recetas con este alimento, también las de otras casas.",
+      "none": "Sin sustitutos.",
+      "asking": "Tabooki los está buscando…",
+      "chosen": "Elegidos a mano por {{who}} el {{when}}.",
+      "undo": "Volver a los sugeridos",
+      "error": "No se ha podido. Inténtalo de nuevo.",
+      "ratio": "Cantidad por cada 1 g",
+      "note": "Nota (p. ej., más ácido)",
+      "up": "Subir",
+      "remove": "Quitar {{name}}",
+      "add": "Añadir sustituto",
+      "search": "Busca un alimento",
+      "typed": "Usar «{{name}}»",
+      "invalid": "Revisa los marcados: no puede ser el mismo alimento ni estar repetido, y la cantidad va de 0,2 a 5.",
+      "saveError": "No se ha podido guardar. Inténtalo de nuevo."
     }
   }
 }

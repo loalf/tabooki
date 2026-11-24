@@ -1,10 +1,13 @@
-import { ArrowLeft, ArrowLeftRight, Check, LoaderCircle, Pencil, Search, ShieldAlert, Undo2 } from 'lucide-react'
+import { ArrowLeft, ArrowLeftRight, ArrowUp, Check, LoaderCircle, Pencil, Plus, Search, ShieldAlert, Undo2, X } from 'lucide-react'
 import { type FormEvent, type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router'
 import { ApiError } from '@/api/client'
 import {
   type FoodCorrection,
+  type SubstituteChoice,
+  useChooseSubstitutes,
+  useSuggestSubstitutes,
   type FoodDetail,
   foodName,
   ingredientName,
@@ -97,7 +100,6 @@ export function IngredientPage() {
 /** What Tabooki knows about the food: per 100 g, allergens and groups, weights, substitutes, and where it comes from. */
 function FoodCard({ food }: { food: FoodDetail }) {
   const { t, i18n } = useTranslation()
-  const lang = i18n.language.startsWith('en') ? 'en' : 'es'
   const number = (value: number, digits = 1) => new Intl.NumberFormat(i18n.language, { maximumFractionDigits: digits }).format(value)
   const [editing, setEditing] = useState(false)
   const estimate = useEstimateFood(food.id!)
@@ -154,20 +156,7 @@ function FoodCard({ food }: { food: FoodDetail }) {
         {weights.length > 0 && <p>{weights.join(' · ')}</p>}
       </Facts>
 
-      {!!food.substitutes?.length && (
-        <Facts>
-          <p className="font-semibold">{t('recipe.substitutes.title')}</p>
-          <ul className="flex flex-col gap-0.5">
-            {food.substitutes.map((s) => (
-              <li key={s.key}>
-                <span className="first-letter:uppercase">{s.name[lang]}</span>
-                {s.ratio !== 1 && <span className="text-muted-foreground"> · {t('recipe.substitutes.ratio', { ratio: number(s.ratio, 2) })}</span>}
-                {s.note && <span className="text-muted-foreground"> · {s.note[lang]}</span>}
-              </li>
-            ))}
-          </ul>
-        </Facts>
-      )}
+      <SubstitutesSection food={food} />
 
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t-2 border-outline/15 pt-3">
         <p className="min-w-0 flex-1 text-xs text-muted-foreground">
@@ -298,6 +287,197 @@ function FoodForm({ food, onDone }: { food: FoodDetail; onDone: () => void }) {
           {t('common.cancel')}
         </Button>
         <Button type="submit" size="sm" disabled={correct.isPending}>
+          {t('common.save')}
+        </Button>
+      </div>
+    </form>
+  )
+}
+
+/** What can stand in for the food, best first; chosen by hand, the model leaves them alone. */
+function SubstitutesSection({ food }: { food: FoodDetail }) {
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language.startsWith('en') ? 'en' : 'es'
+  const number = (value: number) => new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 2 }).format(value)
+  const [editing, setEditing] = useState(false)
+  const [asked, setAsked] = useState(false)
+  const suggest = useSuggestSubstitutes(food.id!)
+  const substitutes = food.substitutes ?? []
+  if (editing) return <SubstitutesForm food={food} onDone={() => setEditing(false)} />
+
+  return (
+    <Facts>
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-semibold">{t('recipe.substitutes.title')}</p>
+        <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
+          <Pencil className="size-4" aria-hidden />
+          {t('ingredients.substitutes.edit')}
+        </Button>
+      </div>
+      {substitutes.length ? (
+        <ul className="flex flex-col gap-0.5">
+          {substitutes.map((s) => (
+            <li key={s.key}>
+              <span className="inline-block first-letter:uppercase">{s.name[lang]}</span>
+              {s.ratio !== 1 && <span className="text-muted-foreground"> · {t('recipe.substitutes.ratio', { ratio: number(s.ratio) })}</span>}
+              {s.note && <span className="text-muted-foreground"> · {s.note[lang]}</span>}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-muted-foreground">{asked ? t('ingredients.substitutes.asking') : t('ingredients.substitutes.none')}</p>
+      )}
+      {food.substitutesChosenAt && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <p className="min-w-0 flex-1 text-xs text-muted-foreground">
+            {t('ingredients.substitutes.chosen', {
+              who: food.substitutesByName ?? t('ingredients.someone'),
+              when: new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(food.substitutesChosenAt)),
+            })}
+          </p>
+          <Button variant="ghost" size="sm" disabled={suggest.isPending} onClick={() => suggest.mutate(undefined, { onSuccess: () => setAsked(true) })}>
+            <Undo2 className="size-4" aria-hidden />
+            {t('ingredients.substitutes.undo')}
+          </Button>
+        </div>
+      )}
+      {suggest.isError && <p className="text-destructive">{t('ingredients.substitutes.error')}</p>}
+    </Facts>
+  )
+}
+
+/** Up to three substitutes, best first: what a recipe and the shopping list offer when the food is missing. */
+const MAX_SUBSTITUTES = 3
+
+type Draft = { key: string | null; name: { es: string; en: string }; ratio: string; note: string; original: { es: string; en: string } | null }
+
+/** Choose the substitutes by hand: from the shared foods, or typed; how much of each, and a note. */
+function SubstitutesForm({ food, onDone }: { food: FoodDetail; onDone: () => void }) {
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language.startsWith('en') ? 'en' : 'es'
+  const choose = useChooseSubstitutes(food.id!)
+  const decimal = (value: number) => new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 2, useGrouping: false }).format(value)
+  const [drafts, setDrafts] = useState<Draft[]>(() =>
+    (food.substitutes ?? []).map((s) => ({ key: s.key, name: s.name, ratio: decimal(s.ratio), note: s.note?.[lang] ?? '', original: s.note ?? null })),
+  )
+  const [adding, setAdding] = useState(false)
+  const [query, setQuery] = useState('')
+  const debounced = useDebounced(query)
+  const foods = useFoodSearch(debounced)
+  const invalid = new Set((choose.error as { violations?: { propertyPath: string }[] } | null)?.violations?.map((v) => v.propertyPath) ?? [])
+  const update = (i: number, change: Partial<Draft>) => setDrafts(drafts.map((d, j) => (j === i ? { ...d, ...change } : d)))
+  const add = (draft: Draft) => {
+    setDrafts([...drafts, draft])
+    setAdding(false)
+    setQuery('')
+  }
+  const taken = new Set([food.key, ...drafts.map((d) => d.key)])
+  const typed = query.trim()
+
+  const save = (event: FormEvent) => {
+    event.preventDefault()
+    const body: SubstituteChoice[] = drafts.map((d) => {
+      const note = d.note.trim()
+      // The note as it was keeps both languages; changed, it's shown in both until someone translates it.
+      const kept = d.original && note === d.original[lang]
+      return {
+        key: d.key,
+        nameEs: d.name.es,
+        nameEn: d.name.en,
+        ratio: Number.parseFloat(d.ratio.replace(',', '.')) || 1,
+        noteEs: kept ? d.original!.es : note || null,
+        noteEn: kept ? d.original!.en : note || null,
+      }
+    })
+    choose.mutate(body, { onSuccess: onDone })
+  }
+
+  return (
+    <form onSubmit={save} aria-labelledby="substitutes-title" className="mt-3 flex flex-col gap-2 border-t-2 border-outline/15 pt-3 text-sm">
+      <h3 id="substitutes-title" className="font-semibold">{t('recipe.substitutes.title')}</h3>
+      <p className="text-xs text-muted-foreground">{t('ingredients.substitutes.hint')}</p>
+      {drafts.length === 0 && <p className="text-muted-foreground">{t('ingredients.substitutes.none')}</p>}
+      <ol className="flex flex-col gap-2">
+        {drafts.map((d, i) => (
+          <li key={d.key ?? `typed-${d.name.es}`} className={cn('flex flex-col gap-1.5 rounded-md border-2 border-outline/30 p-2.5', invalid.has(`substitutes[${i}].key`) && 'border-destructive')}>
+            <div className="flex items-center gap-1">
+              <span className="min-w-0 flex-1 truncate font-semibold first-letter:uppercase">{d.name[lang]}</span>
+              {i > 0 && (
+                <Button variant="ghost" size="icon" aria-label={t('ingredients.substitutes.up')} onClick={() => setDrafts([...drafts.slice(0, i - 1), d, drafts[i - 1]!, ...drafts.slice(i + 1)])}>
+                  <ArrowUp className="size-4" aria-hidden />
+                </Button>
+              )}
+              <Button variant="ghost" size="icon" aria-label={t('ingredients.substitutes.remove', { name: d.name[lang] })} onClick={() => setDrafts(drafts.filter((_, j) => j !== i))}>
+                <X className="size-4" aria-hidden />
+              </Button>
+            </div>
+            <label className="flex items-center justify-between gap-3">
+              <span>{t('ingredients.substitutes.ratio')}</span>
+              <span className="flex items-center gap-1.5">
+                <input
+                  inputMode="decimal"
+                  value={d.ratio}
+                  onChange={(e) => update(i, { ratio: e.target.value })}
+                  aria-invalid={invalid.has(`substitutes[${i}].ratio`) || undefined}
+                  className={cn(inputClass, 'h-9 w-20 text-right tabular-nums', invalid.has(`substitutes[${i}].ratio`) && 'border-destructive')}
+                />
+                <span className="text-muted-foreground">×</span>
+              </span>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="sr-only">{t('ingredients.substitutes.note')}</span>
+              <input value={d.note} maxLength={120} onChange={(e) => update(i, { note: e.target.value })} placeholder={t('ingredients.substitutes.note')} className={cn(inputClass, 'h-9')} />
+            </label>
+          </li>
+        ))}
+      </ol>
+
+      {drafts.length < MAX_SUBSTITUTES &&
+        (adding ? (
+          <div className="flex flex-col gap-2">
+            <label className="relative block">
+              <span className="sr-only">{t('ingredients.substitutes.search')}</span>
+              <Search className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden />
+              <input type="search" autoFocus value={query} maxLength={100} onChange={(e) => setQuery(e.target.value)} placeholder={t('ingredients.substitutes.search')} className={cn(inputClass, 'pl-10')} />
+            </label>
+            {typed.length >= 2 && (
+              <ul className="flex max-h-72 flex-col divide-y overflow-y-auto rounded-md border-2 border-outline/30">
+                {(foods.data ?? [])
+                  .filter((f) => !taken.has(f.key!))
+                  .slice(0, 8)
+                  .map((f) => (
+                    <li key={f.id}>
+                      <button
+                        type="button"
+                        onClick={() => add({ key: f.key!, name: { es: foodName({ ...f, nameEn: null }, 'es'), en: foodName({ ...f, nameEs: null }, 'en') }, ratio: decimal(1), note: '', original: null })}
+                        className="block w-full px-3 py-2 text-left"
+                      >
+                        <span className="block truncate font-semibold first-letter:uppercase">{foodName(f, i18n.language)}</span>
+                        <span className="block truncate text-xs text-muted-foreground">{f.key}</span>
+                      </button>
+                    </li>
+                  ))}
+                <li>
+                  <button type="button" onClick={() => add({ key: null, name: { es: typed, en: typed }, ratio: decimal(1), note: '', original: null })} className="block w-full px-3 py-2 text-left">
+                    {t('ingredients.substitutes.typed', { name: typed })}
+                  </button>
+                </li>
+              </ul>
+            )}
+          </div>
+        ) : (
+          <Button variant="secondary" size="sm" className="self-start" onClick={() => setAdding(true)}>
+            <Plus className="size-4" aria-hidden />
+            {t('ingredients.substitutes.add')}
+          </Button>
+        ))}
+
+      {choose.isError && <p className="text-destructive">{invalid.size ? t('ingredients.substitutes.invalid') : t('ingredients.substitutes.saveError')}</p>}
+      <div className="flex justify-end gap-2">
+        <Button variant="ghost" size="sm" onClick={onDone}>
+          {t('common.cancel')}
+        </Button>
+        <Button type="submit" size="sm" disabled={choose.isPending}>
           {t('common.save')}
         </Button>
       </div>

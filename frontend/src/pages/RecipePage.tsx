@@ -89,7 +89,7 @@ function SubstituteList({ substitutes }: { substitutes: Substitute[] }) {
       <ul className="mt-1 flex flex-col gap-0.5">
         {substitutes.map((s) => (
           <li key={s.key}>
-            <span className="font-semibold first-letter:uppercase">{s.name[lang]}</span>
+            <span className="inline-block font-semibold first-letter:uppercase">{s.name[lang]}</span>
             {s.ratio !== 1 && <span className="text-muted-foreground tabular-nums"> · {t('recipe.substitutes.ratio', { ratio: ratio.format(s.ratio) })}</span>}
             {s.note && <span className="text-muted-foreground"> · {s.note[lang]}</span>}
           </li>

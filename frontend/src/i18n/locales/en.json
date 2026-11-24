@@ -964,6 +964,24 @@
       "weightsHint": "Leave it empty if it isn’t counted in pieces or measured with spoons.",
       "invalid": "Check the marked values: sugar can’t be more than the carbohydrates, nor saturated fat more than the fat.",
       "error": "Couldn’t save it. Try again."
+    },
+    "substitutes": {
+      "edit": "Change",
+      "hint": "Best first, up to 3. They apply to every recipe with this food, other households' too.",
+      "none": "No substitutes.",
+      "asking": "Tabooki is looking for them…",
+      "chosen": "Chosen by hand by {{who}} on {{when}}.",
+      "undo": "Back to the suggested ones",
+      "error": "That didn't work. Try again.",
+      "ratio": "Amount for each 1 g",
+      "note": "Note (e.g. more sour)",
+      "up": "Move up",
+      "remove": "Remove {{name}}",
+      "add": "Add a substitute",
+      "search": "Search for a food",
+      "typed": "Use “{{name}}”",
+      "invalid": "Check the marked ones: not the same food, not twice, and the amount goes from 0.2 to 5.",
+      "saveError": "Couldn't save. Try again."
     }
   }
 }

@@ -9,6 +9,7 @@ export type IngredientDetail = Schemas['Ingredient-ingredient.read_ingredient.it
 export type FoodDetail = NonNullable<IngredientDetail['food']>
 export type FoodChoice = Schemas['Food-food.read']
 export type FoodCorrection = Schemas['Food.FoodCorrectionInput-food.correct']
+export type SubstituteChoice = Schemas['FoodSubstituteInput']
 
 const keys = {
   all: ['ingredients'] as const,
@@ -112,6 +113,33 @@ export function useEstimateFood(foodId: string) {
   return useMutation({
     mutationFn: async () => {
       const { response } = await api.POST('/api/foods/{id}/estimate', { params: { path: { id: foodId } } })
+      if (!response.ok) throw new ApiError(response.status)
+    },
+    onSuccess: changed,
+  })
+}
+
+/** Choose what can stand in for a food by hand, best first (shared, like the food): the model leaves them alone. */
+export function useChooseSubstitutes(foodId: string) {
+  const changed = useFoodChanged()
+  return useMutation({
+    mutationFn: async (substitutes: SubstituteChoice[]) => {
+      const { error, response } = await api.POST('/api/foods/{id}/substitutes', { params: { path: { id: foodId } }, body: { substitutes } })
+      if (!response.ok) {
+        const violations = (error as { violations?: { propertyPath: string; message: string }[] } | undefined)?.violations
+        throw Object.assign(new ApiError(response.status), { violations: violations ?? [] })
+      }
+    },
+    onSuccess: changed,
+  })
+}
+
+/** Undo the choice: the model suggests the substitutes again in the background. */
+export function useSuggestSubstitutes(foodId: string) {
+  const changed = useFoodChanged()
+  return useMutation({
+    mutationFn: async () => {
+      const { response } = await api.POST('/api/foods/{id}/substitutes/suggest', { params: { path: { id: foodId } } })
       if (!response.ok) throw new ApiError(response.status)
     },
     onSuccess: changed,

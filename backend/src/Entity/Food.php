@@ -11,6 +11,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\QueryParameter;
 use App\Dto\FoodCorrectionInput;
+use App\Dto\FoodSubstitutesInput;
 use App\Enum\Allergen;
 use App\Enum\Diet;
 use App\Enum\FoodGroup;
@@ -18,6 +19,7 @@ use App\Enum\FoodSource;
 use App\Food\FoodFacts;
 use App\State\FoodCorrectionProcessor;
 use App\State\FoodSearchProvider;
+use App\State\FoodSubstitutesProcessor;
 use App\Taste\Names;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -55,6 +57,24 @@ use Symfony\Component\Uid\Uuid;
             read: false,
             processor: FoodCorrectionProcessor::class,
             name: 'food_estimate',
+        ),
+        new Post(
+            uriTemplate: '/foods/{id}/substitutes',
+            status: 200,
+            description: 'Choose what can stand in for the food by hand (all of them at once, best first, up to 3; none is an answer too): the model leaves them alone from then on. Foods are shared.',
+            input: FoodSubstitutesInput::class,
+            read: false,
+            processor: FoodSubstitutesProcessor::class,
+            name: 'food_substitutes',
+        ),
+        new Post(
+            uriTemplate: '/foods/{id}/substitutes/suggest',
+            status: 202,
+            description: 'Undo the choice: the model suggests the substitutes again in the background.',
+            input: false,
+            read: false,
+            processor: FoodSubstitutesProcessor::class,
+            name: 'food_substitutes_suggest',
         ),
         new GetCollection(
             uriTemplate: '/foods',
@@ -190,6 +210,15 @@ class Food
     /** When the text model was asked what can stand in for it (FoodSubstitution); null while it hasn't. */
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $substitutesAt = null;
+
+    /** Who chose the substitutes by hand, and when; the model leaves them alone. Null: the model's. */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
+    private ?User $substitutesBy = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    #[Groups(['food:read', 'ingredient:read'])]
+    private ?\DateTimeImmutable $substitutesChosenAt = null;
 
     public function __construct(string $key)
     {
@@ -334,6 +363,34 @@ class Food
     public function substitutesAsked(): void
     {
         $this->substitutesAt = new \DateTimeImmutable();
+    }
+
+    /** Substitutes chosen by hand (FoodSubstitutesProcessor puts the rows): the model isn't asked again. */
+    public function substitutesChosen(?User $by): void
+    {
+        $this->substitutesAt = new \DateTimeImmutable();
+        $this->substitutesBy = $by;
+        $this->substitutesChosenAt = new \DateTimeImmutable();
+    }
+
+    /** Back to the model's substitutes: it's asked again (SuggestSubstitutes). */
+    public function forgetSubstitutes(): void
+    {
+        $this->substitutesAt = null;
+        $this->substitutesBy = null;
+        $this->substitutesChosenAt = null;
+    }
+
+    public function getSubstitutesChosenAt(): ?\DateTimeImmutable
+    {
+        return $this->substitutesChosenAt;
+    }
+
+    /** Who chose the substitutes by hand, by name. */
+    #[Groups(['food:read', 'ingredient:read'])]
+    public function getSubstitutesByName(): ?string
+    {
+        return $this->substitutesBy?->getDisplayName();
     }
 
     public function isEdited(): bool

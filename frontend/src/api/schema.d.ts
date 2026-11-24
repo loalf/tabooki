@@ -104,6 +104,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/foods/{id}/substitutes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a Food resource.
+         * @description Creates a Food resource.
+         */
+        post: operations["food_substitutes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/foods/{id}/substitutes/suggest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a Food resource.
+         * @description Creates a Food resource.
+         */
+        post: operations["food_substitutes_suggest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ingredients": {
         parameters: {
             query?: never;
@@ -1190,6 +1230,8 @@ export interface components {
             readonly edited: boolean;
             /** Format: date-time */
             readonly correctedAt?: string | null;
+            /** Format: date-time */
+            readonly substitutesChosenAt?: string | null;
             substitutes?: {
                 key: string;
                 name: {
@@ -1210,6 +1252,8 @@ export interface components {
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
             readonly described?: boolean;
+            /** @description Who chose the substitutes by hand, by name. */
+            readonly substitutesByName?: string | null;
             /** @description Who fixed it by hand, by name. */
             readonly correctedByName?: string | null;
         };
@@ -1251,6 +1295,8 @@ export interface components {
             readonly edited: boolean;
             /** Format: date-time */
             readonly correctedAt?: string | null;
+            /** Format: date-time */
+            readonly substitutesChosenAt?: string | null;
             substitutes?: {
                 key: string;
                 name: {
@@ -1271,6 +1317,8 @@ export interface components {
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
             readonly described?: boolean;
+            /** @description Who chose the substitutes by hand, by name. */
+            readonly substitutesByName?: string | null;
             /** @description Who fixed it by hand, by name. */
             readonly correctedByName?: string | null;
         };
@@ -1312,6 +1360,8 @@ export interface components {
             readonly edited: boolean;
             /** Format: date-time */
             readonly correctedAt?: string | null;
+            /** Format: date-time */
+            readonly substitutesChosenAt?: string | null;
             substitutes?: {
                 key: string;
                 name: {
@@ -1332,6 +1382,8 @@ export interface components {
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
             readonly described?: boolean;
+            /** @description Who chose the substitutes by hand, by name. */
+            readonly substitutesByName?: string | null;
             /** @description Who fixed it by hand, by name. */
             readonly correctedByName?: string | null;
         };
@@ -1364,6 +1416,10 @@ export interface components {
             gramsPerPiece?: number | null;
             /** @description Grams per millilitre; null when it's never measured by volume. */
             density?: number | null;
+        };
+        /** @description Choose what can stand in for the food by hand (all of them at once, best first, up to 3; none is an answer too): the model leaves them alone from then on. Foods are shared. */
+        "Food.FoodSubstitutesInput": {
+            substitutes?: components["schemas"]["FoodSubstituteInput"][];
         };
         /**
          * @description What a food is, shared by every household: nutrition per 100 g, allergens, food groups, spice,
@@ -1403,6 +1459,8 @@ export interface components {
             readonly edited: boolean;
             /** Format: date-time */
             readonly correctedAt?: string | null;
+            /** Format: date-time */
+            readonly substitutesChosenAt?: string | null;
             substitutes?: {
                 key: string;
                 name: {
@@ -1423,6 +1481,8 @@ export interface components {
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
             readonly described?: boolean;
+            /** @description Who chose the substitutes by hand, by name. */
+            readonly substitutesByName?: string | null;
             /** @description Who fixed it by hand, by name. */
             readonly correctedByName?: string | null;
         };
@@ -1464,6 +1524,8 @@ export interface components {
             readonly edited: boolean;
             /** Format: date-time */
             readonly correctedAt?: string | null;
+            /** Format: date-time */
+            readonly substitutesChosenAt?: string | null;
             substitutes?: {
                 key: string;
                 name: {
@@ -1484,6 +1546,8 @@ export interface components {
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
             readonly described?: boolean;
+            /** @description Who chose the substitutes by hand, by name. */
+            readonly substitutesByName?: string | null;
             /** @description Who fixed it by hand, by name. */
             readonly correctedByName?: string | null;
         };
@@ -1525,6 +1589,8 @@ export interface components {
             readonly edited: boolean;
             /** Format: date-time */
             readonly correctedAt?: string | null;
+            /** Format: date-time */
+            readonly substitutesChosenAt?: string | null;
             substitutes?: {
                 key: string;
                 name: {
@@ -1545,8 +1611,26 @@ export interface components {
              */
             readonly diet?: "vegan" | "vegetarian" | "pescatarian" | null;
             readonly described?: boolean;
+            /** @description Who chose the substitutes by hand, by name. */
+            readonly substitutesByName?: string | null;
             /** @description Who fixed it by hand, by name. */
             readonly correctedByName?: string | null;
+        };
+        FoodSubstituteInput: {
+            /** @description Canonical English key; null to make one from the name. */
+            key?: string | null;
+            /** @default  */
+            nameEs: string;
+            /** @default  */
+            nameEn: string;
+            /**
+             * @description Grams of the substitute for each gram of the food.
+             * @default 1
+             */
+            ratio: number;
+            /** @description How it changes the dish, or what to add; null when it hardly changes anything. */
+            noteEs?: string | null;
+            noteEn?: string | null;
         };
         HydraCollectionBaseSchema: components["schemas"]["HydraCollectionBaseSchemaNoPagination"] & {
             /**
@@ -4258,6 +4342,126 @@ export interface operations {
         };
     };
     food_estimate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Food identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Food resource created */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Food.jsonld-food.read"];
+                    "application/json": components["schemas"]["Food-food.read"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    food_substitutes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Food identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** @description The new Food resource */
+        requestBody: {
+            content: {
+                "application/ld+json": components["schemas"]["Food.FoodSubstitutesInput"];
+                "application/json": components["schemas"]["Food.FoodSubstitutesInput"];
+            };
+        };
+        responses: {
+            /** @description Food resource created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Food.jsonld-food.read"];
+                    "application/json": components["schemas"]["Food-food.read"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description An error occurred */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
+                    "application/problem+json": components["schemas"]["ConstraintViolation"];
+                    "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    food_substitutes_suggest: {
         parameters: {
             query?: never;
             header?: never;

@@ -119,6 +119,72 @@ final class SubstitutesTest extends ApiTestCase
         self::assertSame(['white_beans_dried'], array_column($this->substitutes($id)['chickpeas'] ?? [], 'key'));
     }
 
+    public function testSubstitutesChosenByHandStickAndCanBeUndone(): void
+    {
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $cream = new Food('heavy_cream');
+        $entityManager->persist($cream);
+        $entityManager->persist(new FoodSubstitution($cream, 'evaporated_milk', 'leche evaporada', 'evaporated milk', 1, null, null, 0));
+        $cream->substitutesAsked();
+        $entityManager->flush();
+        $foodId = $cream->getId()->toRfc4122();
+
+        $id = $this->client->request('POST', '/api/recipes', ['json' => [
+            'title' => 'Crema', 'language' => 'es', 'servings' => 2, 'steps' => ['Triturar.'],
+            'ingredients' => [['rawText' => '200 ml de nata', 'canonicalKey' => 'heavy_cream', 'name' => 'nata', 'quantity' => 200, 'unit' => 'ml']],
+        ]])->toArray()['id'] ?? null;
+        self::assertIsString($id);
+
+        // From the catalog (its key) and typed by hand (a key made from the name); the old one is kept, moved down.
+        $chosen = $this->client->request('POST', '/api/foods/'.$foodId.'/substitutes', ['json' => ['substitutes' => [
+            ['key' => 'greek_yogurt', 'nameEs' => 'Yogur griego', 'nameEn' => 'Greek yogurt', 'ratio' => 1, 'noteEs' => 'más ácido', 'noteEn' => 'more sour'],
+            ['key' => null, 'nameEs' => 'Crème fraîche', 'nameEn' => 'Crème fraîche', 'ratio' => 0.8, 'noteEs' => 'Más espesa', 'noteEn' => null],
+            ['key' => 'evaporated_milk', 'nameEs' => 'leche evaporada', 'nameEn' => 'evaporated milk', 'ratio' => 1.2],
+        ]]])->toArray();
+        self::assertResponseIsSuccessful();
+        self::assertSame('Ana', $chosen['substitutesByName'] ?? null);
+        self::assertNotNull($chosen['substitutesChosenAt'] ?? null);
+        self::assertEquals([
+            ['key' => 'greek_yogurt', 'name' => ['es' => 'yogur griego', 'en' => 'greek yogurt'], 'ratio' => 1, 'note' => ['es' => 'más ácido', 'en' => 'more sour']],
+            ['key' => 'creme_fraiche', 'name' => ['es' => 'crème fraîche', 'en' => 'crème fraîche'], 'ratio' => 0.8, 'note' => ['es' => 'Más espesa', 'en' => 'Más espesa']],
+            ['key' => 'evaporated_milk', 'name' => ['es' => 'leche evaporada', 'en' => 'evaporated milk'], 'ratio' => 1.2, 'note' => null],
+        ], $this->substitutes($id)['heavy_cream'] ?? null);
+
+        // Not itself, not twice, a ratio a cook would use, at most three.
+        $this->client->request('POST', '/api/foods/'.$foodId.'/substitutes', ['json' => ['substitutes' => [
+            ['key' => 'heavy_cream', 'nameEs' => 'nata', 'nameEn' => 'cream'],
+            ['key' => 'milk', 'nameEs' => 'leche', 'nameEn' => 'milk', 'ratio' => 9],
+        ]]]);
+        self::assertResponseStatusCodeSame(422);
+        $this->client->request('POST', '/api/foods/'.$foodId.'/substitutes', ['json' => ['substitutes' => [
+            ['key' => 'heavy_cream', 'nameEs' => 'nata', 'nameEn' => 'cream'],
+            ['key' => 'milk', 'nameEs' => 'leche', 'nameEn' => 'milk'],
+            ['key' => 'Milk', 'nameEs' => 'leche', 'nameEn' => 'milk'],
+        ]]]);
+        self::assertResponseStatusCodeSame(422);
+        /** @var array{violations: list<array{propertyPath: string}>} $error */
+        $error = $this->client->getResponse()?->toArray(false) ?? [];
+        self::assertSame(['substitutes[0].key', 'substitutes[2].key'], array_column($error['violations'], 'propertyPath'));
+        self::assertCount(3, $this->substitutes($id)['heavy_cream'] ?? [], 'a refused choice changes nothing');
+
+        // None is an answer too: the model isn't asked again.
+        $this->client->request('POST', '/api/foods/'.$foodId.'/substitutes', ['json' => ['substitutes' => []]]);
+        self::assertResponseIsSuccessful();
+        self::assertArrayNotHasKey('heavy_cream', $this->substitutes($id));
+        $remaining = $entityManager->getConnection()->fetchOne('SELECT count(*) FROM food WHERE id = ? AND substitutes_at IS NULL', [$foodId]);
+        self::assertSame(0, $remaining);
+
+        // Back to the model's: asked again.
+        $undone = $this->client->request('POST', '/api/foods/'.$foodId.'/substitutes/suggest')->toArray();
+        self::assertResponseStatusCodeSame(202);
+        $transport = self::getContainer()->get('messenger.transport.async');
+        self::assertInstanceOf(InMemoryTransport::class, $transport);
+        self::assertEquals([null, null], [$undone['substitutesByName'] ?? null, $undone['substitutesChosenAt'] ?? null]);
+        self::assertCount(1, array_filter($transport->getSent(), static fn ($envelope): bool => $envelope->getMessage() instanceof SuggestSubstitutes));
+        $remaining = $entityManager->getConnection()->fetchOne('SELECT count(*) FROM food WHERE id = ? AND substitutes_at IS NULL', [$foodId]);
+        self::assertSame(1, $remaining);
+    }
+
     /** @return array<string, list<Substitute>> */
     private function substitutes(string $id): array
     {

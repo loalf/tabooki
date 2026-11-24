@@ -476,6 +476,232 @@
                 ]
             }
         },
+        "/api/foods/{id}/substitutes": {
+            "post": {
+                "operationId": "food_substitutes",
+                "tags": [
+                    "Food"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Food resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Food.jsonld-food.read"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Food-food.read"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a Food resource.",
+                "description": "Creates a Food resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Food identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The new Food resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Food.FoodSubstitutesInput"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Food.FoodSubstitutesInput"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
+        "/api/foods/{id}/substitutes/suggest": {
+            "post": {
+                "operationId": "food_substitutes_suggest",
+                "tags": [
+                    "Food"
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Food resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Food.jsonld-food.read"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Food-food.read"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a Food resource.",
+                "description": "Creates a Food resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Food identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ]
+            }
+        },
         "/api/ingredients": {
             "get": {
                 "operationId": "api_ingredients_get_collection",
@@ -6165,6 +6391,14 @@
                         ],
                         "format": "date-time"
                     },
+                    "substitutesChosenAt": {
+                        "readOnly": true,
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
                     "substitutes": {
                         "type": "array",
                         "items": {
@@ -6287,6 +6521,14 @@
                     "described": {
                         "readOnly": true,
                         "type": "boolean"
+                    },
+                    "substitutesByName": {
+                        "readOnly": true,
+                        "description": "Who chose the substitutes by hand, by name.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     },
                     "correctedByName": {
                         "readOnly": true,
@@ -6447,6 +6689,14 @@
                         ],
                         "format": "date-time"
                     },
+                    "substitutesChosenAt": {
+                        "readOnly": true,
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
                     "substitutes": {
                         "type": "array",
                         "items": {
@@ -6569,6 +6819,14 @@
                     "described": {
                         "readOnly": true,
                         "type": "boolean"
+                    },
+                    "substitutesByName": {
+                        "readOnly": true,
+                        "description": "Who chose the substitutes by hand, by name.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     },
                     "correctedByName": {
                         "readOnly": true,
@@ -6729,6 +6987,14 @@
                         ],
                         "format": "date-time"
                     },
+                    "substitutesChosenAt": {
+                        "readOnly": true,
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
                     "substitutes": {
                         "type": "array",
                         "items": {
@@ -6852,6 +7118,14 @@
                         "readOnly": true,
                         "type": "boolean"
                     },
+                    "substitutesByName": {
+                        "readOnly": true,
+                        "description": "Who chose the substitutes by hand, by name.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
                     "correctedByName": {
                         "readOnly": true,
                         "description": "Who fixed it by hand, by name.",
@@ -6945,6 +7219,19 @@
                             "number",
                             "null"
                         ]
+                    }
+                }
+            },
+            "Food.FoodSubstitutesInput": {
+                "type": "object",
+                "description": "Choose what can stand in for the food by hand (all of them at once, best first, up to 3; none is an answer too): the model leaves them alone from then on. Foods are shared.",
+                "properties": {
+                    "substitutes": {
+                        "maxItems": 3,
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/FoodSubstituteInput"
+                        }
                     }
                 }
             },
@@ -7101,6 +7388,14 @@
                                 ],
                                 "format": "date-time"
                             },
+                            "substitutesChosenAt": {
+                                "readOnly": true,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
                             "substitutes": {
                                 "type": "array",
                                 "items": {
@@ -7223,6 +7518,14 @@
                             "described": {
                                 "readOnly": true,
                                 "type": "boolean"
+                            },
+                            "substitutesByName": {
+                                "readOnly": true,
+                                "description": "Who chose the substitutes by hand, by name.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
                             },
                             "correctedByName": {
                                 "readOnly": true,
@@ -7390,6 +7693,14 @@
                                 ],
                                 "format": "date-time"
                             },
+                            "substitutesChosenAt": {
+                                "readOnly": true,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
                             "substitutes": {
                                 "type": "array",
                                 "items": {
@@ -7512,6 +7823,14 @@
                             "described": {
                                 "readOnly": true,
                                 "type": "boolean"
+                            },
+                            "substitutesByName": {
+                                "readOnly": true,
+                                "description": "Who chose the substitutes by hand, by name.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
                             },
                             "correctedByName": {
                                 "readOnly": true,
@@ -7679,6 +7998,14 @@
                                 ],
                                 "format": "date-time"
                             },
+                            "substitutesChosenAt": {
+                                "readOnly": true,
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
                             "substitutes": {
                                 "type": "array",
                                 "items": {
@@ -7802,6 +8129,14 @@
                                 "readOnly": true,
                                 "type": "boolean"
                             },
+                            "substitutesByName": {
+                                "readOnly": true,
+                                "description": "Who chose the substitutes by hand, by name.",
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
                             "correctedByName": {
                                 "readOnly": true,
                                 "description": "Who fixed it by hand, by name.",
@@ -7814,6 +8149,55 @@
                     }
                 ],
                 "description": "What a food is, shared by every household: nutrition per 100 g, allergens, food groups, spice,\nand how much a piece or a millilitre weighs (docs/INGREDIENT-KNOWLEDGE.md). One per canonical\nkey; a household's Ingredient points at one, and can be pointed at another by hand. Filled in\nby the text model (DescribeFoodsHandler); a fix made by hand is kept for good."
+            },
+            "FoodSubstituteInput": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "maxLength": 80,
+                        "description": "Canonical English key; null to make one from the name.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "nameEs": {
+                        "maxLength": 100,
+                        "default": "",
+                        "type": "string"
+                    },
+                    "nameEn": {
+                        "maxLength": 100,
+                        "default": "",
+                        "type": "string"
+                    },
+                    "ratio": {
+                        "minimum": 0.2,
+                        "maximum": 5,
+                        "description": "Grams of the substitute for each gram of the food.",
+                        "default": 1,
+                        "type": "number"
+                    },
+                    "noteEs": {
+                        "maxLength": 120,
+                        "description": "How it changes the dish, or what to add; null when it hardly changes anything.",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "noteEn": {
+                        "maxLength": 120,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "nameEs",
+                    "nameEn"
+                ]
             },
             "HydraCollectionBaseSchema": {
                 "allOf": [
