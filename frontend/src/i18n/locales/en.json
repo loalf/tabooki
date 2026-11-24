@@ -437,7 +437,7 @@
     "add": "Add",
     "addPlaceholder": "Add something to the list",
     "removeItem": "Remove {{name}}",
-    "fix": "Change the aisle of {{name}}",
+    "fix": "More about {{name}}: recipes, substitutes and aisle",
     "aisleLabel": "Aisle",
     "makeStaple": "Always at home",
     "notStaple": "Not always at home",
@@ -486,7 +486,8 @@
     "inCart_one": "In the cart · {{count}}",
     "inCart_other": "In the cart · {{count}}",
     "substitutes": "If they’re out: {{what}}",
-    "aboutIngredient": "About this ingredient"
+    "aboutIngredient": "About this ingredient",
+    "forRecipes": "For:"
   },
   "settings": {
     "title": "Settings",

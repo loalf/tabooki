@@ -437,7 +437,7 @@
     "add": "Añadir",
     "addPlaceholder": "Añadir algo a la lista",
     "removeItem": "Quitar {{name}}",
-    "fix": "Cambiar la sección de {{name}}",
+    "fix": "Más sobre {{name}}: recetas, sustitutos y sección",
     "aisleLabel": "Sección",
     "makeStaple": "Siempre lo tengo en casa",
     "notStaple": "No siempre lo tengo",
@@ -486,7 +486,8 @@
     "inCart_one": "En el carro · {{count}}",
     "inCart_other": "En el carro · {{count}}",
     "substitutes": "Si no hay: {{what}}",
-    "aboutIngredient": "Ver ingrediente"
+    "aboutIngredient": "Ver ingrediente",
+    "forRecipes": "Para:"
   },
   "settings": {
     "title": "Ajustes",
