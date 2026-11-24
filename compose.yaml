@@ -30,6 +30,8 @@ services:
       - caddy_data:/data
       - caddy_config:/config
       - media_data:/app/var/media
+      # BEDCA and USDA answers and the reviewed pairings (app:foods:bedca, app:foods:usda).
+      - food_tables:/app/var/tables
     depends_on:
       database:
         condition: service_healthy
@@ -90,3 +92,5 @@ volumes:
   database_data:
   # Cached thumbnails (later: uploads). Shared by php and worker; include it in backups.
   media_data:
+  # What BEDCA and USDA answered and the pairings reviewed: the imports run in php.
+  food_tables:

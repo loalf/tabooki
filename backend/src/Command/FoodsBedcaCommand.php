@@ -23,7 +23,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 /**
  * Replaces the model's estimates with BEDCA's figures (docs/INGREDIENT-KNOWLEDGE.md, "Data
  * licences"): the text model pairs each food with a BEDCA food (once: the pairs are kept under
- * var/bedca, and --pair fixes one by hand), the pairs and the figures are shown, and imported once
+ * var/tables/bedca, and --pair fixes one by hand), the pairs and the figures are shown, and imported once
  * confirmed (or with --apply). Not foods fixed by hand; not foods already
  * from BEDCA unless --refresh. A BEDCA entry whose energy contradicts its own nutrients is left
  * out. What BEDCA doesn't give (often sugars) stays the estimate, and says so.

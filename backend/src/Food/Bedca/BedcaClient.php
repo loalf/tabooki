@@ -11,7 +11,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * Reads BEDCA (the Spanish food composition database, AESAN) through the XML query interface its
  * website uses: there is no download or official API. Its conditions of use (docs/INGREDIENT-
  * KNOWLEDGE.md, "Data licences") allow personal, non-commercial use; so it is asked politely, one
- * food a second, and every answer is kept under var/bedca (never in git) and asked only once.
+ * food a second, and every answer is kept under var/tables/bedca (never in git) and asked only once.
  */
 final readonly class BedcaClient
 {

@@ -7,10 +7,11 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    # BEDCA's answers and the reviewed pairings (app:foods:bedca): kept, never in git.
-    app.bedca_dir: '%kernel.project_dir%/var/bedca'
+    # BEDCA's answers and the reviewed pairings (app:foods:bedca): kept, never in git. var/tables is
+    # a Docker volume (food_tables in compose.yaml), so the pairings survive deploys.
+    app.bedca_dir: '%kernel.project_dir%/var/tables/bedca'
     # USDA FoodData Central's answers and the reviewed pairings (app:foods:usda).
-    app.usda_dir: '%kernel.project_dir%/var/usda'
+    app.usda_dir: '%kernel.project_dir%/var/tables/usda'
     # Cached thumbnails (later: uploaded screenshots and videos). A Docker volume in compose.yaml.
     app.media_dir: '%kernel.project_dir%/var/media'
     # For the cost column of extraction runs: USD per million tokens, by model id. Models missing

@@ -75,7 +75,7 @@ final class BedcaImportTest extends ApiTestCase
         ]);
         self::assertSame(0.0, $cream->getFiber() ?? -1.0, 'the estimate, kept');
         self::assertSame(1.0, $cream->getDensity(), 'weights and allergens aren\'t BEDCA\'s: kept');
-        self::assertCount(2, array_filter($this->asked, static fn (string $q): bool => str_contains($q, 'level="2"')), 'each food asked once, then from var/bedca');
+        self::assertCount(2, array_filter($this->asked, static fn (string $q): bool => str_contains($q, 'level="2"')), 'each food asked once, then from the saved answers');
 
         // A pairing set by hand.
         $tester = $this->command();

@@ -10,7 +10,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 /**
  * USDA FoodData Central's API (public domain, CC0; docs/INGREDIENT-KNOWLEDGE.md, "Data
  * licences"), with a data.gov key (USDA_API_KEY; DEMO_KEY allows only about 10 requests an hour).
- * Answers are kept under var/usda and asked once.
+ * Answers are kept under var/tables/usda and asked once.
  */
 final readonly class UsdaClient
 {

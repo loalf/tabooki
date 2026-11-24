@@ -161,10 +161,13 @@ Android share menu and the iPhone Shortcut.
 ## Backups (to do before real data goes in)
 
 Nightly database dump plus the media volume (`tabooki_media_data`: cached thumbnails, later
-uploads), copied **off the server** with restic (object storage or a home NAS). Sketch:
+uploads) and `tabooki_food_tables` (the reviewed BEDCA and USDA pairings, `pairs.json`; the rest
+of it is their cached answers), copied **off the server** with restic (object storage or a home
+NAS). Sketch:
 
 ```sh
 docker compose -f compose.yaml -f compose.prod.yaml exec -T database \
   pg_dump -U app -Fc tabooki > /var/backups/tabooki/$(date +%F).dump
-restic backup /var/backups/tabooki "$(docker volume inspect -f '{{ .Mountpoint }}' tabooki_media_data)"
+restic backup /var/backups/tabooki "$(docker volume inspect -f '{{ .Mountpoint }}' tabooki_media_data)" \
+  "$(docker volume inspect -f '{{ .Mountpoint }}' tabooki_food_tables)"
 ```

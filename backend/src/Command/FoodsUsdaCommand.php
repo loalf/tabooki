@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 /**
  * Fills in from USDA FoodData Central what BEDCA lacks (docs/INGREDIENT-KNOWLEDGE.md): foods still
  * estimated by the model, not those from BEDCA or fixed by hand. Each is searched by its key in
- * words and the text model picks the result that is it; pairs are kept under var/usda (--pair
+ * words and the text model picks the result that is it; pairs are kept under var/tables/usda (--pair
  * key=fdcId sets one by hand). Shown, then imported once confirmed, like app:foods:bedca.
  */
 #[AsCommand(name: 'app:foods:usda', description: 'Import USDA FoodData Central\'s figures for foods BEDCA lacks')]
