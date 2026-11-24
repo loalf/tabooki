@@ -10,6 +10,7 @@
     "today": "Hoy"
   },
   "common": {
+    "undo": "Deshacer",
     "back": "Volver",
     "cancel": "Cancelar",
     "save": "Guardar",
@@ -303,6 +304,8 @@
     }
   },
   "plan": {
+    "removed": "{{meal}} quitada",
+    "restoreError": "No se ha podido recuperar",
     "title": "Menú",
     "weeks": "Semanas",
     "previousWeek": "Semana anterior",
@@ -432,6 +435,7 @@
     }
   },
   "shopping": {
+    "removed": "Quitado de la lista",
     "title": "Compra",
     "loadError": "No se ha podido cargar la lista. Inténtalo de nuevo.",
     "noPlan": "La lista de la compra sale del menú: planifica la semana y aparecerá aquí.",

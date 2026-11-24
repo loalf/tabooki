@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useRecipes } from '@/api/library'
-import { type MealPlan, type MealPlanEntry, useRemoveMeal, useSwapMeal, useUpdateMeal } from '@/api/plan'
+import { type MealPlan, type MealPlanEntry, useAddMeal, useRemoveMeal, useSwapMeal, useUpdateMeal } from '@/api/plan'
 import { Thumbnail } from '@/components/library/Thumbnail'
 import { formatDay, formatWeekday } from '@/components/plan/format'
 import { mealQuery } from '@/components/plan/meal'
@@ -15,6 +15,7 @@ import { Button } from '@/components/ui'
 import { type Reason, suggestFor } from '@/lib/suggest'
 import { askWhySwap } from '@/lib/swapWhy'
 import { conflictText } from '@/lib/taste'
+import { toast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
 import { parseIsoDate } from '@/lib/week'
 
@@ -39,6 +40,31 @@ export function MealSheet({ plan, entry, onClose }: { plan: MealPlan; entry: Mea
   const swappedOut = recipe?.id && !leftoverOf ? { id: recipe.id, title: recipe.title ?? '' } : null
   const swapped = () => (swappedOut && askWhySwap() ? setAsking(swappedOut) : onClose())
   const choose = (id: string) => update.mutate({ ...ids, recipe: id }, { onSuccess: () => (id === recipe?.id ? onClose() : swapped()) })
+
+  // "Fuera" is one tap, so it can be taken back for a few seconds. The undo runs after this sheet
+  // has closed: mutateAsync, because callbacks given to mutate() don't run once it's unmounted.
+  const add = useAddMeal()
+  const out = () =>
+    remove.mutate(ids, {
+      onSuccess: () => {
+        onClose()
+        toast({
+          tone: 'success',
+          icon: UtensilsCrossed,
+          title: t('plan.removed', { meal: t(`recipe.meal.${entry.slot}`) }),
+          action: { label: t('common.undo'), undo: () => void restore().catch(() => toast({ tone: 'error', title: t('plan.restoreError') })) },
+        })
+      },
+    })
+  // Back on the same day and meal, with its servings, recipe and lock. If other meals were its
+  // leftovers, they stay apart: the API can't link them again.
+  const restore = async () => {
+    const week = await add.mutateAsync({ planId: plan.id!, date: entry.date!, slot: entry.slot ?? 'dinner', servings: entry.servings })
+    const back = week.entries?.find((e) => e.date === entry.date && e.slot === entry.slot)
+    if (back?.id && (recipe?.id || entry.locked)) {
+      await update.mutateAsync({ planId: plan.id!, entry: back.id, recipe: recipe?.id, locked: entry.locked || undefined })
+    }
+  }
 
   return (
     <Sheet title={t('plan.sheet.title', { day: formatDay(entry.date!, i18n.language), meal: t(`recipe.meal.${entry.slot}`) })} onClose={onClose} hideTitle>
@@ -85,7 +111,7 @@ export function MealSheet({ plan, entry, onClose }: { plan: MealPlan; entry: Mea
               {entry.locked ? <Lock aria-hidden /> : <LockOpen aria-hidden />}
               {entry.locked ? t('plan.sheet.locked') : t('plan.sheet.lock')}
             </button>
-            <button type="button" className={tileClass()} disabled={busy} onClick={() => remove.mutate(ids, { onSuccess: onClose })}>
+            <button type="button" className={tileClass()} disabled={busy} onClick={out}>
               <UtensilsCrossed aria-hidden />
               {t('plan.sheet.out')}
             </button>

@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle2, X } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Undo2, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { dismissToast, type Toast, useToasts } from '@/lib/toast'
@@ -22,25 +22,28 @@ export function Toaster() {
 function ToastCard({ toast }: { toast: Toast }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const Icon = toast.tone === 'success' ? CheckCircle2 : AlertCircle
+  const Icon = toast.icon ?? (toast.tone === 'success' ? CheckCircle2 : AlertCircle)
+  const action = toast.action
 
   return (
     <div role={toast.tone === 'error' ? 'alert' : 'status'} className="toast pointer-events-auto flex items-center gap-3 rounded-lg sticker bg-card py-2.5 pr-1.5 pl-3">
-      <Icon className={cn('size-6 shrink-0', toast.tone === 'success' ? 'text-primary' : 'text-destructive')} aria-hidden />
+      <Icon className={cn('size-6 shrink-0', toast.icon ? 'text-muted-foreground' : toast.tone === 'success' ? 'text-primary' : 'text-destructive')} aria-hidden />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-extrabold">{toast.title}</p>
         {toast.body && <p className="truncate text-sm text-muted-foreground">{toast.body}</p>}
       </div>
-      {toast.action && (
+      {action && (
         <button
           type="button"
           onClick={() => {
             dismissToast(toast.id)
-            void navigate(toast.action!.to)
+            if ('undo' in action) action.undo()
+            else void navigate(action.to)
           }}
-          className="h-9 shrink-0 rounded-sm sticker-sm bg-card px-3 text-sm font-semibold"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-sm sticker-sm bg-card px-3 text-sm font-semibold"
         >
-          {toast.action.label}
+          {'undo' in action && <Undo2 className="size-4" aria-hidden />}
+          {action.label}
         </button>
       )}
       <button

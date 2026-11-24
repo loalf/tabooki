@@ -1,4 +1,4 @@
-import { MoreHorizontal, X } from 'lucide-react'
+import { ListX, MoreHorizontal, X } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
@@ -7,12 +7,14 @@ import {
   type Aisle,
   type ListScope,
   type ShoppingItem,
+  useAddItem,
   useCheckItem,
   useRemoveItem,
   useUpdateIngredient,
 } from '@/api/shopping'
 import { formatAmount } from '@/components/shopping/format'
 import { Button, CheckMark } from '@/components/ui'
+import { toast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
 
 /**
@@ -30,6 +32,18 @@ export function ItemRow({ item, scope }: { item: ShoppingItem; scope: ListScope 
   const recipes = item.recipes ?? []
   const substitutes = item.substitutes ?? []
   const hasMore = Boolean(item.ingredientId || recipes.length || substitutes.length)
+  const add = useAddItem()
+  // A typed item is gone in one tap, so it can be put back: its name is what was typed.
+  const removeTyped = () => {
+    remove.mutate({ ...scope, key: item.key })
+    toast({
+      tone: 'success',
+      icon: ListX,
+      title: t('shopping.removed'),
+      body: item.name,
+      action: { label: t('common.undo'), undo: () => add.mutate({ ...scope, text: item.name, tempKey: `pending:undo-${Date.now()}` }) },
+    })
+  }
 
   return (
     <li className="border-b last:border-b-0">
@@ -49,7 +63,7 @@ export function ItemRow({ item, scope }: { item: ShoppingItem; scope: ListScope 
           </span>
         </button>
         {item.manual ? (
-          <Button variant="ghost" size="icon" disabled={pending || remove.isPending} aria-label={t('shopping.removeItem', { name: item.name })} onClick={() => remove.mutate({ ...scope, key: item.key })}>
+          <Button variant="ghost" size="icon" disabled={pending || remove.isPending} aria-label={t('shopping.removeItem', { name: item.name })} onClick={removeTyped}>
             <X className="size-4 text-muted-foreground" aria-hidden />
           </Button>
         ) : (

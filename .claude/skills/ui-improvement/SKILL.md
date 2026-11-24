@@ -90,6 +90,7 @@ Mark the item ◐ in the table in `docs/UI-IMPROVEMENTS.md`. Leave the dev serve
 - Make the change in the source, matching `after.png`. Follow the code's existing style (comments that say why, i18n keys in both `es` and `en`, the `sticker`/`Chip`/`Button` primitives in `components/ui.tsx`).
 - Check: `cd frontend && npm run typecheck && npm run lint`.
 - The smoke dev server runs with `hmr: false`, so reload the page (and set the zoom again). Put the screen in the same state and compare with `after.png`. If it differs, fix it, or say how and why it differs.
+- Exercise what the change does, not only how it looks (an undo really undoes, a panel really opens). Toasts disappear after 6 s, faster than a `find` plus a click, so do the action and the follow-up tap in one `javascript_tool` call (`[...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Deshacer').click()`), then screenshot.
 - In `docs/UI-IMPROVEMENTS.md`, mark the item ☑ and add the PNGs under its section (`**Mockup:** [before](ui-proposals/NN-slug/before.png) · [after](ui-proposals/NN-slug/after.png)`).
 - On the proposals page, move the item into "Done": turn its `<article>` into a `<details class="proposal">` with a "Built" status (copy #1's shape) and add `loading="lazy"` to its images. Note anything that differs from the mockup, then republish (step 5.2).
 - Tear down: stop the :5175 dev server (TaskStop), close the Chrome tab, and run

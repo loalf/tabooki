@@ -10,6 +10,7 @@
     "today": "Today"
   },
   "common": {
+    "undo": "Undo",
     "back": "Back",
     "cancel": "Cancel",
     "save": "Save",
@@ -303,6 +304,8 @@
     }
   },
   "plan": {
+    "removed": "{{meal}} removed",
+    "restoreError": "Couldn't bring it back",
     "title": "Menu",
     "weeks": "Weeks",
     "previousWeek": "Previous week",
@@ -432,6 +435,7 @@
     }
   },
   "shopping": {
+    "removed": "Removed from the list",
     "title": "Shopping",
     "loadError": "Couldn't load the list. Please try again.",
     "noPlan": "The shopping list comes from the menu: plan the week and it will show up here.",

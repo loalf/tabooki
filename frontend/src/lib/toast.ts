@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react'
 import { useSyncExternalStore } from 'react'
 
 /** A short message that floats over the app for a few seconds (see <Toaster />). */
@@ -6,8 +7,10 @@ export type Toast = {
   tone: 'success' | 'error'
   title: string
   body?: string
-  /** Somewhere to go from it: "Open" the recipe, see what went wrong… */
-  action?: { label: string; to: string }
+  /** Instead of the tone's icon: what happened ("Fuera" shows its crossed cutlery). */
+  icon?: LucideIcon
+  /** Somewhere to go from it ("Open" the recipe, see what went wrong…), or a way to take it back. */
+  action?: { label: string; to: string } | { label: string; undo: () => void }
 }
 
 const MAX_VISIBLE = 3

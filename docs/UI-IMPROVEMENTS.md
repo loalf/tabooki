@@ -10,7 +10,7 @@ Every item below works with what the API already returns, so it only needs front
 |---|---|---|---|
 | 1 | Compra | [One line per item](#1-shopping-one-line-per-item) | ☑ |
 | 2 | Menú | [Say what the ⚠ means on the row](#2-menu-say-what-the--means) | ☑ |
-| 3 | Menú, Compra | [Undo after "Fuera"](#3-undo-after-fuera) | ☐ |
+| 3 | Menú, Compra | [Undo after "Fuera"](#3-undo-after-fuera) | ☑ |
 | 4 | Menú, Compra | [Placeholders while loading; don't wait for last week](#4-menu-and-shopping-placeholders-while-loading) | ☐ |
 | 5 | Hoy | ["No lo hicimos" on pending ratings](#5-today-no-lo-hicimos-on-pending-ratings) | ☐ |
 | 6 | Cocinar | [Timers survive leaving cook mode](#6-cook-mode-timers-survive-leaving-the-screen) | ☐ |
@@ -67,6 +67,8 @@ Every item below works with what the API already returns, so it only needs front
 **Known limit.** If the removed meal was cooked with leftovers planned on later days, removing it unlinks them (`MealPlan::removeEntry`), and undo can't link them again. See [Backend 1](#b1-restore-leftover-links).
 
 **Done when.** Removing a meal or a typed-in item shows "Deshacer" for a few seconds, and tapping it brings the meal or item back.
+
+**Mockup:** [before](ui-proposals/03-undo-fuera/before.png) · [after](ui-proposals/03-undo-fuera/after.png). **Done 2026-11-24:** toasts take an `undo` action and an icon of their own. A meal comes back with its day, meal, servings, recipe and lock. A meal that *was* leftovers comes back as a normal meal of the same recipe, and leftovers of a removed meal stay unlinked ([Backend 1](#b1-restore-leftover-links) covers both). Typed shopping items come back unticked.
 
 ---
 
@@ -177,7 +179,7 @@ Every item below works with what the API already returns, so it only needs front
 ## Needs backend (nice to have)
 
 ### B1. Restore leftover links
-Removing a meal unlinks the leftovers that depended on it (`MealPlan::removeEntry` sets `leftoverOf` to null), and `entries/update` can't set `leftoverOf`. A full undo for #3 needs either `leftoverOf` on the update endpoint or an "entries/restore" endpoint that recreates the meal with its links.
+Removing a meal unlinks the leftovers that depended on it (`MealPlan::removeEntry` sets `leftoverOf` to null), and `entries/update` can't set `leftoverOf`. So the undo in #3 can't relink them, and a removed leftovers meal comes back as a normal meal. A full undo needs either `leftoverOf` on the update endpoint or an "entries/restore" endpoint that recreates the meal with its links.
 
 ### B2. Timer alerts with the screen locked
 Timers only beep and vibrate while the page is open. Alerts from a locked phone need web push (a service worker, VAPID keys, and a backend that schedules the push for the timer's end).
