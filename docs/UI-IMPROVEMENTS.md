@@ -9,7 +9,7 @@ Every item below works with what the API already returns, so it only needs front
 | # | Screen | Improvement | Status |
 |---|---|---|---|
 | 1 | Compra | [One line per item](#1-shopping-one-line-per-item) | ☑ |
-| 2 | Menú | [Say what the ⚠ means on the row](#2-menu-say-what-the--means) | ☐ |
+| 2 | Menú | [Say what the ⚠ means on the row](#2-menu-say-what-the--means) | ☑ |
 | 3 | Menú, Compra | [Undo after "Fuera"](#3-undo-after-fuera) | ☐ |
 | 4 | Menú, Compra | [Placeholders while loading; don't wait for last week](#4-menu-and-shopping-placeholders-while-loading) | ☐ |
 | 5 | Hoy | ["No lo hicimos" on pending ratings](#5-today-no-lo-hicimos-on-pending-ratings) | ☐ |
@@ -48,6 +48,8 @@ Every item below works with what the API already returns, so it only needs front
 **Data.** Already on the entry.
 
 **Done when.** A meal with a warning shows its reason on the menu row without being opened.
+
+**Mockup:** [before](ui-proposals/02-menu-warning-text/before.png) · [after](ui-proposals/02-menu-warning-text/after.png). **Done 2026-11-24:** a first mockup with the full sentence on the row was rejected as too much text. Built instead: a short label per warning (`plan.why.short.*`, "⚠ Se repite") on the minutes line, replacing the triangle on the right; the full sentence stays in the meal sheet.
 
 ---
 

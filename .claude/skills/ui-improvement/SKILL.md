@@ -62,10 +62,11 @@ sips -s format png "<saved .jpg path>" --out docs/ui-proposals/NN-slug/before.pn
 
 ## 4. `after.png`: edit the live page, not the code
 
-Without touching the source, change the DOM of the same page in the same state with `javascript_tool` until it shows the proposal, then screenshot it from the **same scroll position** so the two PNGs compare one-to-one. Convert it the same way into `after.png`.
+Without touching the source, change the DOM of the same page in the same state with `javascript_tool` until it shows the proposal, then screenshot it from the **same scroll position** so the two PNGs compare one-to-one. If the change makes things taller or shorter above that point, the same scroll number shows different content: scroll so the same heading sits at the same height instead (`heading.getBoundingClientRect().top + scrollY - offset`). Convert it the same way into `after.png`.
 
 - Reuse what's already on the page: clone an existing element and change its text, hide or move elements, copy the class lists of similar elements. Tailwind only generates classes that appear in the source, so a new class combination may do nothing; use inline `style` for anything new (colours from the CSS variables, e.g. `var(--muted-foreground)`).
 - Use the real data on the page (names, amounts, warnings…). Don't invent content that the API wouldn't give.
+- Keep added text to the minimum: a two- or three-word label beats a sentence on a list row, and the full text can stay one tap away. The user rejected a proposal (#2, full warning sentence on each meal row) for having too much text on screen. The same goes for the notes on the proposals page: a sentence or two each.
 - Show the state that makes the point. If the proposal *is* something that appears after an action (a toast, a warning line), show that state. If an action only reveals where things moved (for example details moved into a "…" panel), keep `after.png` in its everyday state and describe the revealed part in words: an open panel can eat the space and hide the benefit. It's still two PNGs; offer to show the other state if it matters.
 - React may re-render and undo your DOM edits (a background refetch, a live update). If that happens, take the screenshot right after the edit, in the same `browser_batch`.
 
@@ -73,12 +74,14 @@ Look at both PNGs before showing them: same scroll position, nothing cut off, th
 
 ## 5. Present the proposal and stop
 
-In the reply:
+The user often reviews from their phone (Claude Code's remote session), where local file paths don't open. So show the **images themselves**, not paths: they go on the private proposals page, **https://claude.ai/artifact/MK2kWgvstmnTjUkWVQWRof** ("Tabooki UI proposals"). Its source is [docs/ui-proposals/index.html](../../../docs/ui-proposals/index.html).
 
-- Links to both PNGs (`docs/ui-proposals/NN-slug/before.png`, `.../after.png`) so they open from the chat.
-- **Why it's better:** 2–4 sentences on what the person using the app gets (faster to scan in the shop, no hidden meaning, fewer taps…), not on the code.
-- **What it costs or leaves out**, in a line or two: what moves or gets hidden, what needs the backend, any limit.
-- The question: accept, or what to change.
+1. In `index.html`, add the new proposal as an `<article class="proposal">` right after the header, in place of the "Nothing waiting right now." line: copy the structure of the existing one (number and screen, a "Waiting for your OK" status, the title, the two `<figure>`s with real `alt` text and the PNGs' pixel `width`/`height`, "Why it's better", "What it costs"). Older proposals stay below under "Done" as `<details>`.
+2. Publish it with the Artifact tool. If this conversation hasn't published it yet, first `read` it with `url` set to the page's address. Then publish with that `url`, `file_path` `docs/ui-proposals/index.html`, and `files` mapping each PNG's served path (`NN-slug/before.png`) to its file under `docs/ui-proposals/`. Map only the new PNGs; files already published stay. Don't pass `icon`.
+3. In the reply, give the page link first, then the same short text:
+   - **Why it's better:** 2–4 sentences on what the person using the app gets (faster to scan in the shop, no hidden meaning, fewer taps…), not on the code.
+   - **What it costs or leaves out**, in a line or two: what moves or gets hidden, what needs the backend, any limit.
+   - The question: accept, or what to change.
 
 Mark the item ◐ in the table in `docs/UI-IMPROVEMENTS.md`. Leave the dev server and smoke household running while waiting, because the next step needs them. Don't start implementing in the same turn.
 
@@ -88,6 +91,7 @@ Mark the item ◐ in the table in `docs/UI-IMPROVEMENTS.md`. Leave the dev serve
 - Check: `cd frontend && npm run typecheck && npm run lint`.
 - The smoke dev server runs with `hmr: false`, so reload the page (and set the zoom again). Put the screen in the same state and compare with `after.png`. If it differs, fix it, or say how and why it differs.
 - In `docs/UI-IMPROVEMENTS.md`, mark the item ☑ and add the PNGs under its section (`**Mockup:** [before](ui-proposals/NN-slug/before.png) · [after](ui-proposals/NN-slug/after.png)`).
+- On the proposals page, move the item into "Done": turn its `<article>` into a `<details class="proposal">` with a "Built" status (copy #1's shape) and add `loading="lazy"` to its images. Note anything that differs from the mockup, then republish (step 5.2).
 - Tear down: stop the :5175 dev server (TaskStop), close the Chrome tab, and run
   `python3 -I .claude/skills/ui-improvement/scripts/smoke_down.py`.
 - Commit only when the user asks, and then directly on `main`.
