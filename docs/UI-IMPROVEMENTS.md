@@ -16,7 +16,7 @@ Every item below works with what the API already returns, so it only needs front
 | 6 | Cocinar | [Timers survive leaving cook mode](#6-cook-mode-timers-survive-leaving-the-screen) | ☑ |
 | 7 | Ajustes | [Back goes back; everyday settings first](#7-settings-back-goes-back-everyday-settings-first) | ☑ |
 | 8 | Recetas | [Show "on the menu" and rating on cards](#8-library-show-on-the-menu-and-rating-on-cards) | ☑ |
-| 9 | Receta | [Tidy the facts above the ingredients](#9-recipe-tidy-the-facts-above-the-ingredients) | ☐ |
+| 9 | Receta | [Tidy the facts above the ingredients](#9-recipe-tidy-the-facts-above-the-ingredients) | ☑ |
 | 10 | Recetas | [Keep active filters visible](#10-library-keep-active-filters-visible) | ☐ |
 
 ---
@@ -177,6 +177,10 @@ Every item below works with what the API already returns, so it only needs front
 **Data.** Already on the recipe.
 
 **Done when.** The tortilla's header has one facts row, one "contains / allergens" line and the tags, and every ingredient name lines up.
+
+**Mockup:** before [1](ui-proposals/09-recipe-facts/before-1.png) · [2](ui-proposals/09-recipe-facts/before-2.png) · [3](ui-proposals/09-recipe-facts/before-3.png) — after [1](ui-proposals/09-recipe-facts/after-1.png) · [2](ui-proposals/09-recipe-facts/after-2.png) · [3](ui-proposals/09-recipe-facts/after-3.png)
+
+**Done 2026-11-24.** Heaviness shows only when it's light or hearty: "Normal" is gone rather than reworded. "Lleva" leaves out the groups the allergens already name (`NAMED_BY_ALLERGENS` in RecipePage). "Queso" stays next to "leche", because it says more. Both go on one line, and an ingredient without an amount gets an empty amount column.
 
 ---
 

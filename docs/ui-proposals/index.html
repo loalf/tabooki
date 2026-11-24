@@ -73,6 +73,35 @@
 
   <section class="history" aria-labelledby="done-title">
     <h2 id="done-title">Done</h2>
+    <details class="proposal" id="p9">
+      <summary><span class="num">#9 · Receta</span><span class="status done">Built</span><h2>Tidy the facts above the ingredients</h2></summary>
+      <div class="flow">
+        <h3>Antes</h3>
+        <div class="steps">
+          <figure><figcaption>1 · Tortilla</figcaption><img src="09-recipe-facts/before-1.png" alt="Tortilla header: facts row with '⚖ Normal', then 'Lleva: huevo' and 'Alérgenos: huevo' on two separate lines." width="614" height="857" loading="lazy"></figure>
+          <figure><figcaption>2 · Sus ingredientes</figcaption><img src="09-recipe-facts/before-2.png" alt="Ingredients: '6 huevos', '700 g patatas', '1 cebolla' with names in a column; 'Aceite de oliva' and 'Sal' start further left, under the amounts." width="614" height="857" loading="lazy"></figure>
+          <figure><figcaption>3 · Curry</figcaption><img src="09-recipe-facts/before-3.png" alt="Curry header: '⚖ Normal' in the facts, then 'Lleva: pollo o aves' and a two-line 'Alérgenos' list as separate blocks." width="614" height="857" loading="lazy"></figure>
+        </div>
+      </div>
+      <div class="flow after">
+        <h3>Después</h3>
+        <div class="steps">
+          <figure><figcaption>1 · Sin "Normal" ni "Lleva: huevo"</figcaption><img src="09-recipe-facts/after-1.png" alt="Tortilla header: no 'Normal' in the facts, and only 'Alérgenos: huevo'." width="614" height="857" loading="lazy"></figure>
+          <figure><figcaption>2 · Todos los nombres alineados</figcaption><img src="09-recipe-facts/after-2.png" alt="Ingredients: 'Aceite de oliva' and 'Sal' now start in the same column as 'huevos', 'patatas' and 'cebolla'." width="614" height="857" loading="lazy"></figure>
+          <figure><figcaption>3 · Lleva y alérgenos, una línea</figcaption><img src="09-recipe-facts/after-3.png" alt="Curry header: no 'Normal', and one paragraph 'Lleva: pollo o aves · Alérgenos: gluten · crustáceos · pescado · apio · mostaza · sésamo'." width="614" height="857" loading="lazy"></figure>
+        </div>
+      </div>
+      <div class="notes">
+        <div>
+          <h3>Why it's better</h3>
+          <p>Less to read before the ingredients, nothing said twice, and a list you can scan straight down.</p>
+        </div>
+        <div>
+          <h3>What it costs</h3>
+          <p>"Ligera" and "Contundente" stay; only "Normal" goes, which said nothing. "Lleva" drops what the allergens already say (huevo, pescado, leche, marisco…).</p>
+        </div>
+      </div>
+    </details>
     <details class="proposal" id="p8">
       <summary><span class="num">#8 · Recetas, Receta</span><span class="status done">Built</span><h2>Show what's on the menu, and the rating</h2></summary>
       <div class="flow">

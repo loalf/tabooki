@@ -103,7 +103,14 @@ function SubstituteList({ substitutes }: { substitutes: Substitute[] }) {
 
 function IngredientLine({ text }: { text: string }) {
   const match = AMOUNT.exec(text)
-  if (!match || !match[2]) return <span className="flex-1">{text}</span>
+  // No amount ("Sal"): an empty amount column, so every name starts in the same place.
+  if (!match || !match[2])
+    return (
+      <>
+        <span className="min-w-[4.5rem] shrink-0" aria-hidden />
+        <span className="flex-1">{text}</span>
+      </>
+    )
   return (
     <>
       <span className="min-w-[4.5rem] shrink-0 font-extrabold whitespace-nowrap tabular-nums">{match[1].trim()}</span>
@@ -111,6 +118,23 @@ function IngredientLine({ text }: { text: string }) {
     </>
   )
 }
+
+type FoodGroup = NonNullable<Recipe['foodGroups']>[number]
+type Allergen = NonNullable<Recipe['allergens']>[number]
+
+/** Food groups the allergens already name: "Lleva: huevo" next to "Alérgenos: huevo" says it twice. */
+const NAMED_BY_ALLERGENS: Partial<Record<FoodGroup, Allergen[]>> = {
+  fish: ['fish'],
+  shellfish: ['crustaceans', 'molluscs'],
+  egg: ['eggs'],
+  dairy: ['milk'],
+  gluten: ['gluten'],
+  tree_nuts: ['tree_nuts'],
+  peanuts: ['peanuts'],
+  soy: ['soy'],
+  sesame: ['sesame'],
+}
+const notNamedBy = (allergens: readonly Allergen[]) => (group: FoodGroup) => !NAMED_BY_ALLERGENS[group]?.some((a) => allergens.includes(a))
 
 function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) {
   const { t, i18n } = useTranslation()
@@ -128,10 +152,11 @@ function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) 
   const source = recipe.source
   const tags = recipe.tags ?? []
   const onMenu = useOnMenu().get(recipe.id!)
-  const foodGroups = sortGroups(recipe.foodGroups ?? [])
-  const optionalGroups = sortGroups(recipe.optionalFoodGroups ?? [])
   const allergens = recipe.allergens ?? []
   const optionalAllergens = recipe.optionalAllergens ?? []
+  const foodGroups = sortGroups(recipe.foodGroups ?? []).filter(notNamedBy(allergens))
+  const optionalGroups = sortGroups(recipe.optionalFoodGroups ?? []).filter(notNamedBy([...allergens, ...optionalAllergens]))
+  const hasAllergens = allergens.length > 0 || optionalAllergens.length > 0
   const factor = servings / (recipe.servings || servings)
 
   const cookParams = new URLSearchParams(params)
@@ -203,7 +228,8 @@ function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) 
               {(recipe.mealTypes ?? []).map((type) => t(`recipe.meal.${type}`)).join(' · ')}
             </li>
           )}
-          {recipe.heaviness && (
+          {/* "Normal" says nothing: only light or hearty is worth a word. */}
+          {recipe.heaviness && recipe.heaviness !== 'medium' && (
             <li className="inline-flex items-center gap-1.5">
               <Scale className="size-4" aria-label={t('recipe.facts.heavinessLabel')} />
               {t(`recipe.facts.heaviness.${recipe.heaviness}`)}
@@ -265,20 +291,25 @@ function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) 
         </ul>
       )}
 
-      {foodGroups.length > 0 && (
+      {/* What it has and its allergens, one line: the groups the allergens already name are left out above. */}
+      {(foodGroups.length > 0 || hasAllergens) && (
         <p className="-mt-1 text-[13px] text-muted-foreground">
-          <span className="font-semibold">{t('recipe.facts.contains')}:</span> {foodGroups.map((g) => t(`recipe.facts.group.${g}`)).join(' · ')}
-          {optionalGroups.length > 0 && <> ({t('recipe.facts.optional', { groups: optionalGroups.map((g) => t(`recipe.facts.group.${g}`)).join(' · ') })})</>}
-        </p>
-      )}
-
-      {(allergens.length > 0 || optionalAllergens.length > 0) && (
-        <p className="-mt-1 text-[13px] text-muted-foreground" title={t('recipe.allergensNote')}>
-          <span className="font-semibold">{t('recipe.allergens')}:</span> {allergens.map((a) => t(`recipe.allergen.${a}`)).join(' · ')}
-          {optionalAllergens.length > 0 &&
-            (allergens.length > 0
-              ? ` (${t('recipe.facts.optional', { groups: optionalAllergens.map((a) => t(`recipe.allergen.${a}`)).join(' · ') })})`
-              : t('recipe.facts.optional', { groups: optionalAllergens.map((a) => t(`recipe.allergen.${a}`)).join(' · ') }))}
+          {foodGroups.length > 0 && (
+            <>
+              <span className="font-semibold">{t('recipe.facts.contains')}:</span> {foodGroups.map((g) => t(`recipe.facts.group.${g}`)).join(' · ')}
+              {optionalGroups.length > 0 && <> ({t('recipe.facts.optional', { groups: optionalGroups.map((g) => t(`recipe.facts.group.${g}`)).join(' · ') })})</>}
+            </>
+          )}
+          {foodGroups.length > 0 && hasAllergens && ' · '}
+          {hasAllergens && (
+            <span title={t('recipe.allergensNote')}>
+              <span className="font-semibold">{t('recipe.allergens')}:</span> {allergens.map((a) => t(`recipe.allergen.${a}`)).join(' · ')}
+              {optionalAllergens.length > 0 &&
+                (allergens.length > 0
+                  ? ` (${t('recipe.facts.optional', { groups: optionalAllergens.map((a) => t(`recipe.allergen.${a}`)).join(' · ') })})`
+                  : t('recipe.facts.optional', { groups: optionalAllergens.map((a) => t(`recipe.allergen.${a}`)).join(' · ') }))}
+            </span>
+          )}
         </p>
       )}
 
