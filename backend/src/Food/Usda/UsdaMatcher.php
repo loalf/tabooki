@@ -73,8 +73,8 @@ final readonly class UsdaMatcher
         $lines = [];
         foreach ($foods as $food) {
             $lines[] = \sprintf('## %s (%s / %s)', $food->getKey(), $food->getNameEs() ?? '?', $food->getNameEn() ?? '?');
-            foreach ($candidates[$food->getKey()] ?? [] as $candidate) {
-                $lines[] = \sprintf('- %s [%s]', $candidate->description, $candidate->dataType);
+            foreach ($candidates[$food->getKey()] ?? [] as $i => $candidate) {
+                $lines[] = \sprintf('%s) %s [%s]', self::letter($i), $candidate->description, $candidate->dataType);
             }
             if ([] === ($candidates[$food->getKey()] ?? [])) {
                 $lines[] = '(no results)';
@@ -102,12 +102,14 @@ final readonly class UsdaMatcher
         $answers = $completion->toolInput['matches'] ?? [];
         foreach (\is_array($answers) ? $answers : [] as $answer) {
             $key = \is_array($answer) && \is_string($answer['key'] ?? null) ? $answer['key'] : null;
-            $description = \is_array($answer) && \is_string($answer['usda'] ?? null) ? mb_strtolower(trim($answer['usda'])) : null;
-            if (null === $key || null === $description) {
+            $pick = \is_array($answer) && \is_string($answer['pick'] ?? null) ? trim($answer['pick']) : null;
+            if (null === $key || null === $pick || '' === $pick) {
                 continue;
             }
-            foreach ($candidates[$key] ?? [] as $candidate) {
-                if (mb_strtolower($candidate->description) === $description) {
+            // Its letter among that food's own results; a description copied out (a [dataset] tag aside) is accepted too.
+            $description = mb_strtolower(trim((string) preg_replace('/\s*\[[^\]]*\]\s*$/', '', $pick)));
+            foreach ($candidates[$key] ?? [] as $i => $candidate) {
+                if (strtolower(rtrim($pick, ')')) === self::letter($i) || mb_strtolower($candidate->description) === $description) {
                     $matches[$key] = $candidate;
                     break;
                 }
@@ -117,8 +119,14 @@ final readonly class UsdaMatcher
         return $matches;
     }
 
+    /** a, b, c… for the results of one food (12 at most). */
+    private static function letter(int $i): string
+    {
+        return substr('abcdefghijklmnopqrstuvwxyz', $i, 1);
+    }
+
     private const string INSTRUCTIONS = <<<'TXT'
-        You link a meal planner's foods to USDA FoodData Central, to use its figures. Each of our foods (an English key, as a recipe uses it, and its names) comes with USDA's search results for it. Pick the result that is the same food in the same state, copying its description exactly, or null.
+        You link a meal planner's foods to USDA FoodData Central, to use its figures. Each of our foods (an English key, as a recipe uses it, and its names) comes with USDA's search results for it. Pick the result that is the same food in the same state, by its letter, or null.
         - Same state: raw, cooked, canned (drained), dried, as a stock or broth ready to use (not the powder or cube), as the key and names say; a key without a state is the form a recipe usually uses.
         - Same food: a generic result (Foundation, SR Legacy, Survey) when one is right; a Branded product only for a product (gochujang, halloumi, a sauce), and then the plain one, not a meal or a flavoured variant.
         - When no result is right, null: a wrong match is worse than none.
@@ -138,8 +146,8 @@ final readonly class UsdaMatcher
                     'items' => [
                         'type' => 'object',
                         'additionalProperties' => false,
-                        'required' => ['key', 'usda'],
-                        'properties' => ['key' => ['type' => 'string'], 'usda' => ['type' => ['string', 'null'], 'description' => 'The USDA description, exactly as in the results']],
+                        'required' => ['key', 'pick'],
+                        'properties' => ['key' => ['type' => 'string'], 'pick' => ['type' => ['string', 'null'], 'description' => 'The letter of the result among this food\'s own results ("b"), or null']],
                     ],
                 ],
             ],

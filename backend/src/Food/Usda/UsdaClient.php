@@ -10,13 +10,11 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 /**
  * USDA FoodData Central's API (public domain, CC0; docs/INGREDIENT-KNOWLEDGE.md, "Data
  * licences"), with a data.gov key (USDA_API_KEY; DEMO_KEY allows only about 10 requests an hour).
- * Searches the generic datasets first (Foundation, SR Legacy, FNDDS) and products' labels
- * (Branded) only when they have nothing. Answers are kept under var/usda and asked once.
+ * Answers are kept under var/usda and asked once.
  */
 final readonly class UsdaClient
 {
     private const string API = 'https://api.nal.usda.gov/fdc/v1';
-    private const string GENERIC = 'Foundation,SR Legacy,Survey (FNDDS)';
     private const int PAUSE_MICROSECONDS = 250_000;
 
     public function __construct(
@@ -29,27 +27,44 @@ final readonly class UsdaClient
     ) {
     }
 
-    /** @return list<UsdaFood> the best few for these words, generic foods when there are any */
-    public function search(string $query, int $size = 8): array
+    /**
+     * The best few for these words: raw ingredients (Foundation, SR Legacy) and prepared foods
+     * (FNDDS), as separate lists so the dishes don't crowd out the ingredients; products' labels
+     * (Branded) only when both have nothing.
+     *
+     * @return list<UsdaFood>
+     */
+    public function search(string $query): array
     {
-        foreach ([self::GENERIC, 'Branded'] as $dataType) {
-            $data = $this->get('search-'.hash('xxh128', $dataType."\n".mb_strtolower($query)), '/foods/search', [
-                'query' => $query, 'dataType' => $dataType, 'pageSize' => $size,
-            ]);
-            $foods = [];
-            foreach (\is_array($data['foods'] ?? null) ? $data['foods'] : [] as $item) {
-                $food = \is_array($item) ? UsdaFood::fromArray($item) : null;
-                if (null !== $food) {
-                    $this->keep($food);
-                    $foods[] = $food;
-                }
-            }
-            if ([] !== $foods) {
-                return $foods;
+        $found = [
+            ...$this->searchIn($query, ['Foundation', 'SR Legacy'], 8),
+            ...$this->searchIn($query, ['Survey (FNDDS)'], 4),
+        ];
+
+        return [] !== $found ? $found : $this->searchIn($query, ['Branded'], 8);
+    }
+
+    /**
+     * @param list<string> $dataTypes
+     *
+     * @return list<UsdaFood>
+     */
+    private function searchIn(string $query, array $dataTypes, int $size): array
+    {
+        // By POST, as JSON: in a URL, the client sends the parentheses of "Survey (FNDDS)" unencoded, and USDA refuses them.
+        $data = $this->call('search-'.hash('xxh128', implode(',', $dataTypes)."\n".mb_strtolower($query)), 'POST', '/foods/search', [
+            'json' => ['query' => $query, 'dataType' => $dataTypes, 'pageSize' => $size],
+        ]);
+        $foods = [];
+        foreach (\is_array($data['foods'] ?? null) ? $data['foods'] : [] as $item) {
+            $food = \is_array($item) ? UsdaFood::fromArray($item) : null;
+            if (null !== $food) {
+                $this->keep($food);
+                $foods[] = $food;
             }
         }
 
-        return [];
+        return $foods;
     }
 
     public function food(int $fdcId): ?UsdaFood
@@ -60,8 +75,8 @@ final readonly class UsdaClient
 
             return \is_array($data) ? UsdaFood::fromArray($data) : null;
         }
-        $data = $this->get(null, '/food/'.$fdcId, ['format' => 'abridged']);
-        $food = UsdaFood::fromArray($data);
+        $data = $this->call(null, 'GET', '/food/'.$fdcId, ['query' => ['format' => 'abridged']]);
+        $food = [] === $data ? null : UsdaFood::fromArray($data);
         if (null !== $food) {
             $this->keep($food);
         }
@@ -75,11 +90,11 @@ final readonly class UsdaClient
     }
 
     /**
-     * @param array<string, string|int> $query
+     * @param array<string, mixed> $options
      *
-     * @return array<mixed>
+     * @return array<mixed> empty when the food doesn't exist
      */
-    private function get(?string $cache, string $path, array $query): array
+    private function call(?string $cache, string $method, string $path, array $options): array
     {
         $file = null === $cache ? null : $this->dir.'/'.$cache.'.json';
         if (null !== $file && is_file($file)) {
@@ -88,15 +103,18 @@ final readonly class UsdaClient
             return \is_array($data) ? $data : [];
         }
         usleep(self::PAUSE_MICROSECONDS);
-        // Encoded here, fully: USDA's server refuses the parentheses of "Survey (FNDDS)" left as they are.
-        $url = self::API.$path.'?'.http_build_query(['api_key' => '' === trim($this->apiKey) ? 'DEMO_KEY' : trim($this->apiKey)] + $query, '', '&', \PHP_QUERY_RFC3986);
-        $response = $this->httpClient->request('GET', $url, ['timeout' => 30]);
+        $options['query'] = ['api_key' => '' === trim($this->apiKey) ? 'DEMO_KEY' : trim($this->apiKey)] + (\is_array($options['query'] ?? null) ? $options['query'] : []);
+        $response = $this->httpClient->request($method, self::API.$path, $options + ['timeout' => 30]);
         $status = $response->getStatusCode();
         if (429 === $status) {
             throw new \RuntimeException('USDA\'s rate limit reached: wait an hour, or set USDA_API_KEY to your own data.gov key (https://api.data.gov/signup/).');
         }
-        if (400 === $status || 404 === $status) {
-            return []; // a query it won't take, or an id it doesn't have: nothing found
+        if (404 === $status && 'GET' === $method) {
+            return [];
+        }
+        if ($status >= 400) {
+            // Never read as "nothing found": that would quietly send every food to products' labels.
+            throw new \RuntimeException(\sprintf('USDA refused %s %s (HTTP %d).', $method, $path, $status));
         }
         $text = $response->getContent();
         if (null !== $file) {
