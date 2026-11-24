@@ -19,6 +19,8 @@ import { SimilarRecipes } from '@/components/library/SimilarRecipes'
 import { Thumbnail } from '@/components/library/Thumbnail'
 import { EmptyState } from '@/components/PageHeader'
 import { AddToMenuSheet } from '@/components/plan/AddToMenuSheet'
+import { OnMenuLink } from '@/components/plan/OnMenu'
+import { useOnMenu } from '@/components/plan/useOnMenu'
 import { Sheet, SheetRowContent, sheetRowClass } from '@/components/Sheet'
 import { StarRating } from '@/components/StarRating'
 import { Button, linkButtonClass } from '@/components/ui'
@@ -125,6 +127,7 @@ function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) 
   const [toMenu, setToMenu] = useState(false)
   const source = recipe.source
   const tags = recipe.tags ?? []
+  const onMenu = useOnMenu().get(recipe.id!)
   const foodGroups = sortGroups(recipe.foodGroups ?? [])
   const optionalGroups = sortGroups(recipe.optionalFoodGroups ?? [])
   const allergens = recipe.allergens ?? []
@@ -245,8 +248,13 @@ function RecipeView({ recipe, onBack }: { recipe: Recipe; onBack: () => void }) 
         )}
       </header>
 
-      {tags.length > 0 && (
+      {(tags.length > 0 || onMenu) && (
         <ul className="flex flex-wrap gap-1.5" aria-label={t('recipe.tags')}>
+          {onMenu && (
+            <li>
+              <OnMenuLink date={onMenu} />
+            </li>
+          )}
           {tags.map((tag) => (
             <li key={tag}>
               <Link to={`/recipes?tag=${encodeURIComponent(tag)}`} className="inline-flex h-7 items-center rounded-full bg-muted px-2.5 text-xs font-semibold">

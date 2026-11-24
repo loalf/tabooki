@@ -15,7 +15,7 @@ Every item below works with what the API already returns, so it only needs front
 | 5 | Hoy | ["No lo hicimos" on pending ratings](#5-today-no-lo-hicimos-on-pending-ratings) | ☑ |
 | 6 | Cocinar | [Timers survive leaving cook mode](#6-cook-mode-timers-survive-leaving-the-screen) | ☑ |
 | 7 | Ajustes | [Back goes back; everyday settings first](#7-settings-back-goes-back-everyday-settings-first) | ☑ |
-| 8 | Recetas | [Show "on the menu" and rating on cards](#8-library-show-on-the-menu-and-rating-on-cards) | ☐ |
+| 8 | Recetas | [Show "on the menu" and rating on cards](#8-library-show-on-the-menu-and-rating-on-cards) | ☑ |
 | 9 | Receta | [Tidy the facts above the ingredients](#9-recipe-tidy-the-facts-above-the-ingredients) | ☐ |
 | 10 | Recetas | [Keep active filters visible](#10-library-keep-active-filters-visible) | ☐ |
 
@@ -153,6 +153,10 @@ Every item below works with what the API already returns, so it only needs front
 **Data.** List items already carry `rating`. Menu entries carry `recipe.id` and `date`.
 
 **Done when.** A recipe planned for Thursday shows the badge, and rated recipes show their stars on the card.
+
+**Mockup:** before [1](ui-proposals/08-library-on-menu/before-1.png) · [2](ui-proposals/08-library-on-menu/before-2.png) — after [1](ui-proposals/08-library-on-menu/after-1.png) · [2](ui-proposals/08-library-on-menu/after-2.png) · [3](ui-proposals/08-library-on-menu/after-3.png)
+
+**Done 2026-11-24.** `useOnMenu` (this week and next, from today, leftovers days left out) feeds the cards, "Hace tiempo que no" (which now skips planned recipes) and the recipe page. There the badge sits first among the tags and opens `/plan?week=…#day-…`, and the menu scrolls to that day. Beyond the week ahead the badge adds the date ("jue 3").
 
 ---
 

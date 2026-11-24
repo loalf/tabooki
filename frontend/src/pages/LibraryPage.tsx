@@ -8,6 +8,7 @@ import { InboxBanner } from '@/components/library/Inbox'
 import { RecipeCard } from '@/components/library/RecipeCard'
 import { Thumbnail } from '@/components/library/Thumbnail'
 import { EmptyState, pageTitleClass } from '@/components/PageHeader'
+import { useOnMenu } from '@/components/plan/useOnMenu'
 import { Button, Chip, inputClass } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { useDebounced } from '@/lib/useDebounced'
@@ -86,6 +87,7 @@ export function LibraryPage() {
   const { t, i18n } = useTranslation()
   const [params, setParams] = useSearchParams()
   const [adding, setAdding] = useState(false)
+  const onMenu = useOnMenu()
   const sort: Sort = SORTS.find((s) => s === params.get('sort')) ?? 'recent'
 
   // Filters live in the URL so going back from a recipe keeps them.
@@ -312,7 +314,7 @@ export function LibraryPage() {
         ) : recipes.isError ? (
           <EmptyState>{t('library.loadError')}</EmptyState>
         ) : shown.length === 0 && closeBy.length > 0 ? (
-          <CloseBy recipes={closeBy} />
+          <CloseBy recipes={closeBy} onMenu={onMenu} />
         ) : shown.length === 0 ? (
           filtering ? (
             <EmptyState
@@ -340,7 +342,7 @@ export function LibraryPage() {
           )
         ) : (
           <>
-            {!filtering && <Rediscover recipes={recipes.data} />}
+            {!filtering && <Rediscover recipes={recipes.data} onMenu={onMenu} />}
             <div className="mt-1 flex items-center justify-between gap-2">
               <h2 className="text-[17px] font-extrabold">
                 {filtering ? t('library.results', { count: shown.length }) : t('library.allCount', { count: shown.length })}
@@ -360,11 +362,11 @@ export function LibraryPage() {
             <ul className={cn('grid grid-cols-2 gap-3 sm:grid-cols-3', recipes.isPlaceholderData && 'opacity-60')}>
               {sortRecipes(shown, sort, i18n.language).map((recipe) => (
                 <li key={recipe.id} className="flex">
-                  <RecipeCard recipe={recipe} />
+                  <RecipeCard recipe={recipe} onMenu={onMenu.get(recipe.id!)} />
                 </li>
               ))}
             </ul>
-            {closeBy.length > 0 && <CloseBy recipes={closeBy} />}
+            {closeBy.length > 0 && <CloseBy recipes={closeBy} onMenu={onMenu} />}
           </>
         )}
       </section>
@@ -432,7 +434,7 @@ function MoreFiltersPanel({
 }
 
 /** Recipes found by meaning rather than by the words, closest first. */
-function CloseBy({ recipes }: { recipes: RecipeListItem[] }) {
+function CloseBy({ recipes, onMenu }: { recipes: RecipeListItem[]; onMenu: ReadonlyMap<string, string> }) {
   const { t } = useTranslation()
   return (
     <section aria-labelledby="close-by-title" className="mt-3 flex flex-col gap-2">
@@ -445,7 +447,7 @@ function CloseBy({ recipes }: { recipes: RecipeListItem[] }) {
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {recipes.map((recipe) => (
           <li key={recipe.id} className="flex">
-            <RecipeCard recipe={recipe} />
+            <RecipeCard recipe={recipe} onMenu={onMenu.get(recipe.id!)} />
           </li>
         ))}
       </ul>
@@ -455,13 +457,13 @@ function CloseBy({ recipes }: { recipes: RecipeListItem[] }) {
 
 const FORGOTTEN_AFTER_DAYS = 28
 
-/** Recipes the household liked enough to cook but hasn't for a while, longest ago first. */
-function Rediscover({ recipes }: { recipes: RecipeListItem[] }) {
+/** Recipes the household liked enough to cook but hasn't for a while, longest ago first; not the ones already back on the menu. */
+function Rediscover({ recipes, onMenu }: { recipes: RecipeListItem[]; onMenu: ReadonlyMap<string, string> }) {
   const { t, i18n } = useTranslation()
   const now = parseIsoDate(today()).getTime()
   const days = (date: string) => Math.round((now - parseIsoDate(date).getTime()) / 86_400_000)
   const forgotten = recipes
-    .filter((r) => r.lastCookedOn && days(r.lastCookedOn) >= FORGOTTEN_AFTER_DAYS)
+    .filter((r) => r.lastCookedOn && days(r.lastCookedOn) >= FORGOTTEN_AFTER_DAYS && !onMenu.has(r.id!))
     .sort((a, b) => a.lastCookedOn!.localeCompare(b.lastCookedOn!))
     .slice(0, 10)
   if (!forgotten.length) return null

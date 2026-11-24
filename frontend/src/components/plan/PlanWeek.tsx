@@ -1,6 +1,7 @@
 import { CheckCheck, ChevronDown, Hand } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useLocation } from 'react-router'
 import type { MealPlan, Slot } from '@/api/plan'
 import { formatDay } from '@/components/plan/format'
 import { MealRow } from '@/components/plan/MealRow'
@@ -22,6 +23,12 @@ export function PlanWeek({ plan }: { plan: MealPlan }) {
   const fold = past.length > 0 && past.length < 7 && !showPast
   const visible = fold ? days.filter((d) => d >= now) : days
   const short = new Intl.DateTimeFormat(i18n.language, { weekday: 'short', day: 'numeric' })
+  const { hash } = useLocation()
+
+  // From "En el menú · jue" on a recipe (#day-2026-11-26): straight to that day.
+  useEffect(() => {
+    if (hash.startsWith('#day-')) requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' }))
+  }, [hash])
 
   return (
     <div className="flex flex-col gap-5">

@@ -29,6 +29,7 @@
     "error": "Couldn't sign in. Please try again."
   },
   "library": {
+    "onMenu": "On the menu · {{day}}",
     "title": "Recipes",
     "empty": "Tap + to save a recipe link from Instagram, TikTok, YouTube or a blog. Tabooki pulls out the ingredients and steps.",
     "emptyTitle": "Your recipe book is empty",

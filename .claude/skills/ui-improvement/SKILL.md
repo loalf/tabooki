@@ -42,7 +42,7 @@ In Chrome (load the `anthropic-skills:chrome-browser` skill first if this sessio
 1. Make a new tab. Resize the window to **614 × 1350**. Chrome won't go narrower than ~614 CSS px, and the screen caps the height (on this Mac the page ends up 614 × 813, which is 390 × 516 once zoomed). That's a short phone, so scroll to the part the item is about rather than trying to fit the whole screen.
 2. Open `http://127.0.0.1:5175/login` and sign in with `javascript_tool`:
    `await fetch('/api/login', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email: 'smoke@example.invalid', password: 'smoke-pass-123'})})`
-3. **Then** clear the cached "signed out" state, or the app keeps showing the login page: `localStorage.removeItem('tabooki-offline')`.
+3. **Then** clear the cached "signed out" state and leave the login page in the same call: `localStorage.removeItem('tabooki-offline'); location.href = '/'`. Otherwise the app keeps showing the login page, because while you're still on it the login page saves "signed out" again.
 4. Navigate to the screen, then set a true phone width (390 CSS px):
    `document.documentElement.style.zoom = String(innerWidth / 390)`
    A full navigation (the `navigate` tool, a reload) resets the zoom: set it again after each one. Navigating by clicking inside the app keeps it.

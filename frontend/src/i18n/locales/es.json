@@ -29,6 +29,7 @@
     "error": "No se ha podido iniciar sesión. Inténtalo de nuevo."
   },
   "library": {
+    "onMenu": "En el menú · {{day}}",
     "title": "Recetas",
     "empty": "Toca + para guardar el enlace de una receta de Instagram, TikTok, YouTube o un blog. Tabooki saca los ingredientes y los pasos.",
     "emptyTitle": "Tu recetario está vacío",

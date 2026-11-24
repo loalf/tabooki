@@ -1,13 +1,15 @@
-import { Clock, Heart, ShieldAlert } from 'lucide-react'
+import { Clock, Heart, ShieldAlert, Star } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import type { RecipeListItem } from '@/api/library'
 import { PlatformBadge } from '@/components/library/PlatformBadge'
 import { Thumbnail } from '@/components/library/Thumbnail'
+import { OnMenuBadge } from '@/components/plan/OnMenu'
 import { misfit, notesReason } from '@/lib/taste'
 import { cn } from '@/lib/utils'
 
-export function RecipeCard({ recipe }: { recipe: RecipeListItem }) {
+/** `onMenu`: the next day it's on the menu, to see what's planned while choosing (useOnMenu). */
+export function RecipeCard({ recipe, onMenu }: { recipe: RecipeListItem; onMenu?: string }) {
   const { t, i18n } = useTranslation()
   const bad = misfit(recipe.tasteConflicts, t, i18n.language)
   // Short of a rule, what the notes have against it ("Laboriosa para entre semana").
@@ -26,6 +28,7 @@ export function RecipeCard({ recipe }: { recipe: RecipeListItem }) {
             <Heart className="size-3.5 fill-current" aria-label={t('recipe.favorite')} />
           </span>
         )}
+        {onMenu && <OnMenuBadge date={onMenu} className="absolute bottom-2 left-2" />}
       </div>
       <div className="flex flex-1 flex-col gap-1.5 px-2.5 pt-2.5 pb-3">
         <h3 className="line-clamp-2 text-sm leading-snug font-bold group-hover:underline">{recipe.title}</h3>
@@ -41,6 +44,12 @@ export function RecipeCard({ recipe }: { recipe: RecipeListItem }) {
             <span className="inline-flex shrink-0 items-center gap-1">
               <Clock className="size-3" aria-hidden />
               {t('recipe.minutes', { count: recipe.totalMinutes })}
+            </span>
+          )}
+          {recipe.rating != null && (
+            <span className="inline-flex shrink-0 items-center gap-0.5 font-bold text-foreground">
+              <Star className="size-3 fill-highlight text-outline" aria-hidden />
+              <span aria-label={t('plan.rated', { count: recipe.rating })}>{recipe.rating}</span>
             </span>
           )}
           {recipe.source && <PlatformBadge platform={recipe.source.platform} url={recipe.source.url} />}
