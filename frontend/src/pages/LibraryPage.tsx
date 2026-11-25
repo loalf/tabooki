@@ -9,6 +9,7 @@ import { RecipeCard } from '@/components/library/RecipeCard'
 import { Thumbnail } from '@/components/library/Thumbnail'
 import { EmptyState, pageTitleClass } from '@/components/PageHeader'
 import { useOnMenu } from '@/components/plan/useOnMenu'
+import { Sheet } from '@/components/Sheet'
 import { Button, Chip, inputClass } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { useDebounced } from '@/lib/useDebounced'
@@ -40,6 +41,9 @@ const ALLERGEN_GROUPS: Partial<Record<Allergen, FoodGroup[]>> = {
   soy: ['soy'],
   sesame: ['sesame'],
 }
+
+/** A filter as the row and the sheet show it: tapping it turns it on or off. */
+type Filter = { key: string; on: boolean; icon?: ReactNode; label: string; toggle: () => void }
 
 type MoreFilters = { kcal: number | null; protein: number | null; spice: SpiceFilter | null; without: Allergen[] }
 
@@ -100,7 +104,7 @@ export function LibraryPage() {
   const fitting = params.get('fits') === '1'
   const more = readMoreFilters(params)
   const moreCount = moreFiltersCount(more)
-  const [showMore, setShowMore] = useState(moreCount > 0)
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [query, setQuery] = useState(params.get('q') ?? '')
   const debouncedQuery = useDebounced(query)
 
@@ -157,14 +161,28 @@ export function LibraryPage() {
   // Only once the household has said what it likes (recipes then say what they have against it).
   const hasTaste = (recipes.data ?? []).some((r) => r.tasteConflicts != null)
 
-  const toggleTag = (tag: string) =>
-    setParams((current) => {
-      const next = new URLSearchParams(current)
-      const selected = next.getAll('tag')
-      next.delete('tag')
-      for (const t of selected.includes(tag) ? selected.filter((s) => s !== tag) : [...selected, tag]) next.append('tag', t)
-      return next
+  // Taps in the sheet replace the history entry, so back doesn't step through them one by one.
+  const edit = (change: (next: URLSearchParams) => void) =>
+    setParams(
+      (current) => {
+        const next = new URLSearchParams(current)
+        change(next)
+        return next
+      },
+      { replace: filtersOpen },
+    )
+
+  /** Keys that can hold several values (tags, allergens): adds or drops this one. */
+  const toggleIn = (key: 'tag' | 'without', value: string) =>
+    edit((next) => {
+      const selected = next.getAll(key)
+      next.delete(key)
+      for (const v of selected.includes(value) ? selected.filter((s) => s !== value) : [...selected, value]) next.append(key, v)
     })
+
+  /** One value per key: tapping the chosen one again drops it. */
+  const toggleValue = (key: 'fav' | 'review' | 'fits' | 'veg' | 'heavy' | 'kcal' | 'protein' | 'spice', value = '1') =>
+    edit((next) => (next.get(key) === value ? next.delete(key) : next.set(key, value)))
 
   const setSort = (next: Sort) =>
     setParams(
@@ -177,47 +195,50 @@ export function LibraryPage() {
       { replace: true },
     )
 
-  const toggleHeavy = (value: HeavyFilter) =>
-    setParams((current) => {
-      const next = new URLSearchParams(current)
-      if (next.get('heavy') === value) next.delete('heavy')
-      else next.set('heavy', value)
-      return next
-    })
-
-  /** One choice per key (kcal, protein, spice): tapping the chosen one again drops it. */
-  const toggleChoice = (key: 'kcal' | 'protein' | 'spice', value: string) =>
-    setParams((current) => {
-      const next = new URLSearchParams(current)
-      if (next.get(key) === value) next.delete(key)
-      else next.set(key, value)
-      return next
-    })
-
-  const toggleWithout = (allergen: Allergen) =>
-    setParams((current) => {
-      const next = new URLSearchParams(current)
-      const selected = next.getAll('without')
-      next.delete('without')
-      for (const a of selected.includes(allergen) ? selected.filter((s) => s !== allergen) : [...selected, allergen]) next.append('without', a)
-      return next
-    })
-
-  const toggleFlag = (key: 'fav' | 'review' | 'veg' | 'fits') =>
-    setParams((current) => {
-      const next = new URLSearchParams(current)
-      if (next.get(key) === '1') next.delete(key)
-      else next.set(key, '1')
-      return next
-    })
-
   const clearFilters = () => {
     setQuery('')
     setParams(sort === 'recent' ? new URLSearchParams() : new URLSearchParams({ sort }), { replace: true })
   }
 
-  // Selected tags first (even if no recipe has them any more), then the rest by use.
-  const tagChips = [...tags, ...allTags.filter((tag) => !tags.includes(tag))]
+  /** The sheet's "Borrar": every filter, but not the words in the search box. */
+  const clearChosen = () =>
+    setParams(
+      (current) => {
+        const next = new URLSearchParams()
+        for (const key of ['q', 'sort']) if (current.get(key)) next.set(key, current.get(key)!)
+        return next
+      },
+      { replace: true },
+    )
+
+  // The everyday filters: one tap away in the row, and first in the sheet.
+  const shortcuts: Filter[] = [
+    ...(reviewCount > 0 || needsReview
+      ? [{ key: 'review', on: needsReview, icon: <ListChecks className="size-4" aria-hidden />, label: t('library.toReview', { count: reviewCount }), toggle: () => toggleValue('review') }]
+      : []),
+    { key: 'fav', on: favorite, icon: <Heart className={cn('size-4', favorite && 'fill-current')} aria-hidden />, label: t('library.favorites'), toggle: () => toggleValue('fav') },
+    ...(hasTaste || fitting ? [{ key: 'fits', on: fitting, icon: <Salad className="size-4" aria-hidden />, label: t('library.fits'), toggle: () => toggleValue('fits') }] : []),
+    { key: 'light', on: heavy === 'light', icon: <Feather className="size-4" aria-hidden />, label: t('library.light'), toggle: () => toggleValue('heavy', 'light') },
+    { key: 'hearty', on: heavy === 'hearty', icon: <Soup className="size-4" aria-hidden />, label: t('library.hearty'), toggle: () => toggleValue('heavy', 'hearty') },
+    { key: 'veg', on: vegetarian, icon: <Leaf className="size-4" aria-hidden />, label: t('library.vegetarian'), toggle: () => toggleValue('veg') },
+  ]
+  const number = (n: number) => new Intl.NumberFormat(i18n.language).format(n)
+  // Everything that narrows the list, wherever it was chosen: first in the row, each with its ×.
+  const chosen: Filter[] = [
+    ...shortcuts.filter((s) => s.on),
+    ...tags.map((tag) => ({ key: `tag:${tag}`, on: true, label: tag, toggle: () => toggleIn('tag', tag) })),
+    ...(more.kcal !== null ? [{ key: 'kcal', on: true, label: t('library.more.kcalMax', { kcal: number(more.kcal) }), toggle: () => toggleValue('kcal', String(more.kcal)) }] : []),
+    ...(more.protein !== null
+      ? [{ key: 'protein', on: true, label: t('library.more.proteinChosen', { grams: number(more.protein) }), toggle: () => toggleValue('protein', String(more.protein)) }]
+      : []),
+    ...(more.spice !== null ? [{ key: 'spice', on: true, label: t(`library.more.spice_${more.spice}`), toggle: () => toggleValue('spice', more.spice!) }] : []),
+    ...more.without.map((allergen) => ({
+      key: `without:${allergen}`,
+      on: true,
+      label: t('library.more.withoutOne', { allergen: t(`recipe.allergen.${allergen}`) }),
+      toggle: () => toggleIn('without', allergen),
+    })),
+  ]
 
   return (
     <>
@@ -238,76 +259,69 @@ export function LibraryPage() {
         <InboxBanner onOpen={() => setAdding(true)} />
       </div>
       <section aria-label={t('library.recipes')} className="flex flex-col gap-3">
-        <label className="relative">
-          <span className="sr-only">{t('library.search')}</span>
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <input
-            type="search"
-            enterKeyHint="search"
-            placeholder={t('library.search')}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className={cn(inputClass, 'pr-10 pl-10 [&::-webkit-search-cancel-button]:hidden')}
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery('')}
-              className="absolute top-1/2 right-1 grid size-9 -translate-y-1/2 place-items-center text-muted-foreground"
-              aria-label={t('library.clearSearch')}
-            >
-              <X className="size-5" />
-            </button>
-          )}
-        </label>
-
-        <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
-          <Chip active={!filtering} onClick={clearFilters} className={cn(!filtering && 'bg-foreground text-background')}>
-            {t('library.all')}
-          </Chip>
-          <Chip active={moreCount > 0} onClick={() => setShowMore((open) => !open)} aria-expanded={showMore} aria-controls="more-filters">
-            <SlidersHorizontal className="size-4" aria-hidden />
-            {t('library.more.title')}
-            {moreCount > 0 && <span className="tabular-nums">· {moreCount}</span>}
-          </Chip>
-          {(reviewCount > 0 || needsReview) && (
-            <Chip active={needsReview} onClick={() => toggleFlag('review')}>
-              <ListChecks className="size-4" aria-hidden />
-              {t('library.toReview', { count: reviewCount })}
-            </Chip>
-          )}
-          <Chip active={favorite} onClick={() => toggleFlag('fav')}>
-            <Heart className={cn('size-4', favorite && 'fill-current')} aria-hidden />
-            {t('library.favorites')}
-          </Chip>
-          {(hasTaste || fitting) && (
-            <Chip active={fitting} onClick={() => toggleFlag('fits')}>
-              <Salad className="size-4" aria-hidden />
-              {t('library.fits')}
-            </Chip>
-          )}
-          <Chip active={heavy === 'light'} onClick={() => toggleHeavy('light')}>
-            <Feather className="size-4" aria-hidden />
-            {t('library.light')}
-          </Chip>
-          <Chip active={heavy === 'hearty'} onClick={() => toggleHeavy('hearty')}>
-            <Soup className="size-4" aria-hidden />
-            {t('library.hearty')}
-          </Chip>
-          <Chip active={vegetarian} onClick={() => toggleFlag('veg')}>
-            <Leaf className="size-4" aria-hidden />
-            {t('library.vegetarian')}
-          </Chip>
-          {tagChips.map((tag) => (
-            <Chip key={tag} active={tags.includes(tag)} onClick={() => toggleTag(tag)}>
-              {tag}
-            </Chip>
-          ))}
+        <div className="flex items-center gap-2.5">
+          <label className="relative flex-1">
+            <span className="sr-only">{t('library.search')}</span>
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden />
+            <input
+              type="search"
+              enterKeyHint="search"
+              placeholder={t('library.search')}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className={cn(inputClass, 'pr-10 pl-10 [&::-webkit-search-cancel-button]:hidden')}
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                className="absolute top-1/2 right-1 grid size-9 -translate-y-1/2 place-items-center text-muted-foreground"
+                aria-label={t('library.clearSearch')}
+              >
+                <X className="size-5" />
+              </button>
+            )}
+          </label>
+          <button
+            type="button"
+            onClick={() => setFiltersOpen(true)}
+            aria-haspopup="dialog"
+            aria-label={chosen.length ? `${t('library.filters')} · ${chosen.length}` : t('library.filters')}
+            className="relative grid size-12 shrink-0 place-items-center rounded-md sticker-sm bg-card"
+          >
+            <SlidersHorizontal className="size-5.5" aria-hidden />
+            {chosen.length > 0 && (
+              <span className="absolute -top-2 -right-2 grid h-5.5 min-w-5.5 place-items-center rounded-full border-2 border-outline bg-primary px-1 text-xs font-extrabold text-primary-foreground tabular-nums">
+                {chosen.length}
+              </span>
+            )}
+          </button>
         </div>
 
-        {showMore && (
-          <MoreFiltersPanel filters={more} onChoice={toggleChoice} onWithout={toggleWithout} />
-        )}
+        {/* What's narrowing the list comes first, so it never scrolls out of sight; then the shortcuts and tags not in use. */}
+        <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+          {chosen.map((filter) => (
+            <Chip key={filter.key} active onClick={filter.toggle} aria-pressed={undefined} aria-label={t('library.removeFilter', { name: filter.label })}>
+              {filter.label}
+              <X className="-mr-1 size-4" strokeWidth={2.5} aria-hidden />
+            </Chip>
+          ))}
+          {shortcuts
+            .filter((s) => !s.on)
+            .map((s) => (
+              <Chip key={s.key} onClick={s.toggle}>
+                {s.icon}
+                {s.label}
+              </Chip>
+            ))}
+          {allTags
+            .filter((tag) => !tags.includes(tag))
+            .map((tag) => (
+              <Chip key={tag} onClick={() => toggleIn('tag', tag)}>
+                {tag}
+              </Chip>
+            ))}
+        </div>
 
         {recipes.isPending ? (
           <RecipeGridSkeleton />
@@ -372,18 +386,47 @@ export function LibraryPage() {
       </section>
 
       {(adding || inboxRequested) && <AddRecipeSheet onClose={closeAdding} />}
+      {filtersOpen && (
+        <FiltersSheet
+          shortcuts={shortcuts}
+          more={more}
+          tags={tags}
+          allTags={allTags}
+          onTag={(tag) => toggleIn('tag', tag)}
+          onChoice={toggleValue}
+          onWithout={(allergen) => toggleIn('without', allergen)}
+          count={shown.length}
+          onClear={chosen.length ? clearChosen : undefined}
+          onClose={() => setFiltersOpen(false)}
+        />
+      )}
     </>
   )
 }
 
-function MoreFiltersPanel({
-  filters,
+/** Every filter in one place. Each tap applies at once, so the button below counts what you'd see. */
+function FiltersSheet({
+  shortcuts,
+  more,
+  tags,
+  allTags,
+  onTag,
   onChoice,
   onWithout,
+  count,
+  onClear,
+  onClose,
 }: {
-  filters: MoreFilters
+  shortcuts: Filter[]
+  more: MoreFilters
+  tags: string[]
+  allTags: string[]
+  onTag: (tag: string) => void
   onChoice: (key: 'kcal' | 'protein' | 'spice', value: string) => void
   onWithout: (allergen: Allergen) => void
+  count: number
+  onClear?: () => void
+  onClose: () => void
 }) {
   const { t, i18n } = useTranslation()
   const number = (n: number) => new Intl.NumberFormat(i18n.language).format(n)
@@ -393,43 +436,72 @@ function MoreFiltersPanel({
       <div className="flex flex-wrap gap-2">{chips}</div>
     </div>
   )
+  // Chosen tags first (even if no recipe has them any more), then the rest by use.
+  const tagChips = [...tags, ...allTags.filter((tag) => !tags.includes(tag))]
 
   return (
-    <section id="more-filters" aria-label={t('library.more.title')} className="flex flex-col gap-3.5 rounded-lg border-2 border-outline bg-card p-3.5">
-      {group(
-        t('library.more.kcal'),
-        KCAL_MAX.map((kcal) => (
-          <Chip key={kcal} active={filters.kcal === kcal} onClick={() => onChoice('kcal', String(kcal))}>
-            {t('library.more.kcalMax', { kcal: number(kcal) })}
-          </Chip>
-        )),
-      )}
-      {group(
-        t('library.more.protein'),
-        PROTEIN_MIN.map((grams) => (
-          <Chip key={grams} active={filters.protein === grams} onClick={() => onChoice('protein', String(grams))}>
-            {t('library.more.proteinMin', { grams: number(grams) })}
-          </Chip>
-        )),
-      )}
-      {group(
-        t('library.more.spice'),
-        SPICE_FILTERS.map((spice) => (
-          <Chip key={spice} active={filters.spice === spice} onClick={() => onChoice('spice', spice)}>
-            {t(`library.more.spice_${spice}`)}
-          </Chip>
-        )),
-      )}
-      {group(
-        t('library.more.without'),
-        ALLERGENS.map((allergen) => (
-          <Chip key={allergen} active={filters.without.includes(allergen)} onClick={() => onWithout(allergen)}>
-            <span className="inline-block first-letter:uppercase">{t(`recipe.allergen.${allergen}`)}</span>
-          </Chip>
-        )),
-      )}
-      <p className="text-xs text-muted-foreground">{t('library.more.note')}</p>
-    </section>
+    <Sheet title={t('library.filters')} onClose={onClose} className="pb-0">
+      <div className="flex flex-col gap-3.5 pb-4">
+        <div className="flex flex-wrap gap-2">
+          {shortcuts.map((s) => (
+            <Chip key={s.key} active={s.on} onClick={s.toggle}>
+              {s.icon}
+              {s.label}
+            </Chip>
+          ))}
+        </div>
+        {group(
+          t('library.more.without'),
+          ALLERGENS.map((allergen) => (
+            <Chip key={allergen} active={more.without.includes(allergen)} onClick={() => onWithout(allergen)}>
+              <span className="inline-block first-letter:uppercase">{t(`recipe.allergen.${allergen}`)}</span>
+            </Chip>
+          )),
+        )}
+        {group(
+          t('library.more.spice'),
+          SPICE_FILTERS.map((spice) => (
+            <Chip key={spice} active={more.spice === spice} onClick={() => onChoice('spice', spice)}>
+              {t(`library.more.spice_${spice}`)}
+            </Chip>
+          )),
+        )}
+        {group(
+          t('library.more.kcal'),
+          KCAL_MAX.map((kcal) => (
+            <Chip key={kcal} active={more.kcal === kcal} onClick={() => onChoice('kcal', String(kcal))}>
+              {t('library.more.kcalMax', { kcal: number(kcal) })}
+            </Chip>
+          )),
+        )}
+        {group(
+          t('library.more.protein'),
+          PROTEIN_MIN.map((grams) => (
+            <Chip key={grams} active={more.protein === grams} onClick={() => onChoice('protein', String(grams))}>
+              {t('library.more.proteinMin', { grams: number(grams) })}
+            </Chip>
+          )),
+        )}
+        {tagChips.length > 0 &&
+          group(
+            t('library.tags'),
+            tagChips.map((tag) => (
+              <Chip key={tag} active={tags.includes(tag)} onClick={() => onTag(tag)}>
+                {tag}
+              </Chip>
+            )),
+          )}
+        <p className="text-xs text-muted-foreground">{t('library.more.note')}</p>
+      </div>
+      <div className="sticky bottom-0 -mx-4 flex gap-2.5 border-t-2 border-border bg-background px-4 pt-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <Button variant="secondary" onClick={onClear} disabled={!onClear}>
+          {t('library.clear')}
+        </Button>
+        <Button className="flex-1" onClick={onClose}>
+          {t('library.showResults', { count })}
+        </Button>
+      </div>
+    </Sheet>
   )
 }
 

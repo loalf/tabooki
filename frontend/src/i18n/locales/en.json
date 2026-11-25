@@ -92,7 +92,6 @@
     },
     "toReview_one": "{{count}} to review",
     "toReview_other": "{{count}} to review",
-    "all": "All",
     "allCount_one": "All · {{count}}",
     "allCount_other": "All · {{count}}",
     "results_one": "{{count}} recipe",
@@ -118,7 +117,6 @@
     "vegetarian": "Vegetarian",
     "fits": "Fit you",
     "more": {
-      "title": "More filters",
       "kcal": "Calories per serving",
       "kcalMax": "Up to {{kcal}} kcal",
       "protein": "Protein per serving",
@@ -127,12 +125,20 @@
       "spice_none": "Not spicy",
       "spice_hot": "Spicy",
       "without": "Without",
-      "note": "Only recipes known to match show up: if figures or ingredients are still unknown, they’re left out. To leave out an ingredient, search for it with a dash in front: -coriander."
+      "note": "Only recipes known to match show up: if figures or ingredients are still unknown, they’re left out. To leave out an ingredient, search for it with a dash in front: -coriander.",
+      "withoutOne": "No {{allergen}}",
+      "proteinChosen": "{{grams}} g protein or more"
     },
     "closeBy": {
       "title": "Close to what you’re after",
       "hint": "Not those words, but what they’re about."
-    }
+    },
+    "filters": "Filters",
+    "tags": "Tags",
+    "clear": "Clear",
+    "removeFilter": "Remove {{name}}",
+    "showResults_one": "Show {{count}} recipe",
+    "showResults_other": "Show {{count}} recipes"
   },
   "recipe": {
     "favorite": "Favorite",

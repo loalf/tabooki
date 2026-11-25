@@ -92,7 +92,6 @@
     },
     "toReview_one": "{{count}} por revisar",
     "toReview_other": "{{count}} por revisar",
-    "all": "Todas",
     "allCount_one": "Todas · {{count}}",
     "allCount_other": "Todas · {{count}}",
     "results_one": "{{count}} receta",
@@ -118,7 +117,6 @@
     "vegetarian": "Vegetarianas",
     "fits": "Encajan",
     "more": {
-      "title": "Más filtros",
       "kcal": "Calorías por ración",
       "kcalMax": "Hasta {{kcal}} kcal",
       "protein": "Proteína por ración",
@@ -127,12 +125,20 @@
       "spice_none": "Nada picante",
       "spice_hot": "Que pique",
       "without": "Sin",
-      "note": "Solo salen las recetas de las que se sabe: si faltan cifras o ingredientes por conocer, se quedan fuera. Para quitar un ingrediente, búscalo con un guion delante: -cilantro."
+      "note": "Solo salen las recetas de las que se sabe: si faltan cifras o ingredientes por conocer, se quedan fuera. Para quitar un ingrediente, búscalo con un guion delante: -cilantro.",
+      "withoutOne": "Sin {{allergen}}",
+      "proteinChosen": "{{grams}} g de proteína o más"
     },
     "closeBy": {
       "title": "Por lo que buscas",
       "hint": "Sin esas palabras, pero van de eso."
-    }
+    },
+    "filters": "Filtros",
+    "tags": "Etiquetas",
+    "clear": "Borrar",
+    "removeFilter": "Quitar {{name}}",
+    "showResults_one": "Ver {{count}} receta",
+    "showResults_other": "Ver {{count}} recetas"
   },
   "recipe": {
     "favorite": "Favorita",

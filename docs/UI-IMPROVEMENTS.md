@@ -17,7 +17,7 @@ Every item below works with what the API already returns, so it only needs front
 | 7 | Ajustes | [Back goes back; everyday settings first](#7-settings-back-goes-back-everyday-settings-first) | ☑ |
 | 8 | Recetas | [Show "on the menu" and rating on cards](#8-library-show-on-the-menu-and-rating-on-cards) | ☑ |
 | 9 | Receta | [Tidy the facts above the ingredients](#9-recipe-tidy-the-facts-above-the-ingredients) | ☑ |
-| 10 | Recetas | [Keep active filters visible](#10-library-keep-active-filters-visible) | ☐ |
+| 10 | Recetas | [Rethink filtering](#10-library-rethink-filtering) | ☑ |
 
 ---
 
@@ -184,15 +184,19 @@ Every item below works with what the API already returns, so it only needs front
 
 ---
 
-## 10. Library: keep active filters visible
+## 10. Library: rethink filtering
 
-**Problem.** Eight fixed filter chips plus every tag share one sideways-scrolling row. Once a filter far along the row is on (Ligeras, Vegetariana, a tag) and the row is scrolled back, you can't see what's filtering the list. Only the result count hints at it.
+**Problem.** One sideways-scrolling row mixes a reset ("Todas"), a panel toggle ("Más filtros"), a to-do ("Por revisar"), quick filters and every tag. Active filters far along the row scroll out of sight. "Más filtros" opens inline: about 25 chips that push the recipes off the screen.
 
-**Change.** When any filter is active, show a short line under the search box listing them ("Ligeras ×  Vegetariana ×  cuchara ×") with "Limpiar" at the end. Optionally scroll the chip row so the first active chip is in view.
+**Change.** A filter button with a count badge sits beside the search box and opens a "Filtros" sheet with every filter (shortcuts, allergens, spice, calories, protein, tags), "Borrar" and a live "Ver N recetas". The chip row keeps the shortcuts and puts active filters first, without icons and with ×. "Todas", "Más filtros" and the inline panel go. Sort stays next to the count.
 
-**Where.** [LibraryPage.tsx](../frontend/src/pages/LibraryPage.tsx): every filter is already in the URL (`tag`, `fav`, `review`, `veg`, `fits`, `heavy`, `kcal`, `protein`, `spice`, `without`), with the toggles that remove them.
+**Where.** [LibraryPage.tsx](../frontend/src/pages/LibraryPage.tsx): every filter is already in the URL with its toggle, and the sheet is [Sheet.tsx](../frontend/src/components/Sheet.tsx).
 
-**Done when.** With two filters on, both are visible without scrolling and each can be removed from the line.
+**Done when.** With any filters on, all of them are visible on Recetas and each can be removed with one tap. Opening the sheet never moves the list.
+
+**Mockup:** before [1](ui-proposals/10-library-active-filters/before-1.png) · [2](ui-proposals/10-library-active-filters/before-2.png) · [3](ui-proposals/10-library-active-filters/before-3.png) — after [1](ui-proposals/10-library-active-filters/after-1.png) · [2](ui-proposals/10-library-active-filters/after-2.png) · [3](ui-proposals/10-library-active-filters/after-3.png)
+
+**Done 2026-11-24.** Taps in the sheet replace the history entry, so back doesn't step through them. "Borrar" keeps the search words, and the empty state's "Quitar filtros" still clears those too. A protein pill reads "30 g de proteína o más", since "30 g o más" alone says nothing outside the sheet. "Todas" and "Más filtros" are gone from the strings.
 
 ---
 
