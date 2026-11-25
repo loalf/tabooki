@@ -439,7 +439,8 @@
       "thisWeek": "Esta semana:",
       "unread": "No hemos podido aplicar",
       "retry": "Reintentar"
-    }
+    },
+    "notCooked": "No lo hicisteis"
   },
   "shopping": {
     "removed": "Quitado de la lista",
@@ -693,7 +694,8 @@
     "yesterday": "ayer",
     "shoppingLeft_one": "Compra · queda {{count}} de {{total}}",
     "shoppingLeft_other": "Compra · quedan {{count}} de {{total}}",
-    "shoppingDone": "Compra · todo en el carro"
+    "shoppingDone": "Compra · todo en el carro",
+    "notCookedSaved": "Apuntado: no lo hicisteis"
   },
   "menu": {
     "title": "Añadir al menú",

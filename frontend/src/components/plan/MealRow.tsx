@@ -1,4 +1,4 @@
-import { Clock, CornerDownRight, Lock, Plus, Star, TriangleAlert } from 'lucide-react'
+import { Clock, CornerDownRight, Lock, Plus, Star, TriangleAlert, UtensilsCrossed } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { type MealPlan, type MealPlanEntry, type Slot, useAddMeal } from '@/api/plan'
@@ -36,6 +36,14 @@ export function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: Meal
   const [open, setOpen] = useState(false)
   const recipe = entry.recipe
   const leftoverOf = entry.leftoverOfId ? plan.entries?.find((e) => e.id === entry.leftoverOfId) : undefined
+  // Said on Hoy ("No lo hicimos"): it stays in the week's history, but reads as not made; so do its leftovers.
+  const notCooked = entry.cooked === false || leftoverOf?.cooked === false
+  const notCookedLabel = notCooked && (
+    <span className="inline-flex items-center gap-1 font-bold text-muted-foreground">
+      <UtensilsCrossed className="size-3" aria-hidden />
+      {t('plan.notCooked')}
+    </span>
+  )
   // What the planner had to give up, in two or three words; the meal sheet says it in full.
   const warning = firstWarning(entry)
   const warningLabel = warning && (
@@ -58,7 +66,7 @@ export function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: Meal
           <span className="block text-xs font-semibold text-muted-foreground">
             {t(`recipe.meal.${slot}`)} · {t('recipe.servingsCount', { count: entry.servings })}
           </span>
-          <span className={cn('line-clamp-2 text-[15px] leading-snug font-bold', !recipe && 'font-normal text-muted-foreground')}>
+          <span className={cn('line-clamp-2 text-[15px] leading-snug font-bold', (!recipe || notCooked) && 'text-muted-foreground', !recipe && 'font-normal')}>
             {recipe?.title ?? t('plan.noRecipe')}
           </span>
           {leftoverOf ? (
@@ -67,8 +75,11 @@ export function PlannedMeal({ plan, entry, slot }: { plan: MealPlan; entry: Meal
                 <CornerDownRight className="size-3" aria-hidden />
                 {t('plan.leftoversOf', { day: formatWeekday(leftoverOf.date!, i18n.language) })}
               </span>
+              {notCookedLabel}
               {warningLabel}
             </span>
+          ) : notCooked ? (
+            <span className="inline-flex text-xs">{notCookedLabel}</span>
           ) : (
             (recipe?.totalMinutes != null || entry.rating != null || warning) && (
               <span className="inline-flex flex-wrap items-center gap-x-3 text-xs text-muted-foreground">

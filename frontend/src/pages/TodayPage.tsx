@@ -10,9 +10,9 @@ import { Thumbnail } from '@/components/library/Thumbnail'
 import { formatWeek, formatWeekday } from '@/components/plan/format'
 import { mealQuery } from '@/components/plan/meal'
 import { MealSheet } from '@/components/plan/MealSheet'
-import { useTakeOffMenu } from '@/components/plan/useTakeOffMenu'
 import { pageTitleClass } from '@/components/PageHeader'
 import { StarRating } from '@/components/StarRating'
+import { toast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
 import { AccountSheet, Avatar } from '@/pages/SettingsPage'
 import { addDays, mondayOf, parseIsoDate, today } from '@/lib/week'
@@ -224,7 +224,7 @@ function Pending({
   // Meals of the last two days nobody has rated (leftovers are the same dish, so not those).
   const toRate = plans
     .flatMap((plan) => (plan?.entries ?? []).map((entry) => ({ plan: plan!, entry })))
-    .filter(({ entry }) => entry.recipe && !entry.leftoverOfId && entry.rating == null && entry.date! < now && entry.date! >= addDays(now, -2))
+    .filter(({ entry }) => entry.recipe && !entry.leftoverOfId && entry.rating == null && entry.cooked !== false && entry.date! < now && entry.date! >= addDays(now, -2))
     .sort((a, b) => (b.entry.date! + b.entry.slot).localeCompare(a.entry.date! + a.entry.slot))
     .slice(0, 2)
   // From Friday on, nudge to plan next week.
@@ -248,16 +248,36 @@ function Pending({
 }
 
 /**
- * Rate a meal of the last two days, or say it wasn't cooked: that takes it off the menu (with an
- * undo), so the card goes and the recipe doesn't count as cooked that day ("última vez").
+ * Rate a meal of the last two days, or say it wasn't cooked: it stays on the menu as not made (with
+ * an undo), the card goes, and the recipe doesn't count as cooked that day ("última vez").
  */
 function RateMeal({ plan, entry }: { plan: MealPlan; entry: MealPlanEntry }) {
   const { t, i18n } = useTranslation()
   const update = useUpdateMeal()
-  const { takeOff, isPending: removing } = useTakeOffMenu()
   const when = entry.date === addDays(today(), -1) ? t('today.yesterday') : formatWeekday(entry.date!, i18n.language)
+  // Its leftovers from today on stop being leftovers (the dish is cooked then instead); the undo
+  // links them again. mutateAsync for it: the card has gone by then, and mutate()'s callbacks wouldn't run.
+  const notCooked = () => {
+    const leftovers = (plan.entries ?? []).filter((e) => e.leftoverOfId === entry.id && e.date! >= today()).map((e) => e.id!)
+    const undo = async () => {
+      await update.mutateAsync({ planId: plan.id!, entry: entry.id!, cooked: null, locked: entry.locked ?? false })
+      for (const id of leftovers) await update.mutateAsync({ planId: plan.id!, entry: id, leftoverOf: entry.id! })
+    }
+    update.mutate(
+      { planId: plan.id!, entry: entry.id!, cooked: false },
+      {
+        onSuccess: () =>
+          toast({
+            tone: 'success',
+            icon: UtensilsCrossed,
+            title: t('today.notCookedSaved'),
+            action: { label: t('common.undo'), undo: () => void undo().catch(() => toast({ tone: 'error', title: t('plan.restoreError') })) },
+          }),
+      },
+    )
+  }
   return (
-    <div className={cn('flex items-center gap-3 rounded-lg sticker bg-card p-3', (update.isPending || removing) && 'opacity-60')}>
+    <div className={cn('flex items-center gap-3 rounded-lg sticker bg-card p-3', update.isPending && 'opacity-60')}>
       <Thumbnail src={entry.recipe?.source?.thumbnail} className="size-12 shrink-0 rounded-[10px] border-2 border-outline" />
       <div className="min-w-0 flex-1">
         <p className="truncate text-[13px] font-bold first-letter:uppercase">
@@ -274,8 +294,8 @@ function RateMeal({ plan, entry }: { plan: MealPlan; entry: MealPlanEntry }) {
       </div>
       <button
         type="button"
-        disabled={update.isPending || removing}
-        onClick={() => takeOff(plan, entry)}
+        disabled={update.isPending}
+        onClick={notCooked}
         aria-label={`${t('today.notCooked')}: ${entry.recipe?.title ?? ''}`}
         className="flex w-[62px] shrink-0 flex-col items-center justify-center gap-1 self-stretch rounded-md sticker-sm bg-card px-1 text-center text-[11px] leading-[1.1] font-bold text-balance"
       >

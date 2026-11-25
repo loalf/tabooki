@@ -7,6 +7,7 @@ namespace App\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Dto\MealPlanEntryAction;
+use App\Dto\MealPlanEntryRestore;
 use App\Dto\MealPlanSlotInput;
 use App\Dto\MealPlanTweakInput;
 use App\Entity\MealPlan;
@@ -27,7 +28,7 @@ use Symfony\Component\Uid\Uuid;
  * Everything done to a planned week after creating it (see the operations on MealPlan). Each
  * answers with the whole plan.
  *
- * @implements ProcessorInterface<MealPlanSlotInput|MealPlanEntryAction|MealPlanTweakInput|null, MealPlan>
+ * @implements ProcessorInterface<MealPlanSlotInput|MealPlanEntryAction|MealPlanEntryRestore|MealPlanTweakInput|null, MealPlan>
  */
 final readonly class MealPlanActionProcessor implements ProcessorInterface
 {
@@ -51,6 +52,7 @@ final readonly class MealPlanActionProcessor implements ProcessorInterface
             'meal_plan_swap_entry' => $data instanceof MealPlanEntryAction ? $this->planner->fillOne($plan, $this->entry($plan, $data), swap: true) : null,
             'meal_plan_update_entry' => $data instanceof MealPlanEntryAction ? $this->update($plan, $data) : null,
             'meal_plan_remove_entry' => $data instanceof MealPlanEntryAction ? $plan->removeEntry($this->entry($plan, $data)) : null,
+            'meal_plan_restore_entry' => $data instanceof MealPlanEntryRestore ? $this->restore($plan, $data) : null,
             default => throw new \LogicException('Unknown meal plan operation '.$operation->getName()),
         };
         $this->entityManager->flush();
@@ -90,16 +92,74 @@ final readonly class MealPlanActionProcessor implements ProcessorInterface
             $entry->setServings($input->servings);
         }
         if (null !== $input->recipe) {
-            $recipe = $this->entityManager->find(Recipe::class, Uuid::fromString($input->recipe));
-            if (null === $recipe || !$recipe->getHousehold()->getId()->equals($plan->getHousehold()->getId())) {
-                throw new UnprocessableEntityHttpException('That recipe is not in your library.');
-            }
-            $this->planner->choose($plan, $entry, $recipe);
+            $this->planner->choose($plan, $entry, $this->recipe($plan, $input->recipe));
         }
         // After choosing: the rating is about the recipe that was eaten.
         if (null !== $input->rating) {
             $entry->rate($input->rating);
         }
+        if ($input->setsCooked()) {
+            $entry->setCooked($input->cooked);
+            // Not made: its leftovers still to come can't be leftovers, they're that dish to cook then.
+            if (false === $input->cooked) {
+                $today = new \DateTimeImmutable('today');
+                foreach ($plan->getEntries() as $other) {
+                    if ($other->getLeftoverOf() === $entry && $other->getDateValue() >= $today) {
+                        $other->setLeftoverOf(null);
+                    }
+                }
+            }
+        }
+        if (null !== $input->leftoverOf) {
+            $source = $plan->entry($input->leftoverOf) ?? throw new UnprocessableEntityHttpException('That meal is not in this plan.');
+            if ($source === $entry || null === $entry->getRecipe() || $source->getRecipe() !== $entry->getRecipe() || $source->sortKey() >= $entry->sortKey()) {
+                throw new UnprocessableEntityHttpException('Leftovers are the same dish, eaten after it.');
+            }
+            $entry->setLeftoverOf($source);
+        }
+    }
+
+    /** The undo of "remove": the same meal (same id) back in its place, without planning anything. */
+    private function restore(MealPlan $plan, MealPlanEntryRestore $input): void
+    {
+        $date = CreateMealPlanProcessor::date($input->date);
+        if (!$plan->contains($date)) {
+            throw new UnprocessableEntityHttpException(\sprintf('%s is not in the week of %s.', $input->date, $plan->getWeekStart()));
+        }
+        $slot = MealType::from($input->slot);
+        if (null !== $plan->entry($input->entry) || null !== $plan->entryAt($date, $slot)) {
+            throw new ConflictHttpException('That meal is already planned.');
+        }
+
+        $entry = MealPlanEntry::restored(Uuid::fromString($input->entry), $plan, $date, $slot, $input->servings);
+        $entry->setRecipe(null === $input->recipe ? null : $this->recipe($plan, $input->recipe));
+        $entry->setReasons(array_values(array_filter($input->reasons, static fn (array $reason): bool => \is_string($reason['code'] ?? null))));
+        $entry->setLocked($input->locked);
+        $entry->restoreRating($input->rating);
+        $entry->setCooked($input->cooked);
+        $plan->addEntry($entry);
+
+        // Leftovers are the same dish: only relinked while that's still so.
+        $source = null === $input->leftoverOf ? null : $plan->entry($input->leftoverOf);
+        if (null !== $source && null !== $entry->getRecipe() && $source->getRecipe() === $entry->getRecipe()) {
+            $entry->setLeftoverOf($source);
+        }
+        foreach ($input->leftovers as $id) {
+            $leftovers = $plan->entry($id);
+            if (null !== $leftovers && null === $leftovers->getLeftoverOf() && null !== $entry->getRecipe() && $leftovers->getRecipe() === $entry->getRecipe()) {
+                $leftovers->setLeftoverOf($entry);
+            }
+        }
+    }
+
+    private function recipe(MealPlan $plan, string $id): Recipe
+    {
+        $recipe = $this->entityManager->find(Recipe::class, Uuid::fromString($id));
+        if (null === $recipe || !$recipe->getHousehold()->getId()->equals($plan->getHousehold()->getId())) {
+            throw new UnprocessableEntityHttpException('That recipe is not in your library.');
+        }
+
+        return $recipe;
     }
 
     private function plan(mixed $id): MealPlan

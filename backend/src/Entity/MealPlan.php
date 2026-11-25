@@ -12,6 +12,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\QueryParameter;
 use App\Dto\MealPlanEntryAction;
+use App\Dto\MealPlanEntryRestore;
 use App\Dto\MealPlanInput;
 use App\Dto\MealPlanSlotInput;
 use App\Dto\MealPlanTweakInput;
@@ -111,6 +112,15 @@ use Symfony\Component\Uid\Uuid;
             read: false,
             processor: MealPlanActionProcessor::class,
             name: 'meal_plan_remove_entry',
+        ),
+        new Post(
+            uriTemplate: '/meal-plans/{id}/entries/restore',
+            status: 200,
+            description: 'Put back a meal taken off the menu, as it was and linked to its leftovers (undo).',
+            input: MealPlanEntryRestore::class,
+            read: false,
+            processor: MealPlanActionProcessor::class,
+            name: 'meal_plan_restore_entry',
         ),
         new Delete(uriTemplate: '/meal-plans/{id}'),
     ],

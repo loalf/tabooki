@@ -68,7 +68,7 @@ export function useSwapMeal() {
 
 export function useUpdateMeal() {
   return useWeekMutation(
-    ({ planId, ...body }: EntryAction & { locked?: boolean; servings?: number; recipe?: string; rating?: number }) =>
+    ({ planId, ...body }: EntryAction & { locked?: boolean; servings?: number; recipe?: string; rating?: number; cooked?: boolean | null; leftoverOf?: string }) =>
       api.POST('/api/meal-plans/{id}/entries/update', { params: { path: { id: planId } }, body }).then(unwrap),
   )
 }
@@ -76,6 +76,15 @@ export function useUpdateMeal() {
 export function useRemoveMeal() {
   return useWeekMutation(({ planId, entry }: EntryAction) =>
     api.POST('/api/meal-plans/{id}/entries/remove', { params: { path: { id: planId } }, body: { entry } }).then(unwrap),
+  )
+}
+
+type Restore = Schemas['MealPlan.MealPlanEntryRestore']
+
+/** The undo of a removal: the same meal back, linked again to its leftovers. */
+export function useRestoreMeal() {
+  return useWeekMutation(({ planId, ...body }: Restore & { planId: string }) =>
+    api.POST('/api/meal-plans/{id}/entries/restore', { params: { path: { id: planId } }, body }).then(unwrap),
   )
 }
 

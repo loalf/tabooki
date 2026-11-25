@@ -439,7 +439,8 @@
       "thisWeek": "This week:",
       "unread": "We couldn't apply",
       "retry": "Try again"
-    }
+    },
+    "notCooked": "Not made"
   },
   "shopping": {
     "removed": "Removed from the list",
@@ -693,7 +694,8 @@
     "yesterday": "yesterday",
     "shoppingLeft_one": "Shopping · {{count}} of {{total}} left",
     "shoppingLeft_other": "Shopping · {{count}} of {{total}} left",
-    "shoppingDone": "Shopping · all in the cart"
+    "shoppingDone": "Shopping · all in the cart",
+    "notCookedSaved": "Noted: you didn't make it"
   },
   "menu": {
     "title": "Add to the menu",

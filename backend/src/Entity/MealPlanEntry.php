@@ -46,6 +46,15 @@ class MealPlanEntry
     private ?int $rating = null;
 
     /**
+     * Whether it was cooked: true once cook mode reaches the end or it's rated, false when the
+     * household says it wasn't ("No lo hicimos"), null while nobody has said.
+     */
+    #[ORM\Column(nullable: true)]
+    #[Groups(['meal_plan:read'])]
+    #[ApiProperty(description: 'true: cooked (finished in cook mode, or rated); false: it wasn\'t; null: nobody has said', schema: ['type' => ['boolean', 'null']])]
+    private ?bool $cooked = null;
+
+    /**
      * Why the planner chose this recipe, or which of the household's likings it had to give up
      * on (Planner). Codes: asked, heaviness {value}, shares {names}, notesFit {names},
      * notesMisfit {names}, overTime, repeat,
@@ -88,6 +97,15 @@ class MealPlanEntry
         $this->id = Uuid::v7();
         $this->date = $date->setTime(0, 0);
         $this->servings = $servings;
+    }
+
+    /** A meal taken off the menu, back with the id it had (the undo). */
+    public static function restored(Uuid $id, MealPlan $plan, \DateTimeImmutable $date, MealType $slot, int $servings): self
+    {
+        $entry = new self($plan, $date, $slot, $servings);
+        $entry->id = $id;
+
+        return $entry;
     }
 
     public function getId(): Uuid
@@ -144,6 +162,7 @@ class MealPlanEntry
     {
         if ($recipe !== $this->recipe) {
             $this->rating = null;
+            $this->cooked = null;
         }
         $this->recipe = $recipe;
     }
@@ -186,8 +205,29 @@ class MealPlanEntry
     public function rate(int $rating): void
     {
         $this->rating = $rating;
+        $this->cooked = true;
         $this->locked = true;
         $this->recipe?->setRating($rating);
+    }
+
+    /** Back as it was before being taken off the menu: the recipe already has this rating. */
+    public function restoreRating(?int $rating): void
+    {
+        $this->rating = $rating;
+    }
+
+    public function getCooked(): ?bool
+    {
+        return $this->cooked;
+    }
+
+    /** Cooked or not is what happened: like a rating, it locks the meal so regenerating keeps it. */
+    public function setCooked(?bool $cooked): void
+    {
+        $this->cooked = $cooked;
+        if (null !== $cooked) {
+            $this->locked = true;
+        }
     }
 
     /** @return list<array<string, mixed>> */

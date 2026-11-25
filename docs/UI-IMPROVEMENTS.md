@@ -202,14 +202,24 @@ Every item below works with what the API already returns, so it only needs front
 
 ## Needs backend (nice to have)
 
-### B1. Restore leftover links
-Removing a meal unlinks the leftovers that depended on it (`MealPlan::removeEntry` sets `leftoverOf` to null), and `entries/update` can't set `leftoverOf`. So the undo in #3 can't relink them, and a removed leftovers meal comes back as a normal meal. A full undo needs either `leftoverOf` on the update endpoint or an "entries/restore" endpoint that recreates the meal with its links.
+### B1. Restore leftover links ☑
+Removing a meal unlinks the leftovers that depended on it (`MealPlan::removeEntry` sets `leftoverOf` to null), and `entries/update` couldn't set `leftoverOf`. So the undo in #3 couldn't relink them, and a removed leftovers meal came back as a normal meal.
+
+**Done 2026-11-25.** `POST /meal-plans/{id}/entries/restore` puts the meal back with its own id, recipe, reasons, lock, rating and cooked state. It links it again to the meals that were its leftovers, or to the meal it was the leftovers of, while they're still the same dish. "Fuera"'s undo uses it ([useTakeOffMenu.ts](../frontend/src/components/plan/useTakeOffMenu.ts)).
 
 ### B2. Timer alerts with the screen locked
 Timers only beep and vibrate while the page is open. Alerts from a locked phone need web push (a service worker, VAPID keys, and a backend that schedules the push for the timer's end).
 
-### B3. A "cooked" flag on meals
-"Last cooked" is the latest menu day a recipe appeared on, whether or not it was cooked. #5 fixes this by removing meals that weren't cooked. A `cooked` flag on menu entries, set when cook mode reaches "¡Hecho!" or a meal is rated, would let "last cooked" and rotation count only real cooking, and keep the menu history intact.
+### B3. A "cooked" flag on meals ☑
+"Last cooked" was the latest menu day a recipe appeared on, whether or not it was cooked, and #5 worked around that by removing meals that weren't cooked.
+
+**Done 2026-11-25.** Meals have `cooked`: true when cook mode reaches "¡Hecho!" (from the menu) or the meal is rated, false after "No lo hicimos", null while nobody has said. Saying it locks the meal, like a rating.
+- "No lo hicimos" keeps the meal, which reads "No lo hicisteis" on Menú, with an undo. Its leftovers from today on stop being leftovers: that dish is cooked then instead.
+- "Last cooked" counts meals said to be cooked, and past meals nobody said weren't. Today's meal counts once it's done, and leftovers don't count.
+- The planner's no-repeat window leaves out meals that weren't cooked.
+- `entries/update` takes `cooked` (null clears it) and `leftoverOf`, for the undo.
+
+**Screens:** [Hoy before](ui-proposals/b3-cooked/1-hoy-pending.png) · [Hoy after "No lo hicimos"](ui-proposals/b3-cooked/2-hoy-after.png) · [Menú](ui-proposals/b3-cooked/3-menu.png)
 
 ### Minor (not in the top 10)
 - Recipes without a photo show a large empty placeholder on Hoy, Recetas and the swap suggestions. Your library has a photo on every recipe today (0 of 15 missing), so this only matters for hand-written recipes.

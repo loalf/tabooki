@@ -1866,6 +1866,127 @@
                 }
             }
         },
+        "/api/meal-plans/{id}/entries/restore": {
+            "post": {
+                "operationId": "meal_plan_restore_entry",
+                "tags": [
+                    "MealPlan"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MealPlan resource created",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan.jsonld-meal_plan.read_recipe.list"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MealPlan-meal_plan.read_recipe.list"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "422": {
+                        "description": "An error occurred",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ConstraintViolation"
+                                }
+                            }
+                        },
+                        "links": {}
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/ld+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error.jsonld"
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "links": {}
+                    }
+                },
+                "summary": "Creates a MealPlan resource.",
+                "description": "Creates a MealPlan resource.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "MealPlan identifier",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "style": "simple",
+                        "explode": false
+                    }
+                ],
+                "requestBody": {
+                    "description": "The new MealPlan resource",
+                    "content": {
+                        "application/ld+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MealPlan.MealPlanEntryRestore"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MealPlan.MealPlanEntryRestore"
+                            }
+                        }
+                    },
+                    "required": true
+                }
+            }
+        },
         "/api/meal-plans/{id}/entries/swap": {
             "post": {
                 "operationId": "meal_plan_swap_entry",
@@ -9239,6 +9360,118 @@
                             "string",
                             "null"
                         ]
+                    },
+                    "leftoverOf": {
+                        "format": "uuid",
+                        "description": "Make it the leftovers of another meal of the plan, with the same recipe (undoing \"No lo hicimos\").",
+                        "externalDocs": {
+                            "url": "https://schema.org/identifier"
+                        },
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "cooked": {
+                        "description": "Cooked (true), not cooked (false), or back to nobody has said (null). Left uninitialised\nwhen the request doesn't send it, as null is a value here (undoing \"No lo hicimos\").",
+                        "type": [
+                            "boolean",
+                            "null"
+                        ]
+                    }
+                }
+            },
+            "MealPlan.MealPlanEntryRestore": {
+                "type": "object",
+                "description": "Put back a meal taken off the menu, as it was and linked to its leftovers (undo).",
+                "required": [
+                    "entry",
+                    "date"
+                ],
+                "properties": {
+                    "entry": {
+                        "format": "uuid",
+                        "description": "Its id, as it was.",
+                        "externalDocs": {
+                            "url": "https://schema.org/identifier"
+                        },
+                        "default": "",
+                        "type": "string"
+                    },
+                    "date": {
+                        "externalDocs": {
+                            "url": "https://schema.org/Date"
+                        },
+                        "default": "",
+                        "type": "string"
+                    },
+                    "slot": {
+                        "enum": [
+                            "lunch",
+                            "dinner"
+                        ],
+                        "default": "lunch",
+                        "type": "string"
+                    },
+                    "servings": {
+                        "minimum": 1,
+                        "maximum": 50,
+                        "default": 1,
+                        "type": "integer"
+                    },
+                    "recipe": {
+                        "format": "uuid",
+                        "externalDocs": {
+                            "url": "https://schema.org/identifier"
+                        },
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "locked": {
+                        "default": false,
+                        "type": "boolean"
+                    },
+                    "rating": {
+                        "minimum": 1,
+                        "maximum": 5,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "cooked": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ]
+                    },
+                    "reasons": {
+                        "description": "Why the planner chose it, as the plan gave it.",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "leftoverOf": {
+                        "format": "uuid",
+                        "description": "The meal it was the leftovers of.",
+                        "externalDocs": {
+                            "url": "https://schema.org/identifier"
+                        },
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "leftovers": {
+                        "description": "Meals that were its leftovers.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 }
             },
@@ -9711,6 +9944,12 @@
                             "null"
                         ]
                     },
+                    "cooked": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ]
+                    },
                     "reasons": {
                         "type": "array",
                         "items": {
@@ -9859,6 +10098,12 @@
                         "description": "How it turned out this time (1-5), given after eating it; also becomes the recipe's rating.",
                         "type": [
                             "integer",
+                            "null"
+                        ]
+                    },
+                    "cooked": {
+                        "type": [
+                            "boolean",
                             "null"
                         ]
                     },

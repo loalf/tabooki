@@ -13,7 +13,7 @@ use App\Enum\MealType;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
- * @phpstan-type Entry array{id: string, date: string, slot: string, servings: int, locked: bool, rating?: int|null, leftoverOfId?: string|null, recipe: array{id: string, title: string}}
+ * @phpstan-type Entry array{id: string, date: string, slot: string, servings: int, locked: bool, rating?: int|null, cooked?: bool|null, leftoverOfId?: string|null, reasons?: list<array<string, mixed>>, recipe: array{id: string, title: string}}
  * @phpstan-type Plan array{id: string, weekStart: string, entries: list<Entry>}
  */
 final class MealPlanTest extends ApiTestCase
@@ -222,6 +222,159 @@ final class MealPlanTest extends ApiTestCase
         /** @var array{lastCookedOn?: string|null} $one */
         $one = $this->client->request('GET', '/api/recipes/'.$lentejas->getId())->toArray();
         self::assertSame('2026-11-04', $one['lastCookedOn'] ?? null);
+    }
+
+    public function testAMealTakenOffComesBackAsItWasWithItsLeftovers(): void
+    {
+        $this->recipes(8, 'Plato', []);
+        $plan = $this->createPlan($this->allSlots(), leftovers: true);
+        $dinner = $this->bySlot($plan)['2026-11-23 dinner'];
+        $lunch = $this->bySlot($plan)['2026-11-24 lunch'];
+        self::assertSame($dinner['id'], $lunch['leftoverOfId'] ?? null);
+        $plan = $this->action($plan, 'update', ['entry' => $dinner['id'], 'rating' => 4]);
+        $dinner = $this->bySlot($plan)['2026-11-23 dinner'];
+
+        $plan = $this->action($plan, 'remove', ['entry' => $dinner['id']]);
+        self::assertNull($this->bySlot($plan)['2026-11-24 lunch']['leftoverOfId'] ?? null, 'removing unlinks its leftovers');
+
+        $snapshot = [
+            'entry' => $dinner['id'],
+            'date' => $dinner['date'],
+            'slot' => $dinner['slot'],
+            'servings' => $dinner['servings'],
+            'recipe' => $dinner['recipe']['id'],
+            'locked' => $dinner['locked'],
+            'rating' => $dinner['rating'] ?? null,
+            'cooked' => $dinner['cooked'] ?? null,
+            'reasons' => $dinner['reasons'] ?? [],
+            'leftovers' => [$lunch['id']],
+        ];
+        $plan = $this->action($plan, 'restore', $snapshot);
+        self::assertResponseIsSuccessful();
+        $back = $this->bySlot($plan)['2026-11-23 dinner'];
+        self::assertSame($dinner['id'], $back['id'], 'the same meal');
+        self::assertSame($dinner['recipe']['id'], $back['recipe']['id']);
+        self::assertSame(4, $back['rating'] ?? null);
+        self::assertTrue($back['cooked'] ?? null);
+        self::assertTrue($back['locked']);
+        self::assertSame($dinner['reasons'] ?? [], $back['reasons'] ?? []);
+        self::assertSame($dinner['id'], $this->bySlot($plan)['2026-11-24 lunch']['leftoverOfId'] ?? null, 'its leftovers again');
+
+        $this->action($plan, 'restore', $snapshot);
+        self::assertResponseStatusCodeSame(409, 'already back');
+
+        // Leftovers taken off come back as the leftovers of their meal.
+        $plan = $this->action($plan, 'remove', ['entry' => $lunch['id']]);
+        $plan = $this->action($plan, 'restore', [
+            'entry' => $lunch['id'],
+            'date' => $lunch['date'],
+            'slot' => $lunch['slot'],
+            'servings' => $lunch['servings'],
+            'recipe' => $lunch['recipe']['id'],
+            'locked' => false,
+            'leftoverOf' => $dinner['id'],
+        ]);
+        self::assertSame($dinner['id'], $this->bySlot($plan)['2026-11-24 lunch']['leftoverOfId'] ?? null);
+    }
+
+    public function testTheHouseholdSaysWhetherAMealWasCooked(): void
+    {
+        $lentejas = $this->recipe('Lentejas');
+        $garbanzos = $this->recipe('Garbanzos');
+        $plan = $this->createPlan([['date' => '2026-11-23', 'slot' => 'lunch']]);
+        $entry = $plan['entries'][0]['id'];
+        $plan = $this->action($plan, 'update', ['entry' => $entry, 'recipe' => $lentejas->getId()->toRfc4122()]);
+        self::assertNull($plan['entries'][0]['cooked'] ?? null, 'nobody has said');
+
+        $plan = $this->action($plan, 'update', ['entry' => $entry, 'cooked' => false]);
+        self::assertFalse($plan['entries'][0]['cooked'] ?? null);
+        self::assertTrue($plan['entries'][0]['locked'], 'what happened: regenerating keeps it');
+
+        // Undone: null is a value, not "leave it as it is".
+        $plan = $this->action($plan, 'update', ['entry' => $entry, 'cooked' => null, 'locked' => false]);
+        self::assertNull($plan['entries'][0]['cooked'] ?? null);
+        self::assertFalse($plan['entries'][0]['locked']);
+
+        $plan = $this->action($plan, 'update', ['entry' => $entry, 'servings' => 3]);
+        self::assertNull($plan['entries'][0]['cooked'] ?? null, 'not sent: unchanged');
+
+        $plan = $this->action($plan, 'update', ['entry' => $entry, 'cooked' => true]);
+        self::assertTrue($plan['entries'][0]['cooked'] ?? null);
+
+        // Another recipe: what was cooked was the old one.
+        $plan = $this->action($plan, 'update', ['entry' => $entry, 'recipe' => $garbanzos->getId()->toRfc4122()]);
+        self::assertNull($plan['entries'][0]['cooked'] ?? null);
+
+        $plan = $this->action($plan, 'update', ['entry' => $entry, 'rating' => 5]);
+        self::assertTrue($plan['entries'][0]['cooked'] ?? null, 'rated: it was eaten');
+    }
+
+    public function testLeftoversOfAMealNotMadeAreThatDishToCook(): void
+    {
+        $this->recipes(8, 'Plato', []);
+        $now = new \DateTimeImmutable('today');
+        $yesterday = $now->modify('-1 day');
+        $plan = $this->createPlan([['date' => $yesterday->format('Y-m-d'), 'slot' => 'dinner'], ['date' => $now->format('Y-m-d'), 'slot' => 'lunch']], leftovers: true, week: $yesterday->modify('monday this week')->format('Y-m-d'));
+        if (2 !== \count($plan['entries'])) {
+            self::markTestSkipped('On Mondays yesterday is in another week.');
+        }
+        $dinner = $this->bySlot($plan)[$yesterday->format('Y-m-d').' dinner'];
+        $lunch = $this->bySlot($plan)[$now->format('Y-m-d').' lunch'];
+        self::assertSame($dinner['id'], $lunch['leftoverOfId'] ?? null);
+
+        $plan = $this->action($plan, 'update', ['entry' => $dinner['id'], 'cooked' => false]);
+        $lunch = $this->bySlot($plan)[$now->format('Y-m-d').' lunch'];
+        self::assertNull($lunch['leftoverOfId'] ?? null, 'cooked today instead');
+        self::assertSame($dinner['recipe']['id'], $lunch['recipe']['id'], 'the same dish');
+
+        // Undone: back to leftovers.
+        $this->action($plan, 'update', ['entry' => $dinner['id'], 'cooked' => null, 'locked' => false]);
+        $plan = $this->action($plan, 'update', ['entry' => $lunch['id'], 'leftoverOf' => $dinner['id']]);
+        self::assertSame($dinner['id'], $this->bySlot($plan)[$now->format('Y-m-d').' lunch']['leftoverOfId'] ?? null);
+
+        $this->action($plan, 'update', ['entry' => $dinner['id'], 'leftoverOf' => $lunch['id']]);
+        self::assertResponseStatusCodeSame(422, 'leftovers come after');
+    }
+
+    public function testLastCookedCountsWhatWasCooked(): void
+    {
+        $skipped = $this->recipe('Saltada');
+        $today = $this->recipe('Hoy');
+        $done = $this->recipe('Hecha hoy');
+        $now = new \DateTimeImmutable('today');
+        $monday = $now->modify('monday this week');
+        $lastWeek = $now->modify('-7 days');
+        $week = $monday->format('Y-m-d');
+
+        $past = $this->createPlan([['date' => $lastWeek->format('Y-m-d'), 'slot' => 'lunch']], week: $lastWeek->modify('monday this week')->format('Y-m-d'));
+        $this->action($past, 'update', ['entry' => $past['entries'][0]['id'], 'recipe' => $skipped->getId()->toRfc4122()]);
+        $this->action($past, 'update', ['entry' => $past['entries'][0]['id'], 'cooked' => false]);
+
+        $slots = [['date' => $now->format('Y-m-d'), 'slot' => 'lunch'], ['date' => $now->format('Y-m-d'), 'slot' => 'dinner']];
+        $plan = $this->createPlan($slots, week: $week);
+        $entries = $this->bySlot($plan);
+        $this->action($plan, 'update', ['entry' => $entries[$now->format('Y-m-d').' lunch']['id'], 'recipe' => $today->getId()->toRfc4122()]);
+        $this->action($plan, 'update', ['entry' => $entries[$now->format('Y-m-d').' dinner']['id'], 'recipe' => $done->getId()->toRfc4122()]);
+        $this->action($plan, 'update', ['entry' => $entries[$now->format('Y-m-d').' dinner']['id'], 'cooked' => true]);
+
+        /** @var list<array{title: string, lastCookedOn?: string|null}> $list */
+        $list = $this->client->request('GET', '/api/recipes')->toArray();
+        $byTitle = array_column($list, 'lastCookedOn', 'title');
+        self::assertNull($byTitle['Saltada'] ?? null, 'not cooked');
+        self::assertNull($byTitle['Hoy'] ?? null, 'not until it is done');
+        self::assertSame($now->format('Y-m-d'), $byTitle['Hecha hoy'] ?? null);
+    }
+
+    public function testLeftoversDontCountAsCooking(): void
+    {
+        $this->recipes(8, 'Plato', []);
+        $plan = $this->createPlan([['date' => '2026-11-02', 'slot' => 'dinner'], ['date' => '2026-11-03', 'slot' => 'lunch']], leftovers: true, week: '2026-11-02');
+        $dinner = $this->bySlot($plan)['2026-11-02 dinner'];
+        self::assertSame($dinner['id'], $this->bySlot($plan)['2026-11-03 lunch']['leftoverOfId'] ?? null);
+
+        /** @var array{lastCookedOn?: string|null} $recipe */
+        $recipe = $this->client->request('GET', '/api/recipes/'.$dinner['recipe']['id'])->toArray();
+        self::assertSame('2026-11-02', $recipe['lastCookedOn'] ?? null, 'the day it was cooked, not the leftovers');
     }
 
     public function testAnEmptyLibraryLeavesMealsEmpty(): void

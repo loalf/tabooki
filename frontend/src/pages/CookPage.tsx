@@ -360,7 +360,10 @@ function TimerDock({ idle, timers, now, onStart, onStop }: { idle: StepTimer[]; 
   )
 }
 
-/** The end: rate it. From the menu the rating goes to that meal (and the recipe), else to the recipe. */
+/**
+ * The end: rate it. From the menu the meal now counts as cooked, and the rating goes to it (and the
+ * recipe); else to the recipe.
+ */
 function Done({ recipe, onAgain, onClose }: { recipe: Recipe; onAgain: () => void; onClose: () => void }) {
   const { t } = useTranslation()
   const [params] = useSearchParams()
@@ -368,6 +371,13 @@ function Done({ recipe, onAgain, onClose }: { recipe: Recipe; onAgain: () => voi
   const entry = params.get('entry')
   const updateRecipe = useUpdateRecipe(recipe.id!)
   const updateMeal = useUpdateMeal()
+  const { mutate: markCooked } = useUpdateMeal()
+  const marked = useRef(false)
+  useEffect(() => {
+    if (!planId || !entry || marked.current) return
+    marked.current = true
+    markCooked({ planId, entry, cooked: true })
+  }, [planId, entry, markCooked])
   const [rating, setRating] = useState<number | null>(null)
   const saving = updateRecipe.isPending || updateMeal.isPending
   const failed = updateRecipe.isError || updateMeal.isError
