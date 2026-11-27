@@ -64,7 +64,8 @@ final readonly class PasswordProcessor implements ProcessorInterface
             throw new AccessDeniedException();
         }
         $this->attempt('user:'.$user->getId()->toRfc4122());
-        if (!$this->passwords->isCurrentPassword($user, $data->currentPassword)) {
+        // Someone who signed up with Google has no current password to give.
+        if ($user->hasPassword() && !$this->passwords->isCurrentPassword($user, $data->currentPassword)) {
             throw self::invalid($data, 'currentPassword', 'The current password is not correct.', '');
         }
         $this->passwords->setPassword($user, $data->newPassword);

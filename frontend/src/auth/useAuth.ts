@@ -22,6 +22,28 @@ export function useMe() {
   })
 }
 
+/** What the sign-in page offers besides email and password (Google needs server credentials). */
+export function useAuthOptions() {
+  return useQuery({
+    queryKey: ['auth-options'],
+    queryFn: async (): Promise<{ google: boolean }> => {
+      const response = await fetch('/api/auth/options', { headers: { Accept: 'application/json' } })
+      if (!response.ok) throw new ApiError(response.status)
+      return response.json() as Promise<{ google: boolean }>
+    },
+    staleTime: Infinity,
+    retry: false,
+  })
+}
+
+/**
+ * Where "Continue with Google" goes: the server sends the browser to Google and back, then on to
+ * `target` (an SPA path), signed in. `locale` is for an account created on the way.
+ */
+export function googleSignInUrl(target: string, locale: string) {
+  return `/api/auth/google?${new URLSearchParams({ target, locale })}`
+}
+
 export function useLogin() {
   const queryClient = useQueryClient()
   return useMutation({

@@ -8867,6 +8867,16 @@
                         "default": "es",
                         "type": "string"
                     },
+                    "hasPassword": {
+                        "description": "False for someone who has only signed in with Google: they can add a password without a current one.",
+                        "default": true,
+                        "type": "boolean"
+                    },
+                    "google": {
+                        "description": "Their Google account is linked: \"Continue with Google\" signs them in.",
+                        "default": false,
+                        "type": "boolean"
+                    },
                     "householdName": {
                         "default": "",
                         "type": "string"
@@ -8908,13 +8918,10 @@
             },
             "Me.ChangePasswordInput-me.password": {
                 "type": "object",
-                "description": "Change the password. Other devices are signed out; this one stays signed in.",
-                "required": [
-                    "currentPassword",
-                    "newPassword"
-                ],
+                "description": "Change the password, or add one (no current password then) for someone who only signed in with Google. Other devices are signed out; this one stays signed in.",
                 "properties": {
                     "currentPassword": {
+                        "description": "Left empty by someone who has no password yet (they signed up with Google).",
                         "default": "",
                         "type": "string"
                     },
@@ -8924,7 +8931,10 @@
                         "default": "",
                         "type": "string"
                     }
-                }
+                },
+                "required": [
+                    "newPassword"
+                ]
             },
             "Me.jsonld-me.read": {
                 "allOf": [
@@ -8954,6 +8964,16 @@
                                 ],
                                 "default": "es",
                                 "type": "string"
+                            },
+                            "hasPassword": {
+                                "description": "False for someone who has only signed in with Google: they can add a password without a current one.",
+                                "default": true,
+                                "type": "boolean"
+                            },
+                            "google": {
+                                "description": "Their Google account is linked: \"Continue with Google\" signs them in.",
+                                "default": false,
+                                "type": "boolean"
                             },
                             "householdName": {
                                 "default": "",

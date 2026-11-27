@@ -20,6 +20,9 @@ services:
       BEDROCK_EMBEDDING_MODEL: ${BEDROCK_EMBEDDING_MODEL:-eu.cohere.embed-v4:0}
       # USDA FoodData Central (app:foods:usda): a data.gov key.
       USDA_API_KEY: ${USDA_API_KEY:-DEMO_KEY}
+      # "Continue with Google" (docs/DEPLOY.md). Without them the sign-in page has no Google button.
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       # Password emails (docs/DEPLOY.md). Without MAILER_DSN they are discarded.
       MAILER_DSN: ${MAILER_DSN:-null://null}
       MAILER_FROM: ${MAILER_FROM:-Tabooki <no-reply@tabooki.xyz>}

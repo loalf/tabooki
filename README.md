@@ -87,4 +87,8 @@ Useful commands (`make` lists all of them):
 | `make api-types` | regenerate `frontend/src/api/schema.d.ts` from the OpenAPI spec |
 | `make check` | PHPStan, PHP-CS-Fixer, PHPUnit, TS typecheck, oxlint |
 
+To offer **Continue with Google** on the sign-in page, put `GOOGLE_CLIENT_ID` and
+`GOOGLE_CLIENT_SECRET` in `backend/.env.local` and run `docker compose restart php`. Setting up the
+client is in [docs/DEPLOY.md](docs/DEPLOY.md#sign-in-with-google).
+
 The API docs (Swagger UI) are at https://localhost/api/docs once you're signed in.

@@ -68,7 +68,15 @@ final readonly class CreateUserCommand
             return Command::INVALID;
         }
 
-        $householdEntity = $this->households->findOneByName($household);
+        // Anyone can sign up with Google, each in a household of their own: never join one of
+        // theirs by mistake because it happens to have the same name.
+        $matches = $this->households->findBy(['name' => $household]);
+        if (\count($matches) > 1) {
+            $io->error(\sprintf('%d households are called "%s". Rename yours in the database, or pick another name.', \count($matches), $household));
+
+            return Command::FAILURE;
+        }
+        $householdEntity = $matches[0] ?? null;
         if (null === $householdEntity) {
             $householdEntity = new Household($household);
             $this->entityManager->persist($householdEntity);

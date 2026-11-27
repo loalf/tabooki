@@ -1,5 +1,6 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api, ApiError } from '@/api/client'
+import { meQueryKey } from '@/auth/useAuth'
 
 /** A 422 from the password endpoints: which field is wrong (currentPassword, newPassword, token…). */
 export class PasswordError extends ApiError {
@@ -16,13 +17,19 @@ function failure(response: Response, error: unknown): PasswordError {
   return new PasswordError(response.status, violations.map((v) => v.propertyPath))
 }
 
-/** Signed in: change it. Other devices are signed out; this one stays signed in. */
+/**
+ * Signed in: change it, or add one (currentPassword empty) after signing up with Google. Other
+ * devices are signed out; this one stays signed in.
+ */
 export function useChangePassword() {
+  const queryClient = useQueryClient()
   return useMutation<void, PasswordError, { currentPassword: string; newPassword: string }>({
     mutationFn: async (body: { currentPassword: string; newPassword: string }) => {
       const { error, response } = await api.POST('/api/me/password', { body })
       if (!response.ok) throw failure(response, error)
     },
+    // A first password changes Me.hasPassword.
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: meQueryKey }),
   })
 }
 

@@ -29,7 +29,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             uriTemplate: '/me/password',
             uriVariables: [],
             status: 204,
-            description: 'Change the password. Other devices are signed out; this one stays signed in.',
+            description: 'Change the password, or add one (no current password then) for someone who only signed in with Google. Other devices are signed out; this one stays signed in.',
             denormalizationContext: ['groups' => ['me:password']],
             input: ChangePasswordInput::class,
             output: false,
@@ -61,6 +61,14 @@ final class Me
     #[Assert\Choice(choices: User::LOCALES)]
     public string $locale = 'es';
 
+    /** False for someone who has only signed in with Google: they can add a password without a current one. */
+    #[Groups(['me:read'])]
+    public bool $hasPassword = true;
+
+    /** Their Google account is linked: "Continue with Google" signs them in. */
+    #[Groups(['me:read'])]
+    public bool $google = false;
+
     #[Groups(['me:read'])]
     public string $householdName = '';
 
@@ -84,6 +92,8 @@ final class Me
         $me->email = $user->getEmail();
         $me->displayName = $user->getDisplayName();
         $me->locale = $user->getLocale();
+        $me->hasPassword = $user->hasPassword();
+        $me->google = null !== $user->getGoogleId();
         $me->householdName = $user->getHousehold()->getName();
         $me->defaultServings = $user->getHousehold()->getDefaultServings();
         $me->extractionModels = $extractionModels;

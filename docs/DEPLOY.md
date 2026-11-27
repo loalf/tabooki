@@ -2,7 +2,7 @@
 
 Tabooki runs at **https://tabooki.xyz** on a shared Ubuntu server (`demo.rootware.xyz` in
 `~/.ssh/config`, 13.140.143.9). It's public: sign-in protects everything but the sign-in page,
-with login throttling. Images are built on the server, so the Mac's ARM vs the server's x86
+with login throttling. Anyone with a Google account can sign up (see "Sign in with Google"). Images are built on the server, so the Mac's ARM vs the server's x86
 doesn't matter.
 
 ## How the server is shared
@@ -151,6 +151,38 @@ Emails are sent by the worker; if one fails it's retried, and its error is in
 Without email (or for someone locked out), set a password from the server; it asks for the new
 one and signs them out everywhere:
 `docker compose -f compose.yaml -f compose.prod.yaml exec -it php php bin/console app:user:password someone@example.com`.
+
+## Sign in with Google
+
+With a Google OAuth client set up, the sign-in page shows **Continue with Google**. Anyone can
+sign up this way: someone new gets an account in a household of their own (named "Casa de Ana" or
+"Ana's home"), and their recipes are extracted with Tabooki's Bedrock and OpenRouter keys, so
+watch **Settings → AI costs** and the server log (`New account from Google sign-in`). One IP can
+create 5 accounts a day. Someone who already has an account (made with `make user`) gets that
+account, matched by email, and Google is linked to it. Their password keeps working. People who
+signed up with Google can add a password in Settings.
+
+1. In [Google Cloud Console](https://console.cloud.google.com/), create a project (or reuse one),
+   then open **Google Auth Platform**.
+2. **Branding**: app name Tabooki, a support email, and `tabooki.xyz` as an authorized domain.
+   **Audience**: External, then **Publish app**. While it's in "Testing" only the test users
+   listed there can sign in. The scopes we ask for (`openid email profile`) need no verification.
+3. **Clients → Create client**: type *Web application*, authorized redirect URIs
+   `https://tabooki.xyz/api/auth/google/callback` (and `https://localhost/api/auth/google/callback`
+   to try it in development, or use a second client for that).
+4. Put the client ID and secret in `/opt/tabooki/.env`, then recreate the containers
+   (`docker compose -f compose.yaml -f compose.prod.yaml up -d --wait`):
+
+   ```sh
+   GOOGLE_CLIENT_ID=1234567890-abc.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=GOCSPX-...
+   ```
+
+   In development they go in `backend/.env.local`, then `docker compose restart php` (FrankenPHP
+   reads the environment once, when it starts).
+
+Without them, there is no Google button and nothing else changes. Failed Google sign-ins are
+logged as `Google sign-in failed` in `docker compose -f compose.yaml -f compose.prod.yaml logs php`.
 
 ## Phones
 

@@ -10,8 +10,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 final class ChangePasswordInput
 {
+    /** Left empty by someone who has no password yet (they signed up with Google). */
     #[Groups(['me:password'])]
-    #[Assert\NotBlank]
     public string $currentPassword = '';
 
     #[Groups(['me:password'])]

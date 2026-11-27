@@ -26,7 +26,13 @@
     "submit": "Sign in",
     "submitting": "Signing in…",
     "invalid": "Wrong email or password.",
-    "error": "Couldn't sign in. Please try again."
+    "error": "Couldn't sign in. Please try again.",
+    "or": "or with your email",
+    "google": {
+      "continue": "Continue with Google",
+      "error": "Couldn't sign in with Google. Please try again.",
+      "limit": "Too many accounts were created from here today. Try again tomorrow."
+    }
   },
   "library": {
     "onMenu": "On the menu · {{day}}",
@@ -680,6 +686,11 @@
       "wrongCurrent": "The current password is not correct.",
       "same": "The new password must be different from the current one.",
       "otherDevices": "Your other devices will be signed out; you stay signed in here."
+    },
+    "add": {
+      "hint": "You sign in with Google. Add a password to sign in with your email too.",
+      "open": "Add",
+      "submit": "Save password"
     }
   },
   "today": {

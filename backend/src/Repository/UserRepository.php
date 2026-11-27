@@ -24,6 +24,11 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $this->findOneBy(['email' => mb_strtolower(trim($email))]);
     }
 
+    public function findOneByGoogleId(string $googleId): ?User
+    {
+        return $this->findOneBy(['googleId' => $googleId]);
+    }
+
     /** Rehashes passwords automatically when the hashing algorithm changes. */
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {

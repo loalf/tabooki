@@ -26,7 +26,13 @@
     "submit": "Entrar",
     "submitting": "Entrando…",
     "invalid": "Correo o contraseña incorrectos.",
-    "error": "No se ha podido iniciar sesión. Inténtalo de nuevo."
+    "error": "No se ha podido iniciar sesión. Inténtalo de nuevo.",
+    "or": "o con tu correo",
+    "google": {
+      "continue": "Continuar con Google",
+      "error": "No se ha podido entrar con Google. Inténtalo de nuevo.",
+      "limit": "Hoy se han creado demasiadas cuentas desde aquí. Inténtalo mañana."
+    }
   },
   "library": {
     "onMenu": "En el menú · {{day}}",
@@ -680,6 +686,11 @@
       "wrongCurrent": "La contraseña actual no es correcta.",
       "same": "La nueva contraseña tiene que ser distinta de la actual.",
       "otherDevices": "Se cerrará la sesión en tus otros dispositivos; en este sigues dentro."
+    },
+    "add": {
+      "hint": "Entras con Google. Añade una contraseña para entrar también con tu correo.",
+      "open": "Añadir",
+      "submit": "Guardar contraseña"
     }
   },
   "today": {

@@ -29,8 +29,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::JSON)]
     private array $roles = [];
 
+    /** Empty for someone who has only ever signed in with Google (see hasPassword()). */
     #[ORM\Column]
     private string $password = '';
+
+    /** The Google account's `sub`, once they sign in with Google (App\Security\GoogleAccounts). */
+    #[ORM\Column(length: 255, unique: true, nullable: true)]
+    private ?string $googleId = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
@@ -90,6 +95,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $hashedPassword): void
     {
         $this->password = $hashedPassword;
+    }
+
+    public function hasPassword(): bool
+    {
+        return '' !== $this->password;
+    }
+
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function setGoogleId(?string $googleId): void
+    {
+        $this->googleId = $googleId;
     }
 
     public function getDisplayName(): string

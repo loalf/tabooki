@@ -5,11 +5,12 @@ import { MIN_PASSWORD_LENGTH, useChangePassword } from '@/api/password'
 import { useMe } from '@/auth/useAuth'
 import { Button, Field, inputClass } from '@/components/ui'
 
-/** Settings → Password. */
+/** Settings → Password: change it, or add one after signing up with Google (no current password then). */
 export function ChangePassword() {
   const { t } = useTranslation()
   const change = useChangePassword()
   const { data: me } = useMe()
+  const adding = me?.hasPassword === false
   const [open, setOpen] = useState(false)
   const [current, setCurrent] = useState('')
   const [next, setNext] = useState('')
@@ -56,15 +57,17 @@ export function ChangePassword() {
           <h2 id="password-title" className="font-extrabold">
             {t('password.change.title')}
           </h2>
-          {change.isSuccess && !open && (
+          {change.isSuccess && !open ? (
             <p className="text-sm text-primary" role="status">
               {t('password.change.done')}
             </p>
+          ) : (
+            adding && <p className="text-sm text-muted-foreground">{t('password.add.hint')}</p>
           )}
         </div>
         {!open && (
           <Button variant="secondary" size="sm" onClick={() => (change.reset(), setOpen(true))}>
-            {t('password.change.open')}
+            {adding ? t('password.add.open') : t('password.change.open')}
           </Button>
         )}
       </div>
@@ -72,9 +75,11 @@ export function ChangePassword() {
         <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-3">
           {/* Lets password managers file the new password under the right account. */}
           <input type="email" autoComplete="username" value={me?.email ?? ''} readOnly hidden />
-          <Field label={t('password.current')}>
-            <input type="password" autoComplete="current-password" required value={current} onChange={(e) => setCurrent(e.target.value)} className={inputClass} />
-          </Field>
+          {!adding && (
+            <Field label={t('password.current')}>
+              <input type="password" autoComplete="current-password" required value={current} onChange={(e) => setCurrent(e.target.value)} className={inputClass} />
+            </Field>
+          )}
           <Field label={t('password.new')} hint={t('password.hint', { count: MIN_PASSWORD_LENGTH })}>
             <input type="password" autoComplete="new-password" required minLength={MIN_PASSWORD_LENGTH} value={next} onChange={(e) => setNext(e.target.value)} className={inputClass} />
           </Field>
@@ -89,7 +94,7 @@ export function ChangePassword() {
           )}
           <div className="flex gap-2">
             <Button type="submit" disabled={change.isPending}>
-              {change.isPending ? t('password.saving') : t('password.change.submit')}
+              {change.isPending ? t('password.saving') : adding ? t('password.add.submit') : t('password.change.submit')}
             </Button>
             <Button variant="ghost" onClick={() => (setOpen(false), setMismatch(false), change.reset())}>
               {t('common.cancel')}

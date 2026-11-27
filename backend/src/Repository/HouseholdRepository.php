@@ -15,9 +15,4 @@ class HouseholdRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Household::class);
     }
-
-    public function findOneByName(string $name): ?Household
-    {
-        return $this->findOneBy(['name' => $name]);
-    }
 }

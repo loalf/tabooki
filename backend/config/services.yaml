@@ -49,6 +49,7 @@ services:
     openrouter.http_client: '@http_client'
     bedca.http_client: '@http_client'
     usda.http_client: '@http_client'
+    google.http_client: '@http_client'
 
 when@test:
     parameters:
@@ -71,6 +72,9 @@ when@test:
             class: Symfony\Component\HttpClient\MockHttpClient
             public: true
         usda.http_client:
+            class: Symfony\Component\HttpClient\MockHttpClient
+            public: true
+        google.http_client:
             class: Symfony\Component\HttpClient\MockHttpClient
             public: true
         # No yt-dlp in tests: canned answers, see App\Tests\FakeMediaFetcher.

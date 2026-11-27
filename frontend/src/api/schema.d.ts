@@ -1880,6 +1880,16 @@ export interface components {
              * @enum {string}
              */
             locale: "es" | "en";
+            /**
+             * @description False for someone who has only signed in with Google: they can add a password without a current one.
+             * @default true
+             */
+            hasPassword: boolean;
+            /**
+             * @description Their Google account is linked: "Continue with Google" signs them in.
+             * @default false
+             */
+            google: boolean;
             /** @default  */
             householdName: string;
             /** @default 4 */
@@ -1900,9 +1910,12 @@ export interface components {
              */
             locale: "es" | "en";
         };
-        /** @description Change the password. Other devices are signed out; this one stays signed in. */
+        /** @description Change the password, or add one (no current password then) for someone who only signed in with Google. Other devices are signed out; this one stays signed in. */
         "Me.ChangePasswordInput-me.password": {
-            /** @default  */
+            /**
+             * @description Left empty by someone who has no password yet (they signed up with Google).
+             * @default
+             */
             currentPassword: string;
             /** @default  */
             newPassword: string;
@@ -1920,6 +1933,16 @@ export interface components {
              * @enum {string}
              */
             locale: "es" | "en";
+            /**
+             * @description False for someone who has only signed in with Google: they can add a password without a current one.
+             * @default true
+             */
+            hasPassword: boolean;
+            /**
+             * @description Their Google account is linked: "Continue with Google" signs them in.
+             * @default false
+             */
+            google: boolean;
             /** @default  */
             householdName: string;
             /** @default 4 */
