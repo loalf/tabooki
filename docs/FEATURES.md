@@ -221,8 +221,8 @@ These cost no backend work, so they're cheap raw material for the redesign:
 
 **Compra**
 
-19. **Group by recipe** as an alternative to aisle ("everything for Thursday's curry"), for people who shop for a few days at a time. The item → recipes link exists.
-20. **Shop up to a day**: generalise "From today only" into "From today until Wed". The API takes `from`; it would also take `to`. No new data.
+19. **Shop for some meals only** (chosen for v3, 2026-11-28; it replaces "group by recipe" and "shop up to a day"). The list keeps its aisles but shows only what the chosen meals need, with their amounts: a "Para…" row opens a picker with quick choices (whole week, from today, today only) and every meal still to come. It replaces the "From today only" toggle. No new data: the API takes the chosen meals instead of `from` and adds up only their lines.
+20. _(Folded into 19.)_
 21. **Use-it-up hints**: "You'll have half a bunch of coriander left after Tuesday. 3 recipes also use it." Data is in the shared-ingredient reasons and the canonical keys.
 
 **Tastes and insights**
