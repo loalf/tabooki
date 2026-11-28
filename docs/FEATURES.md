@@ -241,6 +241,7 @@ Ordered by value, highest first. Breakfast, snacks and merienda are left out: Ta
 
 1. **Household members and invites.** Since open Google sign-up, everyone lands alone in their own household, and there's no way to join someone's. This is the most important gap now: shared menu and shared shopping are the app's point.
    **Needs:** a `household_invite` table (household, token hash, invited email or open link, expiry, created by, accepted by), a way to move a user with an empty household, roles (owner/member), and a members list in Settings.
+   **Designed in v3 (2026-11-28):** members and "Invitar" on the account sheet. An invite is a link that works for one person and lasts 7 days, shared from the phone or sent by email, and can be cancelled while pending. Whoever opens it sees who invites them, to which household, and what they'll share. The recipes they already have merge into the household's library (decided 2026-11-28).
 2. **Pantry ("at home").** Today only "staple" (always at home) exists. A real pantry would take what you have out of the list and feed "What can I make" (💡 7).
    **Needs:** a `pantry_item` table (household, ingredient, quantity/unit or just "have", updated at), or a simpler `ingredient.inPantry` + date.
 3. **Push notifications.** Needed for timers on a locked screen (UI-IMPROVEMENTS B2), "Next week has no menu" on Sunday, "Recipe ready" when the app is closed, and "Rate yesterday's dinner".
